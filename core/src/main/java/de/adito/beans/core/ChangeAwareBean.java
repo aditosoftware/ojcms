@@ -1,12 +1,11 @@
 package de.adito.beans.core;
 
 import de.adito.beans.core.listener.IBeanChangeListener;
-import de.adito.beans.core.util.BeanUtil;
-import de.adito.beans.core.util.IBeanFieldPredicate;
+import de.adito.beans.core.util.*;
 import de.adito.beans.core.util.exceptions.BeanFlattenException;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Map;
 import java.util.stream.*;
 
 /**
@@ -25,6 +24,7 @@ class ChangeAwareBean<BEAN extends IBean<BEAN>> implements IModifiableBean<BEAN>
 
   private final boolean isFlat;
   private final IBeanFieldPredicate fieldPredicate;
+  private final _ActivePredicate activePredicate = new _ActivePredicate();
 
   /**
    * Erzeugt die Proxy-Bean, welche mit dem Listener ausgestattet ist.
@@ -53,23 +53,7 @@ class ChangeAwareBean<BEAN extends IBean<BEAN>> implements IModifiableBean<BEAN>
   @Override
   public IBeanFieldActivePredicate<BEAN> getFieldActiveSupplier()
   {
-    IBeanFieldActivePredicate<BEAN> fieldActiveSupplier = IModifiableBean.super.getFieldActiveSupplier();
-
-    return new IBeanFieldActivePredicate<BEAN>()
-    {
-      @Override
-      public BEAN getBean()
-      {
-        return source.getFieldActiveSupplier().getBean();
-      }
-
-      @Override
-      public boolean isOptionalActive(IField<?> pField)
-      {
-        //Nur als aktiv markieren, wenn auch das Prädikat zutrifft
-        return _checkFieldPredicate(pField, getEncapsulated().getValue(pField)) && fieldActiveSupplier.isOptionalActive(pField);
-      }
-    };
+    return activePredicate;
   }
 
   @Override
@@ -165,5 +149,24 @@ class ChangeAwareBean<BEAN extends IBean<BEAN>> implements IModifiableBean<BEAN>
   {
     return BeanUtil.compareBeanValues(pOldBean, pNewBean, pOldBean.streamFields().collect(Collectors.toList()))
         .orElseThrow(BeanFlattenException::new);
+  }
+
+  /**
+   * ActivePredicate für Optionale Bean-Felder
+   */
+  private class _ActivePredicate implements IBeanFieldActivePredicate<BEAN>
+  {
+    @Override
+    public BEAN getBean()
+    {
+      return source.getFieldActiveSupplier().getBean();
+    }
+
+    @Override
+    public boolean isOptionalActive(IField<?> pField)
+    {
+      //Nur als aktiv markieren, wenn auch das Prädikat zutrifft
+      return _checkFieldPredicate(pField, getEncapsulated().getValue(pField)) && IBeanFieldActivePredicate.super.isOptionalActive(pField);
+    }
   }
 }
