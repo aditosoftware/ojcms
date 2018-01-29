@@ -2,15 +2,30 @@ package de.adito.beans.core;
 
 import de.adito.beans.core.util.BeanReflector;
 
+import java.util.concurrent.Executors;
+
 /**
- * Beschreibt die konkrete Basis-Klasse einer Bean. Hier wird der Datenkern gehalten.
- * Initialisiert den Datenkern mit allen Bean-Feldern und null als zugehörigem Wert pro Feld.
+ * The default concrete class of the bean interface.
+ * It holds the encapsulated data core, which is the only state of the bean.
  *
- * Zusätzlich gibt es hier zwei protected-Methoden, welche es erlauben, die Werte von private-Feldern zu erhalten und zu ändern.
- * Dadurch können Getter und Setter in den speziellen Beans definiert werden (wie in einer gewöhnlichen Java-Klasse)
+ * This class should be extended by any bean type of the application.
+ * It may also be extended by another base class, if more base data is necessary.
  *
- * @param <BEAN> der eigentliche Typ der Bean
- * @author s.danner, 23.08.2016
+ * It also provides the possibility the read and change private data.
+ * This can be used to enable the typical behaviour of any Java POJO.
+ *
+ * A specific bean of the application defines its fields as static to allow access without reflection.
+ * Here is an example:
+ * "public class SomeBean extends Bean {
+ * public static final TextField someField = BeanFieldFactory.create(SomeBean.class)"
+ * }"
+ *
+ * It's important to use the static field factory to create the fields.
+ * So all initial data is automatically stored in the field instance.
+ *
+ * @param <BEAN> the specific type of this bean, especially if it is used as base class
+ * @author Simon Danner, 23.08.2016
+ * @see BeanFieldFactory
  */
 public class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
 {
@@ -28,11 +43,11 @@ public class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
   }
 
   /**
-   * Liefert den Wert eines private-Feldes.
+   * Returns the value of a private bean field.
    *
-   * @param pField das Feld, wovon der Wert geliefert werden soll
-   * @param <TYPE> der Daten-Typ des Feldes
-   * @return der Wert des Feldes
+   * @param pField the field to which the value should be returned
+   * @param <TYPE> the data type of the field
+   * @return the field's value
    */
   protected <TYPE> TYPE getPrivateValue(IField<TYPE> pField)
   {
@@ -40,11 +55,11 @@ public class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
   }
 
   /**
-   * Setzt den Wert eines private-Feldes
+   * Sets the value of a private bean field.
    *
-   * @param pField das Feld, wovon der Wert gesetzt werden soll
-   * @param pValue der neue Wert
-   * @param <TYPE> der Datentyp des Wertes
+   * @param pField the field to which the value should be set
+   * @param pValue the new value
+   * @param <TYPE> the data type of the field
    */
   protected <TYPE> void setPrivateValue(IField<TYPE> pField, TYPE pValue)
   {

@@ -4,42 +4,45 @@ import de.adito.beans.core.annotations.Identifier;
 import de.adito.beans.core.listener.IBeanChangeListener;
 import de.adito.beans.core.references.IHierarchicalBeanStructure;
 import de.adito.beans.core.statistics.IStatisticData;
-import de.adito.beans.core.util.BeanFlattenUtil;
-import de.adito.beans.core.util.BeanUtil;
-import de.adito.beans.core.util.IBeanFieldPredicate;
-import de.adito.beans.core.util.exceptions.FieldDoesNotExistException;
+import de.adito.beans.core.util.*;
+import de.adito.beans.core.util.exceptions.BeanFieldDoesNotExistException;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.*;
 
 /**
- * Beschreibt die Hülle einer Bean.
- * Eine Bean besteht aus einem abgekapselten Daten-Kern und der Hülle, welche über default-Methoden sämtliche Funktionalität bereitstellt.
- * Hier wird bewusst ein Interface als Hülle verwendet, um beliebige Objekte als Bean behandeln zu können.
+ * The functional wrapper interface of a bean.
+ * A bean is separated in this wrapper and an encapsulated data core.
+ * This interface provides the whole functionality via default methods.
+ * The default methods use the only non-default method {@link IEncapsulatedHolder#getEncapsulated()} to get access to the data core.
+ * This method may be called 'virtual field', because it gives access to an imaginary field that holds the data core.
+ * This means you only have to give a reference to any bean core to get a completed bean, when this interface is used.
  *
- * Der Daten-Kern wird über die einzig nicht default-Methode geliefert.
- * Diese Methode kann auch als 'virtual-field' bezeichnet werden, da sich alle default-Methoden so Zugriff auf den Kern verschaffen.
- * Da der Daten-Kern gekapselt werden soll und Interfaces nur public-Methoden besitzen können, ist der Datenkern package-protected und
- * somit nur von 'innen' zugänglich.
+ * This interface is implemented by the default bean class {@link Bean}, which is used to create the application's beans.
+ * But it may also be used for any other class that should be treated as bean.
+ * Furthermore you are able to extend this interface through special methods for your use case.
+ * Through the use of an interface it is possible to extend the bean type to a class that already extends another class.
+ * This might seem like a solution to the not available multi inheritance in Java, but here only the base interface type
+ * is transferred to the extending class. Methods and the static field definitions stay at the concrete bean types.
  *
- * @param <BEAN> der generische Typ der speziellen Bean, welche mit diesem Interface ausgestattet ist
- * @author s.danner, 23.08.2016
+ * @param <BEAN> the concrete type of the bean that is implementing the interface
+ * @author Simon Danner, 23.08.2016
  */
 public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBeanEncapsulated<BEAN>>
 {
   /**
-   * Liefert den Wert zu einem Bean-Feld.
-   * Ist nur möglich, wenn das Feld nicht private ist.
+   * The value for a bean field.
+   * This method can only be called if the field has no private access modifier {@link de.adito.beans.core.annotations.Private}.
    *
-   * @param pField das Bean-Feld
-   * @param <TYPE> der Daten-Typ des Feldes
-   * @return der Wert des Feldes
+   * @param pField the bean field
+   * @param <TYPE> the field's data type
+   * @return the value for the bean field
    */
   default <TYPE> TYPE getValue(IField<TYPE> pField)
   {
     if (!hasField(pField))
-      throw new FieldDoesNotExistException(this, pField);
+      throw new BeanFieldDoesNotExistException(this, pField);
     if (pField.isPrivate())
       throw new UnsupportedOperationException();
     assert getEncapsulated() != null;
@@ -47,13 +50,13 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   }
 
   /**
-   * Liefert den Wert zu einem Bean-Feld, wenn dieser nicht null ist.
-   * Sonst wird der Default-Wert des Feldes zurückgegeben.
-   * Ist nur möglich, wenn das Feld nicht private ist.
+   * The value for a bean field if not null.
+   * Otherwise the field's default value will be returned.
+   * This method can only be called if the field has no private access modifier {@link de.adito.beans.core.annotations.Private}.
    *
-   * @param pField das Bean-Feld
-   * @param <TYPE> er Daten-Typ des Feldes
-   * @return der Wert des Feldes oder der Default-Wert, wenn null
+   * @param pField the bean field
+   * @param <TYPE> the field's data type
+   * @return the value for the bean field or the field's default value if null
    */
   default <TYPE> TYPE getValueOrDefault(IField<TYPE> pField)
   {
@@ -61,15 +64,16 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   }
 
   /**
-   * Liefert den Wert zu einem Bean-Feld.
-   * Ist nur möglich, wenn das Feld nicht private ist.
-   * Hier kann zusätzlich ein Typ angegeben werden, zu welchem der Wert konvertiert werden soll.
-   * Dies ist nur möglich, wenn das Feld einen geeigneten Konverter zur Verfügung stellt.
+   * The value for a bean field.
+   * Here it's possible to define a type to which the value should be transformed before it is returned.
+   * The associated field must be able to provide a matching converter.
+   * This method can only be called if the field has no private access modifier {@link de.adito.beans.core.annotations.Private}.
    *
-   * @param pField       das Bean-Feld
-   * @param pConvertType der Typ, zu welchem der Wert konvertiert werden soll
-   * @param <TYPE>       der Daten-Typ des Feldes
-   * @return der konvertierte Wert des Feldes
+   * @param pField       the bean field
+   * @param pConvertType the type to which the value should be transformed
+   * @param <TYPE>       the field's data type
+   * @param <SOURCE>     the generic type to which should be transformed
+   * @return the converted value for the bean field
    */
   default <TYPE, SOURCE> SOURCE getValueConverted(IField<TYPE> pField, Class<SOURCE> pConvertType)
   {
@@ -83,18 +87,18 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   }
 
   /**
-   * Setzt den Daten-Wert eines Bean-Feldes.
-   * Ist nur möglich, wenn das Feld nicht private ist.
-   * Informiert bei Wert-Veränderung alle registrierten Listener in einem neuen Thread.
+   * Sets a value for a bean field.
+   * If the new value is different from the old value, all registered listeners will be informed.
+   * This method can only be called if the field has no private access modifier {@link de.adito.beans.core.annotations.Private}.
    *
-   * @param pField das Bean-Feld, für welches der Wert gesetzt werden soll
-   * @param pValue der neue Wert
-   * @param <TYPE> der Daten-Typ des Feldes
+   * @param pField the bean field for which the value should be set
+   * @param pValue the new value
+   * @param <TYPE> the field's data type
    */
   default <TYPE> void setValue(IField<TYPE> pField, TYPE pValue)
   {
     if (!hasField(pField))
-      throw new FieldDoesNotExistException(this, pField);
+      throw new BeanFieldDoesNotExistException(this, pField);
     if (pField.isPrivate())
       throw new UnsupportedOperationException();
     //noinspection unchecked
@@ -102,15 +106,17 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   }
 
   /**
-   * Setzt den Daten-Wert eines Bean-Feldes.
-   * Ist nur möglich, wenn das Feld nicht private ist.
-   * Informiert bei Wert-Veränderung alle registrierten Listener in einem neuen Thread.
-   * Hier wird der Wert (wenn nötig) vorher konvertiert, falls ein geeigneter Konverter vom Feld bereitgestellt wird.
+   * Sets a value for a bean field.
+   * Here the value may differ from the field's data type.
+   * In this case, a converter, provided by the field, will be used to convert the value beforehand.
+   * If there is no matching converter, a runtime exception will be thrown.
+   * If the new value is different from the old value, all registered listeners will be informed.
+   * This method can only be called if the field has no private access modifier {@link de.adito.beans.core.annotations.Private}.
    *
-   * @param pField          das Bean-Feld, für welches der Wert gesetzt werden soll
-   * @param pValueToConvert der Wert, welcher noch konvertiert werden muss
-   * @param <TYPE>          der Daten-Typ des Feldes
-   * @param <SOURCE>        der Typ des Wertes vor der Konvertierung
+   * @param pField          the bean field for which the value should be set
+   * @param pValueToConvert the new value that possibly has to be transformed beforehand
+   * @param <TYPE>          he field's data type
+   * @param <SOURCE>        the value's type before its conversion
    */
   @SuppressWarnings("unchecked")
   default <TYPE, SOURCE> void setValueConverted(IField<TYPE> pField, SOURCE pValueToConvert)
@@ -128,7 +134,8 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   }
 
   /**
-   * Setzt alle Werte aller Felder dieses Beans auf null.
+   * Clears the values of all public field's of this bean.
+   * The values are 'null' afterwards.
    */
   default void clear()
   {
@@ -138,7 +145,9 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   }
 
   /**
-   * Liefert ein Supplier, welcher ermittelt, ob ein optional Feld der Bean gerade aktiv oder inaktiv ist.
+   * An interface to determine if an optional bean field is active at a certain time.
+   *
+   * @see IBeanFieldActivePredicate
    */
   default IBeanFieldActivePredicate<BEAN> getFieldActiveSupplier()
   {
@@ -147,19 +156,19 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   }
 
   /**
-   * Gibt an, ob diese Bean ein bestimmtes Feld besitzt
+   * Determines if this bean has a certain field.
    *
-   * @param pField das Feld, welches überprüft werden soll
-   * @return <tt>true</tt>, wenn die Bean dieses Feld besitzt
+   * @param pField the bean field to check
+   * @return <tt>true</tt> if the field is present
    */
   default boolean hasField(IField pField)
   {
-    //Referenzen vergleichen, da Felder static definiert
+    //Compare reference, because fields are defined as static
     return streamFields().anyMatch(pExistingField -> pField == pExistingField);
   }
 
   /**
-   * Liefert die Anzahl der Felder der Bean.
+   * The amount of fields of this bean.
    */
   default int getFieldCount()
   {
@@ -168,11 +177,12 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   }
 
   /**
-   * Liefert den Index eines Feldes der Bean.
+   * The index of a bean field.
+   * Generally the index depends on the order of the defined fields.
    *
-   * @param pField das Bean-Feld
-   * @param <TYPE> der Datentyp des Feldes
-   * @return der Index des Feldes
+   * @param pField the bean field
+   * @param <TYPE> the field's data type
+   * @return the index of the field
    */
   default <TYPE> int getFieldIndex(IField<TYPE> pField)
   {
@@ -181,11 +191,12 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   }
 
   /**
-   * Liefert die hierarchische Einordnung dieser Bean.
-   * Dabei werden ausgehend von dieser Bean die Parent-Knoten bereitgestellt,
-   * welche über ein Bean- oder Bean-Container-Feld auf diese Bean referenzieren.
+   * A hierarchical structure of references to this bean.
+   * The structure contains direct and deep parent-references to this bean.
+   * A reference occurs through a bean or container field. (Default Java references are ignored)
    *
-   * @return die Schnittstelle, um die Informationen zur hierarchischen Struktur zu erlangen
+   * @return a interface to retrieve information about the hierarchical reference structure
+   * @see IHierarchicalBeanStructure
    */
   default IHierarchicalBeanStructure getHierarchicalStructure()
   {
@@ -194,9 +205,9 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   }
 
   /**
-   * Fügt einen Bean-Change-Listener hinzu.
+   * Registers a weak change listener.
    *
-   * @param pListener der Listener, welcher über Wert-Änderungen des Beans informiert
+   * @param pListener a listener that gets informed about value changes of this bean
    */
   default void listenWeak(IBeanChangeListener<BEAN> pListener)
   {
@@ -205,9 +216,9 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   }
 
   /**
-   * Entfernt einen Bean-Change-Listener.
+   * Unregisters a change listener.
    *
-   * @param pListener der Listener, welcher entfernt werden soll
+   * @param pListener the listener to deregister
    */
   default void unlisten(IBeanChangeListener<BEAN> pListener)
   {
@@ -216,24 +227,26 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   }
 
   /**
-   * Liefert die statistischen Daten für ein Bean-Feld, wenn vorhanden, sonst null.
+   * The statistic data for a certain bean field.
+   * May be null if not present.
    *
-   * @param pField des bestimmte Bean-Feld
-   * @param <TYPE> der Daten-Typ des Feldes
-   * @return die Statistiken des Feldes oder null, wenn nicht vorhanden
+   * @param pField the bean field
+   * @param <TYPE> the data type of the field
+   * @return the statistic data, or null if not existing
    */
   @Nullable
   default <TYPE> IStatisticData<TYPE> getStatisticData(IField<TYPE> pField)
   {
     if (!hasField(pField))
-      return null;
+      return null; //TODO exception
     assert getEncapsulated() != null;
     //noinspection unchecked
     return getEncapsulated().getStatisticData().get(pField);
   }
 
   /**
-   * Liefert alle Felder des Beans, welche ein Identifikator sind.
+   * All fields marked as identifiers within this bean.
+   * Identifiers could be used to find related beans in two containers. (comparable to primary key columns in DB-systems)
    */
   default Collection<IField<?>> getIdentifiers()
   {
@@ -243,10 +256,10 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   }
 
   /**
-   * Sucht ein Feld dieser Bean über den Namen.
+   * Searches a bean field by its name.
    *
-   * @param pName der gesuchte Name des Feldes
-   * @return ein Optional, welches das Resultat der Suche verkörpert
+   * @param pName the name to search for
+   * @return a Optional that may contain the bean field
    */
   default Optional<IField<?>> findFieldByName(String pName)
   {
@@ -256,12 +269,12 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   }
 
   /**
-   * Erzeugt eine Kopie der Bean mit ausgeschlossenen Feldern.
-   * Hier kann zusätzlich angegeben werden, ob die kopierte Bean automatisch geupdatet werden soll, wenn sich das Original verändert.
+   * Creates a copy of this bean with excluded fields.
+   * The copy may get updated, when the original bean has changed.
    *
-   * @param pFieldPredicate das Predicate, welches bestimmt, welche Felder ausgeschlossen werden sollen
-   * @param pUpdateChanges  <tt>true</tt>, wenn automatisch ein Listener für Änderungen an der Original-Bean eingehängt werden soll
-   * @return die reduzierte Bean-Kopie
+   * @param pFieldPredicate determines, which fields should stay in the copy
+   * @param pUpdateChanges  <tt>true</tt>, if values should be updated in the copy as well
+   * @return a reduced copy of the bean
    */
   default IBean reducedCopy(IBeanFieldPredicate pFieldPredicate, boolean pUpdateChanges)
   {
@@ -273,13 +286,13 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   }
 
   /**
-   * Erzeugt eine flache Kopie der Bean. (nur auf einer Ebene - nicht tief!!)
-   * Dabei werden alle Felder, welche eine Bean beinhalten 'geflattet'.
-   * Hier wird zusätzlich die Kopie informiert, wenn sich am Original ein Feld verändert.
-   * Dieser Mechanismus ist allerdings nur möglich, wenn es sich um keine tiefe Kopie handelt,
-   * da sonst nicht mehr nachvollziehbar ist, welches Feld zu welcher Parent-Bean im Original gehört.
+   * Creates a flat copy of this bean. (Not deep!)
+   * All bean fields will be replaced by the fields of the referred beans.
+   * Additionally the copy will be informed via listeners, when a value of the original bean changes.
+   * Because of this feature this method is restricted to only one iteration of flattening.
+   * Otherwise it may be impossible to determine which flat field belongs to what field in the original bean, due to multiple possibilities.
    *
-   * @return eine flache Kopie der Bean (eine Ebene)
+   * @return a flat copy of this bean (not deep!)
    */
   default IBean flatCopyWithUpdates()
   {
@@ -288,11 +301,11 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   }
 
   /**
-   * Erzeugt eine flache Kopie der Bean.
-   * Dabei werden alle Felder, welche eine Bean beinhalten 'geflattet'.
+   * Creates a flat copy of this bean.
+   * All bean fields will be replaced by the fields of the referred beans.
    *
-   * @param pDeep <tt>true</tt>, wenn dabei bis in die Tiefe 'geflattet' werden soll, sonst nur eine Ebene
-   * @return eine flache Kopie der Bean
+   * @param pDeep <tt>true</tt>, if the fields should be flattened iteratively
+   * @return the flat copy of this bean
    */
   default IBean flatCopy(boolean pDeep)
   {
@@ -301,7 +314,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   }
 
   /**
-   * Liefert alle Felder der Bean als Stream.
+   * A stream containing all fields of this bean.
    */
   default Stream<IField<?>> streamFields()
   {
@@ -311,7 +324,8 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   }
 
   /**
-   * Liefert die Bean als Stream. (IField -> Value)
+   * This bean as stream.
+   * It contains key value pairs describing the field-value combinations.
    */
   default Stream<Map.Entry<IField<?>, Object>> stream()
   {

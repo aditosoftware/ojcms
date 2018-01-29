@@ -7,9 +7,9 @@ import java.lang.annotation.Annotation;
 import java.util.Collection;
 
 /**
- * Beschreibt ein Bean-Feld, welches eine Gleitkommazahl beinhaltet.
+ * A bean field that holds a decimal number (double).
  *
- * @author s.danner, 23.08.2016
+ * @author Simon Danner, 23.08.2016
  */
 @TypeDefaultField(types = Double.class)
 public class DecimalField extends AbstractField<Double>

@@ -1,51 +1,59 @@
 package de.adito.beans.core;
 
-import de.adito.beans.core.util.exceptions.AlreadyTransformedException;
-import de.adito.beans.core.util.exceptions.NotTransformedException;
+import de.adito.beans.core.util.exceptions.*;
 
 import java.util.function.Supplier;
 
 /**
- * Definiert grundlegend eine grafische Komponente, welche in der Lage ist eine Bean-Komponente abzubilden.
- * Unter Transformation wird hierbei, grob gesagt, das Hinzufügen einer Bean-Hülle (siehe IBean/IBeanContainer) zu einer grafischen Komponente verstanden.
- * Es wird die logische Bean-Definition als grafische Komponente abgebildet.
+ * Basic interface for a graphical representation of a bean element.
+ * A visual component will be transformed to the bean element. The original bean or bean container still exists afterwards.
+ * The graphical component can be treated as the original bean element.
+ * To achieve this, the bean interfaces, which are functional wrappers {@link IBean} {@link IBeanContainer},
+ * will be extended to the transformable component.
+ * Through providing a reference to the bean core {@link IEncapsulated} the transformation can be executed.
+ * For detailed information of the separation of functional wrapper and bean cores, take a look at the interfaces above.
  *
- * Dabei muss festgelegt werden, welches logische Element (IField, IBean oder IBeanContainer) zu welcher grafischen Komponente transformiert werden soll.
+ * A transformation can be performed on different levels. (That means wich bean element will be transformed to what graphical part)
+ * These are the reasonable possibilities:
  *
- * Es ergeben sich diese (sinnvollen) Kombinationen:
+ * - {@link IField} -> sub component of a graphical parent component. (e.g. login form)
+ * - {@link IBean} -> graphical component that represents the bean directly
+ * - {@link IBean} (within a container) -> sub component for one bean within a graphical container component (e.g. table)
+ * - {@link IBeanContainer} -> graphical component that represents the bean directly
  *
- * - IField -> Unterkomponente in einer Parent-Grafik-Komponente (z.B. Login-Formular)
- * - IBean -> Grafische Komponente, welche den Bean direkt darstellt
- * - IBean (in einem Container) -> Unterkomponente in einem Parent-Grafik-Container
- * - IBeanContainer -> Grafische Komponente, welche den Bean-Container direkt darstellt
+ * The transformation level will be defined trough the first two generic types.
+ * The transformator, which will be used for the transformation {@link IVisualTransformator}, must be based on the same generic types.
  *
- * @param <LOGIC>        der logische Bean-Element Typ (IField, IBean oder IBeanContainer), welches transformiert werden soll
- * @param <VISUAL>       der Typ der grafischen Komponente, zu welcher das logische Element transformiert werden soll
- * @param <ENCAPSULATED> der Typ des Daten-Kerns der zu transformierenden Quelle
- * @param <SOURCE>       der Typ der Quelle, die transformiert werden soll
- * @author s.danner, 27.01.2017
+ * @param <LOGIC>        the logical level of the transformation (field, bean or container)
+ * @param <VISUAL>       the type of the graphical components to which the logical components will be transformed to
+ * @param <ENCAPSULATED> the type of the data core of the transformation source
+ * @param <SOURCE>       the type of the source (bean element) that will be used for the transformation
+ * @author Simon Danner, 27.01.2017
  */
 interface ITransformable<LOGIC, VISUAL, ENCAPSULATED extends IEncapsulated, SOURCE extends IEncapsulatedHolder<ENCAPSULATED>>
     extends IEncapsulatedHolder<ENCAPSULATED>
 {
   /**
-   * Liefert den Transformator, welcher die hier beschriebene Transformation durchführt.
-   * Wenn dieser noch nicht erzeugt ist, geschieht dies vorher.
+   * The transformator that performs the transformation of the single components.
+   * Must be based on the same generic types, which define the transformation level.
    */
   IVisualTransformator<LOGIC, VISUAL, ENCAPSULATED, SOURCE> getTransformator();
 
   /**
-   * Erzeugt den Transformator und führt die Transformation durch.
+   * Performs the transformation.
+   * Stores the data core's reference at the transformator, which will be used as data holder.
+   * Furthermore a link will be registered at the original bean element.
+   * The before-transformation-queue will be executed finally.
    *
-   * @param pSourceToTransform die Quelle, die transformiert werden soll
+   * @param pSourceToTransform the source bean element of this transformation
    */
   default void transform(SOURCE pSourceToTransform)
   {
     assert getTransformator() != null;
     getTransformator().initTransformation(pSourceToTransform);
-    assert getOriginalSource() != null; //Transformation muss an dieser Stelle vollzogen sein
+    assert getOriginalSource() != null; //the transformation must be completed now
     getOriginalSource().getEncapsulated().registerWeakLink(this);
-    //Nun können Operationen ausgeführt werden, die in der Warteschlange auf eine vollzogene Transformation warten
+    //Perform all operations that were waiting for the completion of the transformation
     try
     {
       synchronized (getTransformator().getBeforeTransformationQueue())
@@ -55,14 +63,14 @@ interface ITransformable<LOGIC, VISUAL, ENCAPSULATED extends IEncapsulated, SOUR
     }
     catch (UnsupportedOperationException pE)
     {
-      //Ignorieren, dann muss auch nichts im Nachhinein ausgeführt werden
+      //Can be ignored (there is no queue then)
     }
   }
 
   /**
-   * Gibt an, ob die Komponente bereits transformiert wurde
+   * Determines, if this component has already been transformed.
    *
-   * @return <tt>true</tt>, wenn die Komponente bereits transformiert wurde
+   * @return <tt>true</tt>, if the component is transformed
    */
   default boolean isTransformed()
   {
@@ -70,10 +78,11 @@ interface ITransformable<LOGIC, VISUAL, ENCAPSULATED extends IEncapsulated, SOUR
   }
 
   /**
-   * Reiht eine Aktion, welche eine abgeschlossene Transformation voraussetzt, in eine Warteschlange ein.
-   * Die komplette Warteschlange wird automatisch abgearbeitet, sobald die Transformation durchgeführt wurde.
+   * Queues a single operation that requires a completed transformation.
+   * The queue will be executed right after the transformation.
    *
-   * @param pOperation die Operation, welche in die Warteschlange versetzt werden soll
+   * @param pOperation the operation to queue
+   * @throws UnsupportedOperationException may throw an exception, if there is no operation container provided by the transformator
    */
   default void queueOperation(Runnable pOperation) throws UnsupportedOperationException
   {
@@ -88,7 +97,8 @@ interface ITransformable<LOGIC, VISUAL, ENCAPSULATED extends IEncapsulated, SOUR
   }
 
   /**
-   * Wirft eine AditoNotTransformedException, falls die Komponente noch nicht transformiert wurde
+   * Throws a {@link NotTransformedException} if the transformation is not completed.
+   * May be used as an 'assertion' within the development.
    */
   default void transformedOrThrow() throws NotTransformedException
   {
@@ -97,10 +107,10 @@ interface ITransformable<LOGIC, VISUAL, ENCAPSULATED extends IEncapsulated, SOUR
   }
 
   /**
-   * Wirft eine beliebige Exception, falls die Komponente noch nicht transformiert wurde
+   * Throws a definable exception, if the transformation is not completed.
    *
-   * @param pThrowable  Supplier für die Exception
-   * @param <THROWABLE> der Typ der Exception
+   * @param pThrowable  supplier for the exception
+   * @param <THROWABLE> the exception's type
    */
   default <THROWABLE extends Throwable> void transformedOrThrow(Supplier<THROWABLE> pThrowable) throws THROWABLE
   {
@@ -109,8 +119,9 @@ interface ITransformable<LOGIC, VISUAL, ENCAPSULATED extends IEncapsulated, SOUR
   }
 
   /**
-   * Liefert die Original-Quelle dieser Transformation.
-   * Wichtig: Darf nur verwendet werden, wenn die Transformation schon durchgeführt wurde.
+   * The original bean element. (source of the transformation)
+   * Will be used to provide the data core's reference for the functional wrapper interfaces. (see {@link IBean}
+   * Important: can only be used if the transformation has been completed
    */
   default SOURCE getOriginalSource()
   {

@@ -1,7 +1,6 @@
 package de.adito.beans.core;
 
-import de.adito.beans.core.annotations.OptionalField;
-import de.adito.beans.core.annotations.TypeDefaultField;
+import de.adito.beans.core.annotations.*;
 import de.adito.picoservice.IPicoRegistry;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,10 +10,14 @@ import java.util.*;
 import java.util.stream.*;
 
 /**
- * Statische Factory für Bean-Felder.
- * Die Methode create(pType) soll zur Erzeugung jedes Bean-Feldes verwendet werden.
+ * A static factory to create bean fields.
+ * Fields should only be created via the methods of this class.
+ * They take care of a lot of initialization work.
  *
- * @author s.danner, 23.08.2016
+ * All specific beans of the application should use this class to create their fields.
+ * For an example, take a look at the {@link Bean}.
+ *
+ * @author Simon Danner, 23.08.2016
  */
 public final class BeanFieldFactory
 {
@@ -26,16 +29,16 @@ public final class BeanFieldFactory
   }
 
   /**
-   * Erzeugt über Reflection das erste Bean-Feld, welches in der übergebenen Bean-Klasse noch nicht initialisiert wurde.
-   * Dabei wird das Feld mit den initialen Daten wie Typ, Name und Annotations belegt.
-   * Verwendung: public static final TextField name = BeanFieldFactory.create(CLASSNAME.class);
-   * Wenn diese Methode auf diese Weise angewandt wird, wird immer das richtige Feld zurückgegeben.
+   * Takes a look at all static bean fields of a certain class and creates the first not initialised field automatically.
+   * In this way all bean fields can be created through this method.
+   * Usage: "public static final TextField name = BeanFieldFactory.create(CLASSNAME.class);"
+   * This method takes care about the whole initialization of the certain field. (name, type, annotations, etc.)
    *
-   * @param pBeanType der Klassen-Typ der Bean, wozu das Feld erzeugt werden soll
-   * @param <BEAN>    der generische Typ der Bean, auf welchen sich der Bean-Typ-Parameter bezieht
-   *                  (Muss hier auf der Klasse Bean basieren! -> da es sich um ein echtes Bean-Modell handeln soll und nicht um eine transformierte)
-   * @param <FIELD>   der Typ des Feldes, welches erzeugt wird
-   * @return die zum statistischen Feld gehörende Bean-Feld-Instanz
+   * @param pBeanType the bean type to which the created field should belong to
+   * @param <BEAN>    the generic type of the parameter above
+   *                  (is here based on the concrete {@link Bean} class rather than on the interface. so it can not be a transformed bean type
+   * @param <FIELD>   the generic type of the field that will be created
+   * @return the newly created field instance
    */
   @SuppressWarnings("unchecked")
   public static <BEAN extends Bean<BEAN>, FIELD extends IField> FIELD create(Class<BEAN> pBeanType)
@@ -58,11 +61,13 @@ public final class BeanFieldFactory
   }
 
   /**
-   * Liefert den Bean-Feld-Typen aufgrund des beinhaltenden Daten-Typs
+   * Provides the bean field type for a certain inner data type.
+   * This depends on the field types annotated with {@link TypeDefaultField}.
+   * They determine what field type is the default for the searched data type.
    *
-   * @param pType  der Daten-Typ
-   * @param <TYPE> der Daten Typ als Generic
-   * @return der Typ des Bean-Feldes, welcher zum Datentyp passt
+   * @param pType  the inner data type of a field
+   * @param <TYPE> the generic data type
+   * @return the default field type for this data type
    */
   public static <TYPE> Class<IField<TYPE>> getFieldTypeFromType(Class<TYPE> pType)
   {
@@ -74,7 +79,7 @@ public final class BeanFieldFactory
                                     (pFieldType1, pFieldType2) ->
                                     {
                                       throw new RuntimeException(pFieldType1.getSimpleName() + " supports same datatype as "
-                                          + pFieldType2.getSimpleName());
+                                                                     + pFieldType2.getSimpleName());
                                     }));
 
     if (!typeFieldMapping.containsKey(pType))
@@ -84,14 +89,15 @@ public final class BeanFieldFactory
   }
 
   /**
-   * Erzeugt ein neues Bean-Feld anhand des Typen und den initialen Daten.
+   * Creates a new bean field based on a certain type und some initial data.
+   * This method should only be used internally within this package.
    *
-   * @param pFieldType   der Bean-Feld-Typ
-   * @param pName        der Name des Feldes
-   * @param pAnnotations die Annotations des Feldes
-   * @param <TYPE>       der Daten-Typ des Bean-Feldes
-   * @param <FIELD>      der Bean-Feld-Typ als Generic
-   * @return das neu erzeugte Feld
+   * @param pFieldType   the fields's type
+   * @param pName        the field's name
+   * @param pAnnotations the field's annotations
+   * @param <TYPE>       the field's data type
+   * @param <FIELD>      the generic field type
+   * @return the newly created field
    */
   static <TYPE, FIELD extends IField<TYPE>> FIELD createField(Class<FIELD> pFieldType, String pName, Collection<Annotation> pAnnotations)
   {
@@ -99,16 +105,17 @@ public final class BeanFieldFactory
   }
 
   /**
-   * Erzeugt ein neues Bean-Feld anhand des Typen und den initialen Daten.
-   * Zusätzlich kann hier ein generischer Typ zum Bean-Feld mitgeliefert werden.
+   * Creates a new bean field based on a certain type und some initial data.
+   * It's also possible to provide an additional generic type of the bean field.
+   * For example, this may be the bean type of a container field.
    *
-   * @param pFieldType   der Bean-Feld-Typ
-   * @param pGenType     der generische Typ des Bean-Feldes
-   * @param pName        der Name des Feldes
-   * @param pAnnotations die Annotations des Feldes
-   * @param <TYPE>       der Daten-Typ des Bean-Feldes
-   * @param <FIELD>      der Bean-Feld-Typ als Generic
-   * @return das neu erzeugte Feld
+   * @param pFieldType   the fields's type
+   * @param pGenType     the fields's generic type (NOT the same type of the field as generic)
+   * @param pName        the fields's name
+   * @param pAnnotations the fields's annotations
+   * @param <TYPE>       the field's data type
+   * @param <FIELD>      the generic field type
+   * @return the newly created field
    */
   @SuppressWarnings("JavaReflectionMemberAccess")
   private static <TYPE, FIELD extends IField<TYPE>> FIELD _createField(Class<FIELD> pFieldType, @Nullable Class pGenType, String pName,
@@ -130,12 +137,12 @@ public final class BeanFieldFactory
   }
 
   /**
-   * Liefert den generischen Typen eines Bean-Feldes, wenn dieser vorhanden ist, sonst null.
+   * Evaluates the generic type of a bean field. Returns null, if not present.
    *
-   * @param pField     das Feld auf Klassenebene
-   * @param pFieldType der Bean-Feld-Typ
-   * @param <FIELD>    der generische Typ des Bean-Feldes
-   * @return der generische Typ des Bean-Feldes
+   * @param pField     the field instance from the reflection API
+   * @param pFieldType the type of the bean field
+   * @param <FIELD>    the type of the bean field as generic
+   * @return the generic type of the field instance
    */
   @Nullable
   private static <FIELD extends IField> Class _getGenType(Field pField, Class<FIELD> pFieldType)
@@ -154,8 +161,8 @@ public final class BeanFieldFactory
   }
 
   /**
-   * Liefert die Felder eines Bean-Typen.
-   * Dabei wird ein Caching vorgenommen.
+   * Returns all public, static, final fields from a bean class type.
+   * They will be cached to improved performance, especially if the class has many fields to initialise.
    *
    * @param pBeanType der Typ des Beans
    * @return eine Menge von Feldern (Reflection)
@@ -180,11 +187,11 @@ public final class BeanFieldFactory
   }
 
   /**
-   * Überprüft, ob es sich bei einem Feld um ein optionales handelt.
-   * Wenn dies der Fall ist, wird dem Feld eine zusätzliche Information angefügt,
-   * welche bestimmt, ob das Feld gerade aktiv ist.
+   * Checks, if a bean field is marked (via {@link OptionalField}) as optional field.
+   * In this case the condition, which is defined through the annotation, will be stored as additional information in the field.
+   * So this information can be used later to determine if the field is active at any moment.
    *
-   * @param pField das betreffende Bean-Feld
+   * @param pField the bean field to check
    */
   private static void _checkOptionalField(IField<?> pField) throws IllegalAccessException, InstantiationException
   {

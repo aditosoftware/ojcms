@@ -4,11 +4,19 @@ import java.time.ZoneId;
 import java.util.Locale;
 
 /**
- * @author s.danner, 13.10.2017
+ * Information of a client based on its zone.
+ *
+ * @author Simon Danner, 13.10.2017
  */
 public interface IClientInfo
 {
+  /**
+   * The client's locale.
+   */
   Locale getLocale();
 
+  /**
+   * The client's zone id.
+   */
   ZoneId getZoneId();
 }

@@ -7,15 +7,10 @@ import java.lang.ref.WeakReference;
 import java.util.*;
 
 /**
- * Eine Implementierung einer 'weak' list.<br/>
- * Mit Vorsicht zu genießen - einige Methoden sind hier sehr ineffizient, da die Daten oft kopiert werden.<br/>
- * Die Liste kann jederzeit kleiner werden, da die enthaltenen Werte garbage collected werden können.
- *
- * @author J. Boesl, 15.03.13
+ * @author Johannes Boesl, 15.03.13
  */
 public class WeakArrayList<E> implements List<E>
 {
-
   private ArrayList<Reference<E>> l = new ArrayList<>();
 
   @Override
@@ -182,7 +177,6 @@ public class WeakArrayList<E> implements List<E>
     return _getSnapshot().subList(fromIndex, toIndex);
   }
 
-
   private List<E> _getSnapshot()
   {
     ArrayList<E> snap = new ArrayList<>();
@@ -226,5 +220,4 @@ public class WeakArrayList<E> implements List<E>
       return t == other;
     }
   }
-
 }

@@ -8,25 +8,28 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
- * Beschreibt das Feld einer Bean.
- * Es besitzt einen 'inneren' Daten-Typen.
+ * Describes a field of a bean.
+ * It's based on a inner data type.
+ * A bean field is just a wrapper for the actual data, that contains additional information.
  *
- * @author s.danner, 23.08.2016
+ * @param <TYPE> the inner data type of this bean field
+ * @author Simon Danner, 23.08.2016
  */
 public interface IField<TYPE>
 {
   /**
-   * Liefert den 'inneren' Daten-Typen des Feldes.
+   * The inner data type of this field.
    */
   Class<TYPE> getType();
 
   /**
-   * Liefert den Namen des Feldes.
+   * The name of this field.
    */
   String getName();
 
   /**
-   * Liefert einen Standard-Wert für den Daten-Typen des Feldes.
+   * A default value for this field.
+   * By default it's null.
    */
   default TYPE getDefaultValue()
   {
@@ -34,11 +37,12 @@ public interface IField<TYPE>
   }
 
   /**
-   * Präsentiert den Wert des Feldes als String (Standard = toString())
+   * A string representation of the value of this bean field.
+   * By default it is the result of {@link Object#toString()} of the value.
    *
-   * @param pValue             der Wert des Feldes
-   * @param pClientSessionInfo Informationen zur Client-Session (Locale, TimeZone etc.)
-   * @return der Wert als String repräsentiert
+   * @param pValue             the field's actual data value
+   * @param pClientSessionInfo information of a client (time zone etc.)
+   * @return the string representation of this field
    */
   default String display(TYPE pValue, IClientInfo pClientSessionInfo)
   {
@@ -46,80 +50,79 @@ public interface IField<TYPE>
   }
 
   /**
-   * Liefert (falls vorhanden) einen Converter für dieses Feld.
-   * Der Converter kann dabei den Wert eines bestimmten Quell-Datentypen in den Typen dieses Feld umwandeln.
+   * Returns a converter to convert a certain value type to the field's data type.
+   * A converter for a type has to be registered by the field. Hence the result type of this method is optional.
    *
-   * @param pSourceType der Typ des Quell-Wertes
-   * @return der Converter zur Umwandlung des Quell-Wertes (Optional, falls dieses Feld einen solchen Converter kennt)
+   * @param pSourceType the type of the value to convert to the field's data type
+   * @return a optional converter (may not be registered)
    */
   <SOURCE> Optional<Function<SOURCE, TYPE>> getToConverter(Class<SOURCE> pSourceType);
 
   /**
-   * Liefert (falls vorhanden) einen Converter für dieses Feld.
-   * Der Converter kann dabei den Wert dieses Feldes zurück in den bestimmten Datentypen wandeln.
+   * Returns a converter to convert the field's data type to a certain source type.
+   * A converter for a type has to be registered by the field. Hence the result type of this method is optional.
    *
-   * @param pSourceType der Typ des Quell-Wertes
-   * @return der Converter zur Zurück-Umwandlung Feld-Wertes (Optional, falls dieses Feld einen solchen Converter kennt)
+   * @param pSourceType the type of the value that will be converted from the field's data type value
+   * @return a optional converter (may not be registered)
    */
   <SOURCE> Optional<Function<TYPE, SOURCE>> getFromConverter(Class<SOURCE> pSourceType);
 
   /**
-   * Liefert die Annotation des Feldes anhand des Annotation-Typen. Wenn nicht vorhanden, null.
+   * The annotation of this field for a certain annotation type. (null, if not present)
    *
-   * @param pType der Typ der Annotation
-   * @return die bestimmte Annotation des Feldes oder null, wenn nicht vorhanden
+   * @param pType the annotation's type
+   * @return the annotation object for the given type, or null if not present
    */
-  @Nullable
-  <ANNOTATION extends Annotation> ANNOTATION getAnnotation(Class<ANNOTATION> pType);
+  @Nullable <ANNOTATION extends Annotation> ANNOTATION getAnnotation(Class<ANNOTATION> pType);
 
   /**
-   * Gibt an, ob das Feld eine bestimmte Annotation besitzt.
+   * Determines, if this field has a certain annotation.
    *
-   * @param pType der Typ der Annotation
-   * @return <tt>true</tt>, wenn das Feld die Annotation besitzt
+   * @param pType the annotation's type
+   * @return <tt>true</tt>, if the field has the annotation
    */
   boolean hasAnnotation(Class<? extends Annotation> pType);
 
   /**
-   * Liefert alle Annotations dieses Feldes.
+   * All annotations of this field.
    */
   Collection<Annotation> getAnnotations();
 
   /**
-   * Stellt eine beliebige zusätzliche Information dieses Feldes bereit
+   * An additional information for this field.
    *
-   * @param pIdentifier der Name der zusätzlichen Information
-   * @return die beliebige Information
+   * @param pIdentifier the identifier of the information
+   * @return the additional information
    */
-  @Nullable
-  <INFO> INFO getAdditionalInformation(IAdditionalFieldInfo<INFO> pIdentifier);
+  @Nullable <INFO> INFO getAdditionalInformation(IAdditionalFieldInfo<INFO> pIdentifier);
 
   /**
-   * Fügt dem Feld eine beliebige zusätzliche Information zur Verfügung
+   * Adds any additional information to this field.
    *
-   * @param pIdentifier der Name der zusätzlichen Information
-   * @param pValue      die beliebige Information
+   * @param pIdentifier the identifier of this information
+   * @param pValue      any information
+   * @see IAdditionalFieldInfo
    */
   <INFO> void addAdditionalInformation(IAdditionalFieldInfo<INFO> pIdentifier, INFO pValue);
 
   /**
-   * Gibt an, ob es sich um ein datengekapseltes Feld handelt.
+   * Determines, if this field has private access only.
    */
   boolean isPrivate();
 
   /**
-   * Gibt an, ob das Feld ein Identifier für Container ist.
+   * Determines, if this field is an identifier.
    */
   boolean isIdentifier();
 
   /**
-   * Gibt, an ob es sich um ein optionales Feld handelt.
-   * Wenn optional, existiert nur unter einer bestimmten Bedingung
+   * Determines, if this field is optional.
+   * If the field is optional, a related condition will define, when the field will be active.
    */
   boolean isOptional();
 
   /**
-   * Gibt an, ob das Feld als Detail markiert ist.
+   * Determines, if this field is marked as detail.
    */
   boolean isDetail();
 }

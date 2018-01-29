@@ -1,8 +1,6 @@
 package de.adito.beans.core.fields;
 
-import de.adito.beans.core.IBean;
-import de.adito.beans.core.IField;
-import de.adito.beans.core.MapBean;
+import de.adito.beans.core.*;
 import org.jetbrains.annotations.*;
 
 import java.lang.annotation.Annotation;
@@ -10,11 +8,11 @@ import java.util.*;
 import java.util.function.Predicate;
 
 /**
- * Beschreibt ein Bean-Feld, welches eine Map beinhaltet.
- * Die Map wird dabei in eine Bean umgewandelt, da eine Bean im Prinzip auch eine Map ist.
+ * A bean field that holds a map.
+ * The original map will be transformed into a bean, which represents the mapping by its fields and according values.
  *
- * @param <TYPE> der Value-Typ der Map, welche hier gespeichert wird.
- * @author s.danner, 01.02.2017
+ * @param <TYPE> the value-type of the map.
+ * @author Simon Danner, 01.02.2017
  */
 public class MapField<TYPE> extends AbstractField<MapBean<TYPE>>
 {
@@ -26,11 +24,12 @@ public class MapField<TYPE> extends AbstractField<MapBean<TYPE>>
   }
 
   /**
-   * Erzeugt die Bean anhand einer beliebigen Map.
+   * Creates a bean from a map that contains strings as keys and any objects as values.
+   * The key defines the bean field's name.
    *
-   * @param pMap       die Map, die in eine Bean umgewandelt werden soll
-   * @param pValueType der Value-Typ der Map.
-   * @return eine (modifizierbare) Bean, welche die Map verkörpert
+   * @param pMap       the map that will be transformed
+   * @param pValueType the value type of the map
+   * @return a (modifiable) bean, which represents the original map
    */
   public MapBean<TYPE> createBeanFromMap(Map<String, Object> pMap, Class<TYPE> pValueType)
   {
@@ -38,12 +37,14 @@ public class MapField<TYPE> extends AbstractField<MapBean<TYPE>>
   }
 
   /**
-   * Erzeugt die Bean anhand einer beliebigen Map.
+   * Creates a bean from a map that contains strings as keys and any objects as values.
+   * The key defines the bean field's name.
+   * This method is also able to define a field predicate, which excludes certain bean fields / map values.
    *
-   * @param pMap            die Map, die in eine Bean umgewandelt werden soll
-   * @param pValueType      der Value-Typ der Map.
-   * @param pFieldPredicate ein Feld-Prädikat, welches bestimmt, welche Felder der Map nicht übernommen werden sollen
-   * @return eine (modifizierbare) Bean, welche die Map verkörpert
+   * @param pMap            the map that will be transformed
+   * @param pValueType      the value type of the map
+   * @param pFieldPredicate an optional field predicate, which excludes certain map entries
+   * @return a (modifiable) bean, which represents the original map
    */
   public MapBean<TYPE> createBeanFromMap(Map<String, Object> pMap, Class<TYPE> pValueType, @Nullable Predicate<IField<TYPE>> pFieldPredicate)
   {
@@ -57,11 +58,11 @@ public class MapField<TYPE> extends AbstractField<MapBean<TYPE>>
   }
 
   /**
-   * Wandelt die Map-Bean wieder in eine normale Map zurück.
+   * Transforms the bean back to the original map.
    *
-   * @param pBean      die Bean, worauf dieses Feld liegt
-   * @param pValueType der Typ der Werte dieser Map
-   * @return die Map, welche durch den Bean verkörpert wurde
+   * @param pBean      the bean that this field belongs to
+   * @param pValueType the value type of the field/map
+   * @return the original map, which was represented by the bean
    */
   public Map<String, TYPE> createMapFromBean(IBean<?> pBean, Class<TYPE> pValueType)
   {

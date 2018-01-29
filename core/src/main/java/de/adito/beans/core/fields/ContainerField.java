@@ -12,10 +12,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Beschreibt ein Bean-Feld, welche einen Bean-Container beinhaltet.
+ * A bean field that holds a bean container.
  *
- * @param <BEAN> der Typ der Beans, welche in dem Container enthalten sind
- * @author s.danner, 09.02.2017
+ * @param <BEAN> the type of the beans in the container
+ * @author Simon Danner, 09.02.2017
  */
 @TypeDefaultField(types = IBeanContainer.class)
 public class ContainerField<BEAN extends IBean<BEAN>> extends AbstractField<IBeanContainer<BEAN>> implements IHierarchicalField<IBeanContainer<BEAN>>
@@ -30,11 +30,11 @@ public class ContainerField<BEAN extends IBean<BEAN>> extends AbstractField<IBea
   {
     if (pContainer == null)
       return Collections.emptySet();
-    //Alle Beans im Container
+    //all beans of the container
     Collection<IReferable> referables = pContainer.stream()
         .map(pBean -> (IReferable) pBean.getEncapsulated())
         .collect(Collectors.toList());
-    //Und der Container selbst
+    //plus the container itself
     referables.add(pContainer.getEncapsulated());
     return referables;
   }

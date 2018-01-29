@@ -4,24 +4,24 @@ import java.util.*;
 import java.util.function.Consumer;
 
 /**
- * Beschreibt einen Transformator für Bean-Container.
- * Für genauere Informationen siehe Basis.
+ * A transformator for bean containers. (Defines the generic types)
+ * For more information take a look at the base interfaces.
  *
- * @param <LOGIC>  der logische Bean-Typ (Feld oder Bean), welcher transformiert werden soll
- * @param <VISUAL> der Typ der grafischen Komponente, zu welcher das logische Element transformiert werden soll
- * @param <BEAN>   der Typ der Quell-Bean
- * @author s.danner, 13.09.2017
- * @see IVisualTransformator
+ * @param <LOGIC>  the logical level of the transformation (bean or container)
+ * @param <VISUAL> the type of the graphical components to which the logical components will be transformed to
+ * @param <BEAN>   the type of the source beans in the container
+ * @author Simon Danner, 13.09.2017
  * @see ITransformable
  */
 public interface IVisualBeanContainerTransformator<LOGIC, VISUAL, BEAN extends IBean<BEAN>>
     extends IVisualTransformator<LOGIC, VISUAL, IBeanContainerEncapsulated<BEAN>, IBeanContainer<BEAN>>
 {
   /**
-   * Liefert den Container für die Listener, welche über Änderungen der Sichtbarkeitszustände der Beans informieren.
-   * Wird standardmäßig nicht unterstützt, da nicht jede Komponente Sichtbarkeitszustände besitzen muss.
+   * A container for listeners that will be informed, when the visibility states of the beans within the container change.
+   * It is not supported per default, because not every component has to have visibility states.
    *
-   * @return ein Set von Consumern für eine Menge der sichtbaren Beans
+   * @return the listener for the visibility states
+   * @throws UnsupportedOperationException if the container is not available
    */
   default Set<Consumer<Collection<BEAN>>> getWeakVisibleListenerContainer() throws UnsupportedOperationException
   {

@@ -1,8 +1,6 @@
 package de.adito.beans.core.util;
 
-import de.adito.beans.core.Bean;
-import de.adito.beans.core.IBean;
-import de.adito.beans.core.IField;
+import de.adito.beans.core.*;
 import de.adito.beans.core.annotations.Statistics;
 import org.jetbrains.annotations.*;
 
@@ -11,9 +9,9 @@ import java.util.*;
 import java.util.stream.*;
 
 /**
- * Hilfs-Klasse für Bean-Reflection.
+ * A utility class for reflection of beans.
  *
- * @author s.danner, 23.08.2016
+ * @author Simon Danner, 23.08.2016
  */
 public final class BeanReflector
 {
@@ -22,16 +20,16 @@ public final class BeanReflector
   }
 
   /**
-   * Liefert die Felder einen Bean-Typen.
+   * Reflects the fields of a bean type.
    *
-   * @param pBeanType der Typ des Beans (Muss hier auf der Klasse Bean basieren, da es sich um ein 'echtes' Modell handeln muss)
-   * @return eine Menge von Bean-Feldern
+   * @param pBeanType the type of the bean, which must be an extension of {@link Bean} to own specific fields
+   * @return a collection of bean fields
    */
   public static List<IField<?>> getBeanMetadata(Class<? extends IBean> pBeanType)
   {
-    assert Bean.class.isAssignableFrom(pBeanType); //Nicht transformiert!
+    assert Bean.class.isAssignableFrom(pBeanType); //To make sure it isn't a transformed type.
     List<Field> declaredFields = new ArrayList<>();
-    //Alle Felder (auch der Super-Klassen) ermitteln
+    //Collect all fields, also from the superclasses
     Class current = pBeanType;
     do
     {
@@ -55,10 +53,10 @@ public final class BeanReflector
   }
 
   /**
-   * Liefert die Statistik-Annotation eines Bean-Typen.
+   * Reflects the statistic annotation of a bean type. (null if not existing)
    *
-   * @param pBeanType der Typ des Beans
-   * @return die Statistik-Annotation
+   * @param pBeanType the bean's type
+   * @return the statistic annotation
    */
   @Nullable
   public static Statistics getContainerStatisticAnnotation(Class<? extends IBean> pBeanType)
@@ -67,10 +65,10 @@ public final class BeanReflector
   }
 
   /**
-   * Liefert alle Feld-Statistik-Annotations eines Bean-Typen als Map.
+   * Reflects all field statistic annotations of a bean type.
    *
-   * @param pBeanType der Typ der Bean
-   * @return eine Map mit dem Feld-Namen als Key und der Annotation als Value
+   * @param pBeanType the bean's type
+   * @return a map with the field names as keys and the annotations as values
    */
   @NotNull
   @SuppressWarnings("unchecked")

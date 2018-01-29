@@ -7,9 +7,9 @@ import java.lang.annotation.Annotation;
 import java.util.Collection;
 
 /**
- * Beschreibt ein Boolean-Bean-Feld.
+ * A bean field that hold a boolean value.
  *
- * @author s.danner, 19.01.2017
+ * @author Simon Danner, 19.01.2017
  */
 @TypeDefaultField(types = Boolean.class)
 public class BooleanField extends AbstractField<Boolean>

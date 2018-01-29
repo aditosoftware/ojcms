@@ -1,26 +1,24 @@
 package de.adito.beans.core.references;
 
-import de.adito.beans.core.IBean;
-import de.adito.beans.core.IField;
+import de.adito.beans.core.*;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Erweitert die hierarchische Struktur speziell für Bean-Strukturen. (Die Struktur bezieht sich auf eine Bean)
- * Hier kann vor allem eine tiefe Struktur untersucht werden (nicht nur die direkten Parents).
- * Beispielsweise könnte es interessant sein, welche Beans mit einem bestimmten Feld auf eine Bean referenzieren.
+ * An extension of {@link IHierarchicalStructure} for beans.
+ * Its main purpose is to analyze the deep references within a bean hierarchical structure.
  *
- * @author s.danner, 29.08.2017
- * @see IHierarchicalStructure (für die Basis)
+ * @author Simon Danner, 29.08.2017
  */
 public interface IHierarchicalBeanStructure extends IHierarchicalStructure
 {
   /**
-   * Liefert alle Felder einer bestimmten Bean, welche auf diese Bean referenzieren.
+   * All bean fields of a certain bean within the parent reference structure, which lead to this bean at some moment.
+   * The references may be direct or accomplished over many nodes.
    *
-   * @param pBean die Bean, welche die Referenz hält
-   * @return eine Menge von Referenz-Feldern
+   * @param pBean the bean that holds the reference
+   * @return a collection of bean fields referring to this bean
    */
   default Set<IHierarchicalField<?>> getParentReferencesByBean(IBean<?> pBean)
   {
@@ -31,10 +29,11 @@ public interface IHierarchicalBeanStructure extends IHierarchicalStructure
   }
 
   /**
-   * Liefert alle Beans, welche über ein bestimmtes Feld auf diese Bean referenzieren.
+   * All beans within the parent reference structure, which lead to this bean at some moment through a certain bean field.
+   * The references may be direct or accomplished over many nodes.
    *
-   * @param pField das bestimmte Feld
-   * @return eine Menge von Referenz-Beans
+   * @param pField the bean field that holds the reference
+   * @return a collection of beans referring to this bean
    */
   default Set<IBean<?>> getParentReferenceByField(IField<?> pField)
   {
@@ -45,11 +44,11 @@ public interface IHierarchicalBeanStructure extends IHierarchicalStructure
   }
 
   /**
-   * Liefert alle Parent-Abhängigkeiten dieser Bean.
-   * Die Referenzen sind dabei nicht untereinander abhängig.
-   * Sie sind lediglich irgendwie mit dieser Bean in Verbindung (direkt oder über n beliebige Knoten).
+   * All parent references of this bean.
+   * The nodes are not connected in any way, it's only a collection of all single elements of the parent reference structure.
+   * A reference may lead to this bean directly or over n nodes.
    *
-   * @return eine Menge von Referenzen (aus Bean + Feld).
+   * @return a collection of reference nodes
    */
   default Set<IHierarchicalNode> getAllParentReferences()
   {
@@ -61,9 +60,8 @@ public interface IHierarchicalBeanStructure extends IHierarchicalStructure
           .flatMap(IHierarchicalNode::streamParentNodes)
           .filter(pNode -> allNodes.stream()
               .map(IHierarchicalNode::getBean)
-              .noneMatch(pInnerBean -> pInnerBean == pNode.getBean()))
+              .noneMatch(pInnerBean -> pInnerBean == pNode.getBean())) //Avoid cyclic references
           .collect(Collectors.toSet());
-      //Alle hinzufügen
       allNodes.addAll(newNodes);
     }
     while (newNodes.size() > 0);

@@ -8,9 +8,9 @@ import java.lang.annotation.Annotation;
 import java.util.Collection;
 
 /**
- * Beschreibt ein String-Bean-Feld.
+ * A bean field that holds a text/string.
  *
- * @author s.danner, 23.08.2016
+ * @author Simon Danner, 23.08.2016
  */
 @TypeDefaultField(types = String.class)
 public class TextField extends AbstractField<String>

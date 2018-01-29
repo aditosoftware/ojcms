@@ -6,53 +6,55 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 
 /**
- * Beschreibt die statistischen Daten eines Bean-Feldes bzw. eines Bean-Containers.
+ * Describes some statistic data based on cyclic collected data entries.
+ * The data consists of entries that contain timestamps and associated values.
  *
- * @param <TYPE> der Typ der Einträge der Daten
- * @author s.danner, 14.02.2017
+ * @param <TYPE> the data type of the statistic entries
+ * @author Simon Danner, 14.02.2017
  */
 public interface IStatisticData<TYPE>
 {
   /**
-   * Liefert das Intervall, in dem ein neuer Eintrag erfasst wird.
+   * The intervall at which an entry will be gathered.
    */
   long getIntervall();
 
   /**
-   * Liefert die maximale Anzahl der Einträge dieser Daten.
+   * The maximum number of statistic entries.
    */
   int getMaxEntrySize();
 
   /**
-   * Liefert die eigentlichen Daten zur Statistik als Map.
+   * The statistic data itself.
+   * A collection of timestamps with an associated value for each.
    *
-   * @return eine Map, welche als Schlüssel den Zeitpunkt und als Wert den Eintrag zu diesem Zeitpunkt besitzt
+   * @return a map that holds a timestamp as key and an associated value as value
    */
   Map<Long, TYPE> getStatistics();
 
   /**
-   * Fügt einen neuen statistischen Eintrag hinzu.
+   * Adds a new entry to this data.
    *
-   * @param pEntry der neue Eintrag
+   * @param pEntry the new entry
    */
   void addEntry(@NotNull TYPE pEntry);
 
   /**
-   * Fügt einen neuen Listener für diese Daten hinzu.
+   * Registers a listener for this data.
    *
-   * @param pListener der neue Listener, welcher informiert, wenn ein neuer Eintrag hinzugefügt wurde
+   * @param pListener the listener that describes how to react to an addition of a new statistic entry
    */
   void listen(IStatisticsListener<TYPE> pListener);
 
   /**
-   * Entfernt einen Listener für diese Daten.
+   * Unregisters a listener from this data.
    *
-   * @param pListener der Listener, welcher entfernt werden soll
+   * @param pListener the listener to remove
    */
   void unlisten(IStatisticsListener<TYPE> pListener);
 
   /**
-   * Löscht diese Daten.
+   * Deletes this statistic data.
    */
   void destroy();
 }

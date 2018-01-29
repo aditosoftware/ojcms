@@ -5,10 +5,12 @@ import de.adito.picoservice.PicoService;
 import java.lang.annotation.*;
 
 /**
- * Annotation für ein Bean-Feld, welches das Standardfeld für einen bestimmten Datentypen ist.
- * Über den PicoService wird zur Laufzeit ein Mapping von Datentyp nach Standard-Feld-Typ hergestellt.
+ * This annotation defines a bean field type as default-field for a certain data type.
+ * The mapping between data type and field type will be established at runtime.
+ * The field marked with this annotation will be registered by the PicoService framework.
  *
- * @author s.danner, 29.06.2017
+ * @author Simon Danner, 29.06.2017
+ * @see PicoService
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -16,8 +18,7 @@ import java.lang.annotation.*;
 public @interface TypeDefaultField
 {
   /**
-   * Liefert die Datentypen, für welche dieses Feldes der Standard-Typ ist.
-   * Dabei muss es sich zwingend um den Grundtypen und optional um die Quell-Typen von registrierten Konvertern handeln.
+   * A collection of data types, which are the default types for the bean field marked by this annotation.
    */
   Class[] types();
 }

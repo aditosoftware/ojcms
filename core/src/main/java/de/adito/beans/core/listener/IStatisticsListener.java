@@ -1,18 +1,18 @@
 package de.adito.beans.core.listener;
 
 /**
- * Definiert einen Listener für Statistik-Änderungen bei Bean-Statistiken.
+ * A listener for changes of bean statistic data.
  *
- * @param <TYPE> der Typ des Statistik-Eintrags
- * @author s.danner, 20.02.2017
+ * @param <TYPE> the type of the statistic's entries
+ * @author Simon Danner, 20.02.2017
  */
 public interface IStatisticsListener<TYPE>
 {
   /**
-   * Ein neuer statistischer Eintrag wurde hinzugefügt.
+   * A new statistic entry has been added.
    *
-   * @param pTimeStamp der Zeitpunkt des Hinzufügens
-   * @param pEntry     der neue Eintrag
+   * @param pTimeStamp the timestamp of the addition
+   * @param pEntry     the value of the new entry
    */
   void entryAdded(long pTimeStamp, TYPE pEntry);
 }

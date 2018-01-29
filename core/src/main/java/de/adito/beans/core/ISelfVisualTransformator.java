@@ -1,12 +1,12 @@
 package de.adito.beans.core;
 
 /**
- * Definiert einen Transformator für eine Transformable-Komponente, welche das Bean-Element direkt abbildet.
- * Hier werden überflüssige Methoden vom IVisualTransformator default-mäßig implementiert.
- * Die visuelle Komponente für eine logische Komponente ist dabei immer der Transformator selbst.
+ * An analog {@link IVisualTransformator} for {@link ISelfTransformable} components.
+ * Self-transformable components represent a bean or bean container directly.
+ * This interface provides a default implementation for the methods that return a graphical component for a logical component.
+ * The visual component always has to be the component itself, because it is a direct representation of the logical counterpart.
  *
- * @author s.danner, 27.01.2017
- * @see ISelfTransformable
+ * @author Simon Danner, 27.01.2017
  */
 interface ISelfVisualTransformator<ENCAPSULATED extends IEncapsulated, SOURCE extends IEncapsulatedHolder<ENCAPSULATED>,
     TRANSFORMATOR extends ISelfVisualTransformator<ENCAPSULATED, SOURCE, TRANSFORMATOR>>

@@ -7,11 +7,12 @@ import java.util.function.*;
 import java.util.stream.Collectors;
 
 /**
- * Ein spezieller Bean, welcher anhand einer Map erzeugt wird.
- * Dabei wird anhand des Value-Typs der Map der Bean-Feld-Typ bestimmt.
+ * A special bean that represents a Map.
+ * A key-value pair of the map will be presented as a bean field with the associated value.
+ * This bean is based on a generic data type which is the value type of the map and will be used as data type for the bean fields.
  *
- * @param <TYPE> der Value-Typ der Map
- * @author s.danner, 07.02.2017
+ * @param <TYPE> the Map's value type
+ * @author Simon Danner, 07.02.2017
  */
 public class MapBean<TYPE> implements IModifiableBean<MapBean<TYPE>>
 {
@@ -19,10 +20,10 @@ public class MapBean<TYPE> implements IModifiableBean<MapBean<TYPE>>
   private Function<Object, TYPE> valueConverter = null;
 
   /**
-   * Erzeugt eine neue Map-Bean.
+   * Creates a map representation.
    *
-   * @param pMap       die Map, aus welcher der Bean erzeugt werden soll
-   * @param pValueType der Value-Typ der Map
+   * @param pMap       the source from which the bean will be created
+   * @param pValueType the map's value type
    */
   public MapBean(Map<String, Object> pMap, Class<TYPE> pValueType)
   {
@@ -30,20 +31,18 @@ public class MapBean<TYPE> implements IModifiableBean<MapBean<TYPE>>
   }
 
   /**
-   * Erzeugt eine neue Map-Bean.
-   * Hier werden die Bean-Felder, welche für die Map verwendet werden, aus einem Cache genommen,
-   * um eine Identifikation anhand der Key-Felder der Map-Bean zu gewährleisten.
-   * Dies nützlich, wenn eine Bean, welche eine Map-Feld besitzt, neu initialisiert wird (mit Werten)
-   * und anschließend überprüft werden soll, ob sich Werte innerhalb der Map geändert haben.
-   * Ein Bean-Feld aus dem Cache wird dabei anhand des Datentypen und des Namen identifziert.
-   * Wenn ein nicht im Cache existiert, wird es neu erzeugt und an das Cache-Callback weitergegeben,
-   * um es womöglich im Cache zu registrieren.
+   * Creates a map representation.
+   * This constructor allows you to provide a field cache.
+   * The cache stores field instances and supplies them for same names and types.
+   * A cache may be useful when MapBeans are compared to each other, because bean fields are mostly compared by reference.
+   * It may also be a slight performance improvement.
+   * If a field is not in the cache yet, it will be created by the field factory and given to the cache via a callback.
    *
-   * @param pMap                die Map, aus welcher der Bean erzeugt werden soll
-   * @param pValueType          der Value-Typ der Map
-   * @param pFieldCacheCallback Callback für das Felder-Caching
-   * @param pFieldCache         ein Cache für Felder gleichen Typs und Names
-   *                            (als BiConsumer mit eben genannten Kriterien als Parameter und dem Feld als optionalen Rückkgabewert)
+   * @param pMap                the source from which the bean will be created
+   * @param pValueType          the map's value type
+   * @param pFieldCacheCallback callback for the cache to record newly created fields
+   * @param pFieldCache         the field cache for beans with the same name and field type
+   *                            (a BiConsumer with the identification arguments and an optional field return type)
    */
   public MapBean(Map<String, Object> pMap, Class<TYPE> pValueType, Consumer<IField<TYPE>> pFieldCacheCallback,
                  BiFunction<Class<? extends IField<TYPE>>, String, Optional<IField<TYPE>>> pFieldCache)
@@ -53,7 +52,7 @@ public class MapBean<TYPE> implements IModifiableBean<MapBean<TYPE>>
         .collect(LinkedHashMap::new,
                  (pSorted, pEntry) -> {
                    IField<TYPE> field = _createField(fieldType, pEntry.getKey(), pFieldCacheCallback, pFieldCache);
-                   if (valueConverter == null) //Muss nur einmal evaluiert werden -> dann immer gleich
+                   if (valueConverter == null) //has to be the same for every entry
                      valueConverter = _getValueConverter(pEntry.getValue(), field);
                    pSorted.put(field, valueConverter != null ? valueConverter.apply(pEntry.getValue()) : null);
                  },
@@ -68,14 +67,15 @@ public class MapBean<TYPE> implements IModifiableBean<MapBean<TYPE>>
   }
 
   /**
-   * Erzeugt ein Bean-Feld anhand eines herkömmlichen Daten-Typen
+   * Creates a bean field for an associated map entry.
+   * Fields may come from a given cache.
    *
-   * @param pFieldType          der Typ des Feldes
-   * @param pName               der Name des Feldes
-   * @param pFieldCacheCallback Callback für das Felder-Caching
-   * @param pFieldCache         ein Cache für Felder gleichen Typs und Names
-   *                            (als BiConsumer mit eben genannten Kriterien als Parameter und dem Feld als optionalen Rückkgabewert)
-   * @return ein Bean-Feld
+   * @param pFieldType          the field's type
+   * @param pName               the field's name
+   * @param pFieldCacheCallback callback for the cache to record newly created fields
+   * @param pFieldCache         the field cache for beans with the same name and field type
+   *                            (a BiConsumer with the identification arguments and an optional field return type)
+   * @return the bean field for the map entry
    */
   private IField<TYPE> _createField(Class<? extends IField<TYPE>> pFieldType, String pName, Consumer<IField<TYPE>> pFieldCacheCallback,
                                     BiFunction<Class<? extends IField<TYPE>>, String, Optional<IField<TYPE>>> pFieldCache)
@@ -90,14 +90,14 @@ public class MapBean<TYPE> implements IModifiableBean<MapBean<TYPE>>
   }
 
   /**
-   * Liefert einen Konverter für den Value des Map-Eintrages.
-   * Wenn dabei der Typ des Wertes nicht zum Feld-Datentypen passt, wird versucht, eine Konvertierung durchzuführen.
-   * Der Konverter wird dabei vom Feld bezogen.
+   * A value converter for the bean fields.
+   * If the field's type is not assignable from the value's type from the map, a converter will be used.
+   * A bean field is able to provide certain converters (for example {@link Date} <-> {@link java.time.Instant}
    *
-   * @param pSourceValue ein Quell-Wert zur Ermittlung des Quell-Typen
-   * @param pField       das Feld, welches Konverter bereitstellt
-   * @param <SOURCE>     der generische Typ des Quell-Wertes
-   * @return ein Konverter als Function, welcher ein Quell-Wert übergeben wird und den konvertierten Wert zurückgibt
+   * @param pSourceValue the source value from the map
+   * @param pField       the field for which the value should be set
+   * @param <SOURCE>     the generic type of the source value
+   * @return the converter as function that returns the data type from the certain source value
    */
   @SuppressWarnings("unchecked")
   private <SOURCE> Function<SOURCE, TYPE> _getValueConverter(SOURCE pSourceValue, IField<TYPE> pField)
@@ -121,7 +121,7 @@ public class MapBean<TYPE> implements IModifiableBean<MapBean<TYPE>>
       return false;
 
     MapBean other = (MapBean) pObject;
-    //Eine Map-Bean ist dann gleich, wenn alle Felder samt ihren Datenwerten übereinstimmen
+    //MapBeans are the same, if all fields and associated values are equal
     return streamFields().allMatch(other::hasField) &&
         !BeanUtil.compareBeanValues(this, other, streamFields().collect(Collectors.toList())).isPresent();
   }

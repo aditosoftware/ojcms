@@ -3,10 +3,10 @@ package de.adito.beans.core.annotations;
 import java.lang.annotation.*;
 
 /**
- * Markiert ein Feld einer Bean als Detail.
- * Wie diese Information angewendet wird, muss von der jeweiligen Applikation entschieden werden.
+ * Marks a bean field as detail.
+ * The application determines how to use this information.
  *
- * @author s.danner, 23.08.2016
+ * @author Simon Danner, 23.08.2016
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)

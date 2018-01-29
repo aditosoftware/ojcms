@@ -9,35 +9,39 @@ import java.util.Map;
 import java.util.stream.*;
 
 /**
- * Wrapper-Klasse für eine beliebige Bean, welche als Listener fungiert,
- * welcher Änderungen an einer Original-Bean zu dieser Bean weiterleitet.
+ * Wrapper for any bean to redirect changes from an original bean.
+ * This class holds the references to the original bean and to a bean, which may be a representation/copy of the original bean.
+ * Trough the usage of the bean listener interface the changes can simply be redirected.
  *
- * @param <BEAN> der konkrete Typ der Bean, welche hier umhüllt wird
- * @author s.danner, 12.06.2017
+ * This wrapper considers possible excluded or flattened representations of the original bean.
+ * So some changes can be ignored and others may be carried to deeper levels of the bean's hierarchy.
+ *
+ * @param <BEAN> the type of the bean that is wrapped by this class
+ * @author Simon Danner, 12.06.2017
  */
 class ChangeAwareBean<BEAN extends IBean<BEAN>> implements IModifiableBean<BEAN>, IBeanChangeListener
 {
-  //Hier das Original halten, um die Referenzen bei mehreren aufeinanderfolgenden Kopien nicht zu verlieren (Der Listener ist nur weak)
+  //Keep the reference to the original bean to avoid GC of the real original bean when using multiple change aware beans in a chain.
   @SuppressWarnings({"FieldCanBeLocal", "unused"})
   private final IBean<?> original;
-  private final BEAN source;
+  private final BEAN representation;
 
   private final boolean isFlat;
   private final IBeanFieldPredicate fieldPredicate;
   private final _ActivePredicate activePredicate = new _ActivePredicate();
 
   /**
-   * Erzeugt die Proxy-Bean, welche mit dem Listener ausgestattet ist.
+   * Creates the wrapper to redirect changes from the original bean.
    *
-   * @param pOriginal       die Original-Bean, auf welche gehört wird
-   * @param pSource         die Quell-Bean
-   * @param pFieldPredicate ein optionales Feld-Prädikat, womit Felder gefiltert werden sollen
+   * @param pOriginal       the original bean
+   * @param pRepresentation the original bean's representation (may be a copy etc.)
+   * @param pFieldPredicate an optional field predicate to exclude some fields from the original bean
    */
-  public ChangeAwareBean(IBean<?> pOriginal, BEAN pSource, boolean pIsFlat, @Nullable IBeanFieldPredicate pFieldPredicate)
+  public ChangeAwareBean(IBean<?> pOriginal, BEAN pRepresentation, boolean pIsFlat, @Nullable IBeanFieldPredicate pFieldPredicate)
   {
-    assert pSource.getEncapsulated() != null;
+    assert pRepresentation.getEncapsulated() != null;
     original = pOriginal;
-    source = pSource;
+    representation = pRepresentation;
     isFlat = pIsFlat;
     fieldPredicate = pFieldPredicate;
     //noinspection unchecked
@@ -47,7 +51,7 @@ class ChangeAwareBean<BEAN extends IBean<BEAN>> implements IModifiableBean<BEAN>
   @Override
   public IBeanEncapsulated<BEAN> getEncapsulated()
   {
-    return source.getEncapsulated();
+    return representation.getEncapsulated();
   }
 
   @Override
@@ -60,7 +64,7 @@ class ChangeAwareBean<BEAN extends IBean<BEAN>> implements IModifiableBean<BEAN>
   public Stream<IField<?>> streamFields()
   {
     return IModifiableBean.super.streamFields()
-        .filter(pField -> _checkFieldPredicate(pField, source.getValue(pField)));
+        .filter(pField -> _checkFieldPredicate(pField, representation.getValue(pField)));
   }
 
   @Override
@@ -90,10 +94,11 @@ class ChangeAwareBean<BEAN extends IBean<BEAN>> implements IModifiableBean<BEAN>
   {
     IBean bean = pBean;
     IField<?> field = pField;
-    if (isFlat && !getEncapsulated().containsField(field)) //Hier über Datenkern, weil das Feld auch wegen des Feld-Prädikats nicht aktiv sein könnte
+    //Use the data core to check here, because the field may be excluded by the field predicate in this certain moment
+    if (isFlat && !getEncapsulated().containsField(field))
     {
       Object changedValue = pBean.getValue(pField);
-      //Der Wert MUSS hier eine Bean sein, da nur Bean-Felder abgeflacht werden
+      //The values must be an instance of the bean interface, because only bean fields can be flattened
       assert pOldValue instanceof IBean;
       assert changedValue instanceof IBean;
       bean = pBean.flatCopy(false);
@@ -101,17 +106,17 @@ class ChangeAwareBean<BEAN extends IBean<BEAN>> implements IModifiableBean<BEAN>
     }
     if (_checkFieldPredicate(field, bean.getValue(field)))
     {
-      assert bean.hasField(field);
+      assert bean.hasField(field); //The field must exist now!
       BeanListenerUtil.setValueAndFire((IBean) this, (IField) field, bean.getValue(field));
     }
   }
 
   /**
-   * Prüft, ob eine Feld einer Bean dem Feld-Prädikat entspricht, auf welchem diese Bean basiert.
+   * Checks, if a bean field and its associated value pass the field predicate of this wrapper.
    *
-   * @param pField der Feld der Bean
-   * @param pValue der aktuelle Wert des Feldes
-   * @return <tt>true</tt>, wenn das Feld dem Prädikat entspricht
+   * @param pField the field to check
+   * @param pValue the current value to check
+   * @return <tt>true</tt>, if the values pass
    */
   private boolean _checkFieldPredicate(IField<?> pField, Object pValue)
   {
@@ -119,11 +124,12 @@ class ChangeAwareBean<BEAN extends IBean<BEAN>> implements IModifiableBean<BEAN>
   }
 
   /**
-   * Liefert den Index eines Bean-Feldes, welches neu hinzugefügt wurde, für die Source-Bean (evtl. weniger Felder)
+   * Calculates the index of a newly added bean field.
+   * The index may be different to the original because of possibly excluded fields.
    *
-   * @param pBean       die Original-Bean, zu welcher das Feld hinzugefügt wurde
-   * @param pAddedField das hinzugefügte Feld
-   * @return der Index innerhalb dieser/der Source-Bean
+   * @param pBean       the original bean, to which the field has been added
+   * @param pAddedField the added field
+   * @return the index of the field within the representation of the original bean
    */
   private int _getIndexOfAddedField(IBean<?> pBean, IField<?> pAddedField)
   {
@@ -132,18 +138,18 @@ class ChangeAwareBean<BEAN extends IBean<BEAN>> implements IModifiableBean<BEAN>
       return originalIndex;
 
     return (int) pBean.streamFields()
-        .filter(pField -> pBean.getFieldIndex(pField) < originalIndex) //Alle mit zu großem Index und es selbst raus
-        .filter(pField -> fieldPredicate.test(pField, pBean.getValue(pField))) //Alle raus, die nicht dem Prädikat entsprechen
-        .count(); //Summe der übrigen muss somit der Index des neuen Feldes sein
+        .filter(pField -> pBean.getFieldIndex(pField) < originalIndex) //Remove all fields equal to or above the original index
+        .filter(pField -> fieldPredicate.test(pField, pBean.getValue(pField))) //Remove all fields that didn't pass the predicate
+        .count(); //The amount of the remaining fields has to be the new index then
   }
 
 
   /**
-   * Sucht das Feld, an welches unterschiedliche Daten innerhalb zweier Beans besitzt.
+   * Finds the field with different values within two beans of the same type.
    *
-   * @param pOldBean die alte Bean
-   * @param pNewBean die neue Bean
-   * @return das Feld, bei welchem sich der Wert verändert hat
+   * @param pOldBean the old bean instance
+   * @param pNewBean the new bean instance
+   * @return the bean field that has a different value
    */
   private IField<?> _findChangedField(IBean<BEAN> pOldBean, IBean<BEAN> pNewBean)
   {
@@ -152,20 +158,21 @@ class ChangeAwareBean<BEAN extends IBean<BEAN>> implements IModifiableBean<BEAN>
   }
 
   /**
-   * ActivePredicate für Optionale Bean-Felder
+   * A special predicate to define which optional fields are active at a certain time.
+   * Excludes optional fields that can not pass the field predicate of this wrapper.
    */
   private class _ActivePredicate implements IBeanFieldActivePredicate<BEAN>
   {
     @Override
     public BEAN getBean()
     {
-      return source.getFieldActiveSupplier().getBean();
+      return representation.getFieldActiveSupplier().getBean();
     }
 
     @Override
     public boolean isOptionalActive(IField<?> pField)
     {
-      //Nur als aktiv markieren, wenn auch das Prädikat zutrifft
+      //the predicate should be applied positively to be active
       return _checkFieldPredicate(pField, getEncapsulated().getValue(pField)) && IBeanFieldActivePredicate.super.isOptionalActive(pField);
     }
   }

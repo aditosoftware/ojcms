@@ -7,43 +7,45 @@ import java.util.*;
 import java.util.stream.*;
 
 /**
- * Beschreibt die hierarchische Struktur eines Bean-Elements (Bean oder Container)
- * Eine solche Struktur bezieht sich allein auf das Bean-Modell.
- * Sie entsteht nur dann, wenn ein Bean-Feld oder ein Container-Feld eine Referenz auf andere Bean-Elemente erzeugen.
+ * A hierarchical reference structure of a bean or a bean container.
+ * The structure contains all direct references to this element.
+ * They are considered as parents.
  *
- * @author s.danner, 01.09.2017
+ * @author Simon Danner, 01.09.2017
  */
 public interface IHierarchicalStructure
 {
   /**
-   * Liefert alle direkten Parent-Knoten dieser Struktur.
-   * Ein Knoten beschreibt eine Referenz bestehend aus Bean und zugehörigem Feld.
+   * All direct parents (references) to this bean element.
+   * A reference is described as a node consisting of the bean and the field, that holds the reference.
    *
-   * @return eine Menge von Hierarchie-Knoten dieser Struktur
+   * @return a collection of hierarchical nodes describing the references
    */
   Set<IHierarchicalNode> getDirectParents();
 
   /**
-   * Vernichtet die Information zur hierarchischen Struktur dieses Bean-Elementes.
-   * Ist evtl. sinnvoll, wenn für komplexe Berechnungen alte bzw. nicht mehr relevante Referenzen
-   * nicht mehr miteinbezogen werden sollen (Falls der GC noch nicht aufgeräumt hat)
+   * Deletes the hierarchical structure of the source bean element.
+   * May be used to improve performance, when calculating complex dependencies and references,
+   * so irrelevant paths must not be analyzed within the calculation.
    */
   void destroy();
 
   /**
-   * Beschreibt einen Hierarchie-Noten dieses Modells.
-   * Beinhaltet die Bean und das Feld einer Referenz.
-   * Eine Node ist iterierbar anhand derer Bean-Parent-Knoten.
+   * Describes a reference node of this structure.
+   * This node stands for the source of the reference to this bean element.
+   * It provides the source bean and the field, which holds to reference.
+   * It is also able to iterate over the source bean's parent references,
+   * which may be used to build the whole structure up to the root.
    */
   interface IHierarchicalNode extends Iterable<IHierarchicalNode>
   {
     /**
-     * Liefert die Bean des Knotens / dieser Stufe.
+     * The bean that holds the reference.
      */
     IBean<?> getBean();
 
     /**
-     * Liefert das Bean-Feld des Knotens / dieser Stufe.
+     * The bean field that holds the reference.
      */
     IHierarchicalField<?> getField();
 
@@ -55,7 +57,7 @@ public interface IHierarchicalStructure
     }
 
     /**
-     * Liefert einen Stream der Parent-Nodes dieser Node.
+     * A stream of the parent references of the node/reference.
      */
     default Stream<IHierarchicalNode> streamParentNodes()
     {

@@ -1,15 +1,16 @@
 package de.adito.beans.core;
 
 /**
- * Definiert eine grafische Bean-Komponente, welche die Quell-Komponente direkt abbildet.
- * Entweder: IBean -> direkte grafische Abbildung oder IBean-Container -> direkte grafische Abbildung.
+ * A transformable graphical component that represents a bean or bean container directly.
+ * In this situation the transformable component has to be the transformator as well. (combines the interfaces)
+ * Because of this, some interface methods can be implemented by default.
+ * But there is also a disadvantage: The data containers and the data core reference cannot be stored at the abstract transformator base.
+ * The core reference has to be stored at the component implementing this interface itself.
  *
- * Konkret gesagt ist dabei das grafische transformable-Element gleichzeitig der Transformator.
- * Ein erheblicher Unterschied ist hier, dass es keine Grundlage für einen Transformator gibt und somit die Original-Quelle gespeichert werden muss.
- *
- * @param <ENCAPSULATED> der Typ des Daten-Kerns der zu transformierenden Quelle
- * @param <SOURCE>       der Typ der Quelle, die transformiert werden soll
- * @author s.danner, 27.01.2017
+ * @param <ENCAPSULATED>  the type of the data core of the transformation source
+ * @param <SOURCE>        the type of the source (bean element) that will be used for the transformation
+ * @param <TRANSFORMATOR> the type of the transformator (the concrete type implementing this interface)
+ * @author Simon Danner, 27.01.2017
  */
 interface ISelfTransformable<ENCAPSULATED extends IEncapsulated, SOURCE extends IEncapsulatedHolder<ENCAPSULATED>,
     TRANSFORMATOR extends ISelfVisualTransformator<ENCAPSULATED, SOURCE, TRANSFORMATOR>>
@@ -29,13 +30,12 @@ interface ISelfTransformable<ENCAPSULATED extends IEncapsulated, SOURCE extends 
   default void transform(SOURCE pSourceToTransform)
   {
     //noinspection unchecked
-    getTransformator().link(pSourceToTransform, (TRANSFORMATOR) this); //Erst linken, dass Operationen ausgeführt werden können (Kern sowieso vorhanden)
+    getTransformator().link(pSourceToTransform, (TRANSFORMATOR) this); //Link first
     ITransformable.super.transform(pSourceToTransform);
   }
 
   @Override
   default void initTransformation(SOURCE pSourceToTransform)
   {
-    //Die Source muss hier manuell gespeichert werden
   }
 }

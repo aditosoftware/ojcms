@@ -1,11 +1,13 @@
 package de.adito.beans.core;
 
 /**
- * Definiert eine grafische Komponente, welche in einen Bean-Container transformierbar ist und den Bean-Container direkt abbildet.
+ * A graphical component that represents a bean container directly.
+ * This component will be transformed to a bean container.
+ * For detailed information take a look at the base interfaces.
  *
- * @param <BEAN>   der Typ der Beans, welche in dem Container enthalten ist
- * @param <VISUAL> der konkrete Typ dieses Interfaces
- * @author s.danner, 27.01.2017
+ * @param <BEAN>   the type of the beans in the container
+ * @param <VISUAL> the concrete type of this interface at runtime
+ * @author Simon Danner, 27.01.2017
  * @see ISelfTransformable
  */
 public interface ISelfTransformableBeanContainer<BEAN extends IBean<BEAN>, VISUAL extends ISelfTransformableBeanContainer<BEAN, VISUAL>>

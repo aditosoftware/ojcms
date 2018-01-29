@@ -1,10 +1,9 @@
 package de.adito.beans.core.util.exceptions;
 
 /**
- * Exception, welche auftritt, wenn die Transformation einer transformierbaren Komponente bereits stattfand,
- * aber eine Aktion darauf ausgelegt ist, vor einer Transformation stattzufinden.
+ * Thrown, if an operation should take place before a bean transformation, but has already been performed.
  *
- * @author s.danner, 18.07.2017
+ * @author Simon Danner, 18.07.2017
  */
 public class AlreadyTransformedException extends RuntimeException
 {

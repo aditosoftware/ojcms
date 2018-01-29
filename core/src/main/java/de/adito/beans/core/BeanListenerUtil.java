@@ -1,7 +1,6 @@
 package de.adito.beans.core;
 
-import de.adito.beans.core.listener.IBeanChangeListener;
-import de.adito.beans.core.listener.IBeanContainerChangeListener;
+import de.adito.beans.core.listener.*;
 import de.adito.beans.core.references.IHierarchicalField;
 import de.adito.beans.core.util.IBeanFieldPredicate;
 import org.jetbrains.annotations.Nullable;
@@ -11,29 +10,31 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
- * Statische Factory, welche einen Bean-Listener für die Beans in einem Container liefert.
- * Der Listener informiert bei Änderungen alle Listener des Containers.
- * Dabei werden die Listener für die gleichen Container gecached.
+ * Utility methods concerning bean listeners.
+ * They fire events, when a value of a bean was changed or a bean was added or removed to/from a container.
+ * Furthermore this class provides a static listener cache for bean-listeners of a container (one listener per container).
+ * This cache is used automatically by the utility methods.
  *
- * @author s.danner, 31.01.2017
+ * @author Simon Danner, 31.01.2017
  */
 final class BeanListenerUtil
 {
-  private static final Map<IBeanContainer, IBeanChangeListener> LISTENER_CACHE = new WeakHashMap<>();
+  private static final Map<IBeanContainer, IBeanChangeListener> LISTENER_CACHE = new WeakHashMap<>(); //weak cache!
 
   private BeanListenerUtil()
   {
   }
 
   /**
-   * Setzt den Wert eines Feldes einer Bean und gibt gleichzeitig den Listenern Bescheid.
-   * Hier passiert alles auf der Ebene des Datenkerns. Optionale Felder sind daher nicht mehr von Bedeutung.
+   * Sets the value for a bean field and informs all listeners about this change.
+   * This may influence the active state of an optional field or create/remove a reference, which will be adjusted here.
+   * This method only uses the encapsulated data core, so any special behaviour of optional fields, etc. won't matter.
    *
-   * @param pBean     die Bean, zu welcher das Feld gehört
-   * @param pField    das Feld, von welchem der Datenwert geändert wurde
-   * @param pNewValue der neue Wert
-   * @param <BEAN>    der generische Typ der Bean, für welche der Wert gesetzt wird
-   * @param <TYPE>    der generische Typ des Datenwertes des Bean-Feldes
+   * @param pBean     the bean, where a value has been changed
+   * @param pField    the bean field from which the value has been changed
+   * @param pNewValue the new value to set
+   * @param <BEAN>    the generic bean type
+   * @param <TYPE>    the data type of the bean field
    */
   public static <BEAN extends IBean<BEAN>, TYPE> void setValueAndFire(BEAN pBean, IField<TYPE> pField, TYPE pNewValue)
   {
@@ -44,33 +45,34 @@ final class BeanListenerUtil
     if (!Objects.equals(oldValue, pNewValue))
     {
       IBeanFieldActivePredicate<BEAN> fieldActiveSupplier = pBean.getFieldActiveSupplier();
-      //Vorher aktive optionale Felder speichern
+      //Store before active optional fields to detect differences later on
       List<IField<?>> optionalActiveFields = encapsulated.streamFields()
           .filter(pBeanField -> pBeanField.isOptional() && fieldActiveSupplier.isOptionalActive(pBeanField))
           .collect(Collectors.toList());
-      //Wert anschließend setzen
+      //Set the new value in the data core
       encapsulated.setValue(pField, pNewValue);
-      //Nun feststellen, ob sich die Aktivitäts-Zustände der optionalen Felder verändert haben
+      //Find newly activated optional fields and fire them as added fields
       encapsulated.streamFields()
           .filter(pBeanField -> pBeanField.isOptional() && fieldActiveSupplier.isOptionalActive(pBeanField))
           .filter(pActiveField -> !optionalActiveFields.remove(pActiveField))
           .forEach(pNewActiveField -> encapsulated.fire(pListener -> pListener.fieldAdded(pBean, pNewActiveField)));
-      //Übrige als removed feuern
+      //Fire the remaining as removed fields
       //noinspection unchecked
       optionalActiveFields.stream()
           .map(pBeforeActiveField -> (IField) pBeforeActiveField)
           .forEach(pBeforeActiveField -> encapsulated.fire(pListener -> pListener.fieldRemoved(pBean, pBeforeActiveField,
                                                                                                encapsulated.getValue(pBeforeActiveField))));
-      //WICHTIG: Wertänderung erst am Schluss feuern, damit bereits alle Felder vorhanden sind
+      //IMPORTANT: The value change itself must be fired after all optional fields have their correct active state
       encapsulated.fire(pListener -> pListener.beanChanged(pBean, pField, oldValue));
-      //Referenzen noch anpassen, falls nötig
+      //Finally adjust the references if necessary
       if (pField instanceof IHierarchicalField)
       {
+        //A hierarchical field is able to provide all instances, which are referred by this field based on its set value
         IHierarchicalField<TYPE> field = (IHierarchicalField<TYPE>) pField;
-        //Alte Referenzen entfernen, anhand des vorherigen Wertes
+        //Remove old references based on the old value
         field.getReferables(oldValue)
             .forEach(pReferable -> pReferable.removeReference(pBean, field));
-        //Neue Referenzen hinzufügen
+        //Add the new ones
         field.getReferables(pNewValue)
             .forEach(pReferable -> pReferable.addWeakReference(pBean, field));
       }
@@ -78,47 +80,50 @@ final class BeanListenerUtil
   }
 
   /**
-   * Fügt der hinzugefügten Bean einen internen Listener hinzu und informiert die bereits registrierten Listener des Containers
+   * A bean has been added to a container.
+   * Adds a listener to the added bean and fires an addition event to the container listeners.
+   * Furthermore registers the container references at the bean.
    *
-   * @param pContainer der Container, wo die Bean hinzugefügt wurde
-   * @param pBean      die neue Bean
-   * @param <BEAN>     der generische Typ der Bean, welche hinzugefügt wurde
+   * @param pContainer the container, where the bean has been added
+   * @param pBean      the added bean
+   * @param <BEAN>     the generic type of the bean
    */
   public static <BEAN extends IBean<BEAN>> void beanAdded(IBeanContainer<BEAN> pContainer, BEAN pBean)
   {
     pBean.listenWeak(_getListener(pContainer));
     pContainer.getEncapsulated().fire(pListener -> pListener.beanAdded(pBean));
-    //Referenz auf die Bean, bei allen Bean-Referenzen des Containers eintragen
+    //Pass the references of the container to the beans as well
     pContainer.getEncapsulated().getHierarchicalStructure().getDirectParents()
         .forEach(pNode -> pBean.getEncapsulated().addWeakReference(pNode.getBean(), pNode.getField()));
   }
 
   /**
-   * De-registriert den internen Listener der entfernten Bean und informiert die bereits registrierten Listener des Containers
+   * A bean has been removed from a container.
+   * Removes the listener from the bean and fires an removal event to the container listeners.
+   * Furthermore removes the container references from the bean.
    *
-   * @param pContainer der Container, wo die Bean enfernt wurde
-   * @param pBean      die entfernte Bean
-   * @param <BEAN>     der generische Typ der Bean, welche entfernt wurde
+   * @param pContainer the container, where the bean has been removed
+   * @param pBean      the removed bean
+   * @param <BEAN>     the generic type of the bean
    */
   public static <BEAN extends IBean<BEAN>> void beanRemoved(IBeanContainer<BEAN> pContainer, BEAN pBean)
   {
     pBean.unlisten(_getListener(pContainer));
     pContainer.getEncapsulated().fire(pListener -> pListener.beanRemoved(pBean));
-    //Referenz entfernen, wenn Container von einem Bean-Feld referenziert wird
+    //Remove the references from the bean, which were created through the container
     pBean.getHierarchicalStructure().getDirectParents().stream()
-        .filter(pNode -> pNode.getBean().getValue(pNode.getField()) == pContainer) //Gibt es Parents, die diesen Container referenzieren?
+        .filter(pNode -> pNode.getBean().getValue(pNode.getField()) == pContainer) //Filter the references to the affected container
         .forEach(pNode -> pBean.getEncapsulated().removeReference(pNode.getBean(), pNode.getField()));
   }
 
   /**
-   * Wandelt eine kopierte Bean in eine Bean um, welche mitbekommt, wenn sich an der Original-Bean etwas verändert.
-   * Dabei wird ein Listener angefügt, welcher solange 'weak' gehalten wird, bis die kopierte Bean nicht mehr referenziert wird.
+   * Converts a bean copy to a change aware bean to be able to get notified about changes at the original bean.
    *
-   * @param pOriginal       die Original-Bean
-   * @param pCopy           die kopierte Bean
-   * @param pIsFlat         <tt>true</tt>, wenn die Kopie geflattet wurde
-   * @param pFieldPredicate ein optionales Feld-Prädikat, womit Felder gefiltert werden sollen
-   * @return die umgewandelte und später informierte Bean
+   * @param pOriginal       the original bean
+   * @param pCopy           the bean copy
+   * @param pIsFlat         <tt>true</tt>, if the copy has flatted fields
+   * @param pFieldPredicate an optional predicate, which maybe was used to exclude some fields from the copy
+   * @return the change aware bean
    */
   public static IBean<?> makeChangeAware(IBean<?> pOriginal, IBean pCopy, boolean pIsFlat, @Nullable IBeanFieldPredicate pFieldPredicate)
   {
@@ -127,11 +132,11 @@ final class BeanListenerUtil
   }
 
   /**
-   * Liefert den Bean-Listener für einen Container.
+   * Provides the single bean listener for a certain container.
    *
-   * @param pContainer der Bean-Container
-   * @param <BEAN>     der Typ der Beans, welche in dem Container enthalten sind
-   * @return der Listener für den Container
+   * @param pContainer the bean container
+   * @param <BEAN>     the type of the beans in the container
+   * @return the bean listener for the container
    */
   private static <BEAN extends IBean<BEAN>> IBeanChangeListener<BEAN> _getListener(IBeanContainer<BEAN> pContainer)
   {
@@ -140,9 +145,9 @@ final class BeanListenerUtil
   }
 
   /**
-   * Der Bean-Change-Listener für Beans in einem Container, welcher bei Änderung die Listener des Containers informiert.
+   * A bean change listener for beans in a container, which forwards fire events to the listeners of the container.
    *
-   * @param <BEAN> der Typ der Beans, welche in dem Container enthalten sind
+   * @param <BEAN> the type of the beans in the container
    */
   private static class _Listener<BEAN extends IBean<BEAN>> implements IBeanChangeListener<BEAN>
   {
@@ -172,9 +177,9 @@ final class BeanListenerUtil
     }
 
     /**
-     * Gibt das Event an die Container-Listener weiter
+     * Forwards an event to the container's listeners.
      *
-     * @param pAction die Aktion die weitergegeben werden soll
+     * @param pAction a consumer for a bean change listener, which represents the fired event call
      */
     private void _fire(Consumer<IBeanContainerChangeListener<BEAN>> pAction)
     {

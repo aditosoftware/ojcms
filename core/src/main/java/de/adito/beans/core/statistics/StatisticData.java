@@ -6,11 +6,10 @@ import org.jetbrains.annotations.*;
 import java.util.*;
 
 /**
- * Implementierung für statistischen Daten.
- * Verwaltet die Daten in einer größen-beschränkten Map (entsprechend der Kapazität einer Statistik)
+ * Implementation of the statistic data with an evicting map to remove entries, which exceed the limit of the data.
  *
- * @param <TYPE> der Typ der Einträge der Statistik
- * @author s.danner, 14.02.2017
+ * @param <TYPE> the data type of the statistic entries
+ * @author Simon Danner, 14.02.2017
  */
 public class StatisticData<TYPE> implements IStatisticData<TYPE>
 {
@@ -74,8 +73,7 @@ public class StatisticData<TYPE> implements IStatisticData<TYPE>
   }
 
   /**
-   * Eine Map, welche nur eine bestimmte Anzahl von Einträgen zulässt.
-   * Aufgrund der initialen Kapazität und dem Load-Factor kann diese Map nicht größer als das Limit werden.
+   * A limited evicting map that only allows a certain number of entries.
    */
   private class _LimitedMap extends LinkedHashMap<Long, TYPE>
   {
@@ -83,7 +81,7 @@ public class StatisticData<TYPE> implements IStatisticData<TYPE>
 
     public _LimitedMap(int pLimit)
     {
-      super(pLimit * 10 / 7, 0.7f, true);
+      super(pLimit * 10 / 7, 0.7f, true); //Optimize the initial limit and the load factor regarding the limit
       limit = pLimit;
     }
 

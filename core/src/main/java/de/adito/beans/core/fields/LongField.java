@@ -7,9 +7,9 @@ import java.lang.annotation.Annotation;
 import java.util.Collection;
 
 /**
- * Beschreibt ein Long-Bean-Feld.
+ * A bean field that holds a Long.
  *
- * @author s.danner, 14.02.2017
+ * @author Simon Danner, 14.02.2017
  */
 @TypeDefaultField(types = Long.class)
 public class LongField extends AbstractField<Long>

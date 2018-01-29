@@ -9,11 +9,10 @@ import java.lang.reflect.Array;
 import java.util.*;
 
 /**
- * Ein List-Proxy für einen Bean-Container, welcher diesen als List verwenden lässt.
- * Die meisten Methoden sind unterstützt. Sollte eine weitere benötigt werden, muss dies noch implementiert werden.
+ * A list proxy for a bean container to treat it as a List.
  *
- * @param <BEAN> der Typ der Beans, welche in dem Container enthalten sind
- * @author s.danner, 08.02.2017
+ * @param <BEAN> the type of the beans in the container
+ * @author Simon Danner, 08.02.2017
  */
 public class BeanContainerListProxy<BEAN extends IBean<BEAN>> implements List<BEAN>
 {
@@ -183,7 +182,7 @@ public class BeanContainerListProxy<BEAN extends IBean<BEAN>> implements List<BE
   }
 
   /**
-   * Eine einfache Implementierung für einen Iterator zu dem Bean-Container.
+   * A simple iterator implementation.
    */
   private class _ProxyIterator implements Iterator<BEAN>
   {
@@ -223,8 +222,7 @@ public class BeanContainerListProxy<BEAN extends IBean<BEAN>> implements List<BE
   }
 
   /**
-   * Erweitert den Iterator zu einem ListIterator für den Bean-Container.
-   * Ebenfalls eine primitive Implementierung.
+   * Extends the simple Iterator to a ListIterator.
    */
   private class _ProxyListIterator extends _ProxyIterator implements ListIterator<BEAN>
   {

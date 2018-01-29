@@ -2,8 +2,7 @@ package de.adito.beans.core;
 
 import de.adito.beans.core.annotations.Statistics;
 import de.adito.beans.core.listener.IBeanChangeListener;
-import de.adito.beans.core.statistics.IStatisticData;
-import de.adito.beans.core.statistics.StatisticData;
+import de.adito.beans.core.statistics.*;
 import de.adito.beans.core.util.BeanReflector;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,10 +10,10 @@ import java.util.*;
 import java.util.stream.*;
 
 /**
- * Implementierung des Bean-Daten-Kerns.
+ * Implementation of the bean encapsulated data core.
  *
- * @param <BEAN> der generische Typ der Bean, zu welcher dieser Datenkern gehört
- * @author s.danner, 19.01.2017
+ * @param <BEAN> the type of bean, which is the wrapper of this data core
+ * @author Simon Danner, 19.01.2017
  */
 class BeanMapEncapsulated<BEAN extends IBean<BEAN>> extends LinkedHashMap<IField<?>, Object> implements IBeanEncapsulated<BEAN>
 {
@@ -23,10 +22,11 @@ class BeanMapEncapsulated<BEAN extends IBean<BEAN>> extends LinkedHashMap<IField
   private final BeanBaseData<BEAN, IBeanChangeListener<BEAN>> baseData = new BeanBaseData<>();
 
   /**
-   * Erzeugt den Kern anhand einer Menge von Bean-Feldern.
+   * Creates the bean core with a collection of empty fields.
+   * The values will be null initially.
    *
-   * @param pBeanType der Typ des Beans, zu welchem dieser Kern gehört
-   * @param pFields   die Felder des Beans
+   * @param pBeanType the type of the bean containing this data core
+   * @param pFields   the collection of bean fields
    */
   public BeanMapEncapsulated(Class<? extends IBean> pBeanType, Collection<IField<?>> pFields)
   {
@@ -35,10 +35,10 @@ class BeanMapEncapsulated<BEAN extends IBean<BEAN>> extends LinkedHashMap<IField
   }
 
   /**
-   * Erzeugt den Kern anhand initialer Felder und Werte als Map
+   * Creates the bean core with an initial mapping of fields and associated values.
    *
-   * @param pBeanType     der Typ des Beans, zu welchem dieser Kern gehört
-   * @param pFieldMapping die initiale Map von Feldern und Werten
+   * @param pBeanType     the type of the bean containing this data core
+   * @param pFieldMapping the initial data of this core as mapping of fields and values
    */
   public BeanMapEncapsulated(Class<? extends IBean> pBeanType, Map<? extends IField<?>, Object> pFieldMapping)
   {
@@ -114,11 +114,12 @@ class BeanMapEncapsulated<BEAN extends IBean<BEAN>> extends LinkedHashMap<IField
   }
 
   /**
-   * Erzeugt die statistischen Daten zu diesem Kern.
-   * Dabei werden die Annotations der Felder ausgewertet und wenn vorhanden initialisiert.
+   * Creates the statistic data for this encapsulated core.
+   * This data contains a set of entries with the value of a field for a certain timestamp.
+   * It may contain multiple sets for every field annotated with {@link Statistics}.
    *
-   * @param pFields   die Felder dieses Kerns
-   * @param pBeanType der Typ des Beans, zu welchem dieser Kern gehört
+   * @param pFields   a collection of all fields of this bean
+   * @param pBeanType the type of the bean
    */
   private void _createStatisticData(Collection<? extends IField<?>> pFields, Class<? extends IBean> pBeanType)
   {
@@ -131,11 +132,11 @@ class BeanMapEncapsulated<BEAN extends IBean<BEAN>> extends LinkedHashMap<IField
   }
 
   /**
-   * Sucht ein Feld in einer Menge von Bean-Feldern anhand des Namen
+   * Resolves a field by its name.
    *
-   * @param pFields    die Menge von Feldern
-   * @param pFieldName der Name des Feldes
-   * @return das gefundene Feld
+   * @param pFields    a collection of fields
+   * @param pFieldName the name of the field to search
+   * @return the resolved field instance
    */
   private IField<?> _findField(Collection<? extends IField> pFields, String pFieldName)
   {
@@ -145,11 +146,11 @@ class BeanMapEncapsulated<BEAN extends IBean<BEAN>> extends LinkedHashMap<IField
   }
 
   /**
-   * Setzt den Wert für ein Bean-Feld.
+   * Sets the value for a bean field.
    *
-   * @param pField         das Bean-Feld
-   * @param pValue         der Wert, welcher gesetzt werden soll
-   * @param pAllowNewField sind neue Felder erlaubt?
+   * @param pField         the bean field
+   * @param pValue         the value to set
+   * @param pAllowNewField <tt>true</tt>, if new fields are allowed
    */
   private void _setValueNonType(IField<?> pField, Object pValue, boolean pAllowNewField)
   {

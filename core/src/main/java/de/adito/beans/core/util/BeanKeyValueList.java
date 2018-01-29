@@ -1,17 +1,17 @@
 package de.adito.beans.core.util;
 
-import de.adito.beans.core.IBean;
-import de.adito.beans.core.IField;
+import de.adito.beans.core.*;
 import de.adito.beans.core.listener.IBeanChangeListener;
 
 import java.util.*;
 
 /**
- * Eine Liste von Key-Value-Paaren, welche eine einzelne Bean darstellt.
- * Dadurch kann die Bean in KeyValue-Form an beliebiger Stelle als Liste eingesetzt werden.
+ * A list of key-value pairs which represent a bean.
+ * This may be used to utilize the bean in a structure, where a list is required.
+ * The list will react to changes at the original bean.
  *
- * @param <BEAN> der konkrete Typ der Bean, welche hier abgebildet wird
- * @author s.danner, 08.06.2017
+ * @param <BEAN> the type of the bean wich is represented
+ * @author Simon Danner, 08.06.2017
  */
 public class BeanKeyValueList<BEAN extends IBean<BEAN>> extends ArrayList<BeanKeyValueList.KeyValue> implements IBeanChangeListener<BEAN>
 {
@@ -33,7 +33,8 @@ public class BeanKeyValueList<BEAN extends IBean<BEAN>> extends ArrayList<BeanKe
   }
 
   /**
-   * Kapselt einen Key (hier Feldname einer Bean) und den zugehörigen Wert (Datenwert des Bean-Feldes)
+   * Combines a bean field with the associated value of the bean.
+   * This object stands for a single element of this list.
    */
   public static class KeyValue
   {

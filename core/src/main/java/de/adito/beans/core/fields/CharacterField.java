@@ -7,9 +7,9 @@ import java.lang.annotation.Annotation;
 import java.util.Collection;
 
 /**
- * Beschreibt ein Char-Bean-Feld.
+ * A bean field that holds a character.
  *
- * @author s.danner, 07.09.2017
+ * @author Simon Danner, 07.09.2017
  */
 @TypeDefaultField(types = Character.class)
 public class CharacterField extends AbstractField<Character>

@@ -7,9 +7,9 @@ import java.lang.annotation.Annotation;
 import java.util.Collection;
 
 /**
- * Beschreibt ein Bean-Feld, welches eine Ganzzahl beinhaltet.
+ * A bean field that holds an Integer.
  *
- * @author s.danner, 27.01.2017
+ * @author Simon Danner, 27.01.2017
  */
 @TypeDefaultField(types = Integer.class)
 public class IntegerField extends AbstractField<Integer>

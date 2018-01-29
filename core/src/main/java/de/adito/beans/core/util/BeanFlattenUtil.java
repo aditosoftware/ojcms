@@ -1,18 +1,16 @@
 package de.adito.beans.core.util;
 
-import de.adito.beans.core.IBean;
-import de.adito.beans.core.IBeanContainer;
-import de.adito.beans.core.IField;
+import de.adito.beans.core.*;
 import de.adito.beans.core.util.exceptions.BeanFlattenException;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Hilfs-Klasse um eine flache Kopie einer Bean zu erzeugen.
- * Dabei werden jegliche Bean-Felder der Bean solange 'geflattet' bis nur noch normale Felder übrig sind.
+ * Utility class to create a flat copy of a bean.
+ * A flat bean has no bean or bean container field, it does not contain any reference field.
  *
- * @author s.danner, 02.02.2017
+ * @author Simon Danner, 02.02.2017
  */
 public final class BeanFlattenUtil
 {
@@ -21,12 +19,12 @@ public final class BeanFlattenUtil
   }
 
   /**
-   * Erzeugt eine flache Kopie einer Bean.
-   * Dabei werden jegliche Bean-Felder der Bean, solange 'geflattet' bis nur noch normale Felder übrig sind.
+   * Creates a flat copy of a bean as a map of fields and it's associated values.
+   * A flat bean has no bean or bean container field, it only consists of no reference fields.
    *
-   * @param pBean die Bean, welche 'geflattet' werden soll
-   * @param pDeep <tt>true</tt> wenn iterativ bis in die Tiefe 'geflattet' werden soll
-   * @return die flache Kopie der Bean
+   * @param pBean the bean to flatten
+   * @param pDeep <tt>true</tt> if this should be a deep copy (includes deep fields iteratively)
+   * @return a flat copy of the bean as a map of fields and it's associated values
    */
   public static Map<IField<?>, Object> createFlatCopy(IBean<?> pBean, boolean pDeep)
   {
@@ -41,8 +39,9 @@ public final class BeanFlattenUtil
   }
 
   /**
-   * Shifter, welcher pro Schritt die Felder einer Menge von Beans flach in eine Map schiebt.
-   * Pro Schritt werden die neuen Elemente zum 'Flatten' bestimmt.
+   * A shifter to flat the fields of a bean stepwise.
+   * One level of fields will be shifted per step.
+   * At the end of the process will be a map as data core for the flat bean copy.
    */
   private static class _Shifter
   {
@@ -52,12 +51,12 @@ public final class BeanFlattenUtil
     public _Shifter(IBean<?> pBean)
     {
       toShift = Collections.singletonList(pBean);
-      shift(); //Ein Shift muss erfolgen, um beim ersten Shift bereits wirklich etwas zu verschieben
+      shift(); //Do one step to really shift some fields with the first method call
     }
 
     /**
-     * Überträgt alle Felder der momentan enthaltenen Beans in die flache Map, wenn es sich um kein Bean- bzw. BeanContainer-Feld handelt.
-     * Die übrigen Bean-Felder werden als neue Menge zum shiften bestimmt.
+     * Shifts all non-reference {@link de.adito.beans.core.fields.BeanField} fields into the new flat bean.
+     * The remaining bean fields will be used in the next step.
      */
     public void shift()
     {
@@ -79,7 +78,7 @@ public final class BeanFlattenUtil
     }
 
     /**
-     * Liefert <tt>true</tt>, wenn der Shifter fertig ist.
+     * Determines if the shifting process is complete.
      */
     public boolean complete()
     {

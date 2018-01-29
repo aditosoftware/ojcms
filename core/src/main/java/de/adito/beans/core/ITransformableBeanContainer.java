@@ -5,13 +5,14 @@ import java.util.function.Consumer;
 import java.util.stream.*;
 
 /**
- * Definiert einen IBeanContainer, welcher durch eine Transformation anhand eines anderen IBeanContainers erzeugt wird.
+ * A graphical representation of a bean container.
+ * The graphical component uses the bean container interface and refers to the same data core as the original.
+ * For further information look at {@link ITransformable}.
  *
- * @param <BEAN>   der Typ der Beans, welche im Container enthalten sind
- * @param <LOGIC>  der logische Bean-Element Typ (IField, IBean oder IBeanContainer), welches transformiert werden soll
- * @param <VISUAL> der Typ der grafischen Komponente, zu welcher das logische Element transformiert werden soll
- * @author s.danner, 07.02.2017
- * @see ITransformable
+ * @param <BEAN>   the bean's types within the container.
+ * @param <LOGIC>  the logical level of the transformation (bean or container)
+ * @param <VISUAL> the type of the graphical components to which the logical components will be transformed to
+ * @author Simon Danner, 07.02.2017
  */
 public interface ITransformableBeanContainer<BEAN extends IBean<BEAN>, LOGIC, VISUAL>
     extends IBeanContainer<BEAN>, ITransformable<LOGIC, VISUAL, IBeanContainerEncapsulated<BEAN>, IBeanContainer<BEAN>>
@@ -20,17 +21,15 @@ public interface ITransformableBeanContainer<BEAN extends IBean<BEAN>, LOGIC, VI
   IVisualBeanContainerTransformator<LOGIC, VISUAL, BEAN> getTransformator();
 
   /**
-   * Liefert einen Stream aller sichtbaren Beans.
-   *
-   * @return ein Stream von Beans
+   * A stream of all visible beans of this container.
    */
   default Stream<BEAN> streamVisibleBeans()
   {
-    return stream(); //Default: alle sichtbar
+    return stream(); //Default: all are visible
   }
 
   /**
-   * Liefert die Anzahl aller sichtbaren Beans.
+   * The count of the visible beans of this container.
    */
   default int getVisibleBeanCount()
   {
@@ -38,12 +37,12 @@ public interface ITransformableBeanContainer<BEAN extends IBean<BEAN>, LOGIC, VI
   }
 
   /**
-   * Registriert einen Listener, welcher informiert wird, wenn sich die Sichtbarkeit der Beans innerhalb des Containers verändert.
-   * Standardmäßig werden die Listener beim Transformator gespeichert.
-   * Wenn kein solcher existiert oder dieser das nicht unterstützt, müssen diese bei den grafischen Komponenten registriert werden.
+   * Registers a listener that gets informed, if the visibility state of the beans within the container is changed.
+   * Per default, the container for the listeners is stored at the transformator.
+   * If there is no transformator (self-transforming component), the container has to be stored at the component itself to use this feature.
    *
-   * @param pListener die Aktion, welche ausgeführt werden soll, wenn sich etwas ändert
-   * @throws UnsupportedOperationException wenn kein Transformator existiert und die grafische Komponente dies nicht unterstützt.
+   * @param pListener the listener / action that will be performed when the visibility changes
+   * @throws UnsupportedOperationException if there's no container for the listeners available
    */
   default void listenWeakToVisibilityChange(Consumer<Collection<BEAN>> pListener) throws UnsupportedOperationException
   {
@@ -57,9 +56,9 @@ public interface ITransformableBeanContainer<BEAN extends IBean<BEAN>, LOGIC, VI
   }
 
   /**
-   * Gibt Bescheid, dass sich die Sichtbarkeitszustände der Beans im Container verändert haben.
+   * Fires a visibility change of the beans in the container.
    *
-   * @throws UnsupportedOperationException wenn kein Transformator existiert oder dieser kein Listener-Registrierung zulässt
+   * @throws UnsupportedOperationException if there's no container for the listeners available
    */
   default void fireVisibilityChange() throws UnsupportedOperationException
   {
@@ -74,9 +73,10 @@ public interface ITransformableBeanContainer<BEAN extends IBean<BEAN>, LOGIC, VI
   }
 
   /**
-   * Vergleicht die sichtbaren Beans vor und nach einer beliebigen Aktion und feuert eine Änderung, wenn sich die Sichtbarkeit verändert hat.
+   * Compares the visible beans before and after a certain action.
+   * If the there is a difference, the listeners will be informed.
    *
-   * @param pAction die beliebige Aktion
+   * @param pAction the action to perform while comparing the visibility states
    */
   default void compareVisibilityAfterActionAndFire(Runnable pAction)
   {
@@ -87,18 +87,17 @@ public interface ITransformableBeanContainer<BEAN extends IBean<BEAN>, LOGIC, VI
   }
 
   /**
-   * Vergleicht die derzeit sichtbaren Beans mit einer beliebigen Menge von Beans und bestimmt, ob diese gleich bzw. verschieden sind.
-   * Kann vor allem dazu verwendet werden, ob sich aufgrund einer bestimmten Aktion der Zustand verändert hat (vorher <-> nacher).
-   * Der Vergleich geschieht auf Basis von Referenzen.
+   * Determines if a certain collection of beans is the same or different from the current visible beans.
+   * The comparison is based on references rather than on a logical equals implementation.
    *
-   * @param pToCompare die Menge, mit welcher der aktuelle Zustand verglichen werden soll
-   * @return <tt>true</tt>, wenn es keine Unterschiede gibt
+   * @param pToCompare the collection of beans that will be compared to the current visible beans
+   * @return <tt>true</tt>, if there is no difference
    */
   default boolean compareVisibleBeans(Collection<BEAN> pToCompare)
   {
     return pToCompare.size() == getVisibleBeanCount() &&
         streamVisibleBeans()
             .noneMatch(pBean -> pToCompare.stream()
-                .anyMatch(pBeanToCompare -> pBean != pBeanToCompare)); //Referenzen!
+                .anyMatch(pBeanToCompare -> pBean != pBeanToCompare)); //references!
   }
 }

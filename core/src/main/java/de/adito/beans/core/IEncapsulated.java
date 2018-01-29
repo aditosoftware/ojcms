@@ -1,36 +1,36 @@
 package de.adito.beans.core;
 
 import de.adito.beans.core.listener.IBeanChangeListener;
-import de.adito.beans.core.references.IHierarchicalField;
-import de.adito.beans.core.references.IHierarchicalStructure;
-import de.adito.beans.core.references.IReferable;
+import de.adito.beans.core.references.*;
 
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.*;
 
 /**
- * Beschreibt den abgekapselten Daten-Kern innerhalb eines Bean-Elements.
- * Stellt die 'private'-Scope auf Java-Ebene dar.
+ * The encapsulated base core of a bean element.
+ * Defines the private scope on a Java level related to the bean data.
  *
- * Wichtig: Dieses Interface muss package-protected bleiben, um die Datenkapselung zu gewähren.
+ * Important: This interface must be package protected to enable data encapsulation.
  *
- * @param <CORE>     der Typ der Elemente, welche im Datenkern enthalten sind
- * @param <BEAN>     der generische Bean-Typ dieses Kerns
- * @param <LISTENER> der Typ der Bean-Listener, welche hier registriert werden können
- * @author s.danner, 25.01.2017
+ * @param <CORE>     the type of the elements in the core
+ * @param <BEAN>     the generic bean type that uses this data core
+ * @param <LISTENER> the type of the bean listeners that can be registered here
+ * @author Simon Danner, 25.01.2017
  */
 interface IEncapsulated<CORE, BEAN extends IBean<BEAN>, LISTENER extends IBeanChangeListener<BEAN>> extends Iterable<CORE>, ILinkable, IReferable
 {
   /**
-   * Liefert die grundlegenden Daten dieses Kerns (Ersatz für abstrakte Klasse).
+   * The additional information containers of this core. (Not the data itself)
+   * This is the replacement for a abstract class.
+   * All other methods have a default implementation that relate to this base data.
    *
-   * @return eine Objekt mit grundlegenden Daten für Listener etc.
+   * @return additional information containers
    */
   BeanBaseData<BEAN, LISTENER> getBeanBaseData();
 
   /**
-   * Liefert die Menge der registrierten Listener. (muss schwach sein)
+   * The container of all weak-registered listeners.
    */
   default List<LISTENER> getWeakListeners()
   {
@@ -39,7 +39,7 @@ interface IEncapsulated<CORE, BEAN extends IBean<BEAN>, LISTENER extends IBeanCh
   }
 
   /**
-   * Liefert den konkreten Container der verlinkten transformierbaren Komponenten.
+   * The container of all weak-registered linked transformable components to this core.
    */
   default Collection<ITransformable> getWeakLinkedContainer()
   {
@@ -55,9 +55,9 @@ interface IEncapsulated<CORE, BEAN extends IBean<BEAN>, LISTENER extends IBeanCh
   }
 
   /**
-   * Fügt dem Kern einen neuen Listener hinzu.
+   * Registers a weak listener.
    *
-   * @param pListener der neue Listener
+   * @param pListener the listener
    */
   default void addListener(LISTENER pListener)
   {
@@ -69,9 +69,9 @@ interface IEncapsulated<CORE, BEAN extends IBean<BEAN>, LISTENER extends IBeanCh
   }
 
   /**
-   * Entfernt einen Listener.
+   * Removes a listener.
    *
-   * @param pListener der zu entfernende Listener
+   * @param pListener the listener to remove
    */
   default void removeListener(LISTENER pListener)
   {
@@ -83,9 +83,9 @@ interface IEncapsulated<CORE, BEAN extends IBean<BEAN>, LISTENER extends IBeanCh
   }
 
   /**
-   * Löst eine Listener-Aktion bei allen registrierten aus.
+   * Fires a event to all registered listeners.
    *
-   * @param pAction die Aktion, welche ausgeführt werden soll
+   * @param pAction the action to perform
    */
   default void fire(Consumer<LISTENER> pAction)
   {
@@ -111,10 +111,9 @@ interface IEncapsulated<CORE, BEAN extends IBean<BEAN>, LISTENER extends IBeanCh
   }
 
   /**
-   * Liefert die hierarchische Struktur dieses Kerns.
-   * Diese beinhaltet alle Referenzen auf die Hülle dieses Kerns.
+   * The hierarchical structure of references to this bean.
    *
-   * @return die Schnittstelle zum Abfragen von Informationen der Struktur
+   * @return a interface to retrieve information about the hierarchical reference structure
    */
   default IHierarchicalStructure getHierarchicalStructure()
   {
@@ -122,7 +121,7 @@ interface IEncapsulated<CORE, BEAN extends IBean<BEAN>, LISTENER extends IBeanCh
   }
 
   /**
-   * Liefert einen Stream der Elemente, welche in diesem Kern enthalten sind
+   * A stream of all core elements of this data core.
    */
   default Stream<CORE> stream()
   {
@@ -130,7 +129,7 @@ interface IEncapsulated<CORE, BEAN extends IBean<BEAN>, LISTENER extends IBeanCh
   }
 
   /**
-   * Liefert einen parallelen Stream der Elemente, welche in diesem Kern enthalten sind
+   * A parallel stream of all core elements of this data core.
    */
   default Stream<CORE> parallelStream()
   {
@@ -138,7 +137,7 @@ interface IEncapsulated<CORE, BEAN extends IBean<BEAN>, LISTENER extends IBeanCh
   }
 
   /**
-   * Default-Implementierung für die hierarchische Struktur.
+   * Default implementation of the hierarchical reference structure.
    */
   class HierarchicalStructureImpl<C, B extends IBean<B>, L extends IBeanChangeListener<B>> implements IHierarchicalStructure
   {

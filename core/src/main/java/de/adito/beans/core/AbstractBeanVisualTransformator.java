@@ -1,12 +1,12 @@
 package de.adito.beans.core;
 
 /**
- * Abstrakte Grundlage für einen Visual-Bean-Transformator.
+ * Abstract base for a visual bean transformator. Defines the generic types.
  *
- * @param <LOGIC>  der logische Bean-Element-Typ (IField, IBean oder IBeanContainer), welcher transformiert werden soll
- * @param <VISUAL> der Typ der grafischen Komponente, zu welcher das logische Element transformiert werden soll
- * @param <BEAN>   der Typ der Bean, welcher Basis für die Transformation ist
- * @author s.danner, 07.02.2017
+ * @param <LOGIC>  the logic bean type to transform
+ * @param <VISUAL> the visual counter type to which the bean component will be transformed
+ * @param <BEAN>   the bean type that is the basis for this transformation
+ * @author Simon Danner, 07.02.2017
  */
 public abstract class AbstractBeanVisualTransformator<LOGIC, VISUAL, BEAN extends IBean<BEAN>>
     extends AbstractVisualTransformator<LOGIC, VISUAL, IBeanEncapsulated<BEAN>, BEAN> implements IVisualBeanTransformator<LOGIC, VISUAL, BEAN>

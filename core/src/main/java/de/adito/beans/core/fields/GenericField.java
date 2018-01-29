@@ -1,16 +1,16 @@
 package de.adito.beans.core.fields;
 
-import de.adito.beans.core.IBean;
-import de.adito.beans.core.IBeanContainer;
+import de.adito.beans.core.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 
 /**
- * Ein Bean-Feld für einen beliebigen generischen Typen.
+ * A bean field that holds any generic type value.
  *
- * @author s.danner, 07.09.2017
+ * @param <TYPE> the generic data type this field is referring to
+ * @author Simon Danner, 07.09.2017
  */
 public class GenericField<TYPE> extends AbstractField<TYPE>
 {

@@ -3,20 +3,20 @@ package de.adito.beans.core;
 import java.util.*;
 
 /**
- * Grundlegende Implementierung eines Bean-Containers. Beinhaltet den Daten-Kern.
- * Ein Bean-Container ist dann gleich einem anderen, wenn alle Beans darin gleich sind.
+ * A default implementation of the bean container interface.
+ * It stores the encapsulated data core.
  *
- * @param <BEAN> der Typ der Beans, welche in dem Container enthalten sind
- * @author s.danner, 23.08.2016
+ * @param <BEAN> the type of the beans in the container
+ * @author Simon Danner, 23.08.2016
  */
 public class BeanContainer<BEAN extends IBean<BEAN>> implements IBeanContainer<BEAN>
 {
   private final IBeanContainerEncapsulated<BEAN> encapsulated;
 
   /**
-   * Erzeugt einen neuen Bean-Container.
+   * Creates a new bean container.
    *
-   * @param pBeanType der Typ der Beans, welche im Container enthalten sind
+   * @param pBeanType the type of the beans in the container
    */
   public BeanContainer(Class<BEAN> pBeanType)
   {
@@ -24,10 +24,10 @@ public class BeanContainer<BEAN extends IBean<BEAN>> implements IBeanContainer<B
   }
 
   /**
-   * Erzeugt einen neuen Bean-Container.
+   * Creates a new bean container with a collection of initial beans.
    *
-   * @param pBeanType der Typ der Beans, welche im Container enthalten sind
-   * @param pBeans    die initiale Menge von Beans des Containers
+   * @param pBeanType the type of the beans in the container
+   * @param pBeans    the initial collection of beans in this container
    */
   public BeanContainer(Class<BEAN> pBeanType, Collection<BEAN> pBeans)
   {
@@ -44,6 +44,6 @@ public class BeanContainer<BEAN extends IBean<BEAN>> implements IBeanContainer<B
   @Override
   public String toString()
   {
-    return "BeanContainer{beanType: " + getBeanType().getSimpleName() + ", count: " + size() + "}";
+    return getClass().getSimpleName() + "{beanType: " + getBeanType().getSimpleName() + ", count: " + size() + "}";
   }
 }

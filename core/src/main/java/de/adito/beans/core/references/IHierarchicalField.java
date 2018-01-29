@@ -6,18 +6,18 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 
 /**
- * Beschreibt ein Bean-Feld, welches eine hierarchische Referenz zu anderen Beans herstellt.
+ * Defines a special bean field that holds references to other bean elements (bean or container) within a hierarchical structure.
  *
- * @param <TYPE> der Datentyp des Feldes
- * @author s.danner, 29.08.2017
+ * @param <TYPE> the inner data type of this field
+ * @author Simon Danner, 29.08.2017
  */
 public interface IHierarchicalField<TYPE> extends IField<TYPE>
 {
   /**
-   * Liefert anhand des Wertes des Feldes alle Elemente, welche dadurch referenziert werden.
+   * Takes the value of this field and returns all references, which are created by this bean field.
    *
-   * @param pValue der Datenwert dieses Feldes
-   * @return eine Menge von IReferables
+   * @param pValue the value of the field from the consisting bean
+   * @return a collection of referables
    */
   Collection<IReferable> getReferables(@Nullable TYPE pValue);
 }

@@ -10,10 +10,10 @@ import java.lang.annotation.Annotation;
 import java.util.*;
 
 /**
- * Beschreibt ein Feld einer Bean, welche eine Bean beinhaltet.
+ * A bean field that holds a bean.
  *
- * @param <BEAN> der Typ der Bean, welche das Datum zu diesem Feld ist
- * @author s.danner, 09.02.2017
+ * @param <BEAN> the generic type of the bean that this field is referring to
+ * @author Simon Danner, 09.02.2017
  */
 @TypeDefaultField(types = IBean.class)
 public class BeanField<BEAN extends IBean<BEAN>> extends AbstractField<BEAN> implements IHierarchicalField<BEAN>

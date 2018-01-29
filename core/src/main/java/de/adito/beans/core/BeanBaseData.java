@@ -7,12 +7,12 @@ import de.adito.beans.core.util.WeakArrayList;
 import java.util.*;
 
 /**
- * Behälter für grundlegende Daten eines Bean-Kerns (Bean oder Container)
- * Dient hier als Ersatz für eine abstrakte Basis-Klasse.
+ * A container for base data of a encapsulated bean core.
+ * It kind of replaces the necessity of an abstract class.
  *
- * @param <BEAN>     der generische Typ der einzelnen Bean oder der Beans in einem Container
- * @param <LISTENER> der Typ der Bean-Listeners, welche hier verwaltet werden
- * @author s.danner, 04.09.2017
+ * @param <BEAN>     the type of the beans in the core
+ * @param <LISTENER> the type of the bean listeners that will be hold here
+ * @author Simon Danner, 04.09.2017
  */
 class BeanBaseData<BEAN extends IBean<BEAN>, LISTENER extends IBeanChangeListener<BEAN>>
 {
@@ -21,7 +21,7 @@ class BeanBaseData<BEAN extends IBean<BEAN>, LISTENER extends IBeanChangeListene
   private final Map<IBean<?>, Set<IHierarchicalField<?>>> references = new WeakHashMap<>();
 
   /**
-   * Liefert den Container der registrierten Listener.
+   * A container with weak-registered listeners.
    */
   public List<LISTENER> getWeakListenerContainer()
   {
@@ -29,7 +29,7 @@ class BeanBaseData<BEAN extends IBean<BEAN>, LISTENER extends IBeanChangeListene
   }
 
   /**
-   * Liefert den Container der Links (transformierte Komponenten).
+   * A container to store links between transformed bean elements. (weak)
    */
   public Set<ITransformable> getWeakLinkContainer()
   {
@@ -37,7 +37,8 @@ class BeanBaseData<BEAN extends IBean<BEAN>, LISTENER extends IBeanChangeListene
   }
 
   /**
-   * Liefert die Map der Referenzen des Kerns.
+   * A container that registers weak references to this bean core.
+   * The reference is established via the bean (the wrapper of the core).
    */
   public Map<IBean<?>, Set<IHierarchicalField<?>>> getWeakReferences()
   {

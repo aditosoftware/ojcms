@@ -3,14 +3,14 @@ package de.adito.beans.core;
 import java.util.*;
 
 /**
- * Abstrakte Grundlage für einen Visual-Transformator.
- * Dieser übernimmt das Speichern der Original-Quelle.
+ * Abstract base for a visual transformator.
+ * Stores the reference to the original bean source and provides a queue to store operations to perform after the transformation.
  *
- * @param <LOGIC>        der logische Bean-Element Typ (IField, IBean oder IBeanContainer), welcher transformiert werden soll
- * @param <VISUAL>       der Typ der grafischen Komponente, zu welcher das logische Element transformiert werden soll
- * @param <ENCAPSULATED> der Typ des Daten-Kerns der zu transformierenden Quelle
- * @param <SOURCE>       der Typ der Quelle, die transformiert werden soll
- * @author s.danner, 07.02.2017
+ * @param <LOGIC>        the logic bean type to transform
+ * @param <VISUAL>       the visual counter type to which the logic part will be transformed
+ * @param <ENCAPSULATED> the type of the encapsulated core of the source
+ * @param <SOURCE>       the type of the source to transform
+ * @author Simon Danner, 07.02.2017
  */
 abstract class AbstractVisualTransformator<LOGIC, VISUAL, ENCAPSULATED extends IEncapsulated, SOURCE extends IEncapsulatedHolder<ENCAPSULATED>>
     implements IVisualTransformator<LOGIC, VISUAL, ENCAPSULATED, SOURCE>

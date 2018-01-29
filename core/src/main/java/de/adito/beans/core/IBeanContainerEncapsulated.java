@@ -8,29 +8,29 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * Definiert den Daten-Kern für einen Bean-Container.
- * Dieser wird als Liste von Beans abgebildet.
+ * Defines the data core for a bean container.
+ * It is based on the List interface to additionally provide the ability to access beans by their indices.
  *
- * @param <BEAN> der Typ der Beans, welche dieser Daten-Kern beinhaltet
- * @author s.danner, 25.01.2017
+ * @param <BEAN> the type of the beans in this container
+ * @author Simon Danner, 25.01.2017
  */
 interface IBeanContainerEncapsulated<BEAN extends IBean<BEAN>> extends IEncapsulated<BEAN, BEAN, IBeanContainerChangeListener<BEAN>>, List<BEAN>
 {
   /**
-   * Liefert den Typ der Beans, welche dieser Daten-Kern beinhaltet
+   * The type of the beans in this container.
    */
   Class<BEAN> getBeanType();
 
   /**
-   * Legt eine maximale an Anzahl für diesen Container-Daten-Kern fest.
+   * Defines a limit (=amount of beans) for this container data core.
    *
-   * @param pMaxCount die maximale Anzahl an Beans, welche in diesem Kern enthalten sein dürfen. (-1 für kein Limit)
-   * @param pEvicting <tt>true</tt>, wenn die ältesten Beans entfernt werden sollen, wenn die Kapazität erreicht ist
+   * @param pMaxCount the maximum amount of beans in this core
+   * @param pEvicting <tt>true</tt>, if the eldest beans should be removed, when the limit is reached
    */
   void setLimit(int pMaxCount, boolean pEvicting);
 
   /**
-   * Liefert die statistischen Daten dieses Daten-Kerns oder null, wenn nicht vorhanden
+   * The statistic data of this core. (null if not present)
    */
   @Nullable
   IStatisticData<Integer> getStatisticData();

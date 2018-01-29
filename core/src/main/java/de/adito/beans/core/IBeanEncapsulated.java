@@ -8,92 +8,96 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 /**
- * Definiert den Daten-Kern für einen Bean.
- * Dieser wird als Map von IField nach Wert abgebildet.
+ * Defines the data core for a bean.
+ * It contains a collection of key-value pairs, which represent the fields and their associated values.
  *
- * @param <BEAN> der generische Typ der Bean, welche zu diesem Datenkern gehört
- * @author s.danner, 20.01.2017
+ * @param <BEAN> the generic bean type that uses this data core
+ * @author Simon Danner, 20.01.2017
  */
 interface IBeanEncapsulated<BEAN extends IBean<BEAN>> extends IEncapsulated<Map.Entry<IField<?>, Object>, BEAN, IBeanChangeListener<BEAN>>
 {
   /**
-   * Liefert den Wert zu einem Feld.
+   * The value for a bean field.
    *
-   * @param pField das Bean-Feld, zu dem der Wer geliefert werden sollte
-   * @param <TYPE> der Daten-Typ des Feldes
-   * @return der Wert zum Feld
+   * @param pField the bean field
+   * @param <TYPE> the data type of the field
+   * @return the value for the field
    */
   <TYPE> TYPE getValue(IField<TYPE> pField);
 
   /**
-   * Setzt den Wert zu einem Bean-Feld neu.
+   * Sets a value for a bean field.
    *
-   * @param pField des betreffende Bean-Feld
-   * @param pValue der neue Wert
-   * @param <TYPE> der Daten-Typ des Feldes
+   * @param pField the bean field
+   * @param pValue the new value
+   * @param <TYPE> the data type of the field
    */
   <TYPE> void setValue(IField<TYPE> pField, TYPE pValue);
 
   /**
-   * Entfernt ein Feld vom Daten-Kern
+   * Adds a bean field to the data core.
    *
-   * @param pField das Feld, welches entfernt werden soll
-   * @param pIndex der Index an dem das Feld hinzugefügt werden soll
-   * @param <TYPE> der Daten-Typ des Feldes
+   * @param pField the bean field to add
+   * @param pIndex the index at which the field should be added
+   * @param <TYPE> the data type of the field
    */
   <TYPE> void addField(IField<TYPE> pField, int pIndex);
 
   /**
-   * Entfernt ein Feld vom Daten-Kern
+   * Removes a bean field from the data core.
    *
-   * @param pField das Feld, welches entfernt werden soll
-   * @param <TYPE> der Daten-Typ des Feldes
+   * @param pField the bean field to remove
+   * @param <TYPE> the data type of the field
    */
   <TYPE> void removeField(IField<TYPE> pField);
 
   /**
-   * Liefert den Index eines Feldes.
+   * The index of a certain bean field.
+   * The index depends in the definition order of the fields.
    *
-   * @param pField das Bean-Feld
-   * @param <TYPE> der Datentyp des Feldes
-   * @return der Index des Feldes
+   * @param pField the bean field field
+   * @param <TYPE> the data type of the field
+   * @return the index of the field
    */
   <TYPE> int getFieldIndex(IField<TYPE> pField);
 
   /**
-   * Liefert die Anzahl der Felder.
+   * The amount of bean fields of this data core.
    */
   int getFieldCount();
 
   /**
-   * Liefert die statistischen Daten dieses Kerns als Map
+   * A map of the statistic data of this core.
+   * The data is grouped by the bean fields.
    *
-   * @return eine Map mit einem IField als Key und den statistischen Daten zum Feld als Value
+   * @return a map that provides statistic data for a bean field
    */
   Map<IField<?>, IStatisticData> getStatisticData();
 
   /**
-   * Liefert einen Stream der Felder dieses Kerns
+   * A stream of bean fields of this data core.
    */
   Stream<IField<?>> streamFields();
 
   /**
-   * Gibt an, ob in diesem Kern ein bestimmtes Bean-Feld enthalten ist.
+   * Determines if this core contains a certain bean field.
    *
-   * @param pField das gesuchte Bean-Feld
-   * @param <TYPE> der Datentyp des Feldes
-   * @return <tt>true</tt>, wenn das Feld vorhanden ist
+   * @param pField the bean field
+   * @param <TYPE> the data type of the field
+   * @return <tt>true</tt>, if the field is present
    */
   default <TYPE> boolean containsField(IField<TYPE> pField)
   {
     return streamFields()
-        .anyMatch(pExistingBean -> pExistingBean == pField); //Referenzen vergleichen wegen static Definition von Feldern
+        .anyMatch(pExistingBean -> pExistingBean == pField); //Compare references because of the static definition of bean fields
   }
 
   /**
-   * Liefert die hierarchische Referenzen-Struktur dieses Kerns / dieser Bean.
+   * A hierarchical reference structure for this core / bean.
+   * The structure contains direct and deep parent references to this bean.
    *
-   * @return eine Schnittstelle zum Abfragen der Struktur
+   * @return a hierarchical reference structure
+   * @see IHierarchicalBeanStructure
    */
   @Override
   default IHierarchicalBeanStructure getHierarchicalStructure()
@@ -102,9 +106,9 @@ interface IBeanEncapsulated<BEAN extends IBean<BEAN>> extends IEncapsulated<Map.
   }
 
   /**
-   * Struktur mit mehr Funktionalität mit Bean-Referenzen (siehe Interface)
-   *
-   * @see IHierarchicalBeanStructure
+   * Default implementation of the {@link IHierarchicalBeanStructure}.
+   * Just defines a class extending the base implementation and implementing the interface.
+   * The extra functionality is provided via default methods.
    */
   class HierarchicalBeanStructureImpl<C, B extends IBean<B>, L extends IBeanChangeListener<B>> extends HierarchicalStructureImpl<C, B, L>
       implements IHierarchicalBeanStructure

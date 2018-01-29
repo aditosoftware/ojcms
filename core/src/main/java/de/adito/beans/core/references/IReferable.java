@@ -5,26 +5,27 @@ import de.adito.beans.core.IBean;
 import java.util.*;
 
 /**
- * Beschreibt eine Schnittstelle zum Hinzufügen, Entfernen und Abfragen von Referenzen auf ein Bean-Element.
+ * Describes an interface to add, remove and get references of a bean element.
+ * A 'referable' could be considered as the target of a reference within a bean structure.
  *
- * @author s.danner, 29.08.2017
+ * @author Simon Danner, 29.08.2017
  */
 public interface IReferable
 {
   /**
-   * Liefert eine Map, welche die Referenzen auf die Bean oder den Bean-Container dieses Datenkerns beinhaltet.
-   * Der Key steht dabei für die Bean, welche die Referenz hält.
-   * Der Value sind eine Menge aus Feldern, welche für solch eine Referenz (Hierarchie) verantwortlich sind
+   * Returns a weak map which contains all references to this bean element.
+   * The key stands for the bean, which is the source of the reference.
+   * The value is a collection of bean fields that hold the direct references.
    *
-   * @return ein Map, mit einer Bean als Key und einer Menge von Hierarchie-Feldern als Value
+   * @return a map that describes all references to this bean element
    */
   Map<IBean<?>, Set<IHierarchicalField<?>>> getWeakReferenceMap();
 
   /**
-   * Fügt eine Referenz hinzu.
+   * Adds a reference to this bean element.
    *
-   * @param pBean  die Bean, welche die Referenz hält
-   * @param pField das Feld, welches die Referenz hält
+   * @param pBean  the source bean of the reference
+   * @param pField the bean field that holds the reference
    */
   default void addWeakReference(IBean<?> pBean, IHierarchicalField<?> pField)
   {
@@ -33,10 +34,10 @@ public interface IReferable
   }
 
   /**
-   * Entfernt eine Referenz.
+   * Removes a reference from this bean element.
    *
-   * @param pBean  die Bean, welche die Referenz hält
-   * @param pField das Feld, welches die Referenz hält
+   * @param pBean  the source bean of the reference
+   * @param pField the bean field that held the reference
    */
   default void removeReference(IBean<?> pBean, IHierarchicalField<?> pField)
   {
@@ -51,7 +52,7 @@ public interface IReferable
   }
 
   /**
-   * Standard-Implementierung einer Hierarchie-Node.
+   * A default implementation for a hierarchical node.
    */
   class HierarchicalNodeImpl implements IHierarchicalBeanStructure.IHierarchicalNode
   {

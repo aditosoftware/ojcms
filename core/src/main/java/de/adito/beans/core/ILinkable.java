@@ -1,26 +1,28 @@
 package de.adito.beans.core;
 
 /**
- * Beschreibt eine Schnittstelle, wo transformierbare Komponenten als Link registriert werden können.
+ * Describes any component that is able to register links to itself.
+ * Links are based on the transformable bean components.
+ * When a bean is transformed to any other component, a link will be registered by the bean.
  *
- * @author s.danner, 18.07.2017
+ * @author Simon Danner, 18.07.2017
  */
 interface ILinkable
 {
   /**
-   * Gibt an, ob eine transformierbare Komponente mit dieser Komponente verlinkt ist.
+   * Determines, if a certain transformable component is linked to this component.
    *
-   * @param pComponent die Komponente, zu welcher überprüft werden soll, ob sie verlinkt ist
-   * @param <LINK>     der generische Typ der transformierbaren Komponente
-   * @return <tt>true</tt>, wenn eine Verlinkung vorhanden ist
+   * @param pComponent the transformable component
+   * @param <LINK>     the generic type of the transformable component
+   * @return <tt>true</tt>, if a link is present
    */
   <LINK extends ITransformable> boolean isLinked(LINK pComponent);
 
   /**
-   * Registriert einen schwachen Link zwischen dieser Komponente und einer transformierbaren anderen Komponente.
+   * Registers a weak-link of a transformable component to this component.
    *
-   * @param pComponent die Komponente, welcher zur Verlinkung registriert werden soll
-   * @param <LINK>der  generische Typ der transformierbaren Komponente
+   * @param pComponent the transformable component to link
+   * @param <LINK>     the generic type of the transformable component
    */
   <LINK extends ITransformable> void registerWeakLink(LINK pComponent);
 }

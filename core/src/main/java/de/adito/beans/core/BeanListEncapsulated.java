@@ -2,18 +2,17 @@ package de.adito.beans.core;
 
 import de.adito.beans.core.annotations.Statistics;
 import de.adito.beans.core.listener.IBeanContainerChangeListener;
-import de.adito.beans.core.statistics.IStatisticData;
-import de.adito.beans.core.statistics.StatisticData;
+import de.adito.beans.core.statistics.*;
 import de.adito.beans.core.util.BeanReflector;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.*;
 
 import java.util.*;
 
 /**
- * Implementierung des Bean-Container-Daten-Kerns.
+ * Implementation of the bean container encapsulated data core.
  *
- * @param <BEAN> der Typ der Beans, welche in diesem Kern enthalten sind
- * @author s.danner, 25.01.2017
+ * @param <BEAN> the type of beans contained in this data.
+ * @author Simon Danner, 25.01.2017
  */
 class BeanListEncapsulated<BEAN extends IBean<BEAN>> extends ArrayList<BEAN> implements IBeanContainerEncapsulated<BEAN>
 {
@@ -23,10 +22,10 @@ class BeanListEncapsulated<BEAN extends IBean<BEAN>> extends ArrayList<BEAN> imp
   private final BeanBaseData<BEAN, IBeanContainerChangeListener<BEAN>> baseData = new BeanBaseData<>();
 
   /**
-   * Erzeugt den Daten-Kern anhand einer Menge von Beans.
+   * Creates the encapsulated core based on a collection of existing beans.
    *
-   * @param pBeanType   der Typ der Beans
-   * @param pCollection die Menge von Beans
+   * @param pBeanType   the bean's type
+   * @param pCollection the collection of beans
    */
   public BeanListEncapsulated(Class<BEAN> pBeanType, Collection<BEAN> pCollection)
   {
@@ -98,12 +97,15 @@ class BeanListEncapsulated<BEAN extends IBean<BEAN>> extends ArrayList<BEAN> imp
   }
 
   /**
-   * Erzeugt die statistischen Daten für diesen Kern. (Anzahl von Beans im Container in einem Zeitintervall)
+   * Creates the statistic data for this encapsulated core.
+   * This data is an amount of timestamps with an associated number,
+   * which stands for the amount of beans in this container at the timestamp.
    *
-   * @param pBeanType    der Typ der Beans, welche in diesem Kern enthalten sind
-   * @param pInitialSize der erste Eintrag in den statistischen Daten
-   * @return die Statistik für den Container/Kern
+   * @param pBeanType    the type of beans in this data
+   * @param pInitialSize the initial entry / the initial size of this container
+   * @return the statistic data for this encapsulated core
    */
+  @Nullable
   private IStatisticData<Integer> _createStatisticData(Class<BEAN> pBeanType, int pInitialSize)
   {
     Statistics statistics = BeanReflector.getContainerStatisticAnnotation(pBeanType);
@@ -111,8 +113,8 @@ class BeanListEncapsulated<BEAN extends IBean<BEAN>> extends ArrayList<BEAN> imp
   }
 
   /**
-   * Prüft und passt das Limit der Bean-Liste an (falls ein Limit gesetzt ist).
-   * (Für Performance-Optimierung könnte natürlich vorher schon geprüft werden bei Nicht-Evicting)
+   * Ensures the possibly set limit of this container and removes some beans if they should be evicted.
+   * (For performance optimization the limit may be checked before the super-call, when using a non-evicting container)
    */
   private void _ensureLimit()
   {
@@ -126,8 +128,8 @@ class BeanListEncapsulated<BEAN extends IBean<BEAN>> extends ArrayList<BEAN> imp
   }
 
   /**
-   * Informationen zum Limit dieses Kern.
-   * Beinhaltet das Limit selbst und eine Information, ob alte Beans entfernt werden sollen, wenn das Limit erreicht ist
+   * Information about the limit of this container core.
+   * Contains the limit itself and the information if old entries should be evicted.
    */
   private class _LimitInfo
   {

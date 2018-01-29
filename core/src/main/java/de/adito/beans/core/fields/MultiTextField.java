@@ -6,9 +6,9 @@ import java.lang.annotation.Annotation;
 import java.util.Collection;
 
 /**
- * Beschreibt ein spezielles Bean-Feld für einen mehrzeiligen Text.
+ * A bean field that holds a multiline text.
  *
- * @author s.danner, 17.01.2017
+ * @author Simon Danner, 17.01.2017
  */
 public class MultiTextField extends TextField
 {

@@ -10,9 +10,10 @@ import java.time.format.*;
 import java.util.*;
 
 /**
- * Beschreibt ein Datums-Bean-Feld.
+ * A bean field that holds a date (as {@link Instant}).
+ * Provides converters for {@link Date} and {@link Long}.
  *
- * @author s.danner, 23.08.2016
+ * @author Simon Danner, 23.08.2016
  */
 @TypeDefaultField(types = {Instant.class, Date.class})
 public class DateField extends AbstractField<Instant>

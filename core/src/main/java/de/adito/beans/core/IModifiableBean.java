@@ -5,21 +5,23 @@ import java.util.*;
 import java.util.function.Predicate;
 
 /**
- * Definiert eine modifizierbare Bean, welche anhand von Feldern erweitert und reduziert werden kann.
+ * A modifiable bean with dynamical fields.
+ * Allows the extension and removal of bean fields.
  *
- * @param <BEAN> der generische Typ der speziellen Bean, welche mit diesem Interface ausgestattet ist (kann nur eine Hülle sein, daher IBean als Basis)
- * @author s.danner, 01.02.2017
+ * @param <BEAN> the generic type of the concrete bean that implements this interface
+ * @author Simon Danner, 01.02.2017
  */
 public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
 {
   /**
-   * Erweitert die Bean um ein Feld.
+   * Extends this bean by one field.
+   * A new field instance will be created.
    *
-   * @param pFieldType   der Typ des neuen Feldes
-   * @param pName        der Name des neuen Feldes
-   * @param pAnnotations die Annotationen des neuen Feldes
-   * @param <TYPE>       der Daten-Typ des neuen Feldes
-   * @return das neu erstelle Feld
+   * @param pFieldType   the new field's data type
+   * @param pName        the new field's name
+   * @param pAnnotations the new field's annotations
+   * @param <TYPE>       the generic data type of the new field
+   * @return the created field instance
    */
   default <TYPE, FIELD extends IField<TYPE>> FIELD addField(Class<FIELD> pFieldType, String pName, Collection<Annotation> pAnnotations)
   {
@@ -33,10 +35,10 @@ public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
   }
 
   /**
-   * Erweitert die Bean um ein bereits existentes Feld.
+   * Extends this bean by a already existing field instance.
    *
-   * @param pField das Feld, welches hinzugefügt werden soll
-   * @param <TYPE> der Datentyp des Feldes
+   * @param pField the field to add
+   * @param <TYPE> the field's data type
    */
   default <TYPE> void addField(IField<TYPE> pField)
   {
@@ -44,11 +46,11 @@ public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
   }
 
   /**
-   * Erweitert die Bean um ein bereits existentes Feld.
+   * Extends this bean by a already existing field instance at a certain index.
    *
-   * @param pField das Feld, welches hinzugefügt werden soll
-   * @param pIndex der Index an dem das Feld hinzugefügt werden soll
-   * @param <TYPE> der Datentyp des Feldes
+   * @param pField the field to add
+   * @param pIndex the index
+   * @param <TYPE> the field's data type
    */
   default <TYPE> void addField(IField<TYPE> pField, int pIndex)
   {
@@ -61,10 +63,10 @@ public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
   }
 
   /**
-   * Reduziert die Bean um ein Feld.
+   * Removes a field from this bean.
    *
-   * @param pField das zu entfernende Feld
-   * @param <TYPE> der Datentyp des Feldes
+   * @param pField the field to remove
+   * @param <TYPE> the field's data type
    */
   default <TYPE> void removeField(IField<TYPE> pField)
   {
@@ -77,10 +79,10 @@ public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
   }
 
   /**
-   * Entfernt ein Feld, wenn es dem übergebenem Prädikat entspricht
+   * Removes all fields that apply to a given predicate.
    *
-   * @param pFieldPredicate das Prädikat, welches bestimmt, welche Felder entfernt werden sollen
-   * @param <TYPE>          der innere Datentyp eines Feldes
+   * @param pFieldPredicate the field predicate that determines which fields should be removed
+   * @param <TYPE>          the field's data type
    */
   default <TYPE> void removeFieldIf(Predicate<IField<TYPE>> pFieldPredicate)
   {

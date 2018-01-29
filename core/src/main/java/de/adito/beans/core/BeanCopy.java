@@ -3,11 +3,11 @@ package de.adito.beans.core;
 import java.util.Map;
 
 /**
- * Eine kopierte Bean.
- * Die Daten stammen von einer bereits existenten Bean, welche z.B. weniger Felder enthält.
- * Auch der Active-Supplier für Felder muss hier bereitgestellt werden, da der Typ der Bean nun verändert wurde.
+ * A possibly adapted bean copy of an original bean.
+ * It has its own encapsulated data core, which may consist of a reduced set of original fields.
+ * The data in the core is copied. Of course, the references to the fields stay the same.
  *
- * @author s.danner, 18.08.2017
+ * @author Simon Danner, 18.08.2017
  */
 public class BeanCopy implements IBean
 {
@@ -15,10 +15,10 @@ public class BeanCopy implements IBean
   private final IBeanFieldActivePredicate originalActiveSupplier;
 
   /**
-   * Erzeugt die Kopie einer Bean.
+   * Creates a copy of a bean.
    *
-   * @param pData                   die Daten, welche die Bean enthalten soll (evtl. reduziert im Vergleich zum Original)
-   * @param pOriginalActiveSupplier der Active-Supplier für Felder der Original-Bean
+   * @param pData                   the possibly reduced data of the bean
+   * @param pOriginalActiveSupplier the original active supplier for optional bean fields
    */
   public BeanCopy(Map<IField<?>, Object> pData, IBeanFieldActivePredicate pOriginalActiveSupplier)
   {

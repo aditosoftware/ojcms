@@ -3,53 +3,54 @@ package de.adito.beans.core;
 import java.util.Queue;
 
 /**
- * Beschreibt einen Transformator, welcher eine Bean-Transformation (siehe ITransformable) durchführt.
- * Der Transformator dient dabei als Container für den Daten-Kern des Bean-Elementes.
+ * Describes the tool to perform a transformation of a {@link ITransformable} component.
+ * It mainly creates the visual components for the logical counterparts and links them.
+ * It also holds several data, containers etc. (replacement for an abstract class).
  *
- * @param <LOGIC>        der logische Bean-Element Typ (IField, IBean oder IBeanContainer), welches transformiert werden soll
- * @param <VISUAL>       der Typ der grafischen Komponente, zu welcher das logische Element transformiert werden soll
- * @param <ENCAPSULATED> der Typ des Daten-Kerns der zu transformierenden Quelle
- * @param <SOURCE>       der Typ der Quelle, die transformiert werden soll
- * @author s.danner, 27.01.2017
+ * @param <LOGIC>        the logical level of the transformation (field, bean or container)
+ * @param <VISUAL>       the type of the graphical components to which the logical components will be transformed to
+ * @param <ENCAPSULATED> the type of the data core of the transformation source
+ * @param <SOURCE>       the type of the source (bean element) that will be used for the transformation
+ * @author Simon Danner, 27.01.2017
  * @see ITransformable
  */
 interface IVisualTransformator<LOGIC, VISUAL, ENCAPSULATED extends IEncapsulated, SOURCE extends IEncapsulatedHolder<ENCAPSULATED>>
 {
   /**
-   * Transformiert den Daten-Kern und initialisiert die Transformation.
+   * Transfers the reference to the data core of the original bean element to the transferable component.
    *
-   * @param pSourceToTransform die Quelle, die transformiert werden soll
+   * @param pSourceToTransform the source/original bean element
    */
   void initTransformation(SOURCE pSourceToTransform);
 
   /**
-   * Liefert die Original-Quelle der Transformation.
+   * The original source of the transformation.
    */
   SOURCE getOriginalSource();
 
   /**
-   * Liefert die grafische Komponente zu einer logischen Bean-Komponente.
+   * The graphical presentation for a logical counterpart.
    *
-   * @param pLogicComponent die logische Bean-Komponente
-   * @return die grafische Komponente, welche die logische Komponente abbildet
+   * @param pLogicComponent the logical bean element
+   * @return a graphical component that represents the logical part
    */
   VISUAL getVisualComponent(LOGIC pLogicComponent);
 
   /**
-   * Verbindet die logische und die grafische Komponente auf Daten-Basis.
-   * Beispiel: Logik: Textfield (in Bean) Visual: Textfeld -> Wird ein Wert in das Textfeld getippt, ist der Wert automatisch im Bean gesetzt.
+   * Links the logical and graphical component based on the data model.
+   * For example: When a user types a text into a visual textfield, the value will also be stored within the bean data core.
    *
-   * @param pLogicComponent  die logische Bean-Komponente
-   * @param pVisualComponent die grafische Komponente, welche die logische Komponente abbildet
+   * @param pLogicComponent  the logical component (field, bean or container)
+   * @param pVisualComponent the graphical component that represents the logical counterpart
    */
   void link(LOGIC pLogicComponent, VISUAL pVisualComponent);
 
   /**
-   * Liefert eine verbundene grafische Komponente zu einer Logik-Komponente.
-   * Kombiniert getVisualComponent()  und link().
+   * A linked graphical component for a logical counterpart.
+   * Combines {@link IVisualTransformator#getVisualComponent(LOGIC)} and {@link IVisualTransformator#link(LOGIC, VISUAL)}
    *
-   * @param pLogicComponent die logische Bean-Komponente
-   * @return die grafische Komponente, welche die logische Komponente abbildet
+   * @param pLogicComponent the logical component (field, bean or container)
+   * @return a graphical component that represents the logical part
    */
   default VISUAL getLinkedVisualComponent(LOGIC pLogicComponent)
   {
@@ -59,10 +60,11 @@ interface IVisualTransformator<LOGIC, VISUAL, ENCAPSULATED extends IEncapsulated
   }
 
   /**
-   * Liefert eine Warteschlange, in welcher Operationen vermerkt werden, welche nach der Transformation ausgeführt werden.
+   * A queue to store operations which can only be executed after a completed transformation.
+   * It's not supported by default.
    *
-   * @return eine Warteschlange von Runnables
-   * @throws UnsupportedOperationException muss beim konkreten Transformator umgesetzt werden, falls benötigt
+   * @return a queue for operations
+   * @throws UnsupportedOperationException if not supported
    */
   default Queue<Runnable> getBeforeTransformationQueue() throws UnsupportedOperationException
   {
