@@ -48,7 +48,7 @@ public interface ITransformableBeanContainer<BEAN extends IBean<BEAN>, LOGIC, VI
   {
     IVisualBeanContainerTransformator<LOGIC, VISUAL, BEAN> transformator = getTransformator();
     if (transformator == null || transformator.getWeakVisibleListenerContainer() == null)
-      throw new UnsupportedOperationException();
+      throw new UnsupportedOperationException("Visibility change listeners are not supported for this container. Provide a container!");
     synchronized (transformator.getWeakVisibleListenerContainer())
     {
       transformator.getWeakVisibleListenerContainer().add(pListener);
@@ -64,7 +64,7 @@ public interface ITransformableBeanContainer<BEAN extends IBean<BEAN>, LOGIC, VI
   {
     IVisualBeanContainerTransformator<LOGIC, VISUAL, BEAN> transformator = getTransformator();
     if (transformator == null || transformator.getWeakVisibleListenerContainer() == null)
-      throw new UnsupportedOperationException();
+      throw new UnsupportedOperationException("Visibility change listeners are not supported for this container. Provide a container!");
     List<BEAN> visibleBeans = streamVisibleBeans().collect(Collectors.toList());
     synchronized (transformator.getWeakVisibleListenerContainer())
     {

@@ -8,4 +8,12 @@ package de.adito.beans.core.util.exceptions;
  */
 public class BeanFlattenException extends RuntimeException
 {
+  public BeanFlattenException()
+  {
+  }
+
+  public BeanFlattenException(String pMessage)
+  {
+    super(pMessage);
+  }
 }

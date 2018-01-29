@@ -28,7 +28,7 @@ public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
     IBeanEncapsulated<BEAN> encapsulated = getEncapsulated();
     assert encapsulated != null;
     if (encapsulated.streamFields().anyMatch(pField -> pField.getName().equals(pName)))
-      throw new RuntimeException("field: " + pName);
+      throw new RuntimeException("A field with the name '" + pName + "' is already existing at this bean!");
     FIELD newField = BeanFieldFactory.createField(pFieldType, pName, pAnnotations);
     addField(newField);
     return newField;

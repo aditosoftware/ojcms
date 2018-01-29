@@ -16,10 +16,33 @@ public class GenericField<TYPE> extends AbstractField<TYPE>
 {
   public GenericField(@NotNull Class<TYPE> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {
-    super(pType, pName, pAnnotations);
-    if (IBean.class.isAssignableFrom(pType))
-      throw new RuntimeException("type: " + pType.getSimpleName());
-    if (IBeanContainer.class.isAssignableFrom(pType))
-      throw new RuntimeException("type: " + pType.getSimpleName());
+    super(_checkGenericType(pType), pName, pAnnotations);
+  }
+
+  /**
+   * Checks, if this generic field may be replaced by a bean- or bean container field.
+   *
+   * @param pGenericType the generic type of this field
+   * @return the generic type to use in a super call
+   */
+  private static <TYPE> Class<TYPE> _checkGenericType(Class<TYPE> pGenericType)
+  {
+    if (IBean.class.isAssignableFrom(pGenericType))
+      _throwPossibleReplacementError(pGenericType, BeanField.class);
+    if (IBeanContainer.class.isAssignableFrom(pGenericType))
+      _throwPossibleReplacementError(pGenericType, ContainerField.class);
+    return pGenericType;
+  }
+
+  /**
+   * Throws a runtime exception that indicates this field can be replaced by another bean field.
+   *
+   * @param pGenericType     the generic type of this field
+   * @param pReplacementType the type of the replacement field
+   */
+  private static <TYPE> void _throwPossibleReplacementError(Class<TYPE> pGenericType, Class<? extends IField> pReplacementType)
+  {
+    throw new RuntimeException("A generic field is not required for this type. Use a " + pReplacementType.getSimpleName() + " instead. " +
+                                   "Generic-Type: " + pGenericType.getSimpleName());
   }
 }

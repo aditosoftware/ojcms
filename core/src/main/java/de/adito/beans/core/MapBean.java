@@ -108,7 +108,7 @@ public class MapBean<TYPE> implements IModifiableBean<MapBean<TYPE>>
     Class<SOURCE> sourceType = (Class<SOURCE>) pSourceValue.getClass();
     return pField.getType().isAssignableFrom(sourceType) ? pSource -> (TYPE) pSource :
         pField.getToConverter(sourceType)
-            .orElseThrow(() -> new RuntimeException("type: " + sourceType.getSimpleName()));
+            .orElseThrow(() -> new RuntimeException("There is no suitable converter for the map values: " + sourceType.getSimpleName()));
   }
 
   @Override

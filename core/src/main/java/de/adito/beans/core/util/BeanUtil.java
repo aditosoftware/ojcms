@@ -58,7 +58,7 @@ public final class BeanUtil
     return pFieldStream
         .filter(pField -> pField.getName().equals(pFieldName))
         .findAny()
-        .orElseThrow(() -> new RuntimeException("name: " + pFieldName));
+        .orElseThrow(() -> new RuntimeException("A field with the name '" + pFieldName + "' is not present."));
   }
 
   /**
@@ -122,7 +122,8 @@ public final class BeanUtil
     for (IField<?> field : pChain)
     {
       if (!pParentBean.hasField(field))
-        throw new RuntimeException("bad-field: " + field.getName());
+        throw new RuntimeException("The chain is invalid. The parent bean '" + pParentBean + "'" +
+                                       " does not contain a field " + field.getName() + ".");
 
       Object value = pParentBean.getValue(field);
       assert value instanceof IBean;
@@ -148,7 +149,8 @@ public final class BeanUtil
     IBean<?> deepBean = resolveDeepBean(pParentBean, pChain);
 
     if (!deepBean.hasField(pDeepField))
-      throw new RuntimeException("deepField: " + pDeepField.getName());
+      throw new RuntimeException("The resolved deep bean '" + deepBean + "' does not contain the field '" + pDeepField.getName() +
+                                     "' to evaluate the value for.");
 
     return deepBean.getValue(pDeepField);
   }

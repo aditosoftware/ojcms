@@ -9,6 +9,6 @@ public class AlreadyTransformedException extends RuntimeException
 {
   public AlreadyTransformedException(String pTransformableTypeName)
   {
-    super(pTransformableTypeName);
+    super("The component " + pTransformableTypeName + " has already been transformed!");
   }
 }

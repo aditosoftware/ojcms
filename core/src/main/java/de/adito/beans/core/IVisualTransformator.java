@@ -68,6 +68,6 @@ interface IVisualTransformator<LOGIC, VISUAL, ENCAPSULATED extends IEncapsulated
    */
   default Queue<Runnable> getBeforeTransformationQueue() throws UnsupportedOperationException
   {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException("A before transformation queue is not supported. Provide a container/queue!");
   }
 }

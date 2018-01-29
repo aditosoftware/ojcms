@@ -138,7 +138,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
   default BEAN getBean(int pIndex)
   {
     if (pIndex < 0)
-      throw new RuntimeException("index: " + pIndex);
+      throw new RuntimeException("The index must be greater than 0. Given index: " + pIndex);
 
     assert getEncapsulated() != null;
     return getEncapsulated().get(pIndex);
@@ -324,6 +324,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
    */
   class ReadOnly<BEAN extends IBean<BEAN>> implements IBeanContainer<BEAN>
   {
+    private static final String ERROR = "Read-only container!";
     private final IBeanContainer<BEAN> original;
 
     public ReadOnly(IBeanContainer<BEAN> pOriginal)
@@ -340,37 +341,37 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
     @Override
     public void addBean(BEAN pBean) throws UnsupportedOperationException
     {
-      throw new UnsupportedOperationException();
+      throw new UnsupportedOperationException(ERROR);
     }
 
     @Override
     public void addBean(BEAN pBean, int pIndex) throws UnsupportedOperationException
     {
-      throw new UnsupportedOperationException();
+      throw new UnsupportedOperationException(ERROR);
     }
 
     @Override
     public BEAN replaceBean(BEAN pBean, int pIndex) throws UnsupportedOperationException
     {
-      throw new UnsupportedOperationException();
+      throw new UnsupportedOperationException(ERROR);
     }
 
     @Override
     public boolean removeBean(BEAN pBean) throws UnsupportedOperationException
     {
-      throw new UnsupportedOperationException();
+      throw new UnsupportedOperationException(ERROR);
     }
 
     @Override
     public boolean removeBeanIf(Predicate<BEAN> pPredicate) throws UnsupportedOperationException
     {
-      throw new UnsupportedOperationException();
+      throw new UnsupportedOperationException(ERROR);
     }
 
     @Override
     public void clear() throws UnsupportedOperationException
     {
-      throw new UnsupportedOperationException();
+      throw new UnsupportedOperationException(ERROR);
     }
   }
 }

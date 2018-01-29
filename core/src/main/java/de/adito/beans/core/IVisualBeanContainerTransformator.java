@@ -25,6 +25,6 @@ public interface IVisualBeanContainerTransformator<LOGIC, VISUAL, BEAN extends I
    */
   default Set<Consumer<Collection<BEAN>>> getWeakVisibleListenerContainer() throws UnsupportedOperationException
   {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException("Visibility change listeners are not supported. Provide a container!");
   }
 }

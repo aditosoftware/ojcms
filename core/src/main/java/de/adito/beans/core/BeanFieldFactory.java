@@ -57,7 +57,7 @@ public final class BeanFieldFactory
         throw new RuntimeException(pE);
       }
 
-    throw new RuntimeException();
+    throw new RuntimeException("Unable to create a bean field. There are no static fields or all of them are initialized already.");
   }
 
   /**
@@ -78,12 +78,12 @@ public final class BeanFieldFactory
           .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                                     (pFieldType1, pFieldType2) ->
                                     {
-                                      throw new RuntimeException(pFieldType1.getSimpleName() + " supports same datatype as "
-                                                                     + pFieldType2.getSimpleName());
+                                      throw new RuntimeException("Incorrect default data types for bean fields: " + pFieldType1.getSimpleName() +
+                                                                     " supports the same data type as " + pFieldType2.getSimpleName());
                                     }));
 
     if (!typeFieldMapping.containsKey(pType))
-      throw new RuntimeException("type: " + pType.getSimpleName());
+      throw new RuntimeException("There is no bean field for this data type: " + pType.getSimpleName());
     //noinspection unchecked
     return (Class<IField<TYPE>>) typeFieldMapping.get(pType);
   }

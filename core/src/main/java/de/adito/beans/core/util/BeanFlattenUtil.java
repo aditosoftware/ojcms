@@ -20,7 +20,8 @@ public final class BeanFlattenUtil
 
   /**
    * Creates a flat copy of a bean as a map of fields and it's associated values.
-   * A flat bean has no bean or bean container field, it only consists of no reference fields.
+   * A flat bean has no bean reference field.
+   * It's not allowed to flat container fields!
    *
    * @param pBean the bean to flatten
    * @param pDeep <tt>true</tt> if this should be a deep copy (includes deep fields iteratively)
@@ -55,7 +56,7 @@ public final class BeanFlattenUtil
     }
 
     /**
-     * Shifts all non-reference {@link de.adito.beans.core.fields.BeanField} fields into the new flat bean.
+     * Shifts all {@link de.adito.beans.core.fields.BeanField} into the new flat bean.
      * The remaining bean fields will be used in the next step.
      */
     public void shift()
@@ -66,7 +67,7 @@ public final class BeanFlattenUtil
                   {
                     Object value = pEntry.getValue();
                     if (value instanceof IBeanContainer)
-                      throw new BeanFlattenException();
+                      throw new BeanFlattenException("It's not allowed to flat bean container fields!");
 
                     boolean isBean = value instanceof IBean;
                     if (!isBean)

@@ -78,7 +78,7 @@ class BeanMapEncapsulated<BEAN extends IBean<BEAN>> extends LinkedHashMap<IField
   public <TYPE> int getFieldIndex(IField<TYPE> pField)
   {
     if (!fieldOrder.contains(pField))
-      throw new RuntimeException("field: " + pField.getName());
+      throw new RuntimeException("The field " + pField.getName() + " is not present at the bean. Its index cannot be resolved.");
     return fieldOrder.indexOf(pField);
   }
 
@@ -142,7 +142,8 @@ class BeanMapEncapsulated<BEAN extends IBean<BEAN>> extends LinkedHashMap<IField
   {
     return pFields.stream()
         .filter(pField -> pField.getName().equals(pFieldName))
-        .findFirst().orElseThrow(() -> new RuntimeException("fieldName: " + pFieldName));
+        .findFirst()
+        .orElseThrow(() -> new RuntimeException("A field with the name " + pFieldName + " could not be found among the given fields"));
   }
 
   /**
@@ -155,11 +156,12 @@ class BeanMapEncapsulated<BEAN extends IBean<BEAN>> extends LinkedHashMap<IField
   private void _setValueNonType(IField<?> pField, Object pValue, boolean pAllowNewField)
   {
     if (pValue != null && !pField.getType().isAssignableFrom(pValue.getClass()))
-      throw new RuntimeException("field-type: " + pField.getType().getSimpleName() + " value-type: " + pValue.getClass().getSimpleName());
+      throw new RuntimeException("The field's data type does not match the value's type: field-type: " + pField.getType().getSimpleName() +
+                                     " value-type: " + pValue.getClass().getSimpleName());
 
     boolean existing = containsKey(pField);
     if (!pAllowNewField && !existing)
-      throw new RuntimeException("field: " + pField.getName());
+      throw new RuntimeException("It is not allowed to add new fields for this bean. field: " + pField.getName());
 
     put(pField, pValue);
     if (!existing)

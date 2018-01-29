@@ -5,7 +5,7 @@ import de.adito.beans.core.listener.IBeanChangeListener;
 import de.adito.beans.core.references.IHierarchicalBeanStructure;
 import de.adito.beans.core.statistics.IStatisticData;
 import de.adito.beans.core.util.*;
-import de.adito.beans.core.util.exceptions.BeanFieldDoesNotExistException;
+import de.adito.beans.core.util.exceptions.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -44,7 +44,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
     if (!hasField(pField))
       throw new BeanFieldDoesNotExistException(this, pField);
     if (pField.isPrivate())
-      throw new UnsupportedOperationException();
+      throw new BeanIllegalAccessException(this, pField);
     assert getEncapsulated() != null;
     return getEncapsulated().getValue(pField);
   }
@@ -82,7 +82,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
       //noinspection unchecked
       return (SOURCE) actualValue;
     return pField.getFromConverter(pConvertType)
-        .orElseThrow(() -> new RuntimeException("type: " + pConvertType.getSimpleName()))
+        .orElseThrow(() -> new RuntimeException("The field " + pField.getName() + " cannot convert to " + pConvertType.getSimpleName()))
         .apply(actualValue);
   }
 
@@ -100,7 +100,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
     if (!hasField(pField))
       throw new BeanFieldDoesNotExistException(this, pField);
     if (pField.isPrivate())
-      throw new UnsupportedOperationException();
+      throw new BeanIllegalAccessException(this, pField);
     //noinspection unchecked
     BeanListenerUtil.setValueAndFire((BEAN) this, pField, pValue);
   }
@@ -127,7 +127,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
       Class<SOURCE> sourceType = (Class<SOURCE>) pValueToConvert.getClass();
       convertedValue = pField.getType().isAssignableFrom(sourceType) ? (TYPE) pValueToConvert :
           pField.getToConverter(sourceType)
-              .orElseThrow(() -> new RuntimeException("type: " + sourceType.getSimpleName()))
+              .orElseThrow(() -> new RuntimeException("The field " + pField.getName() + " cannot convert to " + sourceType.getSimpleName()))
               .apply(pValueToConvert);
     }
     setValue(pField, convertedValue);
@@ -238,7 +238,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   default <TYPE> IStatisticData<TYPE> getStatisticData(IField<TYPE> pField)
   {
     if (!hasField(pField))
-      return null; //TODO exception
+      throw new BeanFieldDoesNotExistException(this, pField);
     assert getEncapsulated() != null;
     //noinspection unchecked
     return getEncapsulated().getStatisticData().get(pField);
@@ -288,6 +288,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   /**
    * Creates a flat copy of this bean. (Not deep!)
    * All bean fields will be replaced by the fields of the referred beans.
+   * A runtime exception will be thrown, if the bean contains a container field.
    * Additionally the copy will be informed via listeners, when a value of the original bean changes.
    * Because of this feature this method is restricted to only one iteration of flattening.
    * Otherwise it may be impossible to determine which flat field belongs to what field in the original bean, due to multiple possibilities.
@@ -303,6 +304,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   /**
    * Creates a flat copy of this bean.
    * All bean fields will be replaced by the fields of the referred beans.
+   * A runtime exception will be thrown, if the bean contains a container field.
    *
    * @param pDeep <tt>true</tt>, if the fields should be flattened iteratively
    * @return the flat copy of this bean

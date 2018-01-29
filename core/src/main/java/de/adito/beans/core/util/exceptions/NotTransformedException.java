@@ -9,6 +9,6 @@ public class NotTransformedException extends RuntimeException
 {
   public NotTransformedException(String pTransformableTypeName)
   {
-    super(pTransformableTypeName);
+    super("The component " + pTransformableTypeName + " should have been transformed to use this operation!");
   }
 }
