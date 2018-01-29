@@ -1,5 +1,5 @@
-/.idea
-!/.idea/codeStyleSettings.xml
-!/.idea/projectCodeStyle.xml
+.idea/*
+!.idea/codeStyles
+!.idea/vcs.xml
 *.iml
 
