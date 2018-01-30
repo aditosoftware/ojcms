@@ -1,8 +1,9 @@
 package de.adito.beans.core;
 
 import de.adito.beans.core.util.BeanReflector;
+import de.adito.beans.core.util.exceptions.BeanFieldDoesNotExistException;
 
-import java.util.concurrent.Executors;
+import java.util.logging.*;
 
 /**
  * The default concrete class of the bean interface.
@@ -29,6 +30,7 @@ import java.util.concurrent.Executors;
  */
 public class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
 {
+  private static final Logger LOGGER = Logger.getLogger(Bean.class.getName());
   private final IBeanEncapsulated<BEAN> encapsulated;
 
   public Bean()
@@ -51,6 +53,9 @@ public class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
    */
   protected <TYPE> TYPE getPrivateValue(IField<TYPE> pField)
   {
+    if (!hasField(pField))
+      throw new BeanFieldDoesNotExistException(this, pField);
+    _checkNotPrivateAndWarn(pField);
     return encapsulated.getValue(pField);
   }
 
@@ -63,6 +68,24 @@ public class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
    */
   protected <TYPE> void setPrivateValue(IField<TYPE> pField, TYPE pValue)
   {
-    encapsulated.setValue(pField, pValue);
+    if (!hasField(pField))
+      throw new BeanFieldDoesNotExistException(this, pField);
+    _checkNotPrivateAndWarn(pField);
+    //noinspection unchecked
+    BeanListenerUtil.setValueAndFire((BEAN) this, pField, pValue);
+  }
+
+  /**
+   * Checks, if the field the value should be set or retrieved for, is really private.
+   * Otherwise the public methods of {@link IBean} should be used.
+   * A misconfiguration will only result in a logger warning.
+   *
+   * @param pField the field to check
+   * @param <TYPE> the generic data type of the field
+   */
+  private <TYPE> void _checkNotPrivateAndWarn(IField<TYPE> pField)
+  {
+    if (!pField.isPrivate())
+      LOGGER.log(Level.WARNING, "The field '" + pField.getName() + "' is not private. Use the public method to get/set the value instead!");
   }
 }
