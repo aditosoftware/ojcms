@@ -7,18 +7,18 @@
   <parent>
     <groupId>de.adito.beans</groupId>
     <artifactId>parent</artifactId>
-    <version>0.9</version>
+    <version>0.9-SNAPSHOT</version>
   </parent>
 
   <artifactId>persistence</artifactId>
-  <version>0.9</version>
+  <version>0.9-SNAPSHOT</version>
 
   <dependencies>
 
     <dependency>
       <groupId>de.adito.beans</groupId>
       <artifactId>core</artifactId>
-      <version>0.9</version>
+      <version>0.9-SNAPSHOT</version>
     </dependency>
 
     <dependency>
