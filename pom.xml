@@ -46,20 +46,18 @@
 
   <distributionManagement>
     <repository>
-      <id>adito.m2</id>
-      <name>releases</name>
-      <url>${repository.releases}</url>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
     <snapshotRepository>
-      <id>adito.m2</id>
-      <name>snapshots</name>
-      <url>${repository.snapshots}</url>
-      <uniqueVersion>false</uniqueVersion>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
   </distributionManagement>
 
   <modules>
     <module>core</module>
+    <module>persistence</module>
   </modules>
 
   <dependencies>
