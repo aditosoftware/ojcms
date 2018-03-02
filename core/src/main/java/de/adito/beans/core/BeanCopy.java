@@ -9,9 +9,9 @@ import java.util.Map;
  *
  * @author Simon Danner, 18.08.2017
  */
-public class BeanCopy implements IBean
+public class BeanCopy implements IBean<BeanCopy>
 {
-  private final IBeanEncapsulated<?> encapsulated;
+  private final IBeanEncapsulated<BeanCopy> encapsulated;
   private final IBeanFieldActivePredicate originalActiveSupplier;
 
   /**
@@ -22,18 +22,18 @@ public class BeanCopy implements IBean
    */
   public BeanCopy(Map<IField<?>, Object> pData, IBeanFieldActivePredicate pOriginalActiveSupplier)
   {
-    encapsulated = new BeanMapEncapsulated<>(getClass(), pData);
+    encapsulated = EncapsulatedBuilder.createBeanEncapsulated(new Bean.DefaultEncapsulatedBuilder(pData), BeanCopy.class);
     originalActiveSupplier = pOriginalActiveSupplier;
   }
 
   @Override
-  public IEncapsulated getEncapsulated()
+  public IBeanEncapsulated<BeanCopy> getEncapsulated()
   {
     return encapsulated;
   }
 
   @Override
-  public IBeanFieldActivePredicate getFieldActiveSupplier()
+  public IBeanFieldActivePredicate<BeanCopy> getFieldActiveSupplier()
   {
     return originalActiveSupplier;
   }

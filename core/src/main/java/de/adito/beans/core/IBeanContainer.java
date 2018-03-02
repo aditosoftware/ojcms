@@ -65,7 +65,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
   default void addBean(BEAN pBean, int pIndex)
   {
     assert getEncapsulated() != null;
-    getEncapsulated().add(pIndex, pBean);
+    getEncapsulated().addBean(pBean, pIndex);
     BeanListenerUtil.beanAdded(this, pBean);
   }
 
@@ -80,7 +80,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
   default BEAN replaceBean(BEAN pBean, int pIndex)
   {
     assert getEncapsulated() != null;
-    BEAN removed = getEncapsulated().set(pIndex, pBean);
+    BEAN removed = getEncapsulated().replaceBean(pBean, pIndex);
     if (removed != null)
       BeanListenerUtil.beanRemoved(this, removed);
     BeanListenerUtil.beanAdded(this, pBean);
@@ -98,7 +98,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
   {
     IBeanContainerEncapsulated<BEAN> enc = getEncapsulated();
     assert enc != null;
-    boolean removed = enc.remove(pBean);
+    boolean removed = enc.removeBean(pBean);
     if (removed)
       BeanListenerUtil.beanRemoved(this, pBean);
     return removed;
@@ -141,11 +141,12 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
       throw new RuntimeException("The index must be greater than 0. Given index: " + pIndex);
 
     assert getEncapsulated() != null;
-    return getEncapsulated().get(pIndex);
+    return getEncapsulated().getBean(pIndex);
   }
 
   /**
    * Returns the index of a certain bean.
+   * -1, if the bean is not present within the container.
    *
    * @param pBean the bean to determine the index
    * @return the index of the bean within the container
@@ -153,7 +154,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
   default int indexOf(BEAN pBean)
   {
     assert getEncapsulated() != null;
-    return getEncapsulated().indexOf(pBean);
+    return getEncapsulated().indexOfBean(pBean);
   }
 
   /**
@@ -182,15 +183,17 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
    */
   default boolean contains(BEAN pBean)
   {
+    if (pBean == null)
+      throw new IllegalArgumentException("The bean must not be null!");
     assert getEncapsulated() != null;
-    return getEncapsulated().contains(pBean);
+    return getEncapsulated().containsBean(Objects.requireNonNull(pBean));
   }
 
   /**
    * Sets a limit (= number of beans) for this container.
    *
    * @param pMaxCount the limit (-1 for no limit)
-   * @param pEvicting <tt>true</tt>, if the eldest beans should be removed, when the limit is reached
+   * @param pEvicting <tt>true</tt>, if the first beans should be removed, when the limit is reached
    */
   default IBeanContainer<BEAN> withLimit(int pMaxCount, boolean pEvicting)
   {

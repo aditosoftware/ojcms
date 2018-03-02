@@ -1,5 +1,7 @@
 package de.adito.beans.core;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.*;
 
 /**
@@ -11,10 +13,11 @@ import java.util.*;
  */
 public class BeanContainer<BEAN extends IBean<BEAN>> implements IBeanContainer<BEAN>
 {
-  private final IBeanContainerEncapsulated<BEAN> encapsulated;
+  private final Class<BEAN> beanType;
+  private IBeanContainerEncapsulated<BEAN> encapsulated;
 
   /**
-   * Creates a new bean container.
+   * Creates a new empty bean container.
    *
    * @param pBeanType the type of the beans in the container
    */
@@ -31,8 +34,33 @@ public class BeanContainer<BEAN extends IBean<BEAN>> implements IBeanContainer<B
    */
   public BeanContainer(Class<BEAN> pBeanType, Collection<BEAN> pBeans)
   {
-    encapsulated = new BeanListEncapsulated<>(pBeanType, pBeans);
-    pBeans.forEach(pBean -> BeanListenerUtil.beanAdded(this, pBean));
+    this(pBeanType, new DefaultEncapsulatedBuilder<>(pBeans));
+  }
+
+  /**
+   * Creates a new bean container with an encapsulated data core
+   * based on a {@link de.adito.beans.core.EncapsulatedBuilder.IContainerEncapsulatedBuilder}
+   *
+   * @param pBeanType the type of the beans in the container
+   * @param pBuilder  the encapsulated builder
+   */
+  public BeanContainer(Class<BEAN> pBeanType, EncapsulatedBuilder.IContainerEncapsulatedBuilder<BEAN> pBuilder)
+  {
+    beanType = pBeanType;
+    setEncapsulated(pBuilder);
+    encapsulated.stream().forEach(pBean -> BeanListenerUtil.beanAdded(this, pBean));
+  }
+
+  /**
+   * Sets the encapsulated data core for this container.
+   * The data core will be created by {@link EncapsulatedBuilder}
+   * based on a {@link de.adito.beans.core.EncapsulatedBuilder.IContainerEncapsulatedBuilder}.
+   *
+   * @param pBuilder the builder to create the data core
+   */
+  void setEncapsulated(EncapsulatedBuilder.IContainerEncapsulatedBuilder<BEAN> pBuilder)
+  {
+    encapsulated = EncapsulatedBuilder.createContainerEncapsulated(pBuilder, beanType);
   }
 
   @Override
@@ -45,5 +73,61 @@ public class BeanContainer<BEAN extends IBean<BEAN>> implements IBeanContainer<B
   public String toString()
   {
     return getClass().getSimpleName() + "{beanType: " + getBeanType().getSimpleName() + ", count: " + size() + "}";
+  }
+
+  /**
+   * Default encapsulated data core based on a list to store the beans of this container.
+   */
+  public static class DefaultEncapsulatedBuilder<BEAN extends IBean<BEAN>> implements EncapsulatedBuilder.IContainerEncapsulatedBuilder<BEAN>
+  {
+    private final List<BEAN> beanList;
+
+    public DefaultEncapsulatedBuilder(Collection<BEAN> pBeans)
+    {
+      beanList = new ArrayList<>(pBeans);
+    }
+
+    @Override
+    public void addBean(BEAN pBean, int pIndex)
+    {
+      beanList.add(pIndex, pBean);
+    }
+
+    @Override
+    public boolean removeBean(BEAN pBean)
+    {
+      return beanList.remove(pBean);
+    }
+
+    @Override
+    public boolean containsBean(BEAN pBean)
+    {
+      return beanList.contains(pBean);
+    }
+
+    @Override
+    public BEAN getBean(int pIndex)
+    {
+      return beanList.get(pIndex);
+    }
+
+    @Override
+    public int indexOfBean(BEAN pBean)
+    {
+      return beanList.indexOf(pBean);
+    }
+
+    @Override
+    public int size()
+    {
+      return beanList.size();
+    }
+
+    @NotNull
+    @Override
+    public Iterator<BEAN> iterator()
+    {
+      return beanList.iterator();
+    }
   }
 }

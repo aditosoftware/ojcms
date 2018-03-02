@@ -57,7 +57,8 @@ public class MapBean<TYPE> implements IModifiableBean<MapBean<TYPE>>
                    pSorted.put(field, valueConverter != null ? valueConverter.apply(pEntry.getValue()) : null);
                  },
                  LinkedHashMap::putAll);
-    encapsulated = new BeanMapEncapsulated<>(getClass(), map);
+    //noinspection unchecked
+    encapsulated = EncapsulatedBuilder.createBeanEncapsulated(new Bean.DefaultEncapsulatedBuilder(map), (Class<MapBean<TYPE>>) getClass());
   }
 
   @Override
@@ -130,7 +131,7 @@ public class MapBean<TYPE> implements IModifiableBean<MapBean<TYPE>>
   public int hashCode()
   {
     return stream()
-        .mapToInt(pEntry -> pEntry.getKey().hashCode() * 31 + Objects.hashCode(pEntry.getValue()))
+        .mapToInt(pFieldTuple -> pFieldTuple.getField().hashCode() * 31 + Objects.hashCode(pFieldTuple.getValue()) * 31)
         .sum();
   }
 }
