@@ -18,7 +18,7 @@ public class BeanKeyValueList<BEAN extends IBean<BEAN>> extends ArrayList<BeanKe
   public BeanKeyValueList(BEAN pBean)
   {
     pBean.stream()
-        .map(pEntry -> new KeyValue(pEntry.getKey(), pEntry.getValue()))
+        .map(pFieldTuple -> new KeyValue(pFieldTuple.getField(), pFieldTuple.getValue()))
         .forEach(this::add);
     pBean.listenWeak(this);
   }

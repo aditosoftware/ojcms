@@ -63,15 +63,15 @@ public final class BeanFlattenUtil
     {
       toShift = toShift.stream()
           .flatMap(IBean::stream)
-          .filter(pEntry ->
+          .filter(pFieldTuple ->
                   {
-                    Object value = pEntry.getValue();
+                    Object value = pFieldTuple.getValue();
                     if (value instanceof IBeanContainer)
                       throw new BeanFlattenException("It's not allowed to flat bean container fields!");
 
                     boolean isBean = value instanceof IBean;
                     if (!isBean)
-                      flatMap.put(pEntry.getKey(), value);
+                      flatMap.put(pFieldTuple.getField(), value);
                     return isBean;
                   })
           .map(pEntry -> (IBean<?>) pEntry.getValue())

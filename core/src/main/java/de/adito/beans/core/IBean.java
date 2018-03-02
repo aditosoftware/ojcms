@@ -1,6 +1,7 @@
 package de.adito.beans.core;
 
 import de.adito.beans.core.annotations.Identifier;
+import de.adito.beans.core.fields.FieldTuple;
 import de.adito.beans.core.listener.IBeanChangeListener;
 import de.adito.beans.core.references.IHierarchicalBeanStructure;
 import de.adito.beans.core.statistics.IStatisticData;
@@ -245,14 +246,14 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   }
 
   /**
-   * All fields marked as identifiers within this bean.
+   * All field tuples marked as identifiers within this bean.
    * Identifiers could be used to find related beans in two containers. (comparable to primary key columns in DB-systems)
    */
-  default Collection<IField<?>> getIdentifiers()
+  default Set<FieldTuple<?>> getIdentifiers()
   {
-    return streamFields()
-        .filter(pField -> pField.hasAnnotation(Identifier.class))
-        .collect(Collectors.toList());
+    return stream()
+        .filter(pTuple -> pTuple.getField().hasAnnotation(Identifier.class))
+        .collect(Collectors.toSet());
   }
 
   /**
@@ -329,10 +330,10 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
    * This bean as stream.
    * It contains key value pairs describing the field-value combinations.
    */
-  default Stream<Map.Entry<IField<?>, Object>> stream()
+  default Stream<FieldTuple<?>> stream()
   {
     assert getEncapsulated() != null;
     return getEncapsulated().stream()
-        .filter(pEntry -> getFieldActiveSupplier().isOptionalActive(pEntry.getKey()));
+        .filter(pFieldTuple -> getFieldActiveSupplier().isOptionalActive(pFieldTuple.getField()));
   }
 }

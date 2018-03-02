@@ -1,10 +1,11 @@
 package de.adito.beans.core.util;
 
 import de.adito.beans.core.*;
+import de.adito.beans.core.fields.FieldTuple;
 import org.jetbrains.annotations.*;
 
 import java.util.*;
-import java.util.stream.Stream;
+import java.util.stream.*;
 
 /**
  * General utility class for the bean modell.
@@ -27,9 +28,9 @@ public final class BeanUtil
   public static Map<IField<?>, Object> asMap(IBean<?> pBean, IBeanFieldPredicate pFieldPredicate)
   {
     return pBean.stream()
-        .filter(pEntry -> pFieldPredicate.test(pEntry.getKey(), pEntry.getValue()))
+        .filter(pFieldTuple -> pFieldPredicate.test(pFieldTuple.getField(), pFieldTuple.getValue()))
         //Use the LinkedHashMap-Collector to keep the order and allow null values
-        .collect(LinkedHashMap::new, (pMap, pEntry) -> pMap.put(pEntry.getKey(), pEntry.getValue()), LinkedHashMap::putAll);
+        .collect(LinkedHashMap::new, (pMap, pFieldTuple) -> pMap.put(pFieldTuple.getField(), pFieldTuple.getValue()), LinkedHashMap::putAll);
   }
 
   /**
@@ -92,13 +93,15 @@ public final class BeanUtil
   public static <BEAN extends IBean<BEAN>> BEAN findRelatedBeanAndRemove(BEAN pBean, Collection<BEAN> pOldToCompare)
   {
     Iterator<BEAN> it = pOldToCompare.iterator();
-    Collection<IField<?>> identifiers = pBean.getIdentifiers();
+    Set<FieldTuple<?>> identifiers = pBean.getIdentifiers();
     while (it.hasNext())
     {
       BEAN oldBean = it.next();
       if (pBean.getClass() == oldBean.getClass() && //same types
           ((identifiers.isEmpty() && Objects.equals(oldBean, pBean)) || //no identifiers -> use default equals()
-              (identifiers.equals(oldBean.getIdentifiers()) && !BeanUtil.compareBeanValues(oldBean, pBean, identifiers).isPresent())))
+              (identifiers.equals(oldBean.getIdentifiers()) && !BeanUtil.compareBeanValues(oldBean, pBean, identifiers.stream()
+                  .map(FieldTuple::getField)
+                  .collect(Collectors.toSet())).isPresent())))
       {
         it.remove();
         return oldBean;

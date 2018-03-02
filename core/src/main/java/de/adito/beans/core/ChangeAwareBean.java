@@ -1,11 +1,11 @@
 package de.adito.beans.core;
 
+import de.adito.beans.core.fields.FieldTuple;
 import de.adito.beans.core.listener.IBeanChangeListener;
 import de.adito.beans.core.util.*;
 import de.adito.beans.core.util.exceptions.BeanFlattenException;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
 import java.util.stream.*;
 
 /**
@@ -68,10 +68,10 @@ class ChangeAwareBean<BEAN extends IBean<BEAN>> implements IModifiableBean<BEAN>
   }
 
   @Override
-  public Stream<Map.Entry<IField<?>, Object>> stream()
+  public Stream<FieldTuple<?>> stream()
   {
     return IModifiableBean.super.stream()
-        .filter(pEntry -> _checkFieldPredicate(pEntry.getKey(), pEntry.getValue()));
+        .filter(pFieldTuple -> _checkFieldPredicate(pFieldTuple.getField(), pFieldTuple.getValue()));
   }
 
   @Override

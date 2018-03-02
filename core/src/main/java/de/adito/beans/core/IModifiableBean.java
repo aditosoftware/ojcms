@@ -1,5 +1,7 @@
 package de.adito.beans.core;
 
+import de.adito.beans.core.fields.FieldTuple;
+
 import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.function.Predicate;
@@ -86,10 +88,10 @@ public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
    */
   default <TYPE> void removeFieldIf(Predicate<IField<TYPE>> pFieldPredicate)
   {
-    Iterator<Map.Entry<IField<?>, Object>> it = getEncapsulated().iterator();
+    Iterator<FieldTuple<?>> it = getEncapsulated().iterator();
     while (it.hasNext())
       //noinspection unchecked
-      if (pFieldPredicate.test((IField<TYPE>) it.next().getKey()))
+      if (pFieldPredicate.test((IField<TYPE>) it.next().getField()))
         it.remove();
   }
 }

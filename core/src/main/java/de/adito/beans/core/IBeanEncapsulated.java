@@ -1,5 +1,6 @@
 package de.adito.beans.core;
 
+import de.adito.beans.core.fields.FieldTuple;
 import de.adito.beans.core.listener.IBeanChangeListener;
 import de.adito.beans.core.references.IHierarchicalBeanStructure;
 import de.adito.beans.core.statistics.IStatisticData;
@@ -14,7 +15,7 @@ import java.util.stream.Stream;
  * @param <BEAN> the generic bean type that uses this data core
  * @author Simon Danner, 20.01.2017
  */
-interface IBeanEncapsulated<BEAN extends IBean<BEAN>> extends IEncapsulated<Map.Entry<IField<?>, Object>, BEAN, IBeanChangeListener<BEAN>>
+interface IBeanEncapsulated<BEAN extends IBean<BEAN>> extends IEncapsulated<FieldTuple<?>, BEAN, IBeanChangeListener<BEAN>>
 {
   /**
    * The value for a bean field.
