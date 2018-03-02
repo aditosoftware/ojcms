@@ -12,7 +12,7 @@ import java.util.Collection;
  * @author Simon Danner, 14.02.2017
  */
 @TypeDefaultField(types = Long.class)
-public class LongField extends AbstractField<Long>
+public class LongField extends AbstractField<Long> implements ISerializableField<Long>
 {
   public LongField(@NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {
@@ -23,5 +23,11 @@ public class LongField extends AbstractField<Long>
   public Long getDefaultValue()
   {
     return 0L;
+  }
+
+  @Override
+  public Long fromPersistent(String pSerialString)
+  {
+    return pSerialString == null ? getDefaultValue() : Long.parseLong(pSerialString);
   }
 }

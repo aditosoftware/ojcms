@@ -16,7 +16,7 @@ import java.util.*;
  * @author Simon Danner, 23.08.2016
  */
 @TypeDefaultField(types = {Instant.class, Date.class})
-public class DateField extends AbstractField<Instant>
+public class DateField extends AbstractField<Instant> implements ISerializableField<Instant>
 {
   public DateField(@NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {
@@ -32,5 +32,11 @@ public class DateField extends AbstractField<Instant>
     return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.MEDIUM)
         .withLocale(pClientInfo.getLocale())
         .format(date);
+  }
+
+  @Override
+  public Instant fromPersistent(String pSerialString)
+  {
+    return Instant.parse(pSerialString);
   }
 }

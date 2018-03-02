@@ -12,7 +12,7 @@ import java.util.Collection;
  * @author Simon Danner, 27.01.2017
  */
 @TypeDefaultField(types = Integer.class)
-public class IntegerField extends AbstractField<Integer>
+public class IntegerField extends AbstractField<Integer> implements ISerializableField<Integer>
 {
   public IntegerField(@NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {
@@ -23,5 +23,11 @@ public class IntegerField extends AbstractField<Integer>
   public Integer getDefaultValue()
   {
     return 0;
+  }
+
+  @Override
+  public Integer fromPersistent(String pSerialString)
+  {
+    return pSerialString == null ? getDefaultValue() : Integer.parseInt(pSerialString);
   }
 }

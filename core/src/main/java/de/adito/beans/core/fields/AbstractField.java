@@ -15,7 +15,7 @@ import java.util.function.Function;
  * @param <TYPE> the data type that is wrapped by this field type (e.g. String, Integer etc)
  * @author Simon Danner, 23.08.2016
  */
-public abstract class AbstractField<TYPE> implements IField<TYPE>
+abstract class AbstractField<TYPE> implements IField<TYPE>
 {
   private final Class<TYPE> type;
   private final String name;

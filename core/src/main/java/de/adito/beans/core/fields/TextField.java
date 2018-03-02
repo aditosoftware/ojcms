@@ -13,7 +13,7 @@ import java.util.Collection;
  * @author Simon Danner, 23.08.2016
  */
 @TypeDefaultField(types = String.class)
-public class TextField extends AbstractField<String>
+public class TextField extends AbstractField<String> implements ISerializableField<String>
 {
   public TextField(@NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {
@@ -24,5 +24,11 @@ public class TextField extends AbstractField<String>
   public String display(String pValue, IClientInfo pClientInfo)
   {
     return pValue != null ? pValue : "";
+  }
+
+  @Override
+  public String fromPersistent(String pSerialString)
+  {
+    return pSerialString;
   }
 }

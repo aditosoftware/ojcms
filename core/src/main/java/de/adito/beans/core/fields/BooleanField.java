@@ -12,7 +12,7 @@ import java.util.Collection;
  * @author Simon Danner, 19.01.2017
  */
 @TypeDefaultField(types = Boolean.class)
-public class BooleanField extends AbstractField<Boolean>
+public class BooleanField extends AbstractField<Boolean> implements ISerializableField<Boolean>
 {
   public BooleanField(@NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {
@@ -23,5 +23,11 @@ public class BooleanField extends AbstractField<Boolean>
   public Boolean getDefaultValue()
   {
     return false;
+  }
+
+  @Override
+  public Boolean fromPersistent(String pSerialString)
+  {
+    return Boolean.parseBoolean(pSerialString);
   }
 }

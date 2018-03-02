@@ -25,7 +25,7 @@ public class GenericField<TYPE> extends AbstractField<TYPE>
    * @param pGenericType the generic type of this field
    * @return the generic type to use in a super call
    */
-  private static <TYPE> Class<TYPE> _checkGenericType(Class<TYPE> pGenericType)
+  protected static <TYPE> Class<TYPE> _checkGenericType(Class<TYPE> pGenericType)
   {
     if (IBean.class.isAssignableFrom(pGenericType))
       _throwPossibleReplacementError(pGenericType, BeanField.class);

@@ -12,7 +12,7 @@ import java.util.Collection;
  * @author Simon Danner, 23.08.2016
  */
 @TypeDefaultField(types = Double.class)
-public class DecimalField extends AbstractField<Double>
+public class DecimalField extends AbstractField<Double> implements ISerializableField<Double>
 {
   public DecimalField(@NotNull Class<Double> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {
@@ -23,5 +23,11 @@ public class DecimalField extends AbstractField<Double>
   public Double getDefaultValue()
   {
     return 0.0;
+  }
+
+  @Override
+  public Double fromPersistent(String pSerialString)
+  {
+    return pSerialString == null ? getDefaultValue() : Double.parseDouble(pSerialString);
   }
 }
