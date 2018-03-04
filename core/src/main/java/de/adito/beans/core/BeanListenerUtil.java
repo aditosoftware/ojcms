@@ -6,7 +6,7 @@ import de.adito.beans.core.util.IBeanFieldPredicate;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Consumer;
+import java.util.function.*;
 import java.util.stream.Collectors;
 
 /**
@@ -114,6 +114,37 @@ final class BeanListenerUtil
     pBean.getHierarchicalStructure().getDirectParents().stream()
         .filter(pNode -> pNode.getBean().getValue(pNode.getField()) == pContainer) //Filter the references to the affected container
         .forEach(pNode -> pBean.getEncapsulated().removeReference(pNode.getBean(), pNode.getField()));
+  }
+
+  /**
+   * Removes beans which apply to a given predicate successfully.
+   * It's possible to break after one removal, if you know the predicate should apply to one bean only.
+   * The registered listeners will be informed.
+   *
+   * @param pContainer the bean container to remove from
+   * @param pPredicate the predicate to determine which beans should be removed
+   * @param pBreak     <tt>true</tt>, if the iteration should break after one removal
+   * @param <BEAN>     the type of the beans in the container
+   * @return <tt>true</tt>, if at least one bean has been removed
+   */
+  public static <BEAN extends IBean<BEAN>> boolean removeBeanIf(IBeanContainer<BEAN> pContainer, Predicate<BEAN> pPredicate, boolean pBreak)
+  {
+    assert pContainer.getEncapsulated() != null;
+    Iterator<BEAN> it = pContainer.getEncapsulated().iterator();
+    boolean removed = false;
+    while (it.hasNext())
+    {
+      BEAN bean = it.next();
+      if (pPredicate.test(bean))
+      {
+        it.remove();
+        beanRemoved(pContainer, bean);
+        removed = true;
+        if (pBreak)
+          break;
+      }
+    }
+    return removed;
   }
 
   /**

@@ -113,20 +113,20 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
    */
   default boolean removeBeanIf(Predicate<BEAN> pPredicate)
   {
-    assert getEncapsulated() != null;
-    Iterator<BEAN> it = getEncapsulated().iterator();
-    boolean removed = false;
-    while (it.hasNext())
-    {
-      BEAN bean = it.next();
-      if (pPredicate.test(bean))
-      {
-        it.remove();
-        BeanListenerUtil.beanRemoved(this, bean);
-        removed = true;
-      }
-    }
-    return removed;
+    return BeanListenerUtil.removeBeanIf(this, pPredicate, false);
+  }
+
+  /**
+   * Removes one bean which applies to a given predicate successfully and then stops the iteration.
+   * This method should be used, if exactly one bean should be removed.
+   * The registered listeners will be informed.
+   *
+   * @param pPredicate the predicate to determine which bean should be removed
+   * @return <tt>true</tt>, if a bean has been removed
+   */
+  default boolean removeBeanIfAndBreak(Predicate<BEAN> pPredicate)
+  {
+    return BeanListenerUtil.removeBeanIf(this, pPredicate, true);
   }
 
   /**
