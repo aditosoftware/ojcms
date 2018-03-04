@@ -162,10 +162,10 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
    * @param pField the bean field to check
    * @return <tt>true</tt> if the field is present
    */
-  default boolean hasField(IField pField)
+  default boolean hasField(IField<?> pField)
   {
-    //Compare reference, because fields are defined as static
-    return streamFields().anyMatch(pExistingField -> pField == pExistingField);
+    assert getEncapsulated() != null;
+    return getEncapsulated().containsField(pField);
   }
 
   /**
