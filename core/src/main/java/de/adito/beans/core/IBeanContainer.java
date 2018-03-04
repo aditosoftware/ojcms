@@ -289,7 +289,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
   default IBeanContainer<BEAN> asReadOnly()
   {
     assert getEncapsulated() != null;
-    return new ReadOnly<>(this);
+    return new ReadOnly<>(getEncapsulated());
   }
 
   /**
@@ -327,18 +327,18 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
    */
   class ReadOnly<BEAN extends IBean<BEAN>> implements IBeanContainer<BEAN>
   {
-    private static final String ERROR = "Read-only container!";
-    private final IBeanContainer<BEAN> original;
+    private static final String ERROR = "This container is read-only! The content can not be modified!";
+    private final IBeanContainerEncapsulated<BEAN> originalEncapsulated;
 
-    public ReadOnly(IBeanContainer<BEAN> pOriginal)
+    public ReadOnly(IBeanContainerEncapsulated<BEAN> pOriginalEncapsulated)
     {
-      original = pOriginal;
+      originalEncapsulated = pOriginalEncapsulated;
     }
 
     @Override
     public IBeanContainerEncapsulated<BEAN> getEncapsulated()
     {
-      return original.getEncapsulated();
+      return originalEncapsulated;
     }
 
     @Override
