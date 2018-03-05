@@ -117,6 +117,28 @@ final class BeanListenerUtil
   }
 
   /**
+   * Removes a bean from a bean container based on a given delete function.
+   * The listeners will be informed about the removal.
+   *
+   * @param pContainer      the container to remove the bean from
+   * @param pDeleteFunction the function to perform the removal based on the data core of the container.
+   *                        It returns the removed bean or null, if no bean hasn't been removed
+   * @param <BEAN>          the type of the beans in the container
+   * @return the removed bean or null, if no bean hasn't been removed
+   */
+  @Nullable
+  public static <BEAN extends IBean<BEAN>> BEAN removeFromContainer(IBeanContainer<BEAN> pContainer,
+                                                                    Function<IBeanContainerEncapsulated<BEAN>, BEAN> pDeleteFunction)
+  {
+    IBeanContainerEncapsulated<BEAN> enc = pContainer.getEncapsulated();
+    assert enc != null;
+    BEAN removedBean = pDeleteFunction.apply(enc);
+    if (removedBean != null)
+      BeanListenerUtil.beanRemoved(pContainer, removedBean);
+    return removedBean;
+  }
+
+  /**
    * Removes beans which apply to a given predicate successfully.
    * It's possible to break after one removal, if you know the predicate should apply to one bean only.
    * The registered listeners will be informed.

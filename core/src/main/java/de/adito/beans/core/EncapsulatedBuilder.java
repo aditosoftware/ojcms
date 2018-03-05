@@ -38,6 +38,30 @@ public final class EncapsulatedBuilder
   }
 
   /**
+   * Injects the default encapsulated data core into a bean.
+   *
+   * @param pBean  the bean to inject the default core into
+   * @param <BEAN> the generic bean type
+   * @return the bean
+   */
+  public static <BEAN extends IBean<BEAN>> BEAN injectDefaultEncapsulated(BEAN pBean)
+  {
+    return injectCustomEncapsulated(pBean, new Bean.DefaultEncapsulatedBuilder(pBean));
+  }
+
+  /**
+   * Injects the default encapsulated data core into a bean container
+   *
+   * @param pContainer the container to inject the default core into
+   * @param <BEAN>     the generic type of the beans in the container
+   * @return the container
+   */
+  public static <BEAN extends IBean<BEAN>> IBeanContainer<BEAN> injectDefaultEncapsulated(IBeanContainer<BEAN> pContainer)
+  {
+    return injectCustomEncapsulated(pContainer, new BeanContainer.DefaultEncapsulatedBuilder<>(pContainer.toListProxy()));
+  }
+
+  /**
    * Injects a custom encapsulated data cora into a bean.
    * The data core is based on a {@link IBeanEncapsulatedBuilder}
    *
@@ -150,12 +174,20 @@ public final class EncapsulatedBuilder
     void addBean(BEAN pBean, int pIndex);
 
     /**
-     * Removes a bean.
+     * Removes the first occurrence of a certain bean.
      *
      * @param pBean the bean to remove
      * @return <tt>true</tt>, if the bean has been removed successfully
      */
     boolean removeBean(BEAN pBean);
+
+    /**
+     * Removes a bean by index.
+     *
+     * @param pIndex the index to remove
+     * @return the removed bean
+     */
+    BEAN removeBean(int pIndex);
 
     /**
      * Determines, if a certain bean is contained.
@@ -333,17 +365,27 @@ public final class EncapsulatedBuilder
     @Override
     public BEAN replaceBean(BEAN pReplacement, int pIndex)
     {
-      BEAN toRemove = getBean(pIndex);
-      if (toRemove != null)
-        removeBean(toRemove);
+      if (pIndex < 0 || pIndex >= size())
+        throw new IndexOutOfBoundsException("index: " + pIndex);
+
+      BEAN removed = removeBean(pIndex);
       addBean(pReplacement, pIndex);
-      return toRemove;
+      return removed;
     }
 
     @Override
     public boolean removeBean(BEAN pBean)
     {
       return builder.removeBean(pBean);
+    }
+
+    @Override
+    public BEAN removeBean(int pIndex)
+    {
+      if (pIndex < 0 || pIndex >= size())
+        throw new IndexOutOfBoundsException("index: " + pIndex);
+
+      return builder.removeBean(pIndex);
     }
 
     @Override

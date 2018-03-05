@@ -3,6 +3,7 @@ package de.adito.beans.core;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A default implementation of the bean container interface.
@@ -72,7 +73,10 @@ public class BeanContainer<BEAN extends IBean<BEAN>> implements IBeanContainer<B
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "{beanType: " + getBeanType().getSimpleName() + ", count: " + size() + "}";
+    return getClass().getSimpleName() + "{beanType: " + getBeanType().getSimpleName() + ", count: " + size() + "}\nbeans:\n" +
+        stream()
+            .map(Objects::toString)
+            .collect(Collectors.joining("\n"));
   }
 
   /**
@@ -97,6 +101,12 @@ public class BeanContainer<BEAN extends IBean<BEAN>> implements IBeanContainer<B
     public boolean removeBean(BEAN pBean)
     {
       return beanList.remove(pBean);
+    }
+
+    @Override
+    public BEAN removeBean(int pIndex)
+    {
+      return beanList.remove(pIndex);
     }
 
     @Override

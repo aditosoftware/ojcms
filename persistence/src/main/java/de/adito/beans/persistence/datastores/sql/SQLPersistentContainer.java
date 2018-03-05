@@ -100,16 +100,19 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
     int index = indexOfBean(pBean);
     if (index == -1)
       return false;
-
-    boolean deleted = _delete(pDelete -> pDelete
-        .whereId(index)
-        .delete());
-
-    if (!deleted)
-      throw new BeanSQLException("Unexpected SQL error while removing bean from container!");
-
-    beanCache.remove(index);
+    _removeByIndex(index);
     return true;
+  }
+
+  @Override
+  public BEAN removeBean(int pIndex)
+  {
+    if (pIndex < 0 || pIndex >= size())
+      throw new IndexOutOfBoundsException("index: " + pIndex);
+    //Inject the default encapsulated core with the values from the database to allow the bean to exist after the removal
+    BEAN removed = EncapsulatedBuilder.injectDefaultEncapsulated(getBean(pIndex));
+    _removeByIndex(pIndex);
+    return removed;
   }
 
   @Override
@@ -131,7 +134,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
   {
     return beanCache.entrySet().stream()
         .filter(pEntry -> Objects.equals(pBean, pEntry.getValue()))
-        .findAny()
+        .findFirst()
         .map(Map.Entry::getKey)
         .orElse(_selectAll(pSelect -> pSelect
             .where(_beanIdentifiersToTuples(pBean))
@@ -195,6 +198,27 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
   private BEAN _injectPersistentCore(BEAN pInstance, int pIndex)
   {
     return EncapsulatedBuilder.injectCustomEncapsulated(pInstance, new _ContainerBean(pIndex));
+  }
+
+  /**
+   * Removes a bean at a certain index.
+   * The bean instance will also be removed from the cache.
+   *
+   * @param pIndex the index to remove to bean from
+   */
+  private void _removeByIndex(int pIndex)
+  {
+    if (pIndex < 0 || pIndex >= size())
+      throw new IndexOutOfBoundsException("index: " + pIndex);
+
+    boolean deleted = _delete(pDelete -> pDelete
+        .whereId(pIndex)
+        .delete());
+
+    if (!deleted)
+      throw new BeanSQLException("Unexpected SQL error while removing bean from container!");
+
+    beanCache.remove(pIndex);
   }
 
   /**

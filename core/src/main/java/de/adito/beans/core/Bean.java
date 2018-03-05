@@ -1,7 +1,7 @@
 package de.adito.beans.core;
 
 import de.adito.beans.core.fields.FieldTuple;
-import de.adito.beans.core.util.BeanReflector;
+import de.adito.beans.core.util.*;
 import de.adito.beans.core.util.exceptions.BeanFieldDoesNotExistException;
 import org.jetbrains.annotations.NotNull;
 
@@ -135,12 +135,32 @@ public class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
   {
     private final Map<IField<?>, Object> values;
 
+    /**
+     * Creates a new default encapsulated builder.
+     *
+     * @param pFields the fields for this core
+     */
     public DefaultEncapsulatedBuilder(List<IField<?>> pFields)
     {
       values = pFields.stream()
           .collect(LinkedHashMap::new, (pMap, pField) -> pMap.put(pField, null), HashMap::putAll);
     }
 
+    /**
+     * Creates a new default encapsulated builder based on the fields and values of a existing bean.
+     *
+     * @param pBean the bean to take the values from
+     */
+    public DefaultEncapsulatedBuilder(IBean<?> pBean)
+    {
+      this(BeanUtil.asMap(pBean, null));
+    }
+
+    /**
+     * Creates a new default encapsulated builder with preset values.
+     *
+     * @param pPreset a preset mapping from fields to values
+     */
     public DefaultEncapsulatedBuilder(Map<? extends IField<?>, Object> pPreset)
     {
       values = new LinkedHashMap<>(pPreset);

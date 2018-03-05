@@ -22,13 +22,13 @@ public final class BeanUtil
    * Returns the bean as a map of fields and associated values.
    * Due to a field predicate fields may be excluded.
    *
-   * @param pFieldPredicate a field predicate to determine which fields should be in the map.
+   * @param pFieldPredicate a field predicate to determine which fields should be in the map or null, if all fields should be affected
    * @return a map with fields as keys and the associated bean values as values
    */
-  public static Map<IField<?>, Object> asMap(IBean<?> pBean, IBeanFieldPredicate pFieldPredicate)
+  public static Map<IField<?>, Object> asMap(IBean<?> pBean, @Nullable IBeanFieldPredicate pFieldPredicate)
   {
     return pBean.stream()
-        .filter(pFieldTuple -> pFieldPredicate.test(pFieldTuple.getField(), pFieldTuple.getValue()))
+        .filter(pFieldTuple -> pFieldPredicate == null || pFieldPredicate.test(pFieldTuple.getField(), pFieldTuple.getValue()))
         //Use the LinkedHashMap-Collector to keep the order and allow null values
         .collect(LinkedHashMap::new, (pMap, pFieldTuple) -> pMap.put(pFieldTuple.getField(), pFieldTuple.getValue()), LinkedHashMap::putAll);
   }

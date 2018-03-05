@@ -32,16 +32,26 @@ interface IBeanContainerEncapsulated<BEAN extends IBean<BEAN>> extends IEncapsul
    * @param pReplacement the bean that replaces the old one
    * @param pIndex       the index where the bean should be replaced
    * @return the replaced bean
+   * @throws IndexOutOfBoundsException if, the index is not within the range of the contained beans
    */
   BEAN replaceBean(BEAN pReplacement, int pIndex);
 
   /**
-   * Removes a bean.
+   * Removes the first occurrence of a certain bean.
    *
    * @param pBean the bean to remove
    * @return <tt>true</tt>, if the bean has been removed successfully
    */
   boolean removeBean(BEAN pBean);
+
+  /**
+   * Removes a bean by index.
+   *
+   * @param pIndex the index to remove
+   * @return the removed bean or null
+   * @throws IndexOutOfBoundsException if, the index is not within the range of the contained beans
+   */
+  BEAN removeBean(int pIndex);
 
   /**
    * Determines, if a certain bean is contained.

@@ -6,6 +6,7 @@ import de.adito.beans.core.util.BeanContainerListProxy;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.*;
 import java.util.stream.*;
 
@@ -76,9 +77,13 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
    * @param pBean  the bean to replace
    * @param pIndex the index of the replacement
    * @return the replaced bean
+   * @throws IndexOutOfBoundsException if, the index is not within the range of the contained beans
    */
   default BEAN replaceBean(BEAN pBean, int pIndex)
   {
+    if (pIndex < 0 || pIndex >= size())
+      throw new IndexOutOfBoundsException("index: " + pIndex);
+
     assert getEncapsulated() != null;
     BEAN removed = getEncapsulated().replaceBean(pBean, pIndex);
     if (removed != null)
@@ -88,7 +93,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
   }
 
   /**
-   * Removes a bean from the container.
+   * Removes a bean (first occurrence) from the container.
    * The registered listeners will be informed.
    *
    * @param pBean the bean to remove
@@ -96,12 +101,22 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
    */
   default boolean removeBean(BEAN pBean)
   {
-    IBeanContainerEncapsulated<BEAN> enc = getEncapsulated();
-    assert enc != null;
-    boolean removed = enc.removeBean(pBean);
-    if (removed)
-      BeanListenerUtil.beanRemoved(this, pBean);
-    return removed;
+    return BeanListenerUtil.removeFromContainer(this, pEncapsulated -> pEncapsulated.removeBean(pBean) ? pBean : null) != null;
+  }
+
+  /**
+   * Removes a bean from the container by index.
+   *
+   * @param pIndex the index to remove the bean from
+   * @return the removed bean
+   * @throws IndexOutOfBoundsException if, the index is not within the range of the contained beans
+   */
+  default BEAN removeBean(int pIndex)
+  {
+    if (pIndex < 0 || pIndex >= size())
+      throw new IndexOutOfBoundsException("index: " + pIndex);
+
+    return BeanListenerUtil.removeFromContainer(this, pEncapsulated -> pEncapsulated.removeBean(pIndex));
   }
 
   /**
@@ -187,6 +202,20 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
       throw new IllegalArgumentException("The bean must not be null!");
     assert getEncapsulated() != null;
     return getEncapsulated().containsBean(Objects.requireNonNull(pBean));
+  }
+
+  /**
+   * Sorts this bean container according to a given comparator.
+   *
+   * @param pComparator the comparator
+   */
+  default void sort(Comparator<BEAN> pComparator)
+  {
+    List<BEAN> sorted = stream()
+        .sorted(pComparator)
+        .collect(Collectors.toList());
+    final AtomicInteger index = new AtomicInteger();
+    sorted.forEach(pBean -> replaceBean(pBean, index.getAndIncrement()));
   }
 
   /**
