@@ -50,49 +50,4 @@ public interface IReferable
     if (nodes.isEmpty())
       references.remove(pBean);
   }
-
-  /**
-   * A default implementation for a hierarchical node.
-   */
-  class HierarchicalNodeImpl implements IHierarchicalBeanStructure.IHierarchicalNode
-  {
-    private final IBean<?> bean;
-    private final IHierarchicalField<?> field;
-
-    public HierarchicalNodeImpl(IBean<?> pBean, IHierarchicalField<?> pField)
-    {
-      bean = pBean;
-      field = pField;
-    }
-
-    @Override
-    public IBean<?> getBean()
-    {
-      return bean;
-    }
-
-    @Override
-    public IHierarchicalField<?> getField()
-    {
-      return field;
-    }
-
-    @Override
-    public boolean equals(Object pObject)
-    {
-      if (this == pObject) return true;
-      if (pObject == null || getClass() != pObject.getClass()) return false;
-
-      HierarchicalNodeImpl other = (HierarchicalNodeImpl) pObject;
-      return bean == other.bean && field == other.field;
-    }
-
-    @Override
-    public int hashCode()
-    {
-      int result = bean.hashCode();
-      result = 31 * result + field.hashCode();
-      return result;
-    }
-  }
 }
