@@ -1,12 +1,12 @@
 package de.adito.beans.core.util;
 
-import de.adito.beans.core.IBean;
-import de.adito.beans.core.IBeanContainer;
+import de.adito.beans.core.*;
 import org.intellij.lang.annotations.Flow;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.stream.IntStream;
 
 /**
  * A list proxy for a bean container to treat it as a List.
@@ -18,6 +18,11 @@ public class BeanContainerListProxy<BEAN extends IBean<BEAN>> implements List<BE
 {
   private final IBeanContainer<BEAN> container;
 
+  /**
+   * Creates the list proxy based on an original bean container.
+   *
+   * @param pContainer the original bean container
+   */
   public BeanContainerListProxy(IBeanContainer<BEAN> pContainer)
   {
     container = pContainer;
@@ -39,7 +44,7 @@ public class BeanContainerListProxy<BEAN extends IBean<BEAN>> implements List<BE
   public boolean contains(Object pObject)
   {
     //noinspection unchecked
-    return container.getBeanType().isAssignableFrom(pObject.getClass()) && container.contains((BEAN) pObject);
+    return _checkType(pObject) && container.contains((BEAN) pObject);
   }
 
   @Override
@@ -70,7 +75,7 @@ public class BeanContainerListProxy<BEAN extends IBean<BEAN>> implements List<BE
   {
     int size = container.size();
     T[] array = pArray.length >= size ? pArray : (T[]) Array.newInstance(pArray.getClass().getComponentType(), size);
-    container.stream().forEach(pBean -> array[container.indexOf(pBean)] = (T) pBean);
+    container.forEachBean(pBean -> array[container.indexOf(pBean)] = (T) pBean);
     return array;
   }
 
@@ -85,7 +90,7 @@ public class BeanContainerListProxy<BEAN extends IBean<BEAN>> implements List<BE
   public boolean remove(Object pObject)
   {
     //noinspection unchecked
-    return container.getBeanType().isAssignableFrom(pObject.getClass()) && container.removeBean((BEAN) pObject);
+    return _checkType(pObject) && container.removeBean((BEAN) pObject);
   }
 
   @Override
@@ -142,14 +147,15 @@ public class BeanContainerListProxy<BEAN extends IBean<BEAN>> implements List<BE
   @Override
   public BEAN remove(int pIndex)
   {
-    BEAN bean = container.getBean(pIndex);
-    container.removeBean(bean);
-    return bean;
+    return container.removeBean(pIndex);
   }
 
   @Override
   public int indexOf(Object pObject)
   {
+    if (!_checkType(pObject))
+      throw new ClassCastException("the type of the given object (" + pObject.getClass().getName() +
+                                       ") is not compatible to the container's bean types.");
     //noinspection unchecked
     return container.indexOf((BEAN) pObject);
   }
@@ -157,7 +163,16 @@ public class BeanContainerListProxy<BEAN extends IBean<BEAN>> implements List<BE
   @Override
   public int lastIndexOf(Object pObject)
   {
-    throw new UnsupportedOperationException();
+    if (!_checkType(pObject))
+      throw new ClassCastException("the type of the given object (" + pObject.getClass().getName() +
+                                       ") is not compatible to the container's bean types.");
+
+    final int lastIndex = size() - 1;
+    return IntStream.rangeClosed(0, lastIndex)
+        .map(pIndex -> lastIndex - pIndex)
+        .filter(pIndex -> Objects.equals(pObject, get(pIndex)))
+        .findFirst()
+        .orElse(-1);
   }
 
   @NotNull
@@ -178,7 +193,18 @@ public class BeanContainerListProxy<BEAN extends IBean<BEAN>> implements List<BE
   @Override
   public List<BEAN> subList(int pFromIndex, int pToIndex)
   {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException("not available for bean containers");
+  }
+
+  /**
+   * Checks, if any object is assignable from the container's bean type.
+   *
+   * @param pObject the object to check
+   * @return <tt>true</tt>, if the bean type is assignable
+   */
+  private boolean _checkType(Object pObject)
+  {
+    return container.getBeanType().isAssignableFrom(pObject.getClass());
   }
 
   /**
@@ -214,6 +240,9 @@ public class BeanContainerListProxy<BEAN extends IBean<BEAN>> implements List<BE
       initialSize--;
     }
 
+    /**
+     * Checks for a concurrent modification.
+     */
     protected void checkConcurrent()
     {
       if (initialSize != container.size())
@@ -226,15 +255,18 @@ public class BeanContainerListProxy<BEAN extends IBean<BEAN>> implements List<BE
    */
   private class _ProxyListIterator extends _ProxyIterator implements ListIterator<BEAN>
   {
+    private final int startIndex;
+
     public _ProxyListIterator(int pStartIndex)
     {
+      startIndex = pStartIndex;
       cursor = pStartIndex;
     }
 
     @Override
     public boolean hasPrevious()
     {
-      return cursor > 0;
+      return cursor > startIndex;
     }
 
     @Override
