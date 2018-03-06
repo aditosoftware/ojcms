@@ -27,15 +27,9 @@ interface ISelfTransformable<ENCAPSULATED extends IEncapsulated, SOURCE extends 
   }
 
   @Override
-  default void transform(SOURCE pSourceToTransform)
-  {
-    //noinspection unchecked
-    getTransformator().link(pSourceToTransform, (TRANSFORMATOR) this); //Link first
-    ITransformable.super.transform(pSourceToTransform);
-  }
-
-  @Override
   default void initTransformation(SOURCE pSourceToTransform)
   {
+    //noinspection unchecked
+    getTransformator().link(pSourceToTransform, (TRANSFORMATOR) this);
   }
 }
