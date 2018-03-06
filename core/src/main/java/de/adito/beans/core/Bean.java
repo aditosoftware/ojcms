@@ -41,7 +41,7 @@ public class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
    */
   public Bean()
   {
-    _init(new DefaultEncapsulatedBuilder(BeanReflector.getBeanMetadata(getClass())));
+    _init(new DefaultEncapsulatedBuilder(BeanReflector.reflectBeanFields(getClass())));
   }
 
   /**

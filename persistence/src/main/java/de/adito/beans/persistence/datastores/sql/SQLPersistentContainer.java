@@ -63,7 +63,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
                                 @Nullable String pUserName, @Nullable String pPassword, String pTableName)
   {
     beanType = pBeanType;
-    fields = BeanReflector.getBeanMetadata(beanType);
+    fields = BeanReflector.reflectBeanFields(beanType);
     type = pType;
     host = pHost;
     port = pPort;

@@ -15,6 +15,7 @@ import java.util.stream.*;
  */
 public final class BeanReflector
 {
+  private static final Map<Class<? extends IBean>, List<Field>> REFLECTION_CACHE = new HashMap<>();
   private static final Map<Class<? extends IBean>, List<IField<?>>> METADATA_CACHE = new HashMap<>();
 
   private BeanReflector()
@@ -22,17 +23,25 @@ public final class BeanReflector
   }
 
   /**
-   * The metadata/fields of a certain bean type.
+   * Reflects the bean fields of a certain bean type.
    *
    * @param pBeanType the type of the bean, which must be an extension of {@link Bean} to own specific fields
-   * @return a collection of bean fields
+   * @return a list of bean fields
    */
-  public static List<IField<?>> getBeanMetadata(Class<? extends IBean> pBeanType)
+  public static List<IField<?>> reflectBeanFields(Class<? extends IBean> pBeanType)
   {
-    if (!Bean.class.isAssignableFrom(pBeanType)) //To make sure it isn't a transformed type
-      throw new RuntimeException(pBeanType.getName() + " is not a valid bean type to reflect fields from. Do not use transformed bean types!");
+    return Collections.unmodifiableList(METADATA_CACHE.computeIfAbsent(pBeanType, BeanReflector::_createBeanMetadata));
+  }
 
-    return METADATA_CACHE.computeIfAbsent(pBeanType, BeanReflector::_createBeanMetadata);
+  /**
+   * Reflects the declared bean fields of a certain bean type.
+   *
+   * @param pBeanType the type of the bean, which must be an extension of {@link Bean} to own specific fields
+   * @return a list of the declared fields
+   */
+  public static List<Field> reflectDeclaredBeanFields(Class<? extends IBean> pBeanType)
+  {
+    return Collections.unmodifiableList(REFLECTION_CACHE.computeIfAbsent(pBeanType, BeanReflector::_createDeclaredFields));
   }
 
   /**
@@ -63,25 +72,14 @@ public final class BeanReflector
   }
 
   /**
-   * Reflects the fields of a bean type.
+   * Reflects the bean fields of a bean type.
    *
    * @param pBeanType the type of the bean, which must be an extension of {@link Bean} to own specific fields
    * @return a list of bean fields from the given type
    */
   private static List<IField<?>> _createBeanMetadata(Class<? extends IBean> pBeanType)
   {
-    List<Field> declaredFields = new ArrayList<>();
-    //Collect all fields, also from the superclasses
-    Class current = pBeanType;
-    do
-    {
-      declaredFields.addAll(Arrays.asList(current.getDeclaredFields()));
-    }
-    while ((current = current.getSuperclass()) != null && !current.equals(Bean.class));
-
-    return declaredFields.stream()
-        .filter(pField -> Modifier.isStatic(pField.getModifiers()))
-        .filter(pField -> IField.class.isAssignableFrom(pField.getType()))
+    return reflectDeclaredBeanFields(_checkValidBeanType(pBeanType)).stream()
         .map(pField -> {
           try
           {
@@ -93,5 +91,45 @@ public final class BeanReflector
           }
         })
         .collect(Collectors.toList());
+  }
+
+  /**
+   * Returns all public and static fields from a bean class type.
+   *
+   * @param pBeanType the type of the bean, which must be an extension of {@link Bean} to own specific fields
+   * @return a list of declared fields of the bean type
+   */
+  private static List<Field> _createDeclaredFields(Class<? extends IBean> pBeanType)
+  {
+    _checkValidBeanType(pBeanType);
+    List<Field> declaredFields = new ArrayList<>();
+    //Collect all fields, also from the superclasses
+    Class current = pBeanType;
+    do
+    {
+      declaredFields.addAll(Arrays.asList(current.getDeclaredFields()));
+    }
+    while ((current = current.getSuperclass()) != null && !current.equals(Bean.class));
+
+    return declaredFields.stream()
+        .filter(pField -> Modifier.isStatic(pField.getModifiers()))
+        .filter(pField -> Modifier.isPublic(pField.getModifiers()))
+        .filter(pField -> IField.class.isAssignableFrom(pField.getType()))
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * Checks, if a bean type is valid for reflecting declared fields.
+   * It has to be an extension of {@link Bean}.
+   * Throws a runtime exception, if the type is invalid
+   *
+   * @param pBeanType the bean type to check
+   * @return the valid bean type
+   */
+  private static Class<? extends IBean> _checkValidBeanType(Class<? extends IBean> pBeanType)
+  {
+    if (!Bean.class.isAssignableFrom(pBeanType)) //To make sure it isn't a transformed type
+      throw new RuntimeException(pBeanType.getName() + " is not a valid bean type to reflect fields from. Do not use transformed bean types!");
+    return pBeanType;
   }
 }

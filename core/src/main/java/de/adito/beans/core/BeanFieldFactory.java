@@ -1,6 +1,7 @@
 package de.adito.beans.core;
 
 import de.adito.beans.core.annotations.*;
+import de.adito.beans.core.util.BeanReflector;
 import de.adito.picoservice.IPicoRegistry;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,7 +22,6 @@ import java.util.stream.*;
  */
 public final class BeanFieldFactory
 {
-  private static final Map<Class<? extends IBean>, List<Field>> CACHE = new LinkedHashMap<>();
   private static Map<Class, Class<? extends IField>> typeFieldMapping;
 
   private BeanFieldFactory()
@@ -43,21 +43,21 @@ public final class BeanFieldFactory
   @SuppressWarnings("unchecked")
   public static <BEAN extends Bean<BEAN>, FIELD extends IField> FIELD create(Class<BEAN> pBeanType)
   {
-    for (Field field : _getFields(pBeanType))
-      try
-      {
-        if (field.get(null) == null)
-        {
-          Class<FIELD> fieldType = (Class<FIELD>) field.getType();
-          return (FIELD) _createField(fieldType, _getGenType(field, fieldType), field.getName(), Arrays.asList(field.getAnnotations()));
-        }
-      }
-      catch (IllegalAccessException pE)
-      {
-        throw new RuntimeException(pE);
-      }
-
-    throw new RuntimeException("Unable to create a bean field. There are no static fields or all of them are initialized already.");
+    Field toCreate = BeanReflector.reflectDeclaredBeanFields(pBeanType).stream()
+        .filter(pField -> {
+          try
+          {
+            return pField.get(null) == null;
+          }
+          catch (IllegalAccessException pE)
+          {
+            throw new RuntimeException(pE);
+          }
+        })
+        .findAny()
+        .orElseThrow(() -> new RuntimeException("Unable to create a field. There are no static fields or all of them are initialized already."));
+    Class<FIELD> fieldType = (Class<FIELD>) toCreate.getType();
+    return (FIELD) _createField(fieldType, _getGenType(toCreate, fieldType), toCreate.getName(), Arrays.asList(toCreate.getAnnotations()));
   }
 
   /**
@@ -158,32 +158,6 @@ public final class BeanFieldFactory
     Type fieldSuperGenType = ((ParameterizedType) fieldSuperType).getActualTypeArguments()[0];
     return (Class) (fieldSuperGenType instanceof ParameterizedType ? ((ParameterizedType) fieldSuperGenType).getRawType() :
         ((ParameterizedType) genericType).getActualTypeArguments()[0]);
-  }
-
-  /**
-   * Returns all public, static, final fields from a bean class type.
-   * They will be cached to improved performance, especially if the class has many fields to initialise.
-   *
-   * @param pBeanType der Typ des Beans
-   * @return eine Menge von Feldern (Reflection)
-   */
-  private static List<Field> _getFields(Class<? extends IBean> pBeanType)
-  {
-    List<Field> fields = CACHE.get(pBeanType);
-    if (fields == null)
-    {
-      fields = new ArrayList<>();
-      for (Field field : pBeanType.getDeclaredFields())
-      {
-        int modifiers = field.getModifiers();
-        if (Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers) && Modifier.isPublic(modifiers) &&
-            IField.class.isAssignableFrom(field.getType()))
-          fields.add(field);
-      }
-      CACHE.put(pBeanType, fields);
-    }
-
-    return fields;
   }
 
   /**

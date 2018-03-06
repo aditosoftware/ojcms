@@ -235,7 +235,7 @@ public final class EncapsulatedBuilder
     private _BeanEncapsulated(IBeanEncapsulatedBuilder pBuilder, Class<BEAN> pBeanType)
     {
       builder = pBuilder;
-      fieldOrder = new ArrayList<>(BeanReflector.getBeanMetadata(pBeanType));
+      fieldOrder = new ArrayList<>(BeanReflector.reflectBeanFields(pBeanType));
       _createStatisticData(pBeanType);
     }
 
