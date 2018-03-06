@@ -102,8 +102,7 @@ interface ITransformable<LOGIC, VISUAL, ENCAPSULATED extends IEncapsulated, SOUR
    */
   default void transformedOrThrow() throws NotTransformedException
   {
-    if (!isTransformed())
-      throw new NotTransformedException(getClass().getSimpleName());
+    transformedOrThrow(() -> new NotTransformedException(getClass().getSimpleName()));
   }
 
   /**
