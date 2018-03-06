@@ -75,6 +75,12 @@ public final class BeanUtil
   {
     return pFieldsToCheck.stream()
         .map(pField -> (IField) pField)
+        .peek(pField -> {
+          //noinspection unchecked
+          assert pBean1.hasField(pField);
+          //noinspection unchecked
+          assert pBean2.hasField(pField);
+        })
         .filter(pField -> !Objects.equals(pBean1.getValue(pField), pBean2.getValue(pField)))
         .findAny();
   }
@@ -85,30 +91,32 @@ public final class BeanUtil
    * The values of these fields have to be equal to fulfil this condition.
    * The bean will be removed from the collection, if the equivalent is found.
    *
-   * @param pBean         the bean for which the equivalent should be found
-   * @param pOldToCompare the collection of beans to compare
-   * @return the equivalent bean that was removed, or null if no result
+   * @param pBean      the bean for which the equivalent should be found
+   * @param pToCompare the collection of beans to compare
+   * @return the equivalent bean that was removed (optional, because it may have not been found)
    */
   @Nullable
-  public static <BEAN extends IBean<BEAN>> BEAN findRelatedBeanAndRemove(BEAN pBean, Collection<BEAN> pOldToCompare)
+  public static <BEAN extends IBean<BEAN>> Optional<BEAN> findRelatedBeanAndRemove(BEAN pBean, Collection<BEAN> pToCompare)
   {
-    Iterator<BEAN> it = pOldToCompare.iterator();
+    Iterator<BEAN> it = pToCompare.iterator();
     Set<FieldTuple<?>> identifiers = pBean.getIdentifiers();
     while (it.hasNext())
     {
       BEAN oldBean = it.next();
       if (pBean.getClass() == oldBean.getClass() && //same types
           ((identifiers.isEmpty() && Objects.equals(oldBean, pBean)) || //no identifiers -> use default equals()
-              (identifiers.equals(oldBean.getIdentifiers()) && !BeanUtil.compareBeanValues(oldBean, pBean, identifiers.stream()
-                  .map(FieldTuple::getField)
-                  .collect(Collectors.toSet())).isPresent())))
+              (identifiers.equals(oldBean.getIdentifiers()) && //else use identifiers
+                  !BeanUtil.compareBeanValues(oldBean, pBean, identifiers.stream()
+                      .map(FieldTuple::getField)
+                      .collect(Collectors.toSet()))
+                      .isPresent())))
       {
         it.remove();
-        return oldBean;
+        return Optional.of(oldBean);
       }
     }
 
-    return null;
+    return Optional.empty();
   }
 
   /**
