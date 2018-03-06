@@ -123,6 +123,7 @@ public class MapBean<TYPE> implements IModifiableBean<MapBean<TYPE>>
 
     MapBean other = (MapBean) pObject;
     //MapBeans are the same, if all fields and associated values are equal
+    //noinspection unchecked
     return streamFields().allMatch(other::hasField) &&
         !BeanUtil.compareBeanValues(this, other, streamFields().collect(Collectors.toList())).isPresent();
   }

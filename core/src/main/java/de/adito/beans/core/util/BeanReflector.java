@@ -15,41 +15,24 @@ import java.util.stream.*;
  */
 public final class BeanReflector
 {
+  private static final Map<Class<? extends IBean>, List<IField<?>>> METADATA_CACHE = new HashMap<>();
+
   private BeanReflector()
   {
   }
 
   /**
-   * Reflects the fields of a bean type.
+   * The metadata/fields of a certain bean type.
    *
    * @param pBeanType the type of the bean, which must be an extension of {@link Bean} to own specific fields
    * @return a collection of bean fields
    */
   public static List<IField<?>> getBeanMetadata(Class<? extends IBean> pBeanType)
   {
-    assert Bean.class.isAssignableFrom(pBeanType); //To make sure it isn't a transformed type.
-    List<Field> declaredFields = new ArrayList<>();
-    //Collect all fields, also from the superclasses
-    Class current = pBeanType;
-    do
-    {
-      declaredFields.addAll(Arrays.asList(current.getDeclaredFields()));
-    }
-    while ((current = current.getSuperclass()) != null && !current.equals(Bean.class));
+    if (!Bean.class.isAssignableFrom(pBeanType)) //To make sure it isn't a transformed type
+      throw new RuntimeException(pBeanType.getName() + " is not a valid bean type to reflect fields from. Do not use transformed bean types!");
 
-    List<IField<?>> metadata = new ArrayList<>();
-    for (Field field : declaredFields)
-      if (Modifier.isStatic(field.getModifiers()) && IField.class.isAssignableFrom(field.getType()))
-        try
-        {
-          metadata.add((IField) field.get(null));
-        }
-        catch (IllegalAccessException pE)
-        {
-          throw new RuntimeException(pE);
-        }
-
-    return metadata;
+    return METADATA_CACHE.computeIfAbsent(pBeanType, BeanReflector::_createBeanMetadata);
   }
 
   /**
@@ -77,5 +60,38 @@ public final class BeanReflector
     return Stream.of(pBeanType.getDeclaredFields())
         .filter(pField -> pField.getAnnotation(Statistics.class) != null)
         .collect(Collectors.toMap(Field::getName, pField -> pField.getAnnotation(Statistics.class)));
+  }
+
+  /**
+   * Reflects the fields of a bean type.
+   *
+   * @param pBeanType the type of the bean, which must be an extension of {@link Bean} to own specific fields
+   * @return a list of bean fields from the given type
+   */
+  private static List<IField<?>> _createBeanMetadata(Class<? extends IBean> pBeanType)
+  {
+    List<Field> declaredFields = new ArrayList<>();
+    //Collect all fields, also from the superclasses
+    Class current = pBeanType;
+    do
+    {
+      declaredFields.addAll(Arrays.asList(current.getDeclaredFields()));
+    }
+    while ((current = current.getSuperclass()) != null && !current.equals(Bean.class));
+
+    return declaredFields.stream()
+        .filter(pField -> Modifier.isStatic(pField.getModifiers()))
+        .filter(pField -> IField.class.isAssignableFrom(pField.getType()))
+        .map(pField -> {
+          try
+          {
+            return (IField<?>) pField.get(null);
+          }
+          catch (IllegalAccessException pE)
+          {
+            throw new RuntimeException(pE);
+          }
+        })
+        .collect(Collectors.toList());
   }
 }
