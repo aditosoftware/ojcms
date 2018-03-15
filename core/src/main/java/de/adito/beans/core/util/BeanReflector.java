@@ -128,6 +128,9 @@ public final class BeanReflector
    */
   private static Class<? extends IBean> _checkValidBeanType(Class<? extends IBean> pBeanType)
   {
+    if (!Modifier.isPublic(pBeanType.getModifiers()))
+      throw new RuntimeException(pBeanType.getName() + " is not a valid bean type! It has to be declared public to create fields!");
+
     if (!Bean.class.isAssignableFrom(pBeanType)) //To make sure it isn't a transformed type
       throw new RuntimeException(pBeanType.getName() + " is not a valid bean type to reflect fields from. Do not use transformed bean types!");
     return pBeanType;
