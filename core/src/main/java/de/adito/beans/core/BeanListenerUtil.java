@@ -3,6 +3,7 @@ package de.adito.beans.core;
 import de.adito.beans.core.listener.*;
 import de.adito.beans.core.references.IHierarchicalField;
 import de.adito.beans.core.util.IBeanFieldPredicate;
+import de.adito.beans.core.util.weak.IInputSortedElements;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -204,9 +205,9 @@ final class BeanListenerUtil
    */
   private static class _Listener<BEAN extends IBean<BEAN>> implements IBeanChangeListener<BEAN>
   {
-    private final List<IBeanContainerChangeListener<BEAN>> containerListeners;
+    private final IInputSortedElements<IBeanContainerChangeListener<BEAN>> containerListeners;
 
-    public _Listener(List<IBeanContainerChangeListener<BEAN>> pContainerListeners)
+    public _Listener(IInputSortedElements<IBeanContainerChangeListener<BEAN>> pContainerListeners)
     {
       containerListeners = pContainerListeners;
     }

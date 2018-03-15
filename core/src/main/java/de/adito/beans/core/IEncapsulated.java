@@ -2,6 +2,7 @@ package de.adito.beans.core;
 
 import de.adito.beans.core.listener.IBeanChangeListener;
 import de.adito.beans.core.references.*;
+import de.adito.beans.core.util.weak.IInputSortedElements;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -32,7 +33,7 @@ interface IEncapsulated<CORE, BEAN extends IBean<BEAN>, LISTENER extends IBeanCh
   /**
    * The container of all weak-registered listeners.
    */
-  default List<LISTENER> getWeakListeners()
+  default IInputSortedElements<LISTENER> getWeakListeners()
   {
     assert getBeanBaseData() != null;
     return getBeanBaseData().getWeakListenerContainer();

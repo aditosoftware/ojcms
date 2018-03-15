@@ -2,7 +2,7 @@ package de.adito.beans.core;
 
 import de.adito.beans.core.listener.IBeanChangeListener;
 import de.adito.beans.core.references.IHierarchicalField;
-import de.adito.beans.core.util.WeakArrayList;
+import de.adito.beans.core.util.weak.*;
 
 import java.util.*;
 
@@ -16,14 +16,14 @@ import java.util.*;
  */
 class BeanBaseData<BEAN extends IBean<BEAN>, LISTENER extends IBeanChangeListener<BEAN>>
 {
-  private final List<LISTENER> listenerContainer = new WeakArrayList<>();
+  private final IInputSortedElements<LISTENER> listenerContainer = new WeakInputSortedContainer<>();
   private final Set<ITransformable> linkContainer = Collections.newSetFromMap(new WeakHashMap<>());
   private final Map<IBean<?>, Set<IHierarchicalField<?>>> references = new WeakHashMap<>();
 
   /**
    * A container with weak-registered listeners.
    */
-  public List<LISTENER> getWeakListenerContainer()
+  public IInputSortedElements<LISTENER> getWeakListenerContainer()
   {
     return listenerContainer;
   }
