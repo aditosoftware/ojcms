@@ -53,10 +53,10 @@ public interface IHierarchicalBeanStructure extends IHierarchicalStructure
   default Set<IHierarchicalNode> getAllParentReferences()
   {
     Set<IHierarchicalNode> allNodes = getDirectParents();
-    Set<IHierarchicalNode> newNodes;
+    Set<IHierarchicalNode> newNodes = allNodes;
     do
     {
-      newNodes = allNodes.stream()
+      newNodes = newNodes.stream()
           .flatMap(IHierarchicalNode::streamParentNodes)
           .filter(pNode -> allNodes.stream()
               .map(IHierarchicalNode::getBean)
