@@ -2,7 +2,6 @@ package de.adito.beans.core;
 
 import de.adito.beans.core.listener.*;
 import de.adito.beans.core.references.IHierarchicalField;
-import de.adito.beans.core.util.IBeanFieldPredicate;
 import de.adito.beans.core.util.weak.IInputSortedElements;
 import org.jetbrains.annotations.Nullable;
 
@@ -168,21 +167,6 @@ final class BeanListenerUtil
       }
     }
     return removed;
-  }
-
-  /**
-   * Converts a bean copy to a change aware bean to be able to get notified about changes at the original bean.
-   *
-   * @param pOriginal       the original bean
-   * @param pCopy           the bean copy
-   * @param pIsFlat         <tt>true</tt>, if the copy has flatted fields
-   * @param pFieldPredicate an optional predicate, which maybe was used to exclude some fields from the copy
-   * @return the change aware bean
-   */
-  public static IBean<?> makeChangeAware(IBean<?> pOriginal, IBean pCopy, boolean pIsFlat, @Nullable IBeanFieldPredicate pFieldPredicate)
-  {
-    //noinspection unchecked
-    return new ChangeAwareBean<>(pOriginal, pCopy, pIsFlat, pFieldPredicate);
   }
 
   /**

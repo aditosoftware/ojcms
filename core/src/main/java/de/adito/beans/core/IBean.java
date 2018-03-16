@@ -5,7 +5,6 @@ import de.adito.beans.core.fields.FieldTuple;
 import de.adito.beans.core.listener.IBeanChangeListener;
 import de.adito.beans.core.references.IHierarchicalBeanStructure;
 import de.adito.beans.core.statistics.IStatisticData;
-import de.adito.beans.core.util.*;
 import de.adito.beans.core.util.exceptions.*;
 import org.jetbrains.annotations.Nullable;
 
@@ -267,53 +266,6 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
     return streamFields()
         .filter(pField -> pField.getName().equals(pName))
         .findAny();
-  }
-
-  /**
-   * Creates a copy of this bean with excluded fields.
-   * The copy may get updated, when the original bean has changed.
-   *
-   * @param pFieldPredicate determines, which fields should stay in the copy
-   * @param pUpdateChanges  <tt>true</tt>, if values should be updated in the copy as well
-   * @return a reduced copy of the bean
-   */
-  default IBean reducedCopy(IBeanFieldPredicate pFieldPredicate, boolean pUpdateChanges)
-  {
-    assert getEncapsulated() != null;
-    IBean<?> reducedCopy = new BeanCopy(BeanUtil.asMap(this, pFieldPredicate), getFieldActiveSupplier());
-    if (pUpdateChanges)
-      reducedCopy = BeanListenerUtil.makeChangeAware(this, reducedCopy, false, pFieldPredicate);
-    return reducedCopy;
-  }
-
-  /**
-   * Creates a flat copy of this bean. (Not deep!)
-   * All bean fields will be replaced by the fields of the referred beans.
-   * A runtime exception will be thrown, if the bean contains a container field.
-   * Additionally the copy will be informed via listeners, when a value of the original bean changes.
-   * Because of this feature this method is restricted to only one iteration of flattening.
-   * Otherwise it may be impossible to determine which flat field belongs to what field in the original bean, due to multiple possibilities.
-   *
-   * @return a flat copy of this bean (not deep!)
-   */
-  default IBean flatCopyWithUpdates()
-  {
-    IBean flatCopy = flatCopy(false);
-    return BeanListenerUtil.makeChangeAware(this, flatCopy, true, null);
-  }
-
-  /**
-   * Creates a flat copy of this bean.
-   * All bean fields will be replaced by the fields of the referred beans.
-   * A runtime exception will be thrown, if the bean contains a container field.
-   *
-   * @param pDeep <tt>true</tt>, if the fields should be flattened iteratively
-   * @return the flat copy of this bean
-   */
-  default IBean flatCopy(boolean pDeep)
-  {
-    assert getEncapsulated() != null;
-    return new BeanCopy(BeanFlattenUtil.createFlatCopy(this, pDeep), getFieldActiveSupplier());
   }
 
   /**
