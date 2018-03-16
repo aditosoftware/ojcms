@@ -54,6 +54,16 @@ public class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
     _init(pEncapsulatedBuilder);
   }
 
+  /**
+   * Creates a copy of a exiting bean.
+   *
+   * @param pBean the bean to copy
+   */
+  public Bean(BEAN pBean)
+  {
+    _init(new DefaultEncapsulatedBuilder(pBean));
+  }
+
   @Override
   public IBeanEncapsulated<BEAN> getEncapsulated()
   {
