@@ -7,14 +7,14 @@ import de.adito.beans.core.util.weak.*;
 import java.util.*;
 
 /**
- * A container for base data of a encapsulated bean core.
+ * A container for base data of a encapsulated data core.
  * It kind of replaces the necessity of an abstract class.
  *
  * @param <BEAN>     the type of the beans in the core
- * @param <LISTENER> the type of the bean listeners that will be hold here
+ * @param <LISTENER> the type of the bean listeners managed here
  * @author Simon Danner, 04.09.2017
  */
-class BeanBaseData<BEAN extends IBean<BEAN>, LISTENER extends IBeanChangeListener<BEAN>>
+class EncapsulatedContainers<BEAN extends IBean<BEAN>, LISTENER extends IBeanChangeListener<BEAN>>
 {
   private final IInputSortedElements<LISTENER> listenerContainer = new WeakInputSortedContainer<>();
   private final Set<ITransformable> linkContainer = Collections.newSetFromMap(new WeakHashMap<>());

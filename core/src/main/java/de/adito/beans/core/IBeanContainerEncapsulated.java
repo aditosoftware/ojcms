@@ -11,7 +11,8 @@ import org.jetbrains.annotations.Nullable;
  * @param <BEAN> the type of the beans in this container
  * @author Simon Danner, 25.01.2017
  */
-interface IBeanContainerEncapsulated<BEAN extends IBean<BEAN>> extends IEncapsulated<BEAN, BEAN, IBeanContainerChangeListener<BEAN>>
+interface IBeanContainerEncapsulated<BEAN extends IBean<BEAN>> extends IEncapsulated<BEAN, BEAN, IBeanContainerChangeListener<BEAN>,
+    EncapsulatedContainers<BEAN, IBeanContainerChangeListener<BEAN>>>
 {
   /**
    * The type of the beans in this container.

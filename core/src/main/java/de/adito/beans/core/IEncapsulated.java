@@ -19,7 +19,8 @@ import java.util.stream.*;
  * @param <LISTENER> the type of the bean listeners that can be registered here
  * @author Simon Danner, 25.01.2017
  */
-interface IEncapsulated<CORE, BEAN extends IBean<BEAN>, LISTENER extends IBeanChangeListener<BEAN>> extends Iterable<CORE>, ILinkable, IReferable
+interface IEncapsulated<CORE, BEAN extends IBean<BEAN>, LISTENER extends IBeanChangeListener<BEAN>,
+    CONTAINERS extends EncapsulatedContainers<BEAN, LISTENER>> extends Iterable<CORE>, ILinkable, IReferable
 {
   /**
    * The additional information containers of this core. (Not the data itself)
@@ -28,15 +29,15 @@ interface IEncapsulated<CORE, BEAN extends IBean<BEAN>, LISTENER extends IBeanCh
    *
    * @return additional information containers
    */
-  BeanBaseData<BEAN, LISTENER> getBeanBaseData();
+  CONTAINERS getContainers();
 
   /**
    * The container of all weak-registered listeners.
    */
   default IInputSortedElements<LISTENER> getWeakListeners()
   {
-    assert getBeanBaseData() != null;
-    return getBeanBaseData().getWeakListenerContainer();
+    assert getContainers() != null;
+    return getContainers().getWeakListenerContainer();
   }
 
   /**
@@ -44,15 +45,15 @@ interface IEncapsulated<CORE, BEAN extends IBean<BEAN>, LISTENER extends IBeanCh
    */
   default Collection<ITransformable> getWeakLinkedContainer()
   {
-    assert getBeanBaseData() != null;
-    return getBeanBaseData().getWeakLinkContainer();
+    assert getContainers() != null;
+    return getContainers().getWeakLinkContainer();
   }
 
   @Override
   default Map<IBean<?>, Set<IHierarchicalField<?>>> getWeakReferenceMap()
   {
-    assert getBeanBaseData() != null;
-    return getBeanBaseData().getWeakReferences();
+    assert getContainers() != null;
+    return getContainers().getWeakReferences();
   }
 
   /**
@@ -140,11 +141,12 @@ interface IEncapsulated<CORE, BEAN extends IBean<BEAN>, LISTENER extends IBeanCh
   /**
    * Default implementation of the hierarchical reference structure.
    */
-  class HierarchicalStructureImpl<C, B extends IBean<B>, L extends IBeanChangeListener<B>> implements IHierarchicalStructure
+  class HierarchicalStructureImpl<C, B extends IBean<B>, L extends IBeanChangeListener<B>, CO extends EncapsulatedContainers<B, L>>
+      implements IHierarchicalStructure
   {
-    private final IEncapsulated<C, B, L> encapsulated;
+    private final IEncapsulated<C, B, L, CO> encapsulated;
 
-    public HierarchicalStructureImpl(IEncapsulated<C, B, L> pEncapsulated)
+    public HierarchicalStructureImpl(IEncapsulated<C, B, L, CO> pEncapsulated)
     {
       encapsulated = pEncapsulated;
     }

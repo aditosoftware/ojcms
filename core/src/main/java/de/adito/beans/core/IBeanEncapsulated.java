@@ -4,6 +4,7 @@ import de.adito.beans.core.fields.FieldTuple;
 import de.adito.beans.core.listener.IBeanChangeListener;
 import de.adito.beans.core.references.IHierarchicalBeanStructure;
 import de.adito.beans.core.statistics.IStatisticData;
+import de.adito.beans.core.util.IBeanFieldPredicate;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -15,7 +16,8 @@ import java.util.stream.Stream;
  * @param <BEAN> the generic bean type that uses this data core
  * @author Simon Danner, 20.01.2017
  */
-interface IBeanEncapsulated<BEAN extends IBean<BEAN>> extends IEncapsulated<FieldTuple<?>, BEAN, IBeanChangeListener<BEAN>>
+interface IBeanEncapsulated<BEAN extends IBean<BEAN>> extends IEncapsulated<FieldTuple<?>, BEAN, IBeanChangeListener<BEAN>,
+    BeanEncapsulatedContainers<BEAN, IBeanChangeListener<BEAN>>>
 {
   /**
    * The value for a bean field.
@@ -81,6 +83,49 @@ interface IBeanEncapsulated<BEAN extends IBean<BEAN>> extends IEncapsulated<Fiel
   Stream<IField<?>> streamFields();
 
   /**
+   * Adds a field filter to this data core.
+   * So fields with their associated values may be excluded for a certain time.
+   *
+   * @param pPredicate the predicate to define the excluded fields
+   */
+  default void addFieldFilter(IBeanFieldPredicate pPredicate)
+  {
+    assert getContainers() != null;
+    getContainers().getFieldFilters().add(pPredicate);
+  }
+
+  /**
+   * Removes a field filter from this data core.
+   *
+   * @param pPredicate the predicate/filter to remove
+   */
+  default void removeFieldFilter(IBeanFieldPredicate pPredicate)
+  {
+    assert getContainers() != null;
+    getContainers().getFieldFilters().remove(pPredicate);
+  }
+
+  /**
+   * Clears all field filters.
+   */
+  default void clearFieldFilters()
+  {
+    assert getContainers() != null;
+    getContainers().getFieldFilters().clear();
+  }
+
+  /**
+   * Determines, if there are any field filters set.
+   *
+   * @return <tt>true</tt>, if there is one filter at least
+   */
+  default boolean isFieldFiltered()
+  {
+    assert getContainers() != null;
+    return !getContainers().getFieldFilters().isEmpty();
+  }
+
+  /**
    * Determines if this core contains a certain bean field.
    *
    * @param pField the bean field
@@ -111,10 +156,10 @@ interface IBeanEncapsulated<BEAN extends IBean<BEAN>> extends IEncapsulated<Fiel
    * Just defines a class extending the base implementation and implementing the interface.
    * The extra functionality is provided via default methods.
    */
-  class HierarchicalBeanStructureImpl<C, B extends IBean<B>, L extends IBeanChangeListener<B>> extends HierarchicalStructureImpl<C, B, L>
-      implements IHierarchicalBeanStructure
+  class HierarchicalBeanStructureImpl<C, B extends IBean<B>, L extends IBeanChangeListener<B>>
+      extends HierarchicalStructureImpl<C, B, L, BeanEncapsulatedContainers<B, L>> implements IHierarchicalBeanStructure
   {
-    public HierarchicalBeanStructureImpl(IEncapsulated<C, B, L> pEncapsulated)
+    public HierarchicalBeanStructureImpl(IEncapsulated<C, B, L, BeanEncapsulatedContainers<B, L>> pEncapsulated)
     {
       super(pEncapsulated);
     }

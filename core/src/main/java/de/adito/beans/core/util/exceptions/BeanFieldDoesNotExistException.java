@@ -11,6 +11,11 @@ public class BeanFieldDoesNotExistException extends RuntimeException
 {
   public BeanFieldDoesNotExistException(IBean<?> pBean, IField<?> pField)
   {
-    super("Missing bean field: bean-type: " + pBean.getClass().getSimpleName() + " field: " + pField.getName());
+    super("Missing bean field: bean-type: " + pBean.getClass().getSimpleName() + " field: " + pField.getName() + ". Consider field filters!");
+  }
+
+  public BeanFieldDoesNotExistException(IField<?> pField)
+  {
+    super("Missing bean field: " + pField.getName() + ". Consider field filters!");
   }
 }

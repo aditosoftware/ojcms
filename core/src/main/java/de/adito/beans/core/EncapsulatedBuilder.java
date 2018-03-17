@@ -5,9 +5,11 @@ import de.adito.beans.core.fields.FieldTuple;
 import de.adito.beans.core.listener.*;
 import de.adito.beans.core.statistics.*;
 import de.adito.beans.core.util.*;
+import de.adito.beans.core.util.exceptions.BeanFieldDoesNotExistException;
 import org.jetbrains.annotations.*;
 
 import java.util.*;
+import java.util.function.*;
 import java.util.stream.*;
 
 /**
@@ -230,7 +232,7 @@ public final class EncapsulatedBuilder
     private final IBeanEncapsulatedBuilder builder;
     private final List<IField<?>> fieldOrder;
     private Map<IField<?>, IStatisticData> statisticData;
-    private final BeanBaseData<BEAN, IBeanChangeListener<BEAN>> baseData = new BeanBaseData<>();
+    private final BeanEncapsulatedContainers<BEAN, IBeanChangeListener<BEAN>> containers = new BeanEncapsulatedContainers<>();
 
     private _BeanEncapsulated(IBeanEncapsulatedBuilder pBuilder, Class<BEAN> pBeanType)
     {
@@ -242,13 +244,13 @@ public final class EncapsulatedBuilder
     @Override
     public <TYPE> TYPE getValue(IField<TYPE> pField)
     {
-      return builder.getValue(pField);
+      return _ifFieldExistsWithResult(pField, builder::getValue);
     }
 
     @Override
     public <TYPE> void setValue(IField<TYPE> pField, TYPE pValue)
     {
-      builder.setValue(pField, pValue, false);
+      _ifFieldExists(pField, pCheckedField -> builder.setValue(pCheckedField, pValue, false));
     }
 
     @Override
@@ -261,22 +263,23 @@ public final class EncapsulatedBuilder
     @Override
     public <TYPE> void removeField(IField<TYPE> pField)
     {
-      builder.removeField(pField);
-      fieldOrder.remove(pField);
+      _ifFieldExists(pField, pCheckedField -> {
+        builder.removeField(pCheckedField);
+        fieldOrder.remove(pCheckedField);
+      });
     }
 
     @Override
     public <TYPE> int getFieldIndex(IField<TYPE> pField)
     {
-      if (!fieldOrder.contains(pField))
-        throw new RuntimeException("The field " + pField.getName() + " is not present at the bean. Its index cannot be resolved.");
-      return fieldOrder.indexOf(pField);
+      return _ifFieldExistsWithResult(pField, pCheckedField -> isFieldFiltered() ?
+          streamFields().collect(Collectors.toList()).indexOf(pCheckedField) : fieldOrder.indexOf(pCheckedField));
     }
 
     @Override
     public int getFieldCount()
     {
-      return fieldOrder.size();
+      return isFieldFiltered() ? (int) streamFields().count() : fieldOrder.size();
     }
 
     @Override
@@ -288,20 +291,23 @@ public final class EncapsulatedBuilder
     @Override
     public Stream<IField<?>> streamFields()
     {
-      return fieldOrder.stream();
+      assert getContainers() != null;
+      return fieldOrder.stream()
+          .filter(pField -> containers.getFieldFilters().stream()
+              .allMatch(pFieldPredicate -> pFieldPredicate.test(pField, builder.getValue(pField))));
     }
 
     @Override
-    public BeanBaseData<BEAN, IBeanChangeListener<BEAN>> getBeanBaseData()
+    public BeanEncapsulatedContainers<BEAN, IBeanChangeListener<BEAN>> getContainers()
     {
-      return baseData;
+      return containers;
     }
 
     @NotNull
     @Override
     public Iterator<FieldTuple<?>> iterator()
     {
-      return builder.iterator();
+      return _createFilteredTupleStream().iterator();
     }
 
     /**
@@ -320,6 +326,53 @@ public final class EncapsulatedBuilder
             return new StatisticData<>(statistics.intervall(), statistics.capacity(), null);
           }));
     }
+
+    /**
+     * Creates a stream of all tuples of this data core, that are currently active.
+     * Some may be filtered at a certain moment.
+     *
+     * @return a stream of field tuples
+     */
+    private Stream<FieldTuple<?>> _createFilteredTupleStream()
+    {
+      return StreamSupport.stream(builder.spliterator(), false)
+          .filter(pTuple -> containers.getFieldFilters().stream()
+              .allMatch(pPredicate -> pPredicate.test(pTuple.getField(), pTuple.getValue())));
+    }
+
+    /**
+     * Checks, if a certain field is existing at a certain time.
+     * Field filters are considered as well.
+     * If the field is existing, a action (based on the field) will be performed and the produced result will be returned.
+     *
+     * @param pField   the field to check
+     * @param pAction  the on the field based action to get the result from
+     * @param <TYPE>   the field's data type
+     * @param <RETURN> the result type
+     * @return the result of the field based action
+     */
+    private <TYPE, RETURN> RETURN _ifFieldExistsWithResult(IField<TYPE> pField, Function<IField<TYPE>, RETURN> pAction)
+    {
+      if (!containsField(pField))
+        throw new BeanFieldDoesNotExistException(pField);
+      return pAction.apply(pField);
+    }
+
+    /**
+     * Checks, if a certain field is existing at a certain time.
+     * Field filters are considered as well.
+     * If the field is existing, a action (based on the field) will be performed with no result
+     *
+     * @param pField  the field to check
+     * @param pAction the on the field based action to perform
+     * @param <TYPE>  the field's data type
+     */
+    private <TYPE> void _ifFieldExists(IField<TYPE> pField, Consumer<IField<TYPE>> pAction)
+    {
+      if (!containsField(pField))
+        throw new BeanFieldDoesNotExistException(pField);
+      pAction.accept(pField);
+    }
   }
 
   /**
@@ -333,7 +386,7 @@ public final class EncapsulatedBuilder
     private final Class<BEAN> beanType;
     private _LimitInfo limitInfo = null;
     private final IStatisticData<Integer> statisticData;
-    private final BeanBaseData<BEAN, IBeanContainerChangeListener<BEAN>> baseData = new BeanBaseData<>();
+    private final EncapsulatedContainers<BEAN, IBeanContainerChangeListener<BEAN>> containers = new EncapsulatedContainers<>();
 
     public _ContainerEncapsulated(IContainerEncapsulatedBuilder<BEAN> pBuilder, Class<BEAN> pBeanType)
     {
@@ -426,9 +479,9 @@ public final class EncapsulatedBuilder
     }
 
     @Override
-    public BeanBaseData<BEAN, IBeanContainerChangeListener<BEAN>> getBeanBaseData()
+    public EncapsulatedContainers<BEAN, IBeanContainerChangeListener<BEAN>> getContainers()
     {
-      return baseData;
+      return containers;
     }
 
     @NotNull

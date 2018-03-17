@@ -5,6 +5,7 @@ import de.adito.beans.core.fields.FieldTuple;
 import de.adito.beans.core.listener.IBeanChangeListener;
 import de.adito.beans.core.references.IHierarchicalBeanStructure;
 import de.adito.beans.core.statistics.IStatisticData;
+import de.adito.beans.core.util.IBeanFieldPredicate;
 import de.adito.beans.core.util.exceptions.*;
 import org.jetbrains.annotations.Nullable;
 
@@ -183,6 +184,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
    * @param pField the bean field
    * @param <TYPE> the field's data type
    * @return the index of the field
+   * @throws BeanFieldDoesNotExistException if, the field does not exists
    */
   default <TYPE> int getFieldIndex(IField<TYPE> pField)
   {
@@ -266,6 +268,43 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
     return streamFields()
         .filter(pField -> pField.getName().equals(pName))
         .findAny();
+  }
+
+  /**
+   * Adds a field filter to this data core.
+   * So fields with their associated values may be excluded for a certain time.
+   *
+   * If a field is excluded, the bean behaves like the field isn't present at all.
+   * Hence methods could throw runtime exceptions, when a field is inactive at a certain moment.
+   * This could be compared to optional field definitions ({@link de.adito.beans.core.annotations.OptionalField}.
+   * But in contrast to them field filters may be used temporary.
+   *
+   * @param pPredicate the predicate to define the excluded fields
+   */
+  default void addFieldFilter(IBeanFieldPredicate pPredicate)
+  {
+    assert getEncapsulated() != null;
+    getEncapsulated().addFieldFilter(pPredicate);
+  }
+
+  /**
+   * Removes a field filter from this data core.
+   *
+   * @param pPredicate the predicate/filter to remove
+   */
+  default void removeFieldFilter(IBeanFieldPredicate pPredicate)
+  {
+    assert getEncapsulated() != null;
+    getEncapsulated().removeFieldFilter(pPredicate);
+  }
+
+  /**
+   * Clears all field filters.
+   */
+  default void clearFieldFilters()
+  {
+    assert getEncapsulated() != null;
+    getEncapsulated().clearFieldFilters();
   }
 
   /**
