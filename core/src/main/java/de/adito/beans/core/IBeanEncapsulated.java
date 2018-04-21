@@ -2,12 +2,15 @@ package de.adito.beans.core;
 
 import de.adito.beans.core.fields.FieldTuple;
 import de.adito.beans.core.listener.IBeanChangeListener;
+import de.adito.beans.core.mappers.*;
 import de.adito.beans.core.references.IHierarchicalBeanStructure;
 import de.adito.beans.core.statistics.IStatisticData;
 import de.adito.beans.core.util.IBeanFieldPredicate;
 
 import java.util.Map;
 import java.util.stream.Stream;
+
+import static de.adito.beans.core.BeanEncapsulatedContainers.BeanDataMapper;
 
 /**
  * Defines the data core for a bean.
@@ -123,6 +126,50 @@ interface IBeanEncapsulated<BEAN extends IBean<BEAN>> extends IEncapsulated<Fiel
   {
     assert getContainers() != null;
     return !getContainers().getFieldFilters().isEmpty();
+  }
+
+  /**
+   * Adds a temporary data mapper to this data core.
+   *
+   * @param pDataMapper the data mapper
+   */
+  default void addDataMapper(IBeanFlatDataMapper pDataMapper)
+  {
+    assert getContainers() != null;
+    getContainers().getDataMappers().add(new BeanDataMapper(pDataMapper));
+  }
+
+  /**
+   * Adds a temporary data mapper, which only applies to a single field, to this data core.
+   *
+   * @param pDataMapper the data mapper
+   */
+  default <TYPE> void addDataMapperForField(IField<TYPE> pField, ISingleFieldFlatDataMapper<TYPE> pDataMapper)
+  {
+    assert getContainers() != null;
+    getContainers().getDataMappers().add(new BeanDataMapper(pDataMapper, pField));
+  }
+
+  /**
+   * Removes a specific data mappers from this data core.
+   * The method can be used for normal mappers and single field mappers.
+   *
+   * @param pDataMapper the data mapper to remove
+   * @return <tt>true</tt>, if the mapper has been removed successfully
+   */
+  default boolean removeDataMapper(IBeanFlatDataMapper pDataMapper)
+  {
+    assert getContainers() != null;
+    return getContainers().getDataMappers().removeIf(pMapper -> pMapper.getDataMapper() == pDataMapper);
+  }
+
+  /**
+   * Clears all data mappers (normal and single) from this data core.
+   */
+  default void clearDataMappers()
+  {
+    assert getContainers() != null;
+    getContainers().getDataMappers().clear();
   }
 
   /**

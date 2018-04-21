@@ -1,6 +1,9 @@
 package de.adito.beans.core;
 
+import de.adito.beans.core.fields.*;
 import de.adito.beans.core.util.IClientInfo;
+import de.adito.beans.core.util.beancopy.CustomFieldCopy;
+import de.adito.beans.core.util.exceptions.BeanCopyUnsupportedException;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
@@ -47,6 +50,19 @@ public interface IField<TYPE>
   default String display(TYPE pValue, IClientInfo pClientSessionInfo)
   {
     return Objects.toString(pValue);
+  }
+
+  /**
+   * Creates a copy of a value of this field.
+   * Per default the value is returned unchanged. (primitive values)
+   *
+   * @param pValue the value to create the copy from
+   * @return a copy of the field value
+   * @throws UnsupportedOperationException if, it is not possible to create a copy
+   */
+  default TYPE copyValue(TYPE pValue, CustomFieldCopy<?>... pCustomFieldCopies) throws BeanCopyUnsupportedException
+  {
+    throw new BeanCopyUnsupportedException(this);
   }
 
   /**
@@ -125,4 +141,62 @@ public interface IField<TYPE>
    * Determines, if this field is marked as detail.
    */
   boolean isDetail();
+
+  /**
+   * Creates a new empty tuple (value = null) from this bean field.
+   *
+   * @return a empty field tuple
+   */
+  default FieldTuple<TYPE> emptyTuple()
+  {
+    return newTuple(null);
+  }
+
+  /**
+   * Creates a new field tuple from this bean field.
+   *
+   * @param pValue the value for the tuple
+   * @return a new field tuple
+   */
+  default FieldTuple<TYPE> newTuple(TYPE pValue)
+  {
+    return new FieldTuple<>(this, pValue);
+  }
+
+  /**
+   * Creates a new empty tuple (value = null) from this bean field.
+   * This method will create a untyped tuple.
+   *
+   * @return a empty field tuple
+   */
+  default FieldTuple<?> emptyUntypedTuple()
+  {
+    return newUntypedTuple(null);
+  }
+
+  /**
+   * Creates a new field tuple from this bean field.
+   * This method will create a untyped tuple.
+   *
+   * @param pValue the value for the tuple
+   * @return a new field tuple
+   */
+  default FieldTuple<?> newUntypedTuple(Object pValue)
+  {
+    if (pValue != null && getType() != pValue.getClass())
+      throw new RuntimeException("type-mismatch: field type: " + getType().getName() + " value type: " + pValue.getClass().getName());
+    //noinspection unchecked
+    return new FieldTuple(this, pValue);
+  }
+
+  /**
+   * Creates a custom field copy creator from this bean field.
+   *
+   * @param pCopyCreator a function that will create a copy of the field's value
+   * @return the copy creator wrapper
+   */
+  default CustomFieldCopy<TYPE> customFieldCopy(Function<TYPE, TYPE> pCopyCreator)
+  {
+    return new CustomFieldCopy<>(this, pCopyCreator);
+  }
 }

@@ -1,7 +1,9 @@
 package de.adito.beans.core;
 
 import de.adito.beans.core.listener.IBeanChangeListener;
+import de.adito.beans.core.mappers.IBeanFlatDataMapper;
 import de.adito.beans.core.util.IBeanFieldPredicate;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -17,6 +19,7 @@ class BeanEncapsulatedContainers<BEAN extends IBean<BEAN>, LISTENER extends IBea
     extends EncapsulatedContainers<BEAN, LISTENER>
 {
   private final List<IBeanFieldPredicate> fieldFilters = new ArrayList<>();
+  private final List<BeanDataMapper> dataMappers = new ArrayList<>();
 
   /**
    * A container for field filters for this bean data core.
@@ -24,5 +27,51 @@ class BeanEncapsulatedContainers<BEAN extends IBean<BEAN>, LISTENER extends IBea
   public List<IBeanFieldPredicate> getFieldFilters()
   {
     return fieldFilters;
+  }
+
+  /**
+   * A container for data mappers for this bean data core.
+   */
+  public List<BeanDataMapper> getDataMappers()
+  {
+    return dataMappers;
+  }
+
+  /**
+   * Wrapper for a bean data mapper and an optional bean field it should apply to.
+   */
+  public static class BeanDataMapper
+  {
+    private final IBeanFlatDataMapper dataMapper;
+    @Nullable
+    private final IField<?> beanField;
+
+    public BeanDataMapper(IBeanFlatDataMapper pDataMapper)
+    {
+      this(pDataMapper, null);
+    }
+
+    public BeanDataMapper(IBeanFlatDataMapper pDataMapper, @Nullable IField<?> pBeanField)
+    {
+      dataMapper = pDataMapper;
+      beanField = pBeanField;
+    }
+
+    /**
+     * The actual data mapper.
+     */
+    public IBeanFlatDataMapper getDataMapper()
+    {
+      return dataMapper;
+    }
+
+    /**
+     * An optional bean field, which the mapper should apply to only
+     */
+    @Nullable
+    public IField<?> getBeanField()
+    {
+      return beanField;
+    }
   }
 }

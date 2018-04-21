@@ -1,11 +1,13 @@
 package de.adito.beans.core.fields;
 
 import de.adito.beans.core.*;
+import de.adito.beans.core.util.beancopy.*;
 import org.jetbrains.annotations.*;
 
 import java.lang.annotation.Annotation;
 import java.util.*;
-import java.util.function.Predicate;
+import java.util.function.*;
+import java.util.stream.Collectors;
 
 /**
  * A bean field that holds a map.
@@ -31,7 +33,7 @@ public class MapField<TYPE> extends AbstractField<MapBean<TYPE>>
    * @param pValueType the value type of the map
    * @return a (modifiable) bean, which represents the original map
    */
-  public MapBean<TYPE> createBeanFromMap(Map<String, Object> pMap, Class<TYPE> pValueType)
+  public MapBean<TYPE> createBeanFromMap(Map<String, TYPE> pMap, Class<TYPE> pValueType)
   {
     return createBeanFromMap(pMap, pValueType, null);
   }
@@ -46,7 +48,7 @@ public class MapField<TYPE> extends AbstractField<MapBean<TYPE>>
    * @param pFieldPredicate an optional field predicate, which excludes certain map entries
    * @return a (modifiable) bean, which represents the original map
    */
-  public MapBean<TYPE> createBeanFromMap(Map<String, Object> pMap, Class<TYPE> pValueType, @Nullable Predicate<IField<TYPE>> pFieldPredicate)
+  public MapBean<TYPE> createBeanFromMap(Map<String, TYPE> pMap, Class<TYPE> pValueType, @Nullable Predicate<IField<TYPE>> pFieldPredicate)
   {
     MapBean<TYPE> bean = new MapBean<>(pMap, pValueType, fieldCache::add, (pFieldType, pName) ->
         fieldCache.stream()
@@ -69,7 +71,15 @@ public class MapField<TYPE> extends AbstractField<MapBean<TYPE>>
     MapBean<TYPE> mapBean = pBean.getValue(this);
     return mapBean.streamFields()
         .collect(LinkedHashMap::new,
-                 (pMap, pField) -> pMap.put(pField.getName(), (TYPE) mapBean.getValueConverted(pField, pValueType)),
+                 (pMap, pField) -> pMap.put(pField.getName(), mapBean.getValueConverted(pField, pValueType)),
                  LinkedHashMap::putAll);
+  }
+
+  @Override
+  public MapBean<TYPE> copyValue(MapBean<TYPE> pValue, CustomFieldCopy<?>... pCustomFieldCopies)
+  {
+    Function<MapBean<TYPE>, MapBean<TYPE>> creator = pMapBean -> new MapBean<>(pValue.streamFields().collect(Collectors.toList()),
+                                                                               pValue.getValueType());
+    return BeanCopyUtil.createCopy(pValue, true, creator, pCustomFieldCopies);
   }
 }

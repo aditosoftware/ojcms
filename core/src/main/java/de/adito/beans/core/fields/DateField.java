@@ -2,6 +2,7 @@ package de.adito.beans.core.fields;
 
 import de.adito.beans.core.annotations.TypeDefaultField;
 import de.adito.beans.core.util.IClientInfo;
+import de.adito.beans.core.util.beancopy.CustomFieldCopy;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
@@ -32,6 +33,12 @@ public class DateField extends AbstractField<Instant> implements ISerializableFi
     return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.MEDIUM)
         .withLocale(pClientInfo.getLocale())
         .format(date);
+  }
+
+  @Override
+  public Instant copyValue(Instant pValue, CustomFieldCopy<?>... pCustomFieldCopies)
+  {
+    return Instant.ofEpochMilli(pValue.toEpochMilli());
   }
 
   @Override

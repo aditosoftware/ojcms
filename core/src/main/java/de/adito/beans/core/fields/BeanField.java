@@ -2,8 +2,8 @@ package de.adito.beans.core.fields;
 
 import de.adito.beans.core.IBean;
 import de.adito.beans.core.annotations.TypeDefaultField;
-import de.adito.beans.core.references.IHierarchicalField;
-import de.adito.beans.core.references.IReferable;
+import de.adito.beans.core.references.*;
+import de.adito.beans.core.util.beancopy.*;
 import org.jetbrains.annotations.*;
 
 import java.lang.annotation.Annotation;
@@ -27,5 +27,11 @@ public class BeanField<BEAN extends IBean<BEAN>> extends AbstractField<BEAN> imp
   public Collection<IReferable> getReferables(@Nullable BEAN pBean)
   {
     return pBean != null ? Collections.singleton(pBean.getEncapsulated()) : Collections.emptySet();
+  }
+
+  @Override
+  public BEAN copyValue(BEAN pValue, CustomFieldCopy<?>... pCustomFieldCopies)
+  {
+    return BeanCopyUtil.createCopy(pValue, true, pCustomFieldCopies);
   }
 }

@@ -17,15 +17,16 @@ import java.util.stream.Collectors;
 public class MapBean<TYPE> implements IModifiableBean<MapBean<TYPE>>
 {
   private final IBeanEncapsulated<MapBean<TYPE>> encapsulated;
+  private final Class<TYPE> valueType;
   private Function<Object, TYPE> valueConverter = null;
 
   /**
-   * Creates a map representation.
+   * Creates a map representation as a bean
    *
    * @param pMap       the source from which the bean will be created
    * @param pValueType the map's value type
    */
-  public MapBean(Map<String, Object> pMap, Class<TYPE> pValueType)
+  public MapBean(Map<String, TYPE> pMap, Class<TYPE> pValueType)
   {
     this(pMap, pValueType, pField -> {}, (pFieldType, pFieldName) -> Optional.empty());
   }
@@ -44,10 +45,11 @@ public class MapBean<TYPE> implements IModifiableBean<MapBean<TYPE>>
    * @param pFieldCache         the field cache for beans with the same name and field type
    *                            (a BiConsumer with the identification arguments and an optional field return type)
    */
-  public MapBean(Map<String, Object> pMap, Class<TYPE> pValueType, Consumer<IField<TYPE>> pFieldCacheCallback,
+  public MapBean(Map<String, TYPE> pMap, Class<TYPE> pValueType, Consumer<IField<TYPE>> pFieldCacheCallback,
                  BiFunction<Class<? extends IField<TYPE>>, String, Optional<IField<TYPE>>> pFieldCache)
   {
-    final Class<? extends IField<TYPE>> fieldType = BeanFieldFactory.getFieldTypeFromType(pValueType);
+    valueType = pValueType;
+    final Class<? extends IField<TYPE>> fieldType = BeanFieldFactory.getFieldTypeFromType(valueType);
     Map<IField<TYPE>, Object> map = pMap.entrySet().stream()
         .collect(LinkedHashMap::new,
                  (pSorted, pEntry) -> {
@@ -58,13 +60,36 @@ public class MapBean<TYPE> implements IModifiableBean<MapBean<TYPE>>
                  },
                  LinkedHashMap::putAll);
     //noinspection unchecked
-    encapsulated = EncapsulatedBuilder.createBeanEncapsulated(new Bean.DefaultEncapsulatedBuilder(map), (Class<MapBean<TYPE>>) getClass());
+    encapsulated = EncapsulatedBuilder.createBeanEncapsulated(new Bean.DefaultEncapsulatedBuilder(map), (Class<MapBean<TYPE>>) getClass(),
+                                                              new ArrayList<>(map.keySet()));
+  }
+
+  /**
+   * Creates an empty map bean based on a list of bean fields.
+   *
+   * @param pFields    a list of bean fields
+   * @param pValueType the map's value type
+   */
+  public MapBean(List<IField<?>> pFields, Class<TYPE> pValueType)
+  {
+    valueType = pValueType;
+    //noinspection unchecked
+    encapsulated = EncapsulatedBuilder.createBeanEncapsulated(new Bean.DefaultEncapsulatedBuilder(pFields), (Class<MapBean<TYPE>>) getClass(),
+                                                              new ArrayList<>(pFields));
   }
 
   @Override
   public IBeanEncapsulated<MapBean<TYPE>> getEncapsulated()
   {
     return encapsulated;
+  }
+
+  /**
+   * The value type of this map bean.
+   */
+  public Class<TYPE> getValueType()
+  {
+    return valueType;
   }
 
   /**

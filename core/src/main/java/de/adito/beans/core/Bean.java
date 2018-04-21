@@ -216,8 +216,7 @@ public class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
         public FieldTuple<?> next()
         {
           Map.Entry<IField<?>, Object> current = mapIterator.next();
-          //noinspection unchecked
-          return new FieldTuple(current.getKey(), current.getValue());
+          return current.getKey().newUntypedTuple(current.getValue());
         }
       };
     }

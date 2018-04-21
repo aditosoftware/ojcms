@@ -1,6 +1,7 @@
 package de.adito.beans.core.fields;
 
 import de.adito.beans.core.annotations.TypeDefaultField;
+import de.adito.beans.core.util.beancopy.CustomFieldCopy;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
@@ -23,6 +24,12 @@ public class IntegerField extends AbstractField<Integer> implements ISerializabl
   public Integer getDefaultValue()
   {
     return 0;
+  }
+
+  @Override
+  public Integer copyValue(Integer pValue, CustomFieldCopy<?>... pCustomFieldCopies)
+  {
+    return pValue;
   }
 
   @Override

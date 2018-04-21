@@ -1,5 +1,7 @@
 package de.adito.beans.core.fields;
 
+import de.adito.beans.core.util.beancopy.*;
+import de.adito.beans.core.util.exceptions.BeanCopyUnsupportedException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
@@ -19,6 +21,19 @@ public class GenericFieldSerializable<TYPE extends Serializable> extends Generic
   public GenericFieldSerializable(@NotNull Class<TYPE> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {
     super(_checkGenericType(pType), pName, pAnnotations);
+  }
+
+  @Override
+  public TYPE copyValue(TYPE pValue, CustomFieldCopy<?>... pCustomFieldCopies) throws BeanCopyUnsupportedException
+  {
+    try
+    {
+      return BeanCopyUtil.tryCopyPerDefaultConstructor(pValue);
+    }
+    catch (UnsupportedOperationException pE)
+    {
+      throw new BeanCopyUnsupportedException(this);
+    }
   }
 
   @Override

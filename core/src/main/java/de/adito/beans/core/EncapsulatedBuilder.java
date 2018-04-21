@@ -3,12 +3,14 @@ package de.adito.beans.core;
 import de.adito.beans.core.annotations.Statistics;
 import de.adito.beans.core.fields.FieldTuple;
 import de.adito.beans.core.listener.*;
+import de.adito.beans.core.mappers.IBeanFlatDataMapper;
 import de.adito.beans.core.statistics.*;
 import de.adito.beans.core.util.*;
 import de.adito.beans.core.util.exceptions.BeanFieldDoesNotExistException;
 import org.jetbrains.annotations.*;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.*;
 import java.util.stream.*;
 
@@ -110,7 +112,22 @@ public final class EncapsulatedBuilder
    */
   public static <BEAN extends IBean<BEAN>> IBeanEncapsulated<BEAN> createBeanEncapsulated(IBeanEncapsulatedBuilder pBuilder, Class<BEAN> pBeanType)
   {
-    return new _BeanEncapsulated<>(pBuilder, pBeanType);
+    return new _BeanEncapsulated<>(pBuilder, pBeanType, null);
+  }
+
+  /**
+   * Creates a bean encapsulated data core based on a {@link IBeanEncapsulatedBuilder}.
+   *
+   * @param pBuilder    the builder (may hold data)
+   * @param pBeanType   the type of the bean to core is for
+   * @param pBeanFields a list of fields for the bean type
+   * @param <BEAN>      the generic bean type
+   * @return the newly created encapsulated data core
+   */
+  static <BEAN extends IBean<BEAN>> IBeanEncapsulated<BEAN> createBeanEncapsulated(IBeanEncapsulatedBuilder pBuilder,
+                                                                                   Class<BEAN> pBeanType, List<IField<?>> pBeanFields)
+  {
+    return new _BeanEncapsulated<>(pBuilder, pBeanType, pBeanFields);
   }
 
   /**
@@ -234,10 +251,10 @@ public final class EncapsulatedBuilder
     private Map<IField<?>, IStatisticData> statisticData;
     private final BeanEncapsulatedContainers<BEAN, IBeanChangeListener<BEAN>> containers = new BeanEncapsulatedContainers<>();
 
-    private _BeanEncapsulated(IBeanEncapsulatedBuilder pBuilder, Class<BEAN> pBeanType)
+    private _BeanEncapsulated(IBeanEncapsulatedBuilder pBuilder, Class<BEAN> pBeanType, @Nullable List<IField<?>> pFields)
     {
       builder = pBuilder;
-      fieldOrder = new ArrayList<>(BeanReflector.reflectBeanFields(pBeanType));
+      fieldOrder = new ArrayList<>(pFields == null ? BeanReflector.reflectBeanFields(pBeanType) : pFields);
       _createStatisticData(pBeanType);
     }
 
@@ -335,9 +352,44 @@ public final class EncapsulatedBuilder
      */
     private Stream<FieldTuple<?>> _createFilteredTupleStream()
     {
-      return StreamSupport.stream(builder.spliterator(), false)
+      return _applyMappings()
           .filter(pTuple -> containers.getFieldFilters().stream()
               .allMatch(pPredicate -> pPredicate.test(pTuple.getField(), pTuple.getValue())));
+    }
+
+    /**
+     * Applies all data mappers to the data stream of the builder.
+     * Effectively every data mapper leads to a flatMap()-operation
+     *
+     * @return a stream of field tuples
+     */
+    private Stream<FieldTuple<?>> _applyMappings()
+    {
+      Stream<FieldTuple<?>> stream = StreamSupport.stream(builder.spliterator(), false);
+      for (BeanEncapsulatedContainers.BeanDataMapper dataMapper : containers.getDataMappers())
+      {
+        IBeanFlatDataMapper mapper = dataMapper.getDataMapper();
+        final AtomicInteger changes = new AtomicInteger(); //Changes for each mapping iteration
+        do
+        {
+          changes.set(0);
+          stream = stream.flatMap(pTuple -> {
+            IField<?> beanField = dataMapper.getBeanField();
+            if ((beanField == null || beanField == pTuple.getField()) && mapper.affectsTuple(pTuple.getField(), pTuple.getValue()))
+            {
+              changes.getAndIncrement();
+              return mapper.flatMapTuple(pTuple.getField(), pTuple.getValue());
+            }
+            else
+              return Stream.of(pTuple);
+          })
+              .collect(Collectors.toList())
+              .stream();
+        }
+        while (!mapper.isCompleted(changes.get()));
+      }
+
+      return stream;
     }
 
     /**

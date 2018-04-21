@@ -57,7 +57,7 @@ public final class BeanFieldFactory
         .findAny()
         .orElseThrow(() -> new RuntimeException("Unable to create a field. There are no static fields or all of them are initialized already."));
     Class<FIELD> fieldType = (Class<FIELD>) toCreate.getType();
-    return (FIELD) _createField(fieldType, _getGenType(toCreate, fieldType), toCreate.getName(), Arrays.asList(toCreate.getAnnotations()));
+    return (FIELD) createField(fieldType, _getGenType(toCreate, fieldType), toCreate.getName(), Arrays.asList(toCreate.getAnnotations()));
   }
 
   /**
@@ -101,7 +101,7 @@ public final class BeanFieldFactory
    */
   static <TYPE, FIELD extends IField<TYPE>> FIELD createField(Class<FIELD> pFieldType, String pName, Collection<Annotation> pAnnotations)
   {
-    return _createField(pFieldType, null, pName, pAnnotations);
+    return createField(pFieldType, null, pName, pAnnotations);
   }
 
   /**
@@ -118,8 +118,8 @@ public final class BeanFieldFactory
    * @return the newly created field
    */
   @SuppressWarnings("JavaReflectionMemberAccess")
-  private static <TYPE, FIELD extends IField<TYPE>> FIELD _createField(Class<FIELD> pFieldType, @Nullable Class pGenType, String pName,
-                                                                       Collection<Annotation> pAnnotations)
+  static <TYPE, FIELD extends IField<TYPE>> FIELD createField(Class<FIELD> pFieldType, @Nullable Class pGenType, String pName,
+                                                              Collection<Annotation> pAnnotations)
   {
     try
     {

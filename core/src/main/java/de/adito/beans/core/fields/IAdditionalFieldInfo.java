@@ -1,4 +1,6 @@
-package de.adito.beans.core;
+package de.adito.beans.core.fields;
+
+import de.adito.beans.core.IField;
 
 /**
  * Identifier for any additional information of a bean field.

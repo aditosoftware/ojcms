@@ -594,7 +594,7 @@ public class SQLBuilder
       //noinspection unchecked
       return pFields.stream()
           .filter(this::hasColumn)
-          .map(pField -> (FieldTuple<?>) new FieldTuple(pField, get(pField)))
+          .map(pField -> pField.newUntypedTuple(get(pField)))
           .collect(Collectors.toSet());
     }
 

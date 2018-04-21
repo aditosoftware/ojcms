@@ -2,6 +2,7 @@ package de.adito.beans.core.fields;
 
 import de.adito.beans.core.annotations.TypeDefaultField;
 import de.adito.beans.core.util.IClientInfo;
+import de.adito.beans.core.util.beancopy.CustomFieldCopy;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
@@ -24,6 +25,13 @@ public class TextField extends AbstractField<String> implements ISerializableFie
   public String display(String pValue, IClientInfo pClientInfo)
   {
     return pValue != null ? pValue : "";
+  }
+
+  @Override
+  public String copyValue(String pValue, CustomFieldCopy<?>... pCustomFieldCopies)
+  {
+    //noinspection RedundantStringConstructorCall
+    return new String(pValue);
   }
 
   @Override

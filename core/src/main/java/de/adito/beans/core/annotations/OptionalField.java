@@ -1,6 +1,7 @@
 package de.adito.beans.core.annotations;
 
 import de.adito.beans.core.*;
+import de.adito.beans.core.fields.IAdditionalFieldInfo;
 
 import java.lang.annotation.*;
 import java.util.function.Predicate;

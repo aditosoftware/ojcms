@@ -3,13 +3,16 @@ package de.adito.beans.core;
 import de.adito.beans.core.annotations.Identifier;
 import de.adito.beans.core.fields.FieldTuple;
 import de.adito.beans.core.listener.IBeanChangeListener;
+import de.adito.beans.core.mappers.*;
 import de.adito.beans.core.references.IHierarchicalBeanStructure;
 import de.adito.beans.core.statistics.IStatisticData;
 import de.adito.beans.core.util.IBeanFieldPredicate;
+import de.adito.beans.core.util.beancopy.*;
 import de.adito.beans.core.util.exceptions.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.*;
 
 /**
@@ -229,6 +232,42 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   }
 
   /**
+   * Creates a copy of this bean.
+   * This method expects an existing default constructor for this concrete bean type.
+   * If the copy should include deep fields, all deep beans are supposed to have default constructors as well.
+   * If it is not possible to provide a default constructor, you may use the other method to create bean copies.
+   * It allows you to define a custom constructor call to create the new instance.
+   *
+   * @param pDeepCopy          <tt>true</tt>, if the copy of the bean should also include deep values
+   * @param pCustomFieldCopies a collection of custom copy mechanisms for specific bean fields
+   * @return a copy of this bean
+   */
+  default BEAN createCopy(boolean pDeepCopy, CustomFieldCopy<?>... pCustomFieldCopies)
+  {
+    assert getEncapsulated() != null;
+    //noinspection unchecked
+    return BeanCopyUtil.createCopy((BEAN) this, pDeepCopy, pCustomFieldCopies);
+  }
+
+  /**
+   * Creates a copy of this bean.
+   * This method should be used, if there's no default constructor to create a new instance automatically.
+   * Otherwise use the other method to create the copy, where you are not supposed to define a custom constructor call.
+   * If the copy should be deep, all deep bean values are supposed to have a default constructors.
+   *
+   * @param pDeepCopy              <tt>true</tt>, if the copy of the bean should also include deep values
+   * @param pCustomConstructorCall a custom constructor call defined as function (the input is the existing bean, the function should create the copy)
+   * @param pCustomFieldCopies     a collection of custom copy mechanisms for specific bean fields
+   * @return a copy of this bean
+   */
+  default BEAN createCopy(boolean pDeepCopy, Function<BEAN, BEAN> pCustomConstructorCall, CustomFieldCopy<?>... pCustomFieldCopies)
+  {
+    assert getEncapsulated() != null;
+    //noinspection unchecked
+    return BeanCopyUtil.createCopy((BEAN) this, pDeepCopy, pCustomConstructorCall, pCustomFieldCopies);
+  }
+
+  /**
    * The statistic data for a certain bean field.
    * May be null if not present.
    *
@@ -305,6 +344,54 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   {
     assert getEncapsulated() != null;
     getEncapsulated().clearFieldFilters();
+  }
+
+  /**
+   * Adds a temporary data mapper to this data core.
+   * A data mapper applies to the tuple-stream of this bean.
+   * It may be used to present values in specific ways temporary.
+   *
+   * @param pDataMapper the data mapper
+   */
+  default void addDataMapper(IBeanFlatDataMapper pDataMapper)
+  {
+    assert getEncapsulated() != null;
+    getEncapsulated().addDataMapper(pDataMapper);
+  }
+
+  /**
+   * Adds a temporary data mapper, which only applies to a single field, to this data core.
+   * A data mapper applies to the tuple-stream of this bean.
+   * It may be used to present values in specific ways temporary.
+   *
+   * @param pDataMapper the data mapper
+   */
+  default <TYPE> void addDataMapperForField(IField<TYPE> pField, ISingleFieldFlatDataMapper<TYPE> pDataMapper)
+  {
+    assert getEncapsulated() != null;
+    getEncapsulated().addDataMapperForField(pField, pDataMapper);
+  }
+
+  /**
+   * Removes a specific data mappers from this data core.
+   * The method can be used for normal mappers and single field mappers.
+   *
+   * @param pDataMapper the data mapper to remove
+   * @return <tt>true</tt>, if the mapper has been removed successfully
+   */
+  default boolean removeDataMapper(IBeanFlatDataMapper pDataMapper)
+  {
+    assert getEncapsulated() != null;
+    return getEncapsulated().removeDataMapper(pDataMapper);
+  }
+
+  /**
+   * Clears all data mappers (normal and single) from this data core.
+   */
+  default void clearDataMappers()
+  {
+    assert getEncapsulated() != null;
+    getEncapsulated().clearDataMappers();
   }
 
   /**

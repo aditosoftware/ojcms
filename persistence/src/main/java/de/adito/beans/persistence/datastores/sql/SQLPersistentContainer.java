@@ -394,7 +394,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
     public <TYPE> void setValue(IField<TYPE> pField, TYPE pValue, boolean pAllowNewField)
     {
       _update(pUpdate -> pUpdate
-          .set(new FieldTuple<>(pField, pValue))
+          .set(pField.newTuple(pValue))
           .update());
     }
 
@@ -418,7 +418,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
       return new IndexBasedIterator<>(fields.size(), pIndex -> tuples.stream()
           .filter(pTuple -> pTuple.getField() == fields.get(pIndex))
           .findAny()
-          .orElse(new FieldTuple<>(fields.get(pIndex), null)));
+          .orElse(fields.get(pIndex).emptyTuple()));
     }
   }
 }
