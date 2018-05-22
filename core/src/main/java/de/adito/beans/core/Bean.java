@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.*;
+import java.util.stream.Collectors;
 
 /**
  * The default concrete class of the bean interface.
@@ -136,6 +137,14 @@ public class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
   {
     if (!pField.isPrivate())
       LOGGER.log(Level.WARNING, "The field '" + pField.getName() + "' is not private. Use the public method to get/set the value instead!");
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "{" + stream()
+        .map(Objects::toString)
+        .collect(Collectors.joining(", ")) + "}";
   }
 
   /**

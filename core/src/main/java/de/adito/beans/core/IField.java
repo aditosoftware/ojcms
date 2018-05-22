@@ -53,8 +53,7 @@ public interface IField<TYPE>
   }
 
   /**
-   * Creates a copy of a value of this field.
-   * Per default the value is returned unchanged. (primitive values)
+   * Creates a copy of the value of this field.
    *
    * @param pValue the value to create the copy from
    * @return a copy of the field value

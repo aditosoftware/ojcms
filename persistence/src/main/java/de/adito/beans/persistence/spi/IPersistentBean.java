@@ -1,6 +1,6 @@
 package de.adito.beans.persistence.spi;
 
-import de.adito.beans.core.EncapsulatedBuilder;
+import de.adito.beans.core.*;
 
 /**
  * A bean in its persistent state.

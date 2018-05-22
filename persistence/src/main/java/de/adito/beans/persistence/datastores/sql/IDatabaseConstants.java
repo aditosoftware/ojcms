@@ -7,6 +7,8 @@ package de.adito.beans.persistence.datastores.sql;
  */
 public interface IDatabaseConstants
 {
+  String BEAN_TABLE_NAME = "OJbeans";
+  String BEAN_TABLE_COLUMN_PREFIX = "field";
+  String BEAN_TABLE_BEAN_ID = "beanId";
   String ID_COLUMN = "ID";
-  String COUNT_RESULT = "rowNumber";
 }

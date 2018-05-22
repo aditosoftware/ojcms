@@ -1,4 +1,4 @@
-package de.adito.beans.persistence.datastores.sql.util;
+package de.adito.beans.persistence.datastores.sql;
 
 import de.adito.beans.core.IField;
 import de.adito.beans.core.fields.*;

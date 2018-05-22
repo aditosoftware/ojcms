@@ -40,10 +40,7 @@ public class FieldTuple<TYPE>
   @Override
   public String toString()
   {
-    return "FieldTuple{" +
-        "field=" + field +
-        ", value=" + value +
-        '}';
+    return field.getName() + " = " + value;
   }
 
   @Override

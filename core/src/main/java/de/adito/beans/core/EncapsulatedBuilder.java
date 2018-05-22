@@ -460,7 +460,7 @@ public final class EncapsulatedBuilder
       if (limitInfo != null && limitInfo.limit == size())
       {
         if (!limitInfo.evicting)
-          throw new RuntimeException("The limit of this container is reached already! Limit: " + limitInfo.limit);
+          throw new RuntimeException("The limit of this container is reached! limit: " + limitInfo.limit);
         removeBean(getBean(0)); //Remove first bean if limit is reached and evicting flag is set
       }
 

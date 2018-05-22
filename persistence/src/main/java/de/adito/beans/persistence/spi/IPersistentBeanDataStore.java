@@ -26,7 +26,7 @@ public interface IPersistentBeanDataStore
    * @param pPersistenceId the persistence ID
    * @return the persistent bean
    */
-  IPersistentBean getSingleBean(String pPersistenceId);
+  <BEAN extends IBean<BEAN>> IPersistentBean getSingleBean(String pPersistenceId, Class<BEAN> pBeanType);
 
   /**
    * A persistent bean container (builder for the encapsulated data core) for a certain persistence id.

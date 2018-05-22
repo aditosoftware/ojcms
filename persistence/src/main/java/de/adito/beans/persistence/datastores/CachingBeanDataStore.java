@@ -19,8 +19,8 @@ class CachingBeanDataStore implements IPersistentBeanDataStore
 {
   private final Map<String, IPersistentBean> beanCache = new HashMap<>();
   private final Map<String, IPersistentBeanContainer> containerCache = new HashMap<>();
-  private final Function<String, IPersistentBean> beanResolver;
-  private final BiFunction<String, Class<? extends IBean<?>>, IPersistentBeanContainer> containerResolver;
+  private final BiFunction<String, Class<? extends IBean<?>>, IPersistentBean> beanResolver;
+  private final BiFunction<String, Class<? extends IBean<?>>, IPersistentBeanContainer<?>> containerResolver;
 
   /**
    * Create the caching persistent data store.
@@ -28,17 +28,17 @@ class CachingBeanDataStore implements IPersistentBeanDataStore
    * @param pBeanResolver      a function to get a persistent bean (data core) from a container id
    * @param pContainerResolver a function to get a persistent bean container (data core) from a container id and a certain bean type
    */
-  public CachingBeanDataStore(Function<String, IPersistentBean> pBeanResolver,
-                              BiFunction<String, Class<? extends IBean<?>>, IPersistentBeanContainer> pContainerResolver)
+  public CachingBeanDataStore(BiFunction<String, Class<? extends IBean<?>>, IPersistentBean> pBeanResolver,
+                              BiFunction<String, Class<? extends IBean<?>>, IPersistentBeanContainer<?>> pContainerResolver)
   {
     beanResolver = pBeanResolver;
     containerResolver = pContainerResolver;
   }
 
   @Override
-  public IPersistentBean getSingleBean(String pPersistenceId)
+  public <BEAN extends IBean<BEAN>> IPersistentBean getSingleBean(String pPersistenceId, Class<BEAN> pBeanType)
   {
-    return beanCache.computeIfAbsent(pPersistenceId, pId -> beanResolver.apply(pPersistenceId));
+    return beanCache.computeIfAbsent(pPersistenceId, pId -> beanResolver.apply(pPersistenceId, pBeanType));
   }
 
   @Override

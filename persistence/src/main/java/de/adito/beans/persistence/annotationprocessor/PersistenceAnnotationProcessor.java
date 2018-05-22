@@ -30,8 +30,8 @@ public class PersistenceAnnotationProcessor extends AbstractProcessor
   private static final String BASE_PATH = "de.adito.beans.persistence";
   private static final Class RETRIEVER_CLASS = OJPersistence.class;
   private static final String RETRIEVER_METHOD = "dataStore()";
-  private static final String BEAN_CLASS_NAME = "Beans";
-  private static final String CONTAINER_CLASS_NAME = "Containers";
+  private static final String BEAN_CLASS_NAME = "OJBeans";
+  private static final String CONTAINER_CLASS_NAME = "OJContainers";
   private static final Function<Boolean, String> DATA_STORE_METHOD = pIsContainer -> pIsContainer ? "getContainerByPersistenceId" :
       "getBeanByPersistenceId";
 

@@ -1,6 +1,7 @@
 package de.adito.beans.persistence.datastores;
 
 import de.adito.beans.persistence.datastores.sql.*;
+import de.adito.beans.persistence.datastores.sql.builder.util.EDatabaseType;
 import de.adito.beans.persistence.spi.IPersistentBeanDataStore;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,7 +25,7 @@ public final class DataStoreFactory
    * @param pDatabaseName the database name to connect to
    * @return the persistent data store
    */
-  public IPersistentBeanDataStore sql(ESupportedSQLTypes pDatabaseType, String pHost, int pPort, String pDatabaseName)
+  public IPersistentBeanDataStore sql(EDatabaseType pDatabaseType, String pHost, int pPort, String pDatabaseName)
   {
     return sql(pDatabaseType, pHost, pPort, pDatabaseName, null, null);
   }
@@ -40,11 +41,12 @@ public final class DataStoreFactory
    * @param pPassword     an optional password for the connection
    * @return the persistent data store
    */
-  public IPersistentBeanDataStore sql(ESupportedSQLTypes pDatabaseType, String pHost, int pPort, String pDatabaseName,
+  public IPersistentBeanDataStore sql(EDatabaseType pDatabaseType, String pHost, int pPort, String pDatabaseName,
                                       @Nullable String pUserName, @Nullable String pPassword)
   {
     //noinspection unchecked
-    return new CachingBeanDataStore(pBeanId -> null, //TODO
+    return new CachingBeanDataStore((pBeanId, pBeanType) -> new SQLPersistentBean(pBeanId, pBeanType, pDatabaseType, pHost, pPort,
+                                                                                  pDatabaseName, pUserName, pPassword),
                                     (pContainerId, pBeanType) -> new SQLPersistentContainer(pBeanType, pDatabaseType, pHost, pPort,
                                                                                             pDatabaseName, pUserName, pPassword, pContainerId));
   }
