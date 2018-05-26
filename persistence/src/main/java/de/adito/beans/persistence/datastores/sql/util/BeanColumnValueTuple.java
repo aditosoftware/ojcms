@@ -1,10 +1,9 @@
-package de.adito.beans.persistence.datastores.sql;
+package de.adito.beans.persistence.datastores.sql.util;
 
 import de.adito.beans.core.IBean;
 import de.adito.beans.core.fields.FieldTuple;
 import de.adito.beans.persistence.datastores.sql.builder.util.*;
 
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
@@ -17,11 +16,19 @@ public class BeanColumnValueTuple<TYPE> implements IColumnValueTuple<TYPE>
 {
   private final FieldTuple<TYPE> fieldTuple;
   private final IColumnDefinition columnDefinition;
+  private final SQLSerializer serializer;
 
-  public BeanColumnValueTuple(FieldTuple<TYPE> pFieldTuple)
+  /**
+   * Creates a new column value tuple.
+   *
+   * @param pFieldTuple the field value tuple its based on
+   * @param pSerializer a SQL serializer
+   */
+  public BeanColumnValueTuple(FieldTuple<TYPE> pFieldTuple, SQLSerializer pSerializer)
   {
     fieldTuple = pFieldTuple;
     columnDefinition = IColumnDefinition.of(fieldTuple.getField().getName(), EColumnType.VARCHAR, 255);
+    serializer = pSerializer;
   }
 
   @Override
@@ -39,41 +46,44 @@ public class BeanColumnValueTuple<TYPE> implements IColumnValueTuple<TYPE>
   @Override
   public String toSerial()
   {
-    return SQLSerializer.toPersistent(fieldTuple);
+    return serializer.toPersistent(fieldTuple);
   }
 
   /**
    * Creates an array of tuples based on a bean and its field value tuples.
    *
-   * @param pBean the bean to create the tuples from
+   * @param pBean       the bean to create the tuples from
+   * @param pSerializer a SQL serializer
    * @return an array of database tuples
    */
-  public static BeanColumnValueTuple[] of(IBean<?> pBean)
+  public static BeanColumnValueTuple[] of(IBean<?> pBean, SQLSerializer pSerializer)
   {
-    return _of(pBean.stream());
+    return _of(pBean.stream(), pSerializer);
   }
 
   /**
    * Creates an array of tuples based on a bean and its identifier field value tuples
    *
-   * @param pBean the bean to create the identifier tuples from
+   * @param pBean       the bean to create the identifier tuples from
+   * @param pSerializer a SQL serializer
    * @return an array of database tuples
    */
-  public static BeanColumnValueTuple[] ofBeanIdentifiers(IBean<?> pBean)
+  public static BeanColumnValueTuple[] ofBeanIdentifiers(IBean<?> pBean, SQLSerializer pSerializer)
   {
-    return _of(pBean.getIdentifiers().stream());
+    return _of(pBean.getIdentifiers().stream(), pSerializer);
   }
 
   /**
    * Creates an array of tuples based on a some field value tuples.
    *
    * @param pTupleSource a stream of bean tuples
+   * @param pSerializer  a SQL serializer
    * @return an array of database tuples
    */
-  private static BeanColumnValueTuple[] _of(Stream<FieldTuple<?>> pTupleSource)
+  private static BeanColumnValueTuple[] _of(Stream<FieldTuple<?>> pTupleSource, SQLSerializer pSerializer)
   {
     return pTupleSource
-        .map((Function<FieldTuple<?>, BeanColumnValueTuple>) BeanColumnValueTuple::new)
+        .map(pTuple -> new BeanColumnValueTuple<>(pTuple, pSerializer))
         .toArray(BeanColumnValueTuple[]::new);
   }
 }

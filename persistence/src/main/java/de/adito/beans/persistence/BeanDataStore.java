@@ -14,7 +14,7 @@ import java.util.*;
  *
  * @author Simon Danner, 17.02.2018
  */
-final class BeanDataStore
+public final class BeanDataStore
 {
   private final IPersistentBeanDataStore dataStore;
   private final Map<String, IBean> beanCache = new HashMap<>();
@@ -60,5 +60,21 @@ final class BeanDataStore
     //noinspection unchecked
     return (IBeanContainer<BEAN>) containerCache.computeIfAbsent(pPersistenceId, pId ->
         EncapsulatedBuilder.injectCustomEncapsulated(new BeanContainer<>(pBeanType), dataStore.getContainer(pId, pBeanType)));
+  }
+
+  /**
+   * Determines the persistence container id from a bean container.
+   * The container has to be created automatically by this framework to be found.
+   *
+   * @param pContainer the container to search the container id for
+   * @return the container id
+   */
+  public String findContainerId(IBeanContainer<?> pContainer)
+  {
+    return containerCache.entrySet().stream()
+        .filter(pEntry -> pEntry.getValue() == pContainer)
+        .findAny()
+        .map(Map.Entry::getKey)
+        .orElseThrow(() -> new RuntimeException("The bean container '" + pContainer + "' is not a persistent container!"));
   }
 }

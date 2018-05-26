@@ -1,10 +1,9 @@
-package de.adito.beans.persistence.datastores.sql;
+package de.adito.beans.persistence.datastores.sql.util;
 
 import de.adito.beans.core.IField;
 import de.adito.beans.persistence.datastores.sql.builder.util.IColumnIdentification;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -16,10 +15,18 @@ import java.util.stream.Collectors;
 public class BeanColumnIdentification<TYPE> implements IColumnIdentification<TYPE>
 {
   private final IField<TYPE> field;
+  private final SQLSerializer serializer;
 
-  public BeanColumnIdentification(IField<TYPE> pField)
+  /**
+   * Creates a new column identification.
+   *
+   * @param pField      the bean field, that identifies the column
+   * @param pSerializer a SQL serializer
+   */
+  public BeanColumnIdentification(IField<TYPE> pField, SQLSerializer pSerializer)
   {
     field = pField;
+    serializer = pSerializer;
   }
 
   /**
@@ -41,19 +48,20 @@ public class BeanColumnIdentification<TYPE> implements IColumnIdentification<TYP
   @Override
   public TYPE fromSerial(String pSerial)
   {
-    return SQLSerializer.fromPersistent(field, pSerial);
+    return serializer.fromPersistent(field, pSerial);
   }
 
   /**
    * Creates an array of column identifications based on a collection of bean fields.
    *
-   * @param pFields the bean fields to create the identifications tuples from
+   * @param pFields     the bean fields to create the identifications tuples from
+   * @param pSerializer a SQL serializer
    * @return an array of column identifications
    */
-  public static List<BeanColumnIdentification<?>> of(Collection<IField<?>> pFields)
+  public static List<BeanColumnIdentification<?>> of(Collection<IField<?>> pFields, SQLSerializer pSerializer)
   {
     return pFields.stream()
-        .map((Function<IField<?>, BeanColumnIdentification<?>>) BeanColumnIdentification::new)
+        .map(pField -> new BeanColumnIdentification<>(pField, pSerializer))
         .collect(Collectors.toList());
   }
 }

@@ -3,12 +3,13 @@ package de.adito.beans.persistence.datastores.sql;
 import de.adito.beans.core.*;
 import de.adito.beans.core.fields.FieldTuple;
 import de.adito.beans.core.util.BeanReflector;
-import de.adito.beans.persistence.Persist;
+import de.adito.beans.persistence.*;
 import de.adito.beans.persistence.datastores.sql.builder.*;
 import de.adito.beans.persistence.datastores.sql.builder.result.ResultRow;
 import de.adito.beans.persistence.datastores.sql.builder.util.*;
+import de.adito.beans.persistence.datastores.sql.util.*;
 import de.adito.beans.persistence.spi.IPersistentBean;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -31,30 +32,27 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
   private final IColumnValueTuple<String> beanIdCondition;
   private final Map<IField<?>, _ColumnIdentification<?>> columns;
   private final OJSQLBuilderForTable builder;
+  private final SQLSerializer serializer;
 
   /**
    * Creates a persistent bean.
    *
-   * @param pBeanId       the id of the bean
-   * @param pBeanType     the final bean type, which will be created by this persistent bean
-   * @param pDatabaseType the database type used for this persistent bean
-   * @param pHost         the host address of the database to connect to
-   * @param pPort         the port of the database to connect to
-   * @param pDatabaseName the name of the database to connect to
-   * @param pUserName     an optional username to use for the database connection
-   * @param pPassword     an optional password to use for the database connection
+   * @param pBeanId         the id of the bean
+   * @param pBeanType       the final bean type, which will be created by this persistent bean
+   * @param pConnectionInfo information for the database connection
+   * @param pBeanDataStore  the data store for persistent bean elements
    */
-  public SQLPersistentBean(String pBeanId, Class<BEAN> pBeanType, EDatabaseType pDatabaseType, String pHost, int pPort, String pDatabaseName,
-                           @Nullable String pUserName, @Nullable String pPassword)
+  public SQLPersistentBean(String pBeanId, Class<BEAN> pBeanType, DBConnectionInfo pConnectionInfo, BeanDataStore pBeanDataStore)
   {
     IColumnDefinition beanIdColumnDefinition = IColumnDefinition.of(IDatabaseConstants.BEAN_TABLE_BEAN_ID, EColumnType.VARCHAR, 255,
                                                                     EColumnModifier.PRIMARY_KEY, EColumnModifier.NOT_NULL);
     beanIdCondition = IColumnValueTuple.of(beanIdColumnDefinition, pBeanId);
     columns = _createColumnMap(pBeanType);
-    builder = OJSQLBuilderFactory.newSQLBuilder(pDatabaseType, IDatabaseConstants.ID_COLUMN)
+    builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionInfo.getDatabaseType(), IDatabaseConstants.ID_COLUMN)
         .forSingleTable(IDatabaseConstants.BEAN_TABLE_NAME)
-        .withClosingAndRenewingConnection(pHost, pPort, pDatabaseName, pUserName, pPassword)
+        .withClosingAndRenewingConnection(pConnectionInfo)
         .create();
+    serializer = new SQLSerializer(pBeanDataStore);
     builder.ifTableNotExistingCreate(pCreate -> pCreate
         .columns(beanIdColumnDefinition)
         .create());
@@ -182,7 +180,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
     @Override
     public TYPE fromSerial(String pSerial)
     {
-      return SQLSerializer.fromPersistent(beanField, pSerial);
+      return serializer.fromPersistent(beanField, pSerial);
     }
   }
 
@@ -227,7 +225,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
     @Override
     public String toSerial()
     {
-      return SQLSerializer.toPersistent(beanField.newTuple(getValue()));
+      return serializer.toPersistent(beanField.newTuple(getValue()));
     }
   }
 }

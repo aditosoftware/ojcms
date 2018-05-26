@@ -15,7 +15,7 @@ import java.util.function.*;
  *
  * @author Simon Danner, 18.02.2018
  */
-class CachingBeanDataStore implements IPersistentBeanDataStore
+public class CachingBeanDataStore implements IPersistentBeanDataStore
 {
   private final Map<String, IPersistentBean> beanCache = new HashMap<>();
   private final Map<String, IPersistentBeanContainer> containerCache = new HashMap<>();

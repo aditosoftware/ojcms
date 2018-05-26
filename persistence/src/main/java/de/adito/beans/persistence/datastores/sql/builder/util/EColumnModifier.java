@@ -26,6 +26,8 @@ public enum EColumnModifier
 
   /**
    * The descriptor of this modifier.
+   *
+   * @return a descriptor for the modifier
    */
   public String getDescriptor()
   {

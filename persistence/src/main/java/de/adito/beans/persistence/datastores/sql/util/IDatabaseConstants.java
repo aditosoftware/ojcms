@@ -1,4 +1,4 @@
-package de.adito.beans.persistence.datastores.sql;
+package de.adito.beans.persistence.datastores.sql.util;
 
 /**
  * Several database constants.

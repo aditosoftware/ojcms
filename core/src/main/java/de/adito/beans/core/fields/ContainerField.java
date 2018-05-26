@@ -30,7 +30,7 @@ public class ContainerField<BEAN extends IBean<BEAN>> extends AbstractField<IBea
   {
     IBeanContainer<BEAN> copy = new BeanContainer<>(pOriginalContainer.getBeanType());
     pOriginalContainer.stream()
-        .map(pOriginalBean -> BeanCopyUtil.createCopy(pOriginalBean, true, pCustomFieldCopies))
+        .map(pOriginalBean -> pOriginalBean.createCopy(true, pCustomFieldCopies))
         .forEach(copy::addBean);
     return copy;
   }

@@ -1,7 +1,6 @@
 package de.adito.beans.persistence.datastores.sql.builder;
 
 import de.adito.beans.persistence.datastores.sql.builder.util.*;
-import org.jetbrains.annotations.Nullable;
 
 import java.sql.*;
 import java.util.function.Supplier;
@@ -188,17 +187,12 @@ public final class OJSQLBuilderFactory
      * A used connection will be closed after every execution of a SQL statement.
      * The connections are based on several connection information.
      *
-     * @param pHost         the host address of the database to use for the connections
-     * @param pPort         the port the use for the connections
-     * @param pDatabaseName the name of the database to connect to
-     * @param pUserName     an optional username to use for the connections
-     * @param pPassword     an optional password to use for the connections
+     * @param pConnectionInfo information for the database connection
      * @return the builder itself to enable a pipelining mechanism
      */
-    public BUILDER withClosingAndRenewingConnection(String pHost, int pPort, String pDatabaseName, @Nullable String pUserName,
-                                                    @Nullable String pPassword)
+    public BUILDER withClosingAndRenewingConnection(DBConnectionInfo pConnectionInfo)
     {
-      return withClosingAndRenewingConnection(_createConnectionSupplier(databaseType, pHost, pPort, pDatabaseName, pUserName, pPassword));
+      return withClosingAndRenewingConnection(_createConnectionSupplier(pConnectionInfo));
     }
 
     /**
@@ -225,27 +219,22 @@ public final class OJSQLBuilderFactory
     /**
      * Creates the supplier of a database connection, that will open a connection every time it is called.
      *
-     * @param pDatabaseType the type of the database to connect to
-     * @param pHost         the host address of the database to connect to
-     * @param pPort         the port of the database to connect to
-     * @param pDatabaseName the name of the database to connect to
-     * @param pUserName     an optional username to use for the connection
-     * @param pPassword     an optional password to use for the connection
+     * @param pConnectionInfo information for the database connection
      * @return a database connection supplier
      */
-    private Supplier<Connection> _createConnectionSupplier(EDatabaseType pDatabaseType, String pHost, int pPort,
-                                                           String pDatabaseName, @Nullable String pUserName, @Nullable String pPassword)
+    private Supplier<Connection> _createConnectionSupplier(DBConnectionInfo pConnectionInfo)
     {
-      final String dbUrl = pDatabaseType.getConnectionString(pHost, pPort, pDatabaseName);
+      final String dbUrl = pConnectionInfo.getJDBCConnectionString();
       return () -> {
         try
         {
-          return pUserName == null || pPassword == null ? DriverManager.getConnection(dbUrl) :
-              DriverManager.getConnection(dbUrl, pUserName, pPassword);
+          return pConnectionInfo.getUsername() == null || pConnectionInfo.getPassword() == null ? DriverManager.getConnection(dbUrl) :
+              DriverManager.getConnection(dbUrl, pConnectionInfo.getUsername(), pConnectionInfo.getPassword());
         }
         catch (SQLException pE)
         {
-          throw new OJDatabaseException("Unable to connect to the database! host = " + pHost + " port = " + pPort, pE);
+          throw new OJDatabaseException("Unable to connect to the database! host = " + pConnectionInfo.getHost() +
+                                            " port = " + pConnectionInfo.getPort(), pE);
         }
       };
     }

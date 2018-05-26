@@ -3,13 +3,14 @@ package de.adito.beans.persistence.datastores.sql;
 import de.adito.beans.core.*;
 import de.adito.beans.core.fields.FieldTuple;
 import de.adito.beans.core.util.*;
-import de.adito.beans.persistence.BeanPersistenceUtil;
+import de.adito.beans.persistence.*;
 import de.adito.beans.persistence.datastores.sql.builder.*;
 import de.adito.beans.persistence.datastores.sql.builder.result.ResultRow;
 import de.adito.beans.persistence.datastores.sql.builder.statements.Select;
 import de.adito.beans.persistence.datastores.sql.builder.util.*;
+import de.adito.beans.persistence.datastores.sql.util.*;
 import de.adito.beans.persistence.spi.*;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -25,6 +26,7 @@ import java.util.*;
 public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersistentBeanContainer<BEAN>
 {
   private final Class<BEAN> beanType;
+  private final SQLSerializer serializer;
   private final List<BeanColumnIdentification<?>> columns;
   private final OJSQLBuilderForTable builder;
   private final Map<Integer, BEAN> beanCache = new HashMap<>();
@@ -32,47 +34,28 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
   /**
    * Creates a new persistent bean container.
    *
-   * @param pBeanType     the type of the beans in the container
-   * @param pType         the database type
-   * @param pHost         the host to connect to
-   * @param pPort         the port to connect to
-   * @param pDatabaseName the database name to connect to
-   * @param pTableName    the name of the database table that represents this container core
+   * @param pBeanType       the type of the beans in the container
+   * @param pConnectionInfo information for the database connection
+   * @param pTableName      the name of the database table that represents this container core
+   * @param pBeanDataStore  the data store for persistent bean elements
    */
-  public SQLPersistentContainer(Class<BEAN> pBeanType, EDatabaseType pType, String pHost, int pPort, String pDatabaseName, String pTableName)
-  {
-    this(pBeanType, pType, pHost, pPort, pDatabaseName, null, null, pTableName);
-  }
-
-  /**
-   * Creates a new persistent bean container.
-   *
-   * @param pBeanType     the type of the beans in the container
-   * @param pType         the database type
-   * @param pHost         the host to connect to
-   * @param pPort         the port to connect to
-   * @param pDatabaseName the database name to connect to
-   * @param pTableName    the name of the database table that represents this container core
-   * @param pUserName     an optional user name for the connection
-   * @param pPassword     an optional password for the connection
-   */
-  public SQLPersistentContainer(Class<BEAN> pBeanType, EDatabaseType pType, String pHost, int pPort, String pDatabaseName,
-                                @Nullable String pUserName, @Nullable String pPassword, String pTableName)
+  public SQLPersistentContainer(Class<BEAN> pBeanType, DBConnectionInfo pConnectionInfo, String pTableName, BeanDataStore pBeanDataStore)
   {
     beanType = pBeanType;
-    columns = BeanColumnIdentification.of(BeanReflector.reflectBeanFields(beanType));
-    builder = OJSQLBuilderFactory.newSQLBuilder(pType, IDatabaseConstants.ID_COLUMN)
+    serializer = new SQLSerializer(pBeanDataStore);
+    columns = BeanColumnIdentification.of(BeanReflector.reflectBeanFields(beanType), serializer);
+    builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionInfo.getDatabaseType(), IDatabaseConstants.ID_COLUMN)
         .forSingleTable(pTableName)
-        .withClosingAndRenewingConnection(pHost, pPort, pDatabaseName, pUserName, pPassword)
+        .withClosingAndRenewingConnection(pConnectionInfo)
         .create();
     //Setup driver
     try
     {
-      Class.forName(pType.getDriverName());
+      Class.forName(pConnectionInfo.getDatabaseType().getDriverName());
     }
     catch (ClassNotFoundException pE)
     {
-      throw new RuntimeException("Driver '" + pType.getDriverName() + "' not found!", pE);
+      throw new RuntimeException("Driver '" + pConnectionInfo.getDatabaseType().getDriverName() + "' not found!", pE);
     }
     //Create table if necessary
     builder.ifTableNotExistingCreate(pCreate -> pCreate
@@ -86,7 +69,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
   {
     builder.doInsert(pInsert -> pInsert
         .atIndex(pIndex)
-        .values(BeanColumnValueTuple.of(pBean))
+        .values(BeanColumnValueTuple.of(pBean, serializer))
         .insert());
     beanCache.put(pIndex, _injectPersistentCore(pBean, pIndex));
   }
@@ -104,10 +87,8 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
   @Override
   public BEAN removeBean(int pIndex)
   {
-    if (pIndex < 0 || pIndex >= size())
-      throw new IndexOutOfBoundsException("index: " + pIndex);
     //Inject the default encapsulated core with the values from the database to allow the bean to exist after the removal
-    BEAN removed = EncapsulatedBuilder.injectDefaultEncapsulated(getBean(pIndex));
+    BEAN removed = EncapsulatedBuilder.injectDefaultEncapsulated(getBean(_requireInRange(pIndex)));
     _removeByIndex(pIndex);
     return removed;
   }
@@ -116,14 +97,15 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
   public boolean containsBean(BEAN pBean)
   {
     return beanCache.containsValue(pBean) || builder.doSelect(pSelect -> pSelect
-        .where(BeanColumnValueTuple.ofBeanIdentifiers(pBean))
+        .where(BeanColumnValueTuple.ofBeanIdentifiers(pBean, serializer))
         .hasResult());
   }
 
   @Override
   public BEAN getBean(int pIndex)
   {
-    return beanCache.computeIfAbsent(pIndex, pCreationIndex -> _injectPersistentCore(BeanPersistenceUtil.newInstance(beanType), pCreationIndex));
+    return beanCache.computeIfAbsent(_requireInRange(pIndex), pCreationIndex ->
+        _injectPersistentCore(BeanPersistenceUtil.newInstance(beanType), pCreationIndex));
   }
 
   @Override
@@ -134,7 +116,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
         .findFirst()
         .map(Map.Entry::getKey)
         .orElse(builder.doSelect(pSelect -> pSelect
-            .where(BeanColumnValueTuple.ofBeanIdentifiers(pBean))
+            .where(BeanColumnValueTuple.ofBeanIdentifiers(pBean, serializer))
             .firstResult()
             .map(ResultRow::getIdIfAvailable)
             .orElse(-1)));
@@ -151,6 +133,21 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
   public Iterator<BEAN> iterator()
   {
     return new IndexBasedIterator<>(size(), this::getBean);
+  }
+
+  /**
+   * Makes sure an index is within the range of this container.
+   * It has to be between 0 and size().
+   *
+   * @param pIndex the index to check
+   * @return the checked index
+   */
+  private int _requireInRange(int pIndex)
+  {
+    final int size = size();
+    if (pIndex < 0 || pIndex >= size)
+      throw new IndexOutOfBoundsException("The index for the bean is not within the range of this container. index: " + pIndex + ", size: " + size);
+    return pIndex;
   }
 
   /**
@@ -202,7 +199,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
     @Override
     public <TYPE> TYPE getValue(IField<TYPE> pField)
     {
-      return builder.doSelectOne(new BeanColumnIdentification<>(pField), pSelect -> pSelect
+      return builder.doSelectOne(new BeanColumnIdentification<>(pField, serializer), pSelect -> pSelect
           .whereId(index)
           .firstResult()
           .orIfNotPresentThrow(() -> new OJDatabaseException("No result for index " + index + " found. field: " + pField)));
@@ -212,7 +209,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
     public <TYPE> void setValue(IField<TYPE> pField, TYPE pValue, boolean pAllowNewField)
     {
       builder.doUpdate(pUpdate -> pUpdate
-          .set(new BeanColumnValueTuple<>(pField.newTuple(pValue)))
+          .set(new BeanColumnValueTuple<>(pField.newTuple(pValue), serializer))
           .whereId(index)
           .update());
     }

@@ -1,7 +1,8 @@
-package de.adito.beans.persistence.datastores;
+package de.adito.beans.persistence;
 
+import de.adito.beans.persistence.datastores.CachingBeanDataStore;
 import de.adito.beans.persistence.datastores.sql.*;
-import de.adito.beans.persistence.datastores.sql.builder.util.EDatabaseType;
+import de.adito.beans.persistence.datastores.sql.builder.util.*;
 import de.adito.beans.persistence.spi.IPersistentBeanDataStore;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,10 +45,9 @@ public final class DataStoreFactory
   public IPersistentBeanDataStore sql(EDatabaseType pDatabaseType, String pHost, int pPort, String pDatabaseName,
                                       @Nullable String pUserName, @Nullable String pPassword)
   {
+    final DBConnectionInfo dbConnectionInfo = new DBConnectionInfo(pDatabaseType, pHost, pPort, pDatabaseName, pUserName, pPassword);
     //noinspection unchecked
-    return new CachingBeanDataStore((pBeanId, pBeanType) -> new SQLPersistentBean(pBeanId, pBeanType, pDatabaseType, pHost, pPort,
-                                                                                  pDatabaseName, pUserName, pPassword),
-                                    (pContainerId, pBeanType) -> new SQLPersistentContainer(pBeanType, pDatabaseType, pHost, pPort,
-                                                                                            pDatabaseName, pUserName, pPassword, pContainerId));
+    return new CachingBeanDataStore((pBeanId, pBeanType) -> new SQLPersistentBean(pBeanId, pBeanType, dbConnectionInfo, OJPersistence.dataStore()),
+                                    (pContainerId, pBeanType) -> new SQLPersistentContainer(pBeanType, dbConnectionInfo, pContainerId, OJPersistence.dataStore()));
   }
 }

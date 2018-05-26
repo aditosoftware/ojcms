@@ -1,7 +1,6 @@
 package de.adito.beans.persistence;
 
 import de.adito.beans.core.*;
-import de.adito.beans.persistence.datastores.DataStoreFactory;
 import de.adito.beans.persistence.spi.IPersistentBeanDataStore;
 
 import java.util.function.*;

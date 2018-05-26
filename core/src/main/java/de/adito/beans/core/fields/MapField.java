@@ -80,6 +80,6 @@ public class MapField<TYPE> extends AbstractField<MapBean<TYPE>>
   {
     Function<MapBean<TYPE>, MapBean<TYPE>> creator = pMapBean -> new MapBean<>(pValue.streamFields().collect(Collectors.toList()),
                                                                                pValue.getValueType());
-    return BeanCopyUtil.createCopy(pValue, true, creator, pCustomFieldCopies);
+    return pValue.createCopy(true, creator, pCustomFieldCopies);
   }
 }
