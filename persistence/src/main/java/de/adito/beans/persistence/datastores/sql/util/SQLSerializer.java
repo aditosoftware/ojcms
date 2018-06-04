@@ -4,7 +4,7 @@ import de.adito.beans.core.*;
 import de.adito.beans.core.fields.*;
 import de.adito.beans.core.references.IHierarchicalField;
 import de.adito.beans.persistence.*;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Serialization utility for bean values.
@@ -38,16 +38,20 @@ public class SQLSerializer
    */
   public <TYPE> String toPersistent(FieldTuple<TYPE> pTuple)
   {
-    IField<TYPE> field = pTuple.getField();
+    final IField<TYPE> field = pTuple.getField();
+    final TYPE value = pTuple.getValue();
+
+    if (value == null)
+      return null;
 
     if (field instanceof BeanField)
-      return _referenceBean((IBean<?>) pTuple.getValue());
+      return _referenceBean((IBean<?>) value);
 
     if (field instanceof ContainerField)
-      return _referenceContainer((IBeanContainer<?>) pTuple.getValue());
+      return _referenceContainer((IBeanContainer<?>) value);
 
     if (field instanceof ISerializableField)
-      return ((ISerializableField<TYPE>) field).toPersistent(pTuple.getValue());
+      return ((ISerializableField<TYPE>) field).toPersistent(value);
 
     throw new BeanSerializationException(_notSerializableMessage(field, true));
   }
@@ -62,6 +66,9 @@ public class SQLSerializer
    */
   public <TYPE> TYPE fromPersistent(IField<TYPE> pField, String pSerialString)
   {
+    if (pSerialString == null)
+      return null;
+
     if (pField instanceof BeanField)
       //noinspection unchecked
       return (TYPE) _dereferenceBean((Class<? extends IBean>) pField.getType(), pSerialString);
@@ -84,10 +91,8 @@ public class SQLSerializer
    * @param pBean the bean to create the reference string for
    * @return the reference string
    */
-  private String _referenceBean(@Nullable IBean<?> pBean)
+  private String _referenceBean(@NotNull IBean<?> pBean)
   {
-    if (pBean == null)
-      return null;
     Class<? extends IBean> beanType = pBean.getClass();
     if (!beanType.isAnnotationPresent(Persist.class))
       throw new BeanSerializationException("Bean references within a persistent bean must always refer to another persistent bean!");
@@ -104,10 +109,8 @@ public class SQLSerializer
    * @param pContainer the container to create the reference string for
    * @return the reference string
    */
-  private String _referenceContainer(@Nullable IBeanContainer<?> pContainer)
+  private String _referenceContainer(@NotNull IBeanContainer<?> pContainer)
   {
-    if (pContainer == null)
-      return null;
     return beanDataStore.findContainerId(pContainer) + SEPARATOR + pContainer.getBeanType().getName();
   }
 
@@ -118,10 +121,8 @@ public class SQLSerializer
    * @param pSerialString the serial reference string
    * @return the dereferenced bean
    */
-  private IBean<?> _dereferenceBean(Class<? extends IBean> pBeanType, @Nullable String pSerialString)
+  private IBean<?> _dereferenceBean(Class<? extends IBean> pBeanType, @NotNull String pSerialString)
   {
-    if (pSerialString == null)
-      return null;
     assert pBeanType.isAnnotationPresent(Persist.class);
     Persist annotation = pBeanType.getAnnotation(Persist.class);
     //noinspection unchecked
@@ -135,10 +136,8 @@ public class SQLSerializer
    * @param pSerialString the serial reference string
    * @return the dereferenced bean container
    */
-  private IBeanContainer<?> _dereferenceBeanContainer(@Nullable String pSerialString)
+  private IBeanContainer<?> _dereferenceBeanContainer(@NotNull String pSerialString)
   {
-    if (pSerialString == null)
-      return null;
     String[] parts = pSerialString.split(SEPARATOR);
     if (parts.length != 2)
       throw new BeanSerializationException("Corrupted bean container reference: " + pSerialString);

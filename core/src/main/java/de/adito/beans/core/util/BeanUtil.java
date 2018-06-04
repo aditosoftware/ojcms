@@ -5,7 +5,7 @@ import de.adito.beans.core.fields.FieldTuple;
 import org.jetbrains.annotations.*;
 
 import java.util.*;
-import java.util.stream.*;
+import java.util.stream.Stream;
 
 /**
  * General utility class for the bean modell.
@@ -68,19 +68,13 @@ public final class BeanUtil
    *
    * @param pBean1         the first bean to compare
    * @param pBean2         the second bean to compare
-   * @param pFieldsToCheck a collection of fields, which should be used for the comparison
+   * @param pFieldsToCheck a stream of fields, which should be used for the comparison
    * @return a Optional that may contain the field with a different value (it is empty if all values are equal)
    */
-  public static Optional<IField> compareBeanValues(IBean pBean1, IBean pBean2, Collection<IField<?>> pFieldsToCheck)
+  public static Optional<IField> compareBeanValues(IBean pBean1, IBean pBean2, Stream<IField<?>> pFieldsToCheck)
   {
-    return pFieldsToCheck.stream()
+    return pFieldsToCheck
         .map(pField -> (IField) pField)
-        .peek(pField -> {
-          //noinspection unchecked
-          assert pBean1.hasField(pField);
-          //noinspection unchecked
-          assert pBean2.hasField(pField);
-        })
         .filter(pField -> !Objects.equals(pBean1.getValue(pField), pBean2.getValue(pField)))
         .findAny();
   }
@@ -106,16 +100,14 @@ public final class BeanUtil
       if (pBean.getClass() == oldBean.getClass() && //same types
           ((identifiers.isEmpty() && Objects.equals(oldBean, pBean)) || //no identifiers -> use default equals()
               (identifiers.equals(oldBean.getIdentifiers()) && //else use identifiers
-                  !BeanUtil.compareBeanValues(oldBean, pBean, identifiers.stream()
-                      .map(FieldTuple::getField)
-                      .collect(Collectors.toSet()))
+                  !compareBeanValues(oldBean, pBean, identifiers.stream()
+                      .map(FieldTuple::getField))
                       .isPresent())))
       {
         it.remove();
         return Optional.of(oldBean);
       }
     }
-
     return Optional.empty();
   }
 

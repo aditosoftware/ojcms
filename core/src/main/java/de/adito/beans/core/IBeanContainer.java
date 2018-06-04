@@ -198,10 +198,8 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
    */
   default boolean contains(BEAN pBean)
   {
-    if (pBean == null)
-      throw new IllegalArgumentException("The bean must not be null!");
     assert getEncapsulated() != null;
-    return getEncapsulated().containsBean(Objects.requireNonNull(pBean));
+    return getEncapsulated().indexOfBean(Objects.requireNonNull(pBean)) >= 0;
   }
 
   /**

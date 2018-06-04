@@ -55,14 +55,6 @@ interface IBeanContainerEncapsulated<BEAN extends IBean<BEAN>> extends IEncapsul
   BEAN removeBean(int pIndex);
 
   /**
-   * Determines, if a certain bean is contained.
-   *
-   * @param pBean the bean to check
-   * @return <tt>true</tt>, if the bean is contained
-   */
-  boolean containsBean(BEAN pBean);
-
-  /**
    * Gets a bean by its index.
    *
    * @param pIndex the index of the bean

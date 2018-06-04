@@ -1,6 +1,6 @@
 package de.adito.beans.persistence;
 
-import de.adito.beans.core.IBean;
+import de.adito.beans.core.*;
 
 /**
  * General utility class for the persistence framework.

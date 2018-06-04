@@ -182,7 +182,7 @@ public interface IField<TYPE>
    */
   default FieldTuple<?> newUntypedTuple(Object pValue)
   {
-    if (pValue != null && getType() != pValue.getClass())
+    if (pValue != null && !getType().isAssignableFrom(pValue.getClass()))
       throw new RuntimeException("type-mismatch: field type: " + getType().getName() + " value type: " + pValue.getClass().getName());
     //noinspection unchecked
     return new FieldTuple(this, pValue);

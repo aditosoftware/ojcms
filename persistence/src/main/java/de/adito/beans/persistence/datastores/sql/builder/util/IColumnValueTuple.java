@@ -2,7 +2,7 @@ package de.adito.beans.persistence.datastores.sql.builder.util;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Collection;
 import java.util.function.*;
 import java.util.stream.Stream;
 
@@ -30,21 +30,26 @@ public interface IColumnValueTuple<TYPE>
    *
    * @return the value in a serial string format
    */
+  @Nullable
   default String toSerial()
   {
-    return Objects.toString(getValue());
+    TYPE value = getValue();
+    return value == null ? null : value.toString();
   }
 
   /**
    * The value as string to use for database statements.
    * For number values the string will be surrounded by quotes.
-   * The value will be put in in its serial format.
+   * The value might be null for nullable columns
    *
    * @return the value in a string format for SQL statements (with quotes for numbers)
    */
+  @Nullable
   default String valueToStatementString()
   {
     String serialValue = toSerial();
+    if (serialValue == null)
+      return null;
     return getColumnDefinition().getColumnType().isNumeric() ? serialValue : "'" + serialValue + "'";
   }
 

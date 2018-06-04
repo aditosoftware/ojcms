@@ -233,8 +233,8 @@ public final class OJSQLBuilderFactory
         }
         catch (SQLException pE)
         {
-          throw new OJDatabaseException("Unable to connect to the database! host = " + pConnectionInfo.getHost() +
-                                            " port = " + pConnectionInfo.getPort(), pE);
+          throw new OJDatabaseException(pE, "Unable to connect to the database! host = " + pConnectionInfo.getHost() +
+              " port = " + pConnectionInfo.getPort());
         }
       };
     }

@@ -209,14 +209,6 @@ public final class EncapsulatedBuilder
     BEAN removeBean(int pIndex);
 
     /**
-     * Determines, if a certain bean is contained.
-     *
-     * @param pBean the bean to check
-     * @return <tt>true</tt>, if the bean is contained
-     */
-    boolean containsBean(BEAN pBean);
-
-    /**
      * Gets a bean by its index.
      *
      * @param pIndex the index of the bean
@@ -491,12 +483,6 @@ public final class EncapsulatedBuilder
         throw new IndexOutOfBoundsException("index: " + pIndex);
 
       return builder.removeBean(pIndex);
-    }
-
-    @Override
-    public boolean containsBean(BEAN pBean)
-    {
-      return builder.containsBean(pBean);
     }
 
     @Override

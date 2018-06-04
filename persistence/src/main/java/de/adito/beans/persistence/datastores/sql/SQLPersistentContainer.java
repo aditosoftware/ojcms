@@ -26,10 +26,13 @@ import java.util.*;
 public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersistentBeanContainer<BEAN>
 {
   private final Class<BEAN> beanType;
+  private final boolean isAutomaticAdditionMode;
   private final SQLSerializer serializer;
   private final List<BeanColumnIdentification<?>> columns;
   private final OJSQLBuilderForTable builder;
   private final Map<Integer, BEAN> beanCache = new HashMap<>();
+  private final Map<BEAN, Integer> additionQueue = new HashMap<>();
+  private boolean shouldQueueAdditions = false;
 
   /**
    * Creates a new persistent bean container.
@@ -42,6 +45,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
   public SQLPersistentContainer(Class<BEAN> pBeanType, DBConnectionInfo pConnectionInfo, String pTableName, BeanDataStore pBeanDataStore)
   {
     beanType = pBeanType;
+    isAutomaticAdditionMode = pBeanType.getAnnotation(Persist.class).storageMode() == EStorageMode.AUTOMATIC;
     serializer = new SQLSerializer(pBeanDataStore);
     columns = BeanColumnIdentification.of(BeanReflector.reflectBeanFields(beanType), serializer);
     builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionInfo.getDatabaseType(), IDatabaseConstants.ID_COLUMN)
@@ -67,6 +71,17 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
   @Override
   public void addBean(BEAN pBean, int pIndex)
   {
+    //Additions will be queued in the automatic mode, when a new bean instance is created at this certain time.
+    //Otherwise unwanted copies will be created, because a new instance will lead to an addition in the automatic mode.
+    if (isAutomaticAdditionMode && shouldQueueAdditions)
+    {
+      synchronized (additionQueue)
+      {
+        additionQueue.put(pBean, pIndex);
+      }
+      return;
+    }
+    //TODO removal?
     builder.doInsert(pInsert -> pInsert
         .atIndex(pIndex)
         .values(BeanColumnValueTuple.of(pBean, serializer))
@@ -81,6 +96,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
     if (index == -1)
       return false;
     _removeByIndex(index);
+    EncapsulatedBuilder.injectDefaultEncapsulated(pBean);
     return true;
   }
 
@@ -94,18 +110,9 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
   }
 
   @Override
-  public boolean containsBean(BEAN pBean)
-  {
-    return beanCache.containsValue(pBean) || builder.doSelect(pSelect -> pSelect
-        .where(BeanColumnValueTuple.ofBeanIdentifiers(pBean, serializer))
-        .hasResult());
-  }
-
-  @Override
   public BEAN getBean(int pIndex)
   {
-    return beanCache.computeIfAbsent(_requireInRange(pIndex), pCreationIndex ->
-        _injectPersistentCore(BeanPersistenceUtil.newInstance(beanType), pCreationIndex));
+    return beanCache.computeIfAbsent(_requireInRange(pIndex), pCreationIndex -> _injectPersistentCore(_createBeanInstance(), pCreationIndex));
   }
 
   @Override
@@ -115,11 +122,17 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
         .filter(pEntry -> Objects.equals(pBean, pEntry.getValue()))
         .findFirst()
         .map(Map.Entry::getKey)
-        .orElse(builder.doSelect(pSelect -> pSelect
-            .where(BeanColumnValueTuple.ofBeanIdentifiers(pBean, serializer))
-            .firstResult()
-            .map(ResultRow::getIdIfAvailable)
-            .orElse(-1)));
+        .orElseGet(() -> {
+          BeanColumnValueTuple[] tuples = BeanColumnValueTuple.ofBeanIdentifiers(pBean, serializer);
+          if (tuples.length == 0)
+            throw new OJDatabaseException("A bean instance not created by this container can only be used for a index-of or contains search," +
+                                              " if there are bean fields marked as @Identifier!");
+          return builder.doSelect(pSelect -> pSelect
+              .where(tuples)
+              .firstResult()
+              .map(ResultRow::getIdIfAvailable)
+              .orElse(-1));
+        });
   }
 
   @Override
@@ -160,6 +173,30 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
   private BEAN _injectPersistentCore(BEAN pInstance, int pIndex)
   {
     return EncapsulatedBuilder.injectCustomEncapsulated(pInstance, new _ContainerBean(pIndex));
+  }
+
+  /**
+   * Creates a new instance of a bean of this container's bean type.
+   * If the type of the persistent bean is {@link EStorageMode#AUTOMATIC}, additions will be disabled for this short period of time.
+   * All addition happening in the mean time, will be stored in a queue, which will be executed afterwards.
+   * It is necessary the queue the additions in the automatic mode to avoid copies while creating a new instance from this class.
+   *
+   * @return a new instance of a bean
+   */
+  private BEAN _createBeanInstance()
+  {
+    if (!isAutomaticAdditionMode)
+      return BeanPersistenceUtil.newInstance(beanType);
+    shouldQueueAdditions = true;
+    BEAN instance = BeanPersistenceUtil.newInstance(beanType);
+    synchronized (additionQueue)
+    {
+      additionQueue.remove(instance);
+      additionQueue.forEach(this::addBean);
+      additionQueue.clear();
+    }
+    shouldQueueAdditions = false;
+    return instance;
   }
 
   /**

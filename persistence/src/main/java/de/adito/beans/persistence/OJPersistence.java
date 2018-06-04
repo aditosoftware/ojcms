@@ -64,9 +64,10 @@ public final class OJPersistence
     @Override
     public void accept(IBean<?> pCreatedBean, Persist pAnnotation)
     {
+      if (pAnnotation.mode() == EPersistenceMode.SINGLE || pAnnotation.storageMode() == EStorageMode.MANUAL)
+        return;
       IBeanContainer container = beanDataStore.getContainerByPersistenceId(pAnnotation.containerId(), pCreatedBean.getClass());
-      if (!container.contains(pCreatedBean))
-        container.addBean(pCreatedBean);
+      container.addBean(pCreatedBean);
     }
   }
 }

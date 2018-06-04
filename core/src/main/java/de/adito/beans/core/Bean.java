@@ -28,6 +28,9 @@ import java.util.stream.Collectors;
  * It's important to use the static field factory to create the fields.
  * So all initial data is automatically stored in the field instance.
  *
+ * This bean has implementations for {@link #equals(Object)} and {@link #hashCode()}.
+ * They include all fields marked as {@link de.adito.beans.core.annotations.Identifier}.
+ *
  * @param <BEAN> the specific type of this bean, especially if it is used as base class
  * @author Simon Danner, 23.08.2016
  * @see BeanFieldFactory
@@ -145,6 +148,30 @@ public class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
     return getClass().getSimpleName() + "{" + stream()
         .map(Objects::toString)
         .collect(Collectors.joining(", ")) + "}";
+  }
+
+  @Override
+  public boolean equals(Object pOther)
+  {
+    if (this == pOther)
+      return true;
+    Set<FieldTuple<?>> identifiers = getIdentifiers();
+    if (identifiers.isEmpty())
+      return super.equals(pOther);
+    if (pOther == null || getClass() != pOther.getClass())
+      return false;
+    return !BeanUtil.compareBeanValues(this, (IBean) pOther, identifiers.stream()
+        .map(FieldTuple::getField))
+        .isPresent();
+  }
+
+  @Override
+  public int hashCode()
+  {
+    Set<FieldTuple<?>> identifiers = getIdentifiers();
+    return identifiers.isEmpty() ? super.hashCode() : Objects.hash(identifiers.stream()
+                                                                       .map(FieldTuple::getValue)
+                                                                       .toArray(Object[]::new));
   }
 
   /**

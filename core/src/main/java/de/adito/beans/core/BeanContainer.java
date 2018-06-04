@@ -110,12 +110,6 @@ public class BeanContainer<BEAN extends IBean<BEAN>> implements IBeanContainer<B
     }
 
     @Override
-    public boolean containsBean(BEAN pBean)
-    {
-      return beanList.contains(pBean);
-    }
-
-    @Override
     public BEAN getBean(int pIndex)
     {
       return beanList.get(pIndex);

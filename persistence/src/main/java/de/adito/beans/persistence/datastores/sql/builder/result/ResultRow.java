@@ -53,7 +53,7 @@ public class ResultRow
       throw new OJDatabaseException("The column '" + pColumn.getColumnName() + "' is not present within the result row!");
 
     String serialValue = values.get(pColumn.getColumnName().toUpperCase());
-    return serialValue == null || serialValue.equals("null") ? null : pColumn.fromSerial(serialValue);
+    return serialValue == null ? null : pColumn.fromSerial(serialValue);
   }
 
   /**

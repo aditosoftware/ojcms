@@ -26,4 +26,9 @@ public @interface Persist
    * The mode, in which the beans should be persisted.
    */
   EPersistenceMode mode() default EPersistenceMode.CONTAINER;
+
+  /**
+   * The mode, in which persistent beans will be added to the persistent container.
+   */
+  EStorageMode storageMode() default EStorageMode.MANUAL;
 }

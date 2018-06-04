@@ -4,7 +4,6 @@ import de.adito.beans.core.util.BeanUtil;
 
 import java.util.*;
 import java.util.function.*;
-import java.util.stream.Collectors;
 
 /**
  * A special bean that represents a Map.
@@ -149,8 +148,7 @@ public class MapBean<TYPE> implements IModifiableBean<MapBean<TYPE>>
     MapBean other = (MapBean) pObject;
     //MapBeans are the same, if all fields and associated values are equal
     //noinspection unchecked
-    return streamFields().allMatch(other::hasField) &&
-        !BeanUtil.compareBeanValues(this, other, streamFields().collect(Collectors.toList())).isPresent();
+    return streamFields().allMatch(other::hasField) && !BeanUtil.compareBeanValues(this, other, streamFields()).isPresent();
   }
 
   @Override
