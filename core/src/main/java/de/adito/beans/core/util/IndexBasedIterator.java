@@ -14,6 +14,7 @@ import java.util.function.*;
 public class IndexBasedIterator<ELEMENT> implements Iterator<ELEMENT>
 {
   private int index;
+  private int lastIndex = -1;
   private final int endIndexExclusive;
   private final Function<Integer, ELEMENT> provider;
   @Nullable
@@ -81,15 +82,17 @@ public class IndexBasedIterator<ELEMENT> implements Iterator<ELEMENT>
   {
     if (!hasNext())
       throw new NoSuchElementException();
-    return provider.apply(index++);
+    return provider.apply(lastIndex = index++);
   }
 
   @Override
   public void remove()
   {
-    if (remover != null)
-      remover.accept(index);
-    else
-      Iterator.super.remove(); //unsupported
+    if (remover == null)
+      throw new UnsupportedOperationException();
+    if (lastIndex < 0)
+      throw new IllegalStateException();
+    remover.accept(index = lastIndex);
+    lastIndex = -1;
   }
 }

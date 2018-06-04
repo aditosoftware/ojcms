@@ -81,7 +81,6 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
       }
       return;
     }
-    //TODO removal?
     builder.doInsert(pInsert -> pInsert
         .atIndex(pIndex)
         .values(BeanColumnValueTuple.of(pBean, serializer))
@@ -145,7 +144,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
   @Override
   public Iterator<BEAN> iterator()
   {
-    return new IndexBasedIterator<>(size(), this::getBean);
+    return new IndexBasedIterator<>(size(), this::getBean, this::removeBean);
   }
 
   /**
