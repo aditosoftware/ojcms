@@ -4,14 +4,15 @@ import de.adito.beans.core.*;
 import de.adito.beans.core.fields.*;
 import de.adito.beans.core.references.IHierarchicalField;
 import de.adito.beans.persistence.*;
-import org.jetbrains.annotations.NotNull;
+import de.adito.beans.persistence.datastores.sql.builder.definition.*;
+import org.jetbrains.annotations.*;
 
 /**
  * Serialization utility for bean values.
  *
  * @author Simon Danner, 19.02.2018
  */
-public class SQLSerializer
+public class BeanSQLSerializer implements IValueSerializer
 {
   private static final String REF_FIELD = IHierarchicalField.class.getSimpleName();
   private static final String SERIALIZABLE_FIELD = ISerializableField.class.getSimpleName();
@@ -24,9 +25,25 @@ public class SQLSerializer
    *
    * @param pBeanDataStore the data store for persistent bean elements
    */
-  public SQLSerializer(BeanDataStore pBeanDataStore)
+  public BeanSQLSerializer(BeanDataStore pBeanDataStore)
   {
     beanDataStore = pBeanDataStore;
+  }
+
+  @Override
+  public @Nullable <TYPE> String toSerial(IColumnValueTuple<TYPE> pColumnValueTuple)
+  {
+    return pColumnValueTuple instanceof BeanColumnValueTuple ?
+        _toPersistent(((BeanColumnValueTuple<TYPE>) pColumnValueTuple).getFieldTuple()) :
+        IValueSerializer.DEFAULT.toSerial(pColumnValueTuple);
+  }
+
+  @Override
+  public <TYPE> @Nullable TYPE fromSerial(IColumnIdentification<TYPE> pColumnIdentification, String pSerialValue)
+  {
+    return pColumnIdentification instanceof BeanColumnIdentification ?
+        _fromPersistent(((BeanColumnIdentification<TYPE>) pColumnIdentification).getBeanField(), pSerialValue) :
+        IValueSerializer.DEFAULT.fromSerial(pColumnIdentification, pSerialValue);
   }
 
   /**
@@ -36,7 +53,7 @@ public class SQLSerializer
    * @param <TYPE> the data value's type
    * @return the value in its serializable format
    */
-  public <TYPE> String toPersistent(FieldTuple<TYPE> pTuple)
+  private <TYPE> String _toPersistent(FieldTuple<TYPE> pTuple)
   {
     final IField<TYPE> field = pTuple.getField();
     final TYPE value = pTuple.getValue();
@@ -64,7 +81,7 @@ public class SQLSerializer
    * @param <TYPE>        the data type
    * @return the converted data value
    */
-  public <TYPE> TYPE fromPersistent(IField<TYPE> pField, String pSerialString)
+  private <TYPE> TYPE _fromPersistent(IField<TYPE> pField, String pSerialString)
   {
     if (pSerialString == null)
       return null;

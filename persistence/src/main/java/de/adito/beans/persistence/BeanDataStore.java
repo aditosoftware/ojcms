@@ -77,4 +77,14 @@ public final class BeanDataStore
         .map(Map.Entry::getKey)
         .orElseThrow(() -> new RuntimeException("The bean container '" + pContainer + "' is not a persistent container!"));
   }
+
+  /**
+   * Removes all obsolete persistent single beans.
+   *
+   * @param pStillExistingSingleBeans all remaining single beans (to find the obsoletes)
+   */
+  void removeObsoleteSingleBeans(Collection<IBean<?>> pStillExistingSingleBeans)
+  {
+    dataStore.removeObsoleteSingleBeans(pStillExistingSingleBeans);
+  }
 }

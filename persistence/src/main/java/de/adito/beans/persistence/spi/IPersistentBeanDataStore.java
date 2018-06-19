@@ -3,6 +3,7 @@ package de.adito.beans.persistence.spi;
 import de.adito.beans.core.IBean;
 import de.adito.beans.persistence.Persist;
 
+import java.util.Collection;
 import java.util.function.Function;
 
 /**
@@ -37,4 +38,11 @@ public interface IPersistentBeanDataStore
    * @return the persistent container
    */
   <BEAN extends IBean<BEAN>> IPersistentBeanContainer<BEAN> getContainer(String pPersistenceId, Class<BEAN> pBeanType);
+
+  /**
+   * Removes all obsolete persistent single beans from this data store.
+   *
+   * @param pStillExistingSingleBeans all remaining single beans (to find the obsoletes)
+   */
+  void removeObsoleteSingleBeans(Collection<IBean<?>> pStillExistingSingleBeans);
 }

@@ -34,6 +34,9 @@ public class PersistenceAnnotationProcessor extends AbstractProcessor
   private static final String CONTAINER_CLASS_NAME = "OJContainers";
   private static final Function<Boolean, String> DATA_STORE_METHOD = pIsContainer -> pIsContainer ? "getContainerByPersistenceId" :
       "getBeanByPersistenceId";
+  private static final Class ARRAYS_CLASS = Arrays.class;
+  private static final String AS_LIST_METHOD = "asList";
+  private static final String REMOVE_OBSOLETE_METHOD = "removeObsoleteSingleBeans";
 
   @Override
   public boolean process(Set<? extends TypeElement> pAnnotations, RoundEnvironment pRoundEnvironment)
@@ -85,13 +88,21 @@ public class PersistenceAnnotationProcessor extends AbstractProcessor
             .build())
         .collect(Collectors.toSet());
 
-    TypeSpec newClass = TypeSpec.classBuilder(pClassName)
+    final String allFields = pMapping.keySet().stream()
+        .collect(Collectors.joining(", "));
+
+    TypeSpec.Builder classBuilder = TypeSpec.classBuilder(pClassName)
         .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-        .addFields(fieldSpecs)
-        .build();
+        .addFields(fieldSpecs);
+    if (!pIsContainer)
+      classBuilder.addStaticBlock(CodeBlock.builder()
+                                      .addStatement("$T.$N($T.$N(" + allFields + "))", RETRIEVER_CLASS, REMOVE_OBSOLETE_METHOD,
+                                                    ARRAYS_CLASS, AS_LIST_METHOD)
+                                      .build());
+
     try
     {
-      JavaFile javaFile = JavaFile.builder(BASE_PATH, newClass).build();
+      JavaFile javaFile = JavaFile.builder(BASE_PATH, classBuilder.build()).build();
       javaFile.writeTo(processingEnv.getFiler());
     }
     catch (IOException pE)

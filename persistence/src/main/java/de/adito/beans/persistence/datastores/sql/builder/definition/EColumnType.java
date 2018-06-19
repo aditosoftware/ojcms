@@ -1,4 +1,4 @@
-package de.adito.beans.persistence.datastores.sql.builder.util;
+package de.adito.beans.persistence.datastores.sql.builder.definition;
 
 /**
  * Enumerates all possible database column types.

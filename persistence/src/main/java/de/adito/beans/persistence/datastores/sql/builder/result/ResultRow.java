@@ -1,6 +1,7 @@
 package de.adito.beans.persistence.datastores.sql.builder.result;
 
-import de.adito.beans.persistence.datastores.sql.builder.util.*;
+import de.adito.beans.persistence.datastores.sql.builder.definition.*;
+import de.adito.beans.persistence.datastores.sql.builder.util.OJDatabaseException;
 
 import java.sql.*;
 import java.util.*;
@@ -13,17 +14,20 @@ import java.util.*;
  */
 public class ResultRow
 {
+  private final IValueSerializer serializer;
   private final int index; //-1 if not available
   private final Map<String, String> values;
 
   /**
    * Creates a new result row.
    *
+   * @param pSerializer   the serializer for the database values
    * @param pResultSet    the result set to build this row from (can not be stored, because the result set may be closed in the future)
    * @param pIdColumnName the name of the id column
    */
-  public ResultRow(ResultSet pResultSet, String pIdColumnName)
+  public ResultRow(IValueSerializer pSerializer, ResultSet pResultSet, String pIdColumnName)
   {
+    serializer = pSerializer;
     index = _getIdIfAvailable(pResultSet, pIdColumnName);
     values = _createValueMap(pResultSet);
   }
@@ -34,7 +38,7 @@ public class ResultRow
    * @param pColumn the column identification
    * @return <tt>true</tt>, if the column is contained
    */
-  public boolean hasColumn(IColumnIdentification<?> pColumn)
+  public boolean hasColumn(IColumnIdentification pColumn)
   {
     return values.containsKey(pColumn.getColumnName().toUpperCase());
   }
@@ -53,7 +57,7 @@ public class ResultRow
       throw new OJDatabaseException("The column '" + pColumn.getColumnName() + "' is not present within the result row!");
 
     String serialValue = values.get(pColumn.getColumnName().toUpperCase());
-    return serialValue == null ? null : pColumn.fromSerial(serialValue);
+    return serializer.fromSerial(pColumn, serialValue);
   }
 
   /**

@@ -1,8 +1,8 @@
 package de.adito.beans.persistence.datastores.sql.builder.statements;
 
 import de.adito.beans.persistence.datastores.sql.builder.*;
+import de.adito.beans.persistence.datastores.sql.builder.definition.*;
 import de.adito.beans.persistence.datastores.sql.builder.modifiers.WhereModifiers;
-import de.adito.beans.persistence.datastores.sql.builder.util.*;
 
 import java.util.stream.*;
 
@@ -20,11 +20,12 @@ public class Update extends AbstractSQLStatement<WhereModifiers, Void, Void, Upd
    *
    * @param pStatementExecutor the executor for this statement
    * @param pDatabaseType      the database type used for this statement
+   * @param pSerializer        the value serializer
    * @param pIdColumnName      the id column name
    */
-  public Update(IStatementExecutor<Void> pStatementExecutor, EDatabaseType pDatabaseType, String pIdColumnName)
+  public Update(IStatementExecutor<Void> pStatementExecutor, EDatabaseType pDatabaseType, IValueSerializer pSerializer, String pIdColumnName)
   {
-    super(pStatementExecutor, pDatabaseType, new WhereModifiers(pIdColumnName));
+    super(pStatementExecutor, pDatabaseType, pSerializer, new WhereModifiers(pSerializer, pIdColumnName));
   }
 
   /**
@@ -63,7 +64,7 @@ public class Update extends AbstractSQLStatement<WhereModifiers, Void, Void, Upd
   private String _changes()
   {
     return Stream.of(changes)
-        .map(pChange -> pChange.getColumnDefinition().getColumnName().toUpperCase() + " = " + pChange.valueToStatementString())
+        .map(pChange -> pChange.getColumnDefinition().getColumnName().toUpperCase() + " = " + serializer.serialValueToStatementString(pChange))
         .collect(Collectors.joining(", "));
   }
 }

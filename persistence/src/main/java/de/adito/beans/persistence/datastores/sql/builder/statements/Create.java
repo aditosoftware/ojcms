@@ -1,7 +1,7 @@
 package de.adito.beans.persistence.datastores.sql.builder.statements;
 
 import de.adito.beans.persistence.datastores.sql.builder.*;
-import de.adito.beans.persistence.datastores.sql.builder.util.*;
+import de.adito.beans.persistence.datastores.sql.builder.definition.*;
 
 import java.util.List;
 import java.util.stream.*;
@@ -13,7 +13,7 @@ import java.util.stream.*;
  */
 public class Create extends AbstractBaseStatement<Void, Create>
 {
-  private final IColumnDefinition idColumnDefinition;
+  private final IColumnDefinition<Integer> idColumnDefinition;
   private boolean withIdColumn = false;
   private IColumnDefinition[] columns;
 
@@ -22,12 +22,13 @@ public class Create extends AbstractBaseStatement<Void, Create>
    *
    * @param pStatementExecutor the executor fot this statement
    * @param pDatabaseType      the database type used for this statement
+   * @param pSerializer        the value serializer
    * @param pIdColumnName      the name of the id column for this table
    */
-  public Create(IStatementExecutor<Void> pStatementExecutor, EDatabaseType pDatabaseType, String pIdColumnName)
+  public Create(IStatementExecutor<Void> pStatementExecutor, EDatabaseType pDatabaseType, IValueSerializer pSerializer, String pIdColumnName)
   {
-    super(pStatementExecutor, pDatabaseType);
-    idColumnDefinition = IColumnDefinition.of(pIdColumnName, EColumnType.INT, EColumnModifier.PRIMARY_KEY, EColumnModifier.NOT_NULL);
+    super(pStatementExecutor, pDatabaseType, pSerializer);
+    idColumnDefinition = IColumnDefinition.of(pIdColumnName, EColumnType.INT, Integer.class, EColumnModifier.PRIMARY_KEY, EColumnModifier.NOT_NULL);
   }
 
   /**
@@ -71,7 +72,7 @@ public class Create extends AbstractBaseStatement<Void, Create>
   {
     String query = "CREATE TABLE " + getTableName() + " ("
         + (withIdColumn ? Stream.concat(Stream.of(idColumnDefinition), Stream.of(columns)) : Stream.of(columns))
-        .map(pColumnDefinition -> pColumnDefinition.getAsDBString(getDatabaseType()))
+        .map(pColumnDefinition -> pColumnDefinition.getAsDBString(databaseType))
         .collect(Collectors.joining(",\n")) + _primaryKey() + ")";
     executeStatement(query);
   }

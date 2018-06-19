@@ -1,8 +1,9 @@
 package de.adito.beans.persistence.datastores.sql.builder;
 
+import de.adito.beans.persistence.datastores.sql.builder.definition.*;
 import de.adito.beans.persistence.datastores.sql.builder.modifiers.SelectModifiers;
 import de.adito.beans.persistence.datastores.sql.builder.result.Result;
-import de.adito.beans.persistence.datastores.sql.builder.util.*;
+import de.adito.beans.persistence.datastores.sql.builder.util.OJDatabaseException;
 
 import java.sql.*;
 import java.util.*;
@@ -24,13 +25,14 @@ public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>> exte
    *
    * @param pStatementExecutor the executor for the statement
    * @param pDatabaseType      the database type used for this select statement
+   * @param pSerializer        the value serializer
    * @param pIdColumnName      the name of the id column
    * @param pColumns           the column names to select
    */
-  protected AbstractSelect(IStatementExecutor<ResultSet> pStatementExecutor, EDatabaseType pDatabaseType, String pIdColumnName,
-                           IColumnIdentification<?>... pColumns)
+  protected AbstractSelect(IStatementExecutor<ResultSet> pStatementExecutor, EDatabaseType pDatabaseType, IValueSerializer pSerializer,
+                           String pIdColumnName, IColumnIdentification<?>... pColumns)
   {
-    super(pStatementExecutor, pDatabaseType, new SelectModifiers(pIdColumnName));
+    super(pStatementExecutor, pDatabaseType, pSerializer, new SelectModifiers(pSerializer, pIdColumnName));
     columns = Arrays.asList(pColumns);
     idColumnName = pIdColumnName;
   }
@@ -96,7 +98,7 @@ public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>> exte
   @Override
   protected Result doQuery()
   {
-    return new Result(_query(), idColumnName);
+    return new Result(serializer, _query(), idColumnName);
   }
 
   /**

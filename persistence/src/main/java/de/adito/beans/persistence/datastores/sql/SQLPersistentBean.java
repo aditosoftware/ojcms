@@ -5,6 +5,8 @@ import de.adito.beans.core.fields.FieldTuple;
 import de.adito.beans.core.util.BeanReflector;
 import de.adito.beans.persistence.*;
 import de.adito.beans.persistence.datastores.sql.builder.*;
+import de.adito.beans.persistence.datastores.sql.builder.definition.*;
+import de.adito.beans.persistence.datastores.sql.builder.definition.condition.IWhereCondition;
 import de.adito.beans.persistence.datastores.sql.builder.result.ResultRow;
 import de.adito.beans.persistence.datastores.sql.builder.util.*;
 import de.adito.beans.persistence.datastores.sql.util.*;
@@ -14,6 +16,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.*;
+
+import static de.adito.beans.persistence.datastores.sql.builder.definition.condition.IWhereCondition.*;
 
 /**
  * Implementation of a persistent bean.
@@ -29,10 +33,30 @@ import java.util.stream.*;
  */
 public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentBean
 {
-  private final IColumnValueTuple<String> beanIdCondition;
+  private static final IColumnDefinition<String> BEAN_ID_COLUMN_DEFINITION =
+      IColumnDefinition.of(IDatabaseConstants.BEAN_TABLE_BEAN_ID, EColumnType.VARCHAR, String.class, 255, EColumnModifier.PRIMARY_KEY,
+                           EColumnModifier.NOT_NULL);
+  private final IWhereCondition<String> beanIdCondition;
   private final Map<IField<?>, _ColumnIdentification<?>> columns;
   private final OJSQLBuilderForTable builder;
-  private final SQLSerializer serializer;
+
+  /**
+   * Removes all obsolete single beans from the database table and removes columns, if necessary.
+   *
+   * @param pConnectionInfo     information for the database connection
+   * @param pStillExistingBeans a stream of still existing single beans
+   */
+  public static void removeObsoletes(DBConnectionInfo pConnectionInfo, Stream<IBean<?>> pStillExistingBeans)
+  {
+    final OJSQLBuilderForTable builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionInfo.getDatabaseType(), IDatabaseConstants.ID_COLUMN)
+        .forSingleTable(IDatabaseConstants.BEAN_TABLE_NAME)
+        .withClosingAndRenewingConnection(pConnectionInfo)
+        .create();
+    builder.doDelete(pDelete -> pDelete
+        .where(not(in(BEAN_ID_COLUMN_DEFINITION, pStillExistingBeans
+            .map(pBean -> pBean.getClass().getAnnotation(Persist.class).containerId()))))
+        .delete());
+  }
 
   /**
    * Creates a persistent bean.
@@ -44,17 +68,15 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
    */
   public SQLPersistentBean(String pBeanId, Class<BEAN> pBeanType, DBConnectionInfo pConnectionInfo, BeanDataStore pBeanDataStore)
   {
-    IColumnDefinition beanIdColumnDefinition = IColumnDefinition.of(IDatabaseConstants.BEAN_TABLE_BEAN_ID, EColumnType.VARCHAR, 255,
-                                                                    EColumnModifier.PRIMARY_KEY, EColumnModifier.NOT_NULL);
-    beanIdCondition = IColumnValueTuple.of(beanIdColumnDefinition, pBeanId);
+    beanIdCondition = isEqual(BEAN_ID_COLUMN_DEFINITION, pBeanId);
     columns = _createColumnMap(pBeanType);
     builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionInfo.getDatabaseType(), IDatabaseConstants.ID_COLUMN)
         .forSingleTable(IDatabaseConstants.BEAN_TABLE_NAME)
         .withClosingAndRenewingConnection(pConnectionInfo)
+        .withCustomSerializer(new BeanSQLSerializer(pBeanDataStore))
         .create();
-    serializer = new SQLSerializer(pBeanDataStore);
     builder.ifTableNotExistingCreate(pCreate -> pCreate
-        .columns(beanIdColumnDefinition)
+        .columns(BEAN_ID_COLUMN_DEFINITION)
         .create());
     _checkColumnSize();
     _checkRowExisting();
@@ -132,7 +154,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
   {
     IntStream.range(builder.getColumnCount() - 1, columns.size())
         .mapToObj(pIndex -> IDatabaseConstants.BEAN_TABLE_COLUMN_PREFIX + pIndex)
-        .forEach(pColumnName -> builder.addColumn(IColumnDefinition.of(pColumnName, EColumnType.VARCHAR, 255)));
+        .forEach(pColumnName -> builder.addColumn(IColumnDefinition.of(pColumnName, EColumnType.VARCHAR, String.class, 255)));
   }
 
   /**
@@ -156,7 +178,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
    */
   private class _ColumnIdentification<TYPE> implements IColumnIdentification<TYPE>
   {
-    private final IField<TYPE> beanField;
+    private final Class<TYPE> dataType;
     private final int id;
 
     /**
@@ -167,7 +189,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
      */
     private _ColumnIdentification(IField<TYPE> pBeanField, int pId)
     {
-      beanField = pBeanField;
+      dataType = pBeanField.getType();
       id = pId;
     }
 
@@ -178,9 +200,9 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
     }
 
     @Override
-    public TYPE fromSerial(String pSerial)
+    public Class<TYPE> getDataType()
     {
-      return serializer.fromPersistent(beanField, pSerial);
+      return dataType;
     }
   }
 
@@ -190,11 +212,9 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
    *
    * @param <TYPE> the data type of the associated bean tuple
    */
-  private class _ColumnTuple<TYPE> implements IColumnValueTuple<TYPE>
+  private class _ColumnTuple<TYPE> extends BeanColumnValueTuple<TYPE>
   {
-    private final IField<TYPE> beanField;
-    private final IColumnDefinition columnDefinition;
-    private final TYPE value;
+    private final IColumnDefinition<TYPE> columnDefinition;
 
     /**
      * Creates a new column value tuple.
@@ -205,27 +225,14 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
      */
     private _ColumnTuple(IField<TYPE> pBeanField, int pId, TYPE pValue)
     {
-      beanField = pBeanField;
-      columnDefinition = IColumnDefinition.of(IDatabaseConstants.BEAN_TABLE_COLUMN_PREFIX + pId, EColumnType.VARCHAR, 255);
-      value = pValue;
+      super(pBeanField.newTuple(pValue));
+      columnDefinition = IColumnDefinition.of(IDatabaseConstants.BEAN_TABLE_COLUMN_PREFIX + pId, EColumnType.VARCHAR, pBeanField.getType(), 255);
     }
 
     @Override
-    public IColumnDefinition getColumnDefinition()
+    public IColumnDefinition<TYPE> getColumnDefinition()
     {
       return columnDefinition;
-    }
-
-    @Override
-    public TYPE getValue()
-    {
-      return value;
-    }
-
-    @Override
-    public String toSerial()
-    {
-      return serializer.toPersistent(beanField.newTuple(getValue()));
     }
   }
 }

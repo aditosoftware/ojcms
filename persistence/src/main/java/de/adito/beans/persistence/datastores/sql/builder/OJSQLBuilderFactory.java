@@ -1,8 +1,9 @@
 package de.adito.beans.persistence.datastores.sql.builder;
 
-import de.adito.beans.persistence.datastores.sql.builder.util.*;
+import de.adito.beans.persistence.datastores.sql.builder.definition.*;
+import de.adito.beans.persistence.datastores.sql.builder.util.DBConnectionInfo;
 
-import java.sql.*;
+import java.sql.Connection;
 import java.util.function.Supplier;
 
 /**
@@ -74,7 +75,7 @@ public final class OJSQLBuilderFactory
     @Override
     public OJSQLBuilder create()
     {
-      return new OJSQLBuilder(databaseType, connectionSupplier, closeConnectionAfterStatement, idColumnName);
+      return new OJSQLBuilder(databaseType, connectionSupplier, closeConnectionAfterStatement, serializer, idColumnName);
     }
   }
 
@@ -125,7 +126,7 @@ public final class OJSQLBuilderFactory
     @Override
     public OJSQLBuilderForTable create()
     {
-      return new OJSQLBuilderForTable(databaseType, connectionSupplier, closeConnectionAfterStatement, tableName, idColumnName);
+      return new OJSQLBuilderForTable(databaseType, connectionSupplier, closeConnectionAfterStatement, serializer, tableName, idColumnName);
     }
   }
 
@@ -140,6 +141,7 @@ public final class OJSQLBuilderFactory
     protected final EDatabaseType databaseType;
     protected final String idColumnName;
     protected Supplier<Connection> connectionSupplier;
+    protected IValueSerializer serializer = IValueSerializer.DEFAULT;
     protected boolean closeConnectionAfterStatement = true;
 
     /**
@@ -171,12 +173,12 @@ public final class OJSQLBuilderFactory
      * Configures the builder to hold permanent database connection.
      * This connection will not be closed and used for all statements from the final builder.
      *
-     * @param pConnection the database connection to use for the builder
+     * @param pConnectionInfo information for the database connection
      * @return the builder itself to enable a pipelining mechanism
      */
-    public BUILDER withPermanentConnection(Connection pConnection)
+    public BUILDER withPermanentConnection(DBConnectionInfo pConnectionInfo)
     {
-      connectionSupplier = () -> pConnection;
+      connectionSupplier = pConnectionInfo::createConnection;
       closeConnectionAfterStatement = false;
       //noinspection unchecked
       return (BUILDER) this;
@@ -192,7 +194,7 @@ public final class OJSQLBuilderFactory
      */
     public BUILDER withClosingAndRenewingConnection(DBConnectionInfo pConnectionInfo)
     {
-      return withClosingAndRenewingConnection(_createConnectionSupplier(pConnectionInfo));
+      return withClosingAndRenewingConnection(pConnectionInfo::createConnection);
     }
 
     /**
@@ -210,33 +212,23 @@ public final class OJSQLBuilderFactory
     }
 
     /**
+     * Configures the builder to use a custom value serializer for all statements.
+     *
+     * @param pSerializer the value serializer
+     * @return the builder itself to enable a pipelining mechanism
+     */
+    public BUILDER withCustomSerializer(IValueSerializer pSerializer)
+    {
+      serializer = pSerializer;
+      //noinspection unchecked
+      return (BUILDER) this;
+    }
+
+    /**
      * Creates the final SQL statement builder.
      *
      * @return a SQL statement builder
      */
     public abstract SQLBUILDER create();
-
-    /**
-     * Creates the supplier of a database connection, that will open a connection every time it is called.
-     *
-     * @param pConnectionInfo information for the database connection
-     * @return a database connection supplier
-     */
-    private Supplier<Connection> _createConnectionSupplier(DBConnectionInfo pConnectionInfo)
-    {
-      final String dbUrl = pConnectionInfo.getJDBCConnectionString();
-      return () -> {
-        try
-        {
-          return pConnectionInfo.getUsername() == null || pConnectionInfo.getPassword() == null ? DriverManager.getConnection(dbUrl) :
-              DriverManager.getConnection(dbUrl, pConnectionInfo.getUsername(), pConnectionInfo.getPassword());
-        }
-        catch (SQLException pE)
-        {
-          throw new OJDatabaseException(pE, "Unable to connect to the database! host = " + pConnectionInfo.getHost() +
-              " port = " + pConnectionInfo.getPort());
-        }
-      };
-    }
   }
 }

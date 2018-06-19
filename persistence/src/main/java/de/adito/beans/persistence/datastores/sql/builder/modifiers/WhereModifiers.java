@@ -1,9 +1,7 @@
 package de.adito.beans.persistence.datastores.sql.builder.modifiers;
 
-import de.adito.beans.persistence.datastores.sql.builder.util.IColumnValueTuple;
-
-import java.util.*;
-import java.util.stream.Collectors;
+import de.adito.beans.persistence.datastores.sql.builder.definition.*;
+import de.adito.beans.persistence.datastores.sql.builder.definition.condition.*;
 
 /**
  * Condition based modifiers for SQL statements.
@@ -12,34 +10,41 @@ import java.util.stream.Collectors;
  */
 public class WhereModifiers
 {
-  protected int id = -1;
-  protected final Set<IColumnValueTuple<?>> whereConditions = new HashSet<>();
-  private final String idColumnName;
+  private final IValueSerializer serializer;
+  private final IColumnDefinition<Integer> idColumnDefinition;
+  private IWhereCondition<Integer> idCondition;
+  private IWhereConditions whereCondition;
 
-  public WhereModifiers(String pIdColumnName)
+  /**
+   * Creates new where modifiers.
+   *
+   * @param pSerializer   a value serializer
+   * @param pIdColumnName the global name of the id column
+   */
+  public WhereModifiers(IValueSerializer pSerializer, String pIdColumnName)
   {
-    idColumnName = pIdColumnName;
+    serializer = pSerializer;
+    idColumnDefinition = IColumnDefinition.of(pIdColumnName, EColumnType.INT, Integer.class, EColumnModifier.PRIMARY_KEY, EColumnModifier.NOT_NULL);
   }
 
   /**
-   * Sets an id for a condition based on an id-column.
+   * Sets an id for the condition to only affect rows with a certain id.
    *
    * @param pId the id for the condition
    */
-  public void setId(int pId)
+  public void setWhereId(int pId)
   {
-    id = pId;
+    idCondition = IWhereCondition.isEqual(idColumnDefinition, pId);
   }
 
   /**
-   * Sets a variable amount of where conditions for a SQL statement.
-   * The conditions will be created from column value tuples ('COLUMN_NAME = VALUE').
+   * Sets the where condition.
    *
-   * @param pConditions the conditions for the statement
+   * @param pCondition the where condition for the statement
    */
-  public void setWhereConditions(IColumnValueTuple<?>... pConditions)
+  public void setWhereCondition(IWhereConditions pCondition)
   {
-    whereConditions.addAll(Arrays.asList(pConditions));
+    whereCondition = pCondition;
   }
 
   /**
@@ -49,12 +54,20 @@ public class WhereModifiers
    */
   public String where()
   {
-    if (id == -1 && whereConditions.isEmpty())
+    if (idCondition == null && whereCondition == null)
       return "";
 
-    return " WHERE " + (id != -1 ? idColumnName + " = " + id + " " : "") +
-        whereConditions.stream()
-            .map(pCondition -> pCondition.getColumnDefinition().getColumnName().toUpperCase() + " = " + pCondition.valueToStatementString())
-            .collect(Collectors.joining(" AND "));
+    String where = " WHERE ";
+
+    if (idCondition == null)
+      where += whereCondition.toStatementFormat(serializer);
+    else if (whereCondition == null)
+      where += idCondition.toStatementFormat(serializer);
+    else
+      where += IWhereConditions.create(idCondition)
+          .and(whereCondition)
+          .toStatementFormat(serializer);
+
+    return where;
   }
 }

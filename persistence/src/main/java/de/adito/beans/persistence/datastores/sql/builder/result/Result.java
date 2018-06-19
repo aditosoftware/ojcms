@@ -1,5 +1,6 @@
 package de.adito.beans.persistence.datastores.sql.builder.result;
 
+import de.adito.beans.persistence.datastores.sql.builder.definition.IValueSerializer;
 import de.adito.beans.persistence.datastores.sql.builder.util.OJDatabaseException;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,6 +17,7 @@ import java.util.*;
  */
 public class Result implements Iterable<ResultRow>
 {
+  private final IValueSerializer serializer;
   private final ResultSet resultSet;
   private final String idColumnName;
   private boolean used = false;
@@ -23,11 +25,13 @@ public class Result implements Iterable<ResultRow>
   /**
    * Creates a new result.
    *
+   * @param pSerializer   a value serializer
    * @param pResult       the result set from the query
    * @param pIdColumnName the name of the id column
    */
-  public Result(ResultSet pResult, String pIdColumnName)
+  public Result(IValueSerializer pSerializer, ResultSet pResult, String pIdColumnName)
   {
+    serializer = pSerializer;
     resultSet = pResult;
     idColumnName = pIdColumnName;
   }
@@ -42,7 +46,7 @@ public class Result implements Iterable<ResultRow>
     _checkUsage();
     try
     {
-      return resultSet.next() ? Optional.of(new ResultRow(resultSet, idColumnName)) : Optional.empty();
+      return resultSet.next() ? Optional.of(new ResultRow(serializer, resultSet, idColumnName)) : Optional.empty();
     }
     catch (SQLException pE)
     {
@@ -78,7 +82,7 @@ public class Result implements Iterable<ResultRow>
           try
           {
             resultSet.next();
-            return new ResultRow(resultSet, idColumnName);
+            return new ResultRow(serializer, resultSet, idColumnName);
           }
           catch (SQLException pE)
           {

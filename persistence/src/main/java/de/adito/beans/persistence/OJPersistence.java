@@ -3,6 +3,7 @@ package de.adito.beans.persistence;
 import de.adito.beans.core.*;
 import de.adito.beans.persistence.spi.IPersistentBeanDataStore;
 
+import java.util.Collection;
 import java.util.function.*;
 
 /**
@@ -46,11 +47,22 @@ public final class OJPersistence
   }
 
   /**
-   * The bean data store to access to persistent data.
+   * The bean data store to access the persistent data.
    */
   static BeanDataStore dataStore()
   {
     return beanDataStore;
+  }
+
+  /**
+   * Removes all obsolete persistent single beans.
+   * Has to be package protected to ensure this method cannot be accessed by the user's of the framework.
+   *
+   * @param pStillExistingSingleBeans all remaining single beans (to find the obsoletes)
+   */
+  static void removeObsoleteSingleBeans(Collection<IBean<?>> pStillExistingSingleBeans)
+  {
+    beanDataStore.removeObsoleteSingleBeans(pStillExistingSingleBeans);
   }
 
   /**

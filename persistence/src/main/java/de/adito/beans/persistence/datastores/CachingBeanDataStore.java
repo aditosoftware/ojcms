@@ -6,6 +6,7 @@ import de.adito.beans.persistence.spi.*;
 
 import java.util.*;
 import java.util.function.*;
+import java.util.stream.Stream;
 
 /**
  * A caching persistent data store implementation for {@link IPersistentBeanDataStore}.
@@ -21,18 +22,23 @@ public class CachingBeanDataStore implements IPersistentBeanDataStore
   private final Map<String, IPersistentBeanContainer> containerCache = new HashMap<>();
   private final BiFunction<String, Class<? extends IBean<?>>, IPersistentBean> beanResolver;
   private final BiFunction<String, Class<? extends IBean<?>>, IPersistentBeanContainer<?>> containerResolver;
+  private final Consumer<Stream<IBean<?>>> singleBeanObsoleteRemover;
 
   /**
    * Create the caching persistent data store.
    *
    * @param pBeanResolver      a function to get a persistent bean (data core) from a container id
    * @param pContainerResolver a function to get a persistent bean container (data core) from a container id and a certain bean type
+   * @param pSingleBeanObsoleteRemover a function to clean up obsolete single beans in the persistent data store,
+   *                           takes a stream of all still existing single beans
    */
   public CachingBeanDataStore(BiFunction<String, Class<? extends IBean<?>>, IPersistentBean> pBeanResolver,
-                              BiFunction<String, Class<? extends IBean<?>>, IPersistentBeanContainer<?>> pContainerResolver)
+                              BiFunction<String, Class<? extends IBean<?>>, IPersistentBeanContainer<?>> pContainerResolver,
+                              Consumer<Stream<IBean<?>>> pSingleBeanObsoleteRemover)
   {
-    beanResolver = pBeanResolver;
-    containerResolver = pContainerResolver;
+    beanResolver = Objects.requireNonNull(pBeanResolver);
+    containerResolver = Objects.requireNonNull(pContainerResolver);
+    singleBeanObsoleteRemover = Objects.requireNonNull(pSingleBeanObsoleteRemover);
   }
 
   @Override
@@ -46,5 +52,11 @@ public class CachingBeanDataStore implements IPersistentBeanDataStore
   {
     //noinspection unchecked
     return containerCache.computeIfAbsent(pPersistenceId, pId -> containerResolver.apply(pPersistenceId, pBeanType));
+  }
+
+  @Override
+  public void removeObsoleteSingleBeans(Collection<IBean<?>> pStillExistingSingleBeans)
+  {
+    singleBeanObsoleteRemover.accept(pStillExistingSingleBeans.stream());
   }
 }

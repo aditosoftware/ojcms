@@ -1,5 +1,6 @@
 package de.adito.beans.persistence.datastores.sql.builder.result;
 
+import de.adito.beans.persistence.datastores.sql.builder.definition.IColumnIdentification;
 import de.adito.beans.persistence.datastores.sql.builder.util.*;
 import org.jetbrains.annotations.NotNull;
 

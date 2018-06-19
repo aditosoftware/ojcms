@@ -1,7 +1,8 @@
 package de.adito.beans.persistence.datastores.sql.builder;
 
+import de.adito.beans.persistence.datastores.sql.builder.definition.*;
 import de.adito.beans.persistence.datastores.sql.builder.statements.*;
-import de.adito.beans.persistence.datastores.sql.builder.util.*;
+import de.adito.beans.persistence.datastores.sql.builder.util.OJDatabaseException;
 
 import java.io.IOException;
 import java.sql.*;
@@ -19,6 +20,7 @@ abstract class AbstractSQLBuilder
   private final EDatabaseType databaseType;
   private final Supplier<Connection> connectionSupplier;
   private final boolean closeAfterStatement;
+  private final IValueSerializer serializer;
   private final String idColumnName; //global id column name for this builder
 
   /**
@@ -30,13 +32,14 @@ abstract class AbstractSQLBuilder
    * @param pIdColumnName        a global id column name for this builder instance
    */
   protected AbstractSQLBuilder(EDatabaseType pDatabaseType, Supplier<Connection> pConnectionSupplier, boolean pCloseAfterStatement,
-                               String pIdColumnName)
+                               IValueSerializer pSerializer, String pIdColumnName)
   {
     if (pIdColumnName == null || pIdColumnName.isEmpty())
       throw new IllegalArgumentException("the id column name must given! name: " + pIdColumnName);
     databaseType = Objects.requireNonNull(pDatabaseType);
     connectionSupplier = Objects.requireNonNull(pConnectionSupplier);
     closeAfterStatement = pCloseAfterStatement;
+    serializer = Objects.requireNonNull(pSerializer);
     idColumnName = pIdColumnName;
   }
 
@@ -47,7 +50,7 @@ abstract class AbstractSQLBuilder
    */
   public void doCreate(Consumer<Create> pCreateStatement)
   {
-    _execute(configureStatementBeforeExecution(new Create(_createNoResultExecutor(), databaseType, idColumnName)), pCreateStatement);
+    _execute(configureStatementBeforeExecution(new Create(_createNoResultExecutor(), databaseType, serializer, idColumnName)), pCreateStatement);
   }
 
   /**
@@ -57,7 +60,7 @@ abstract class AbstractSQLBuilder
    */
   public void doInsert(Consumer<Insert> pInsertStatement)
   {
-    _execute(configureStatementBeforeExecution(new Insert(_createNoResultExecutor(), databaseType, idColumnName)), pInsertStatement);
+    _execute(configureStatementBeforeExecution(new Insert(_createNoResultExecutor(), databaseType, serializer, idColumnName)), pInsertStatement);
   }
 
   /**
@@ -67,7 +70,7 @@ abstract class AbstractSQLBuilder
    */
   public void doUpdate(Consumer<Update> pUpdateStatement)
   {
-    _execute(configureStatementBeforeExecution(new Update(_createNoResultExecutor(), databaseType, idColumnName)), pUpdateStatement);
+    _execute(configureStatementBeforeExecution(new Update(_createNoResultExecutor(), databaseType, serializer, idColumnName)), pUpdateStatement);
   }
 
   /**
@@ -77,7 +80,7 @@ abstract class AbstractSQLBuilder
    */
   public boolean doDelete(Function<Delete, Boolean> pDeleteStatement)
   {
-    return _query(configureStatementBeforeExecution(new Delete(_createSuccessfulExecutor(), databaseType, idColumnName)), pDeleteStatement);
+    return _query(configureStatementBeforeExecution(new Delete(_createSuccessfulExecutor(), databaseType, serializer, idColumnName)), pDeleteStatement);
   }
 
   /**
@@ -88,10 +91,10 @@ abstract class AbstractSQLBuilder
    * @param <RESULT>     the type of the result
    * @return the result of the select statement
    */
-  public <RESULT> RESULT doSelect(Function<Select, RESULT> pSelectQuery, IColumnIdentification<?>... pColumns)
+  public <RESULT> RESULT doSelect(Function<Select, RESULT> pSelectQuery, IColumnIdentification... pColumns)
   {
-    Select select = pColumns == null || pColumns.length == 0 ? new Select(_createResultExecutor(), databaseType, idColumnName) :
-        new Select(_createResultExecutor(), databaseType, idColumnName, pColumns);
+    Select select = pColumns == null || pColumns.length == 0 ? new Select(_createResultExecutor(), databaseType, serializer, idColumnName) :
+        new Select(_createResultExecutor(), databaseType, serializer, idColumnName, pColumns);
     return _query(configureStatementBeforeExecution(select), pSelectQuery);
   }
 
@@ -107,7 +110,7 @@ abstract class AbstractSQLBuilder
    */
   public <TYPE, RESULT> RESULT doSelectOne(IColumnIdentification<TYPE> pColumn, Function<SingleSelect<TYPE>, RESULT> pSelectQuery)
   {
-    SingleSelect<TYPE> select = new SingleSelect<>(_createResultExecutor(), databaseType, idColumnName, pColumn);
+    SingleSelect<TYPE> select = new SingleSelect<>(_createResultExecutor(), databaseType, serializer, idColumnName, pColumn);
     return _query(configureStatementBeforeExecution(select), pSelectQuery);
   }
 

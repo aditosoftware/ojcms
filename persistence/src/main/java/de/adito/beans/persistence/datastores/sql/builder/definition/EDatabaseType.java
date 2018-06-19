@@ -1,4 +1,6 @@
-package de.adito.beans.persistence.datastores.sql.builder.util;
+package de.adito.beans.persistence.datastores.sql.builder.definition;
+
+import de.adito.beans.persistence.datastores.sql.builder.util.OJDatabaseException;
 
 import java.util.*;
 import java.util.function.*;

@@ -1,7 +1,7 @@
 package de.adito.beans.persistence.datastores.sql.builder;
 
+import de.adito.beans.persistence.datastores.sql.builder.definition.*;
 import de.adito.beans.persistence.datastores.sql.builder.statements.Create;
-import de.adito.beans.persistence.datastores.sql.builder.util.*;
 
 import java.sql.Connection;
 import java.util.function.*;
@@ -22,11 +22,13 @@ public class OJSQLBuilder extends AbstractSQLBuilder
    * @param pDatabaseType        the database type to use for this builder
    * @param pConnectionSupplier  the database connection supplier
    * @param pCloseAfterStatement <tt>true</tt>, if the connection should be closed after executing one statement
+   * @param pSerializer          the value serializer
    * @param pIdColumnName        a global id column name for this builder instance
    */
-  OJSQLBuilder(EDatabaseType pDatabaseType, Supplier<Connection> pConnectionSupplier, boolean pCloseAfterStatement, String pIdColumnName)
+  OJSQLBuilder(EDatabaseType pDatabaseType, Supplier<Connection> pConnectionSupplier, boolean pCloseAfterStatement,
+               IValueSerializer pSerializer, String pIdColumnName)
   {
-    super(pDatabaseType, pConnectionSupplier, pCloseAfterStatement, pIdColumnName);
+    super(pDatabaseType, pConnectionSupplier, pCloseAfterStatement, pSerializer, pIdColumnName);
   }
 
   /**

@@ -1,8 +1,9 @@
 package de.adito.beans.persistence.datastores.sql.builder.statements;
 
 import de.adito.beans.persistence.datastores.sql.builder.*;
+import de.adito.beans.persistence.datastores.sql.builder.definition.*;
 import de.adito.beans.persistence.datastores.sql.builder.result.SingleColumnResult;
-import de.adito.beans.persistence.datastores.sql.builder.util.*;
+import de.adito.beans.persistence.datastores.sql.builder.util.OptionalNullable;
 
 import java.sql.ResultSet;
 
@@ -21,13 +22,14 @@ public class SingleSelect<TYPE> extends AbstractSelect<SingleSelect<TYPE>>
    *
    * @param pStatementExecutor the executor for this statement
    * @param pDatabaseType      the database type used for this statement
+   * @param pSerializer        the value serializer
    * @param pIdColumnName      the name of the id column
    * @param pColumn            the single column to select
    */
-  public SingleSelect(IStatementExecutor<ResultSet> pStatementExecutor, EDatabaseType pDatabaseType, String pIdColumnName,
-                      IColumnIdentification<TYPE> pColumn)
+  public SingleSelect(IStatementExecutor<ResultSet> pStatementExecutor, EDatabaseType pDatabaseType, IValueSerializer pSerializer,
+                      String pIdColumnName, IColumnIdentification<TYPE> pColumn)
   {
-    super(pStatementExecutor, pDatabaseType, pIdColumnName, pColumn);
+    super(pStatementExecutor, pDatabaseType, pSerializer, pIdColumnName, pColumn);
     column = pColumn;
   }
 

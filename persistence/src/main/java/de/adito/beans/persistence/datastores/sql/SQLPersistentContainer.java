@@ -5,6 +5,7 @@ import de.adito.beans.core.fields.FieldTuple;
 import de.adito.beans.core.util.*;
 import de.adito.beans.persistence.*;
 import de.adito.beans.persistence.datastores.sql.builder.*;
+import de.adito.beans.persistence.datastores.sql.builder.definition.condition.IWhereCondition;
 import de.adito.beans.persistence.datastores.sql.builder.result.ResultRow;
 import de.adito.beans.persistence.datastores.sql.builder.statements.Select;
 import de.adito.beans.persistence.datastores.sql.builder.util.*;
@@ -27,7 +28,6 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
 {
   private final Class<BEAN> beanType;
   private final boolean isAutomaticAdditionMode;
-  private final SQLSerializer serializer;
   private final List<BeanColumnIdentification<?>> columns;
   private final OJSQLBuilderForTable builder;
   private final Map<Integer, BEAN> beanCache = new HashMap<>();
@@ -46,11 +46,11 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
   {
     beanType = pBeanType;
     isAutomaticAdditionMode = pBeanType.getAnnotation(Persist.class).storageMode() == EStorageMode.AUTOMATIC;
-    serializer = new SQLSerializer(pBeanDataStore);
-    columns = BeanColumnIdentification.of(BeanReflector.reflectBeanFields(beanType), serializer);
+    columns = BeanColumnIdentification.ofMultiple(BeanReflector.reflectBeanFields(beanType));
     builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionInfo.getDatabaseType(), IDatabaseConstants.ID_COLUMN)
         .forSingleTable(pTableName)
         .withClosingAndRenewingConnection(pConnectionInfo)
+        .withCustomSerializer(new BeanSQLSerializer(pBeanDataStore))
         .create();
     //Setup driver
     try
@@ -64,7 +64,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
     //Create table if necessary
     builder.ifTableNotExistingCreate(pCreate -> pCreate
         .withIdColumn()
-        .columns(BeanColumnDefinition.of(columns))
+        .columns(BeanColumnDefinition.ofMultiple(columns))
         .create());
   }
 
@@ -73,17 +73,18 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
   {
     //Additions will be queued in the automatic mode, when a new bean instance is created at this certain time.
     //Otherwise unwanted copies will be created, because a new instance will lead to an addition in the automatic mode.
-    if (isAutomaticAdditionMode && shouldQueueAdditions)
-    {
+    if (isAutomaticAdditionMode)
       synchronized (additionQueue)
       {
-        additionQueue.put(pBean, pIndex);
+        if (shouldQueueAdditions)
+        {
+          additionQueue.put(pBean, pIndex);
+          return;
+        }
       }
-      return;
-    }
     builder.doInsert(pInsert -> pInsert
         .atIndex(pIndex)
-        .values(BeanColumnValueTuple.of(pBean, serializer))
+        .values(BeanColumnValueTuple.ofBean(pBean))
         .insert());
     beanCache.put(pIndex, _injectPersistentCore(pBean, pIndex));
   }
@@ -122,12 +123,12 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
         .findFirst()
         .map(Map.Entry::getKey)
         .orElseGet(() -> {
-          BeanColumnValueTuple[] tuples = BeanColumnValueTuple.ofBeanIdentifiers(pBean, serializer);
-          if (tuples.length == 0)
+          IWhereCondition<?>[] conditions = BeanWhereCondition.ofBeanIdentifiers(pBean);
+          if (conditions.length == 0)
             throw new OJDatabaseException("A bean instance not created by this container can only be used for a index-of or contains search," +
                                               " if there are bean fields marked as @Identifier!");
           return builder.doSelect(pSelect -> pSelect
-              .where(tuples)
+              .where(conditions)
               .firstResult()
               .map(ResultRow::getIdIfAvailable)
               .orElse(-1));
@@ -193,8 +194,8 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
       additionQueue.remove(instance);
       additionQueue.forEach(this::addBean);
       additionQueue.clear();
+      shouldQueueAdditions = false;
     }
-    shouldQueueAdditions = false;
     return instance;
   }
 
@@ -235,7 +236,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
     @Override
     public <TYPE> TYPE getValue(IField<TYPE> pField)
     {
-      return builder.doSelectOne(new BeanColumnIdentification<>(pField, serializer), pSelect -> pSelect
+      return builder.doSelectOne(new BeanColumnIdentification<>(pField), pSelect -> pSelect
           .whereId(index)
           .firstResult()
           .orIfNotPresentThrow(() -> new OJDatabaseException("No result for index " + index + " found. field: " + pField)));
@@ -245,7 +246,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
     public <TYPE> void setValue(IField<TYPE> pField, TYPE pValue, boolean pAllowNewField)
     {
       builder.doUpdate(pUpdate -> pUpdate
-          .set(new BeanColumnValueTuple<>(pField.newTuple(pValue), serializer))
+          .set(new BeanColumnValueTuple<>(pField.newTuple(pValue)))
           .whereId(index)
           .update());
     }

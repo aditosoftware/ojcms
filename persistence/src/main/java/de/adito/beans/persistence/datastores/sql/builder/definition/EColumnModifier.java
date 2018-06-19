@@ -1,4 +1,4 @@
-package de.adito.beans.persistence.datastores.sql.builder.util;
+package de.adito.beans.persistence.datastores.sql.builder.definition;
 
 import java.util.Collection;
 import java.util.stream.Collectors;

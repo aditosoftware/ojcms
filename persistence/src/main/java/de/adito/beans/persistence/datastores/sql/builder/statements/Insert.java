@@ -1,7 +1,8 @@
 package de.adito.beans.persistence.datastores.sql.builder.statements;
 
 import de.adito.beans.persistence.datastores.sql.builder.*;
-import de.adito.beans.persistence.datastores.sql.builder.util.*;
+import de.adito.beans.persistence.datastores.sql.builder.definition.*;
+import de.adito.beans.persistence.datastores.sql.builder.util.OJDatabaseException;
 
 import java.util.function.Function;
 import java.util.stream.*;
@@ -22,11 +23,12 @@ public class Insert extends AbstractBaseStatement<Void, Insert>
    *
    * @param pStatementExecutor the executor for this statement
    * @param pDatabaseType      the database type used for this statement
+   * @param pSerializer        the value serializer
    * @param pIdColumnName      the name of the id column
    */
-  public Insert(IStatementExecutor<Void> pStatementExecutor, EDatabaseType pDatabaseType, String pIdColumnName)
+  public Insert(IStatementExecutor<Void> pStatementExecutor, EDatabaseType pDatabaseType, IValueSerializer pSerializer, String pIdColumnName)
   {
-    super(pStatementExecutor, pDatabaseType);
+    super(pStatementExecutor, pDatabaseType, pSerializer);
     idColumnName = pIdColumnName;
   }
 
@@ -82,7 +84,7 @@ public class Insert extends AbstractBaseStatement<Void, Insert>
       executeStatement("UPDATE " + getTableName() + " SET " + id + " = " + id + "+1 WHERE " + id + ">=" + index);
     executeStatement("INSERT INTO " + getTableName() + " (" + (index >= 0 ? id + ", " : "") +
                          _enumerate(pTuple -> pTuple.getColumnDefinition().getColumnName().toUpperCase())
-                         + ") VALUES (" + (index >= 0 ? index + ", " : "") + _enumerate(IColumnValueTuple::valueToStatementString) + ")");
+                         + ") VALUES (" + (index >= 0 ? index + ", " : "") + _enumerate(serializer::serialValueToStatementString) + ")");
   }
 
   /**

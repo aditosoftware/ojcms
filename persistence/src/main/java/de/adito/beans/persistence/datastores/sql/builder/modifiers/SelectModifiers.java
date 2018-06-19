@@ -1,6 +1,6 @@
 package de.adito.beans.persistence.datastores.sql.builder.modifiers;
 
-import de.adito.beans.persistence.datastores.sql.builder.util.IColumnIdentification;
+import de.adito.beans.persistence.datastores.sql.builder.definition.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,9 +17,15 @@ public class SelectModifiers extends WhereModifiers
   private boolean distinct = false;
   private boolean count = false;
 
-  public SelectModifiers(String pIdColumnName)
+  /**
+   * Creates new select modifiers.
+   *
+   * @param pSerializer   a value serializer
+   * @param pIdColumnName the global name of the id column
+   */
+  public SelectModifiers(IValueSerializer pSerializer, String pIdColumnName)
   {
-    super(pIdColumnName);
+    super(pSerializer, pIdColumnName);
   }
 
   /**

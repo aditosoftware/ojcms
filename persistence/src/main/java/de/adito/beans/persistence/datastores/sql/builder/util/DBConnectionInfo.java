@@ -1,7 +1,9 @@
 package de.adito.beans.persistence.datastores.sql.builder.util;
 
+import de.adito.beans.persistence.datastores.sql.builder.definition.EDatabaseType;
 import org.jetbrains.annotations.Nullable;
 
+import java.sql.*;
 import java.util.Objects;
 
 /**
@@ -110,5 +112,24 @@ public class DBConnectionInfo
   public String getJDBCConnectionString()
   {
     return databaseType.getConnectionString(host, port, databaseName);
+  }
+
+  /**
+   * Creates a database connection based on the given connection information.
+   *
+   * @return the database connection
+   */
+  public Connection createConnection()
+  {
+    final String connectionString = getJDBCConnectionString();
+    try
+    {
+      return username == null || password == null ? DriverManager.getConnection(connectionString) :
+          DriverManager.getConnection(connectionString, username, password);
+    }
+    catch (SQLException pE)
+    {
+      throw new OJDatabaseException(pE, "Unable to connect to the database! host = " + host + " port = " + port);
+    }
   }
 }

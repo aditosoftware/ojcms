@@ -1,9 +1,10 @@
 package de.adito.beans.persistence.datastores.sql.util;
 
 import de.adito.beans.core.IField;
-import de.adito.beans.persistence.datastores.sql.builder.util.IColumnIdentification;
+import de.adito.beans.persistence.datastores.sql.builder.definition.IColumnIdentification;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -15,18 +16,15 @@ import java.util.stream.Collectors;
 public class BeanColumnIdentification<TYPE> implements IColumnIdentification<TYPE>
 {
   private final IField<TYPE> field;
-  private final SQLSerializer serializer;
 
   /**
    * Creates a new column identification.
    *
-   * @param pField      the bean field, that identifies the column
-   * @param pSerializer a SQL serializer
+   * @param pField the bean field, that identifies the column
    */
-  public BeanColumnIdentification(IField<TYPE> pField, SQLSerializer pSerializer)
+  public BeanColumnIdentification(IField<TYPE> pField)
   {
     field = pField;
-    serializer = pSerializer;
   }
 
   /**
@@ -46,22 +44,21 @@ public class BeanColumnIdentification<TYPE> implements IColumnIdentification<TYP
   }
 
   @Override
-  public TYPE fromSerial(String pSerial)
+  public Class<TYPE> getDataType()
   {
-    return serializer.fromPersistent(field, pSerial);
+    return field.getType();
   }
 
   /**
    * Creates an array of column identifications based on a collection of bean fields.
    *
-   * @param pFields     the bean fields to create the identifications tuples from
-   * @param pSerializer a SQL serializer
+   * @param pFields the bean fields to create the identifications tuples from
    * @return an array of column identifications
    */
-  public static List<BeanColumnIdentification<?>> of(Collection<IField<?>> pFields, SQLSerializer pSerializer)
+  public static List<BeanColumnIdentification<?>> ofMultiple(Collection<IField<?>> pFields)
   {
     return pFields.stream()
-        .map(pField -> new BeanColumnIdentification<>(pField, pSerializer))
+        .map((Function<IField<?>, ? extends BeanColumnIdentification<?>>) BeanColumnIdentification::new)
         .collect(Collectors.toList());
   }
 }

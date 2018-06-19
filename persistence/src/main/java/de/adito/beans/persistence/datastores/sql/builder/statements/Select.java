@@ -1,8 +1,8 @@
 package de.adito.beans.persistence.datastores.sql.builder.statements;
 
 import de.adito.beans.persistence.datastores.sql.builder.*;
+import de.adito.beans.persistence.datastores.sql.builder.definition.*;
 import de.adito.beans.persistence.datastores.sql.builder.result.*;
-import de.adito.beans.persistence.datastores.sql.builder.util.*;
 
 import java.sql.ResultSet;
 import java.util.Optional;
@@ -19,11 +19,13 @@ public class Select extends AbstractSelect<Select>
    *
    * @param pStatementExecutor the executor for this statement
    * @param pDatabaseType      the database type used for this statement
+   * @param pSerializer        the value serializer
    * @param pIdColumnName      the id column name
    */
-  public Select(IStatementExecutor<ResultSet> pStatementExecutor, EDatabaseType pDatabaseType, String pIdColumnName)
+  public Select(IStatementExecutor<ResultSet> pStatementExecutor, EDatabaseType pDatabaseType, IValueSerializer pSerializer,
+                String pIdColumnName)
   {
-    super(pStatementExecutor, pDatabaseType, pIdColumnName);
+    super(pStatementExecutor, pDatabaseType, pSerializer, pIdColumnName);
   }
 
   /**
@@ -31,13 +33,14 @@ public class Select extends AbstractSelect<Select>
    *
    * @param pStatementExecutor the executor for this statement
    * @param pDatabaseType      the database type used for this statement
+   * @param pSerializer        the value serializer
    * @param pIdColumnName      the id column name
    * @param pColumns           the  columns to select
    */
-  public Select(IStatementExecutor<ResultSet> pStatementExecutor, EDatabaseType pDatabaseType, String pIdColumnName,
-                IColumnIdentification<?>... pColumns)
+  public Select(IStatementExecutor<ResultSet> pStatementExecutor, EDatabaseType pDatabaseType, IValueSerializer pSerializer,
+                String pIdColumnName, IColumnIdentification<?>... pColumns)
   {
-    super(pStatementExecutor, pDatabaseType, pIdColumnName, pColumns);
+    super(pStatementExecutor, pDatabaseType, pSerializer, pIdColumnName, pColumns);
   }
 
   /**

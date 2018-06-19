@@ -1,7 +1,10 @@
 package de.adito.beans.persistence.datastores.sql.builder;
 
+import de.adito.beans.persistence.datastores.sql.builder.definition.*;
+import de.adito.beans.persistence.datastores.sql.builder.definition.condition.*;
 import de.adito.beans.persistence.datastores.sql.builder.modifiers.WhereModifiers;
-import de.adito.beans.persistence.datastores.sql.builder.util.*;
+
+import java.util.stream.Stream;
 
 /**
  * An abstract base for every statement, which is based on a table and allows conditions,
@@ -22,11 +25,13 @@ public abstract class AbstractSQLStatement<MODIFIERS extends WhereModifiers, RES
    *
    * @param pStatementExecutor the executor for this statement
    * @param pDatabaseType      the database type used for this statement
+   * @param pSerializer        the value serializer
    * @param pModifiers         the modifiers for this statement
    */
-  public AbstractSQLStatement(IStatementExecutor<INNERRESULT> pStatementExecutor, EDatabaseType pDatabaseType, MODIFIERS pModifiers)
+  public AbstractSQLStatement(IStatementExecutor<INNERRESULT> pStatementExecutor, EDatabaseType pDatabaseType, IValueSerializer pSerializer,
+                              MODIFIERS pModifiers)
   {
-    super(pStatementExecutor, pDatabaseType);
+    super(pStatementExecutor, pDatabaseType, pSerializer);
     modifiers = pModifiers;
   }
 
@@ -49,16 +54,35 @@ public abstract class AbstractSQLStatement<MODIFIERS extends WhereModifiers, RES
   }
 
   /**
-   * Determines a where condition to only affect certain rows through this statement.
-   * The conditions are defined in a formal of 'COLUMN_NAME = VALUE'.
-   * So one condition is represented by a {@link IColumnValueTuple}.
+   * Sets the where condition for this statement.
+   * The condition contains any amount of single where conditions, which will be concatenated with "AND".
    *
-   * @param pConditions a collection of conditions (column name + value)
+   * @param pConditions the single conditions to concatenate to a multiple where condition
    * @return the statement itself to enable a pipelining mechanism
    */
-  public STATEMENT where(IColumnValueTuple<?>... pConditions)
+  public STATEMENT where(IWhereCondition<?>... pConditions)
   {
-    modifiers.setWhereConditions(pConditions);
+    if (pConditions.length == 0)
+      //noinspection unchecked
+      return (STATEMENT) this;
+
+    IWhereConditions conditions = IWhereConditions.create(pConditions[0]);
+    Stream.of(pConditions)
+        .skip(1)
+        .forEach(conditions::and);
+    return where(conditions);
+  }
+
+  /**
+   * Sets the where condition for this statement.
+   * The condition might contain multiple, concatenated conditions.
+   *
+   * @param pConditions the where condition to set
+   * @return the statement itself to enable a pipelining mechanism
+   */
+  public STATEMENT where(IWhereConditions pConditions)
+  {
+    modifiers.setWhereCondition(pConditions);
     //noinspection unchecked
     return (STATEMENT) this;
   }
@@ -71,7 +95,7 @@ public abstract class AbstractSQLStatement<MODIFIERS extends WhereModifiers, RES
    */
   public STATEMENT whereId(int pId)
   {
-    modifiers.setId(pId);
+    modifiers.setWhereId(pId);
     //noinspection unchecked
     return (STATEMENT) this;
   }

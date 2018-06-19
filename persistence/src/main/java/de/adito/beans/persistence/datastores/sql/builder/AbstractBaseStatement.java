@@ -1,6 +1,6 @@
 package de.adito.beans.persistence.datastores.sql.builder;
 
-import de.adito.beans.persistence.datastores.sql.builder.util.EDatabaseType;
+import de.adito.beans.persistence.datastores.sql.builder.definition.*;
 import de.adito.beans.persistence.datastores.sql.builder.util.OJDatabaseException;
 
 import java.io.IOException;
@@ -18,7 +18,8 @@ import java.io.IOException;
 public abstract class AbstractBaseStatement<RESULT, STATEMENT extends AbstractBaseStatement<RESULT, STATEMENT>> implements IStatement
 {
   private final IStatementExecutor<RESULT> executor;
-  private final EDatabaseType databaseType;
+  protected final EDatabaseType databaseType;
+  protected final IValueSerializer serializer;
   private String tableName;
 
   /**
@@ -26,11 +27,13 @@ public abstract class AbstractBaseStatement<RESULT, STATEMENT extends AbstractBa
    *
    * @param pExecutor     the executor for the statements
    * @param pDatabaseType the database type used for this statement
+   * @param pSerializer   the value serializer
    */
-  protected AbstractBaseStatement(IStatementExecutor<RESULT> pExecutor, EDatabaseType pDatabaseType)
+  protected AbstractBaseStatement(IStatementExecutor<RESULT> pExecutor, EDatabaseType pDatabaseType, IValueSerializer pSerializer)
   {
     executor = pExecutor;
     databaseType = pDatabaseType;
+    serializer = pSerializer;
   }
 
   /**
@@ -42,14 +45,6 @@ public abstract class AbstractBaseStatement<RESULT, STATEMENT extends AbstractBa
   protected RESULT executeStatement(String pSQLStatement)
   {
     return executor.executeStatement(pSQLStatement);
-  }
-
-  /**
-   * The database type used for this statement.
-   */
-  protected EDatabaseType getDatabaseType()
-  {
-    return databaseType;
   }
 
   /**

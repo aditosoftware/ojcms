@@ -1,7 +1,7 @@
 package de.adito.beans.persistence.datastores.sql.util;
 
 import de.adito.beans.core.IField;
-import de.adito.beans.persistence.datastores.sql.builder.util.*;
+import de.adito.beans.persistence.datastores.sql.builder.definition.*;
 
 import java.util.Collection;
 
@@ -11,7 +11,7 @@ import java.util.Collection;
  * @param <TYPE> the data type of the field
  * @author Simon Danner, 17.05.2018
  */
-public class BeanColumnDefinition<TYPE> implements IColumnDefinition
+public class BeanColumnDefinition<TYPE> implements IColumnDefinition<TYPE>
 {
   private final IField<TYPE> beanField;
 
@@ -33,9 +33,25 @@ public class BeanColumnDefinition<TYPE> implements IColumnDefinition
   }
 
   @Override
+  public Class<TYPE> getDataType()
+  {
+    return beanField.getType();
+  }
+
+  @Override
   public int getColumnSize()
   {
     return 255;
+  }
+
+  /**
+   * The bean field this column is based on.
+   *
+   * @return a bean field
+   */
+  public IField<TYPE> getBeanField()
+  {
+    return beanField;
   }
 
   /**
@@ -44,7 +60,7 @@ public class BeanColumnDefinition<TYPE> implements IColumnDefinition
    * @param pColumnIdentifications the column identifications to create the array from
    * @return an array of columns definitions
    */
-  public static BeanColumnDefinition[] of(Collection<BeanColumnIdentification<?>> pColumnIdentifications)
+  public static BeanColumnDefinition[] ofMultiple(Collection<BeanColumnIdentification<?>> pColumnIdentifications)
   {
     return pColumnIdentifications.stream()
         .map(BeanColumnIdentification::getBeanField)
