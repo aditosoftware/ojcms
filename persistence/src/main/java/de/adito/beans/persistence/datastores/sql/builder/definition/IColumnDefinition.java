@@ -73,7 +73,7 @@ public interface IColumnDefinition<TYPE>
    * @param pDatabaseType the database type
    * @return a string definition for the database column (e.g. 'NAME varchar(255) NOT_NULL')
    */
-  default String getAsDBString(EDatabaseType pDatabaseType)
+  default String toStatementFormat(EDatabaseType pDatabaseType)
   {
     return getColumnName().toUpperCase() + " " + getColumnType().getNameByDatabaseTypeAndSize(pDatabaseType, getColumnSize()) +
         EColumnModifier.asString(getModifiers());

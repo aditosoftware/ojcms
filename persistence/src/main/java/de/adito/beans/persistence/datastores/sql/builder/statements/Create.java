@@ -72,7 +72,7 @@ public class Create extends AbstractBaseStatement<Void, Create>
   {
     String query = "CREATE TABLE " + getTableName() + " ("
         + (withIdColumn ? Stream.concat(Stream.of(idColumnDefinition), Stream.of(columns)) : Stream.of(columns))
-        .map(pColumnDefinition -> pColumnDefinition.getAsDBString(databaseType))
+        .map(pColumnDefinition -> pColumnDefinition.toStatementFormat(databaseType))
         .collect(Collectors.joining(",\n")) + _primaryKey() + ")";
     executeStatement(query);
   }

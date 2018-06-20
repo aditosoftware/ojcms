@@ -104,7 +104,7 @@ public interface IWhereCondition<TYPE> extends IColumnValueTuple<TYPE>, IConditi
    */
   static <TYPE> IWhereCondition<TYPE> greaterThanOrEqual(IColumnDefinition<TYPE> pColumn, TYPE pValue)
   {
-    return of(pColumn, pValue, IWhereOperator.greaterThanOrEquals());
+    return of(pColumn, pValue, IWhereOperator.greaterThanOrEqual());
   }
 
   /**

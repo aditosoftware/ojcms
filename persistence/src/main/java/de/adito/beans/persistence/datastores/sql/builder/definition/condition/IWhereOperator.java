@@ -78,7 +78,7 @@ public interface IWhereOperator<TYPE>
    *
    * @return a where condition operator.
    */
-  static <TYPE> IWhereOperator<TYPE> greaterThanOrEquals()
+  static <TYPE> IWhereOperator<TYPE> greaterThanOrEqual()
   {
     return () -> ">=";
   }

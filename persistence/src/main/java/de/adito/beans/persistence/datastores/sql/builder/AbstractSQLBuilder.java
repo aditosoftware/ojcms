@@ -135,7 +135,7 @@ abstract class AbstractSQLBuilder
    */
   protected void addColumn(String pTableName, IColumnDefinition pColumnDefinition)
   {
-    _executeNoResultStatement("ALTER TABLE " + pTableName + " ADD " + pColumnDefinition.getAsDBString(databaseType));
+    _executeNoResultStatement("ALTER TABLE " + pTableName + " ADD " + pColumnDefinition.toStatementFormat(databaseType));
   }
 
   /**

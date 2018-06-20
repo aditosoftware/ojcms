@@ -178,8 +178,8 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
   /**
    * Creates a new instance of a bean of this container's bean type.
    * If the type of the persistent bean is {@link EStorageMode#AUTOMATIC}, additions will be disabled for this short period of time.
-   * All addition happening in the mean time, will be stored in a queue, which will be executed afterwards.
-   * It is necessary the queue the additions in the automatic mode to avoid copies while creating a new instance from this class.
+   * All additions happening in the mean time, will be stored in a queue, which will be executed afterwards.
+   * It is necessary to queue the additions in the automatic mode to avoid copies while creating a new instance from this class.
    *
    * @return a new instance of a bean
    */
@@ -254,7 +254,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
     @Override
     public <TYPE> void removeField(IField<TYPE> pField)
     {
-      //Keep the column
+      throw new UnsupportedOperationException("It's not allowed to remove fields from a persistent bean!");
     }
 
     @NotNull

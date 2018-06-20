@@ -28,7 +28,7 @@ class InConditionImpl<TYPE> extends ConditionImpl<TYPE>
   }
 
   /**
-   * The operator for the "IN" condition".
+   * The operator for the "IN" condition.
    *
    * @param <TYPE> the data type of the values of the condition
    */
