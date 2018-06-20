@@ -82,11 +82,11 @@ public class BeanContainer<BEAN extends IBean<BEAN>> implements IBeanContainer<B
   /**
    * Default encapsulated data core based on a list to store the beans of this container.
    */
-  public static class DefaultEncapsulatedBuilder<BEAN extends IBean<BEAN>> implements EncapsulatedBuilder.IContainerEncapsulatedBuilder<BEAN>
+  static class DefaultEncapsulatedBuilder<BEAN extends IBean<BEAN>> implements EncapsulatedBuilder.IContainerEncapsulatedBuilder<BEAN>
   {
     private final List<BEAN> beanList;
 
-    public DefaultEncapsulatedBuilder(Collection<BEAN> pBeans)
+    DefaultEncapsulatedBuilder(Collection<BEAN> pBeans)
     {
       beanList = new ArrayList<>(pBeans);
     }

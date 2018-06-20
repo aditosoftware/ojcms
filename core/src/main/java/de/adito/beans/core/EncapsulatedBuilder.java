@@ -110,7 +110,7 @@ public final class EncapsulatedBuilder
    * @param <BEAN>    the generic bean type
    * @return the newly created encapsulated data core
    */
-  public static <BEAN extends IBean<BEAN>> IBeanEncapsulated<BEAN> createBeanEncapsulated(IBeanEncapsulatedBuilder pBuilder, Class<BEAN> pBeanType)
+  static <BEAN extends IBean<BEAN>> IBeanEncapsulated<BEAN> createBeanEncapsulated(IBeanEncapsulatedBuilder pBuilder, Class<BEAN> pBeanType)
   {
     return new _BeanEncapsulated<>(pBuilder, pBeanType, null);
   }
@@ -138,8 +138,8 @@ public final class EncapsulatedBuilder
    * @param <BEAN>    the generic bean type
    * @return the newly created encapsulated data core
    */
-  public static <BEAN extends IBean<BEAN>> IBeanContainerEncapsulated<BEAN> createContainerEncapsulated(IContainerEncapsulatedBuilder<BEAN> pBuilder,
-                                                                                                        Class<BEAN> pBeanType)
+  static <BEAN extends IBean<BEAN>> IBeanContainerEncapsulated<BEAN> createContainerEncapsulated(IContainerEncapsulatedBuilder<BEAN> pBuilder,
+                                                                                                 Class<BEAN> pBeanType)
   {
     return new _ContainerEncapsulated<>(pBuilder, pBeanType);
   }

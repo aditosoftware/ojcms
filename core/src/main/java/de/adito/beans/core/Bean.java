@@ -59,7 +59,7 @@ public class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
   }
 
   /**
-   * Creates a copy of a exiting bean.
+   * Creates a copy of an existing bean.
    *
    * @param pBean the bean to copy
    */
@@ -177,7 +177,7 @@ public class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
   /**
    * Default encapsulated data core based on a map to store the bean fields' values.
    */
-  public static class DefaultEncapsulatedBuilder implements EncapsulatedBuilder.IBeanEncapsulatedBuilder
+  static class DefaultEncapsulatedBuilder implements EncapsulatedBuilder.IBeanEncapsulatedBuilder
   {
     private final Map<IField<?>, Object> values;
 
@@ -186,7 +186,7 @@ public class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
      *
      * @param pFields the fields for this core
      */
-    public DefaultEncapsulatedBuilder(List<IField<?>> pFields)
+    DefaultEncapsulatedBuilder(List<IField<?>> pFields)
     {
       values = pFields.stream()
           .collect(LinkedHashMap::new, (pMap, pField) -> pMap.put(pField, null), HashMap::putAll);
@@ -197,7 +197,7 @@ public class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
      *
      * @param pBean the bean to take the values from
      */
-    public DefaultEncapsulatedBuilder(IBean<?> pBean)
+    DefaultEncapsulatedBuilder(IBean<?> pBean)
     {
       this(BeanUtil.asMap(pBean, null));
     }
@@ -207,7 +207,7 @@ public class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
      *
      * @param pPreset a preset mapping from fields to values
      */
-    public DefaultEncapsulatedBuilder(Map<? extends IField<?>, Object> pPreset)
+    DefaultEncapsulatedBuilder(Map<? extends IField<?>, Object> pPreset)
     {
       values = new LinkedHashMap<>(pPreset);
     }

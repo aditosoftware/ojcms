@@ -40,7 +40,7 @@ class BeanEncapsulatedContainers<BEAN extends IBean<BEAN>, LISTENER extends IBea
   /**
    * Wrapper for a bean data mapper and an optional bean field it should apply to.
    */
-  public static class BeanDataMapper
+  static class BeanDataMapper
   {
     private final IBeanFlatDataMapper dataMapper;
     @Nullable
