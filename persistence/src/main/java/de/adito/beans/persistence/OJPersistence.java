@@ -5,6 +5,7 @@ import de.adito.beans.persistence.spi.IPersistentBeanDataStore;
 
 import java.util.Collection;
 import java.util.function.*;
+import java.util.stream.*;
 
 /**
  * Entry-Point for the bean persistence framework.
@@ -58,11 +59,35 @@ public final class OJPersistence
    * Removes all obsolete persistent single beans.
    * Has to be package protected to ensure this method cannot be accessed by the user's of the framework.
    *
-   * @param pStillExistingSingleBeans all remaining single beans (to find the obsoletes)
+   * @param pStillExistingBeans all remaining single beans(to find the obsoletes)
    */
-  static void removeObsoleteSingleBeans(Collection<IBean<?>> pStillExistingSingleBeans)
+  static void removeObsoleteSingleBeans(Collection<IBean<?>> pStillExistingBeans)
   {
-    beanDataStore.removeObsoleteSingleBeans(pStillExistingSingleBeans);
+    beanDataStore.removeObsoleteSingleBeans(_getPersistentContainerIds(pStillExistingBeans.stream().map(Object::getClass)));
+  }
+
+  /**
+   * Removes all obsolete persistent containers.
+   * Has to be package protected to ensure this method cannot be accessed by the user's of the framework.
+   *
+   * @param pStillExistingContainers all remaining containers (to find the obsoletes)
+   */
+  static void removeObsoleteBeanContainers(Collection<IBeanContainer<?>> pStillExistingContainers)
+  {
+    beanDataStore.removeObsoleteContainers(_getPersistentContainerIds(pStillExistingContainers.stream().map(IBeanContainer::getBeanType)));
+  }
+
+  /**
+   * All persistent container ids of a stream of annotated elements.
+   *
+   * @param pAnnotatedElements the stream of annotated elements
+   * @return the collection of persistent container ids
+   */
+  private static Collection<String> _getPersistentContainerIds(Stream<Class<?>> pAnnotatedElements)
+  {
+    return pAnnotatedElements
+        .map(pElement -> pElement.getAnnotation(Persist.class).containerId())
+        .collect(Collectors.toList());
   }
 
   /**

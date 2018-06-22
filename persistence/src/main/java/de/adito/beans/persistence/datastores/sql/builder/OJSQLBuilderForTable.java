@@ -37,6 +37,16 @@ public class OJSQLBuilderForTable extends AbstractSQLBuilder
   }
 
   /**
+   * Drops the table of the builder.
+   */
+  public void dropTable()
+  {
+    boolean result = super.dropTable(tableName);
+    if (!result)
+      throw new IllegalStateException("The table " + tableName + " is not existing anymore!");
+  }
+
+  /**
    * Adds a column to the database table of this builder.
    *
    * @param pColumnDefinition information about the new column

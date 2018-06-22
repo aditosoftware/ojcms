@@ -81,10 +81,20 @@ public final class BeanDataStore
   /**
    * Removes all obsolete persistent single beans.
    *
-   * @param pStillExistingSingleBeans all remaining single beans (to find the obsoletes)
+   * @param pStillExistingSingleBeanIds all remaining single bean ids (to find the obsoletes)
    */
-  void removeObsoleteSingleBeans(Collection<IBean<?>> pStillExistingSingleBeans)
+  void removeObsoleteSingleBeans(Collection<String> pStillExistingSingleBeanIds)
   {
-    dataStore.removeObsoleteSingleBeans(pStillExistingSingleBeans);
+    dataStore.removeObsoleteSingleBeans(pStillExistingSingleBeanIds);
+  }
+
+  /**
+   * Removes all obsolete persistent containers.
+   *
+   * @param pStillExistingContainerIds all remaining containers ids (to find the obsoletes)
+   */
+  void removeObsoleteContainers(Collection<String> pStillExistingContainerIds)
+  {
+    dataStore.removeObsoleteContainers(pStillExistingContainerIds);
   }
 }

@@ -36,7 +36,8 @@ public class PersistenceAnnotationProcessor extends AbstractProcessor
       "getBeanByPersistenceId";
   private static final Class ARRAYS_CLASS = Arrays.class;
   private static final String AS_LIST_METHOD = "asList";
-  private static final String REMOVE_OBSOLETE_METHOD = "removeObsoleteSingleBeans";
+  private static final Function<Boolean, String> OBSOLETE_REMOVER = pIsContainer -> pIsContainer ? "removeObsoleteBeanContainers" :
+      "removeObsoleteSingleBeans";
 
   @Override
   public boolean process(Set<? extends TypeElement> pAnnotations, RoundEnvironment pRoundEnvironment)
@@ -93,12 +94,11 @@ public class PersistenceAnnotationProcessor extends AbstractProcessor
 
     TypeSpec.Builder classBuilder = TypeSpec.classBuilder(pClassName)
         .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-        .addFields(fieldSpecs);
-    if (!pIsContainer)
-      classBuilder.addStaticBlock(CodeBlock.builder()
-                                      .addStatement("$T.$N($T.$N(" + allFields + "))", RETRIEVER_CLASS, REMOVE_OBSOLETE_METHOD,
-                                                    ARRAYS_CLASS, AS_LIST_METHOD)
-                                      .build());
+        .addFields(fieldSpecs)
+        .addStaticBlock(CodeBlock.builder()
+                            .addStatement("$T.$N($T.$N(" + allFields + "))", RETRIEVER_CLASS, OBSOLETE_REMOVER.apply(pIsContainer),
+                                          ARRAYS_CLASS, AS_LIST_METHOD)
+                            .build());
 
     try
     {

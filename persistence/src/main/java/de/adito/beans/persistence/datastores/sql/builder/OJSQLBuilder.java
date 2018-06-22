@@ -4,6 +4,7 @@ import de.adito.beans.persistence.datastores.sql.builder.definition.*;
 import de.adito.beans.persistence.datastores.sql.builder.statements.Create;
 
 import java.sql.Connection;
+import java.util.List;
 import java.util.function.*;
 
 /**
@@ -31,44 +32,37 @@ public class OJSQLBuilder extends AbstractSQLBuilder
     super(pDatabaseType, pConnectionSupplier, pCloseAfterStatement, pSerializer, pIdColumnName);
   }
 
-  /**
-   * Adds a column to a database table.
-   *
-   * @param pTableName        the name of the table to add the column
-   * @param pColumnDefinition information about the new column
-   */
+  @Override
+  public boolean dropTable(String pTableName)
+  {
+    return super.dropTable(pTableName);
+  }
+
+  @Override
   public void addColumn(String pTableName, IColumnDefinition pColumnDefinition)
   {
     super.addColumn(pTableName, pColumnDefinition);
   }
 
-  /**
-   * Checks, if a certain table exists in the database.
-   *
-   * @param pTableName the name of the table to check
-   * @return <tt>true</tt>, if the table is existing
-   */
+  @Override
   public boolean hasTable(String pTableName)
   {
     return super.hasTable(pTableName);
   }
 
-  /**
-   * Executes a create statement, if a certain table is not existing in the database.
-   *
-   * @param pTableName       the name of the table to check
-   * @param pCreateStatement the create statement to execute (defined in a pipelining mechanism)
-   */
+  @Override
   public void ifTableNotExistingCreate(String pTableName, Consumer<Create> pCreateStatement)
   {
     super.ifTableNotExistingCreate(pTableName, pCreateStatement);
   }
 
-  /**
-   * The column count of a certain table.
-   *
-   * @return the number of columns of a database table
-   */
+  @Override
+  public List<String> getAllTableNames()
+  {
+    return super.getAllTableNames();
+  }
+
+  @Override
   public int getColumnCount(String pTableName)
   {
     return super.getColumnCount(pTableName);

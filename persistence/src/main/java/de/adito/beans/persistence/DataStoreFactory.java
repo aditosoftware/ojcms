@@ -3,7 +3,7 @@ package de.adito.beans.persistence;
 import de.adito.beans.persistence.datastores.CachingBeanDataStore;
 import de.adito.beans.persistence.datastores.sql.*;
 import de.adito.beans.persistence.datastores.sql.builder.definition.EDatabaseType;
-import de.adito.beans.persistence.datastores.sql.builder.util.*;
+import de.adito.beans.persistence.datastores.sql.builder.util.DBConnectionInfo;
 import de.adito.beans.persistence.spi.IPersistentBeanDataStore;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,6 +50,7 @@ public final class DataStoreFactory
     //noinspection unchecked
     return new CachingBeanDataStore((pBeanId, pBeanType) -> new SQLPersistentBean(pBeanId, pBeanType, dbConnectionInfo, OJPersistence.dataStore()),
                                     (pContainerId, pBeanType) -> new SQLPersistentContainer(pBeanType, dbConnectionInfo, pContainerId, OJPersistence.dataStore()),
-                                    pExistingSingleBeans -> SQLPersistentBean.removeObsoletes(dbConnectionInfo, pExistingSingleBeans));
+                                    pExistingSingleBeanIds -> SQLPersistentBean.removeObsoletes(dbConnectionInfo, pExistingSingleBeanIds),
+                                    pExistingContainerIds -> SQLPersistentContainer.removeObsoletes(dbConnectionInfo, pExistingContainerIds));
   }
 }

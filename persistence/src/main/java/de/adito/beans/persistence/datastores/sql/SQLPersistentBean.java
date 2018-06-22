@@ -43,18 +43,17 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
   /**
    * Removes all obsolete single beans from the database table and removes columns, if necessary.
    *
-   * @param pConnectionInfo     information for the database connection
-   * @param pStillExistingBeans a stream of still existing single beans
+   * @param pConnectionInfo       information for the database connection
+   * @param pStillExistingBeanIds a collection of still existing single bean ids
    */
-  public static void removeObsoletes(DBConnectionInfo pConnectionInfo, Stream<IBean<?>> pStillExistingBeans)
+  public static void removeObsoletes(DBConnectionInfo pConnectionInfo, Collection<String> pStillExistingBeanIds)
   {
     final OJSQLBuilderForTable builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionInfo.getDatabaseType(), IDatabaseConstants.ID_COLUMN)
         .forSingleTable(IDatabaseConstants.BEAN_TABLE_NAME)
         .withClosingAndRenewingConnection(pConnectionInfo)
         .create();
     builder.doDelete(pDelete -> pDelete
-        .where(not(in(BEAN_ID_COLUMN_DEFINITION, pStillExistingBeans
-            .map(pBean -> pBean.getClass().getAnnotation(Persist.class).containerId()))))
+        .where(not(in(BEAN_ID_COLUMN_DEFINITION, pStillExistingBeanIds.stream())))
         .delete());
   }
 

@@ -35,6 +35,22 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
   private boolean shouldQueueAdditions = false;
 
   /**
+   * Removes all obsolete bean container database tables.
+   *
+   * @param pConnectionInfo            information for the database connection
+   * @param pStillExistingContainerIds the ids of all still existing containers
+   */
+  public static void removeObsoletes(DBConnectionInfo pConnectionInfo, Collection<String> pStillExistingContainerIds)
+  {
+    final OJSQLBuilder builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionInfo.getDatabaseType(), IDatabaseConstants.ID_COLUMN)
+        .withClosingAndRenewingConnection(pConnectionInfo)
+        .create();
+    List<String> allTables = builder.getAllTableNames();
+    allTables.removeAll(pStillExistingContainerIds);
+    allTables.forEach(builder::dropTable);
+  }
+
+  /**
    * Creates a new persistent bean container.
    *
    * @param pBeanType       the type of the beans in the container

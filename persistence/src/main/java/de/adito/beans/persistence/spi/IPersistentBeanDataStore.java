@@ -42,7 +42,14 @@ public interface IPersistentBeanDataStore
   /**
    * Removes all obsolete persistent single beans from this data store.
    *
-   * @param pStillExistingSingleBeans all remaining single beans (to find the obsoletes)
+   * @param pStillExistingSingleBeanIds all remaining single bean ids (to find the obsoletes)
    */
-  void removeObsoleteSingleBeans(Collection<IBean<?>> pStillExistingSingleBeans);
+  void removeObsoleteSingleBeans(Collection<String> pStillExistingSingleBeanIds);
+
+  /**
+   * Removes all obsolete persistent single beans from this data store.
+   *
+   * @param pStillExistingContainerIds all remaining container ids (to find the obsoletes)
+   */
+  void removeObsoleteContainers(Collection<String> pStillExistingContainerIds);
 }

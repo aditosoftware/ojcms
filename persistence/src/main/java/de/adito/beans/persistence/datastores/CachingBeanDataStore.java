@@ -6,7 +6,6 @@ import de.adito.beans.persistence.spi.*;
 
 import java.util.*;
 import java.util.function.*;
-import java.util.stream.Stream;
 
 /**
  * A caching persistent data store implementation for {@link IPersistentBeanDataStore}.
@@ -22,23 +21,28 @@ public class CachingBeanDataStore implements IPersistentBeanDataStore
   private final Map<String, IPersistentBeanContainer> containerCache = new HashMap<>();
   private final BiFunction<String, Class<? extends IBean<?>>, IPersistentBean> beanResolver;
   private final BiFunction<String, Class<? extends IBean<?>>, IPersistentBeanContainer<?>> containerResolver;
-  private final Consumer<Stream<IBean<?>>> singleBeanObsoleteRemover;
+  private final Consumer<Collection<String>> singleBeanObsoleteRemover;
+  private final Consumer<Collection<String>> containerObsoleteRemover;
 
   /**
    * Create the caching persistent data store.
    *
-   * @param pBeanResolver      a function to get a persistent bean (data core) from a container id
-   * @param pContainerResolver a function to get a persistent bean container (data core) from a container id and a certain bean type
+   * @param pBeanResolver              a function to get a persistent bean (data core) from a container id
+   * @param pContainerResolver         a function to get a persistent bean container (data core) from a container id and a certain bean type
    * @param pSingleBeanObsoleteRemover a function to clean up obsolete single beans in the persistent data store,
-   *                           takes a stream of all still existing single beans
+   *                                   takes a collection of all still existing single bean persistent ids
+   * @param pContainerObsoleteRemover  a function to clean up all obsolete containers in the persistent data store
+   *                                   takes a collection of all still existing container persistent ids
    */
   public CachingBeanDataStore(BiFunction<String, Class<? extends IBean<?>>, IPersistentBean> pBeanResolver,
                               BiFunction<String, Class<? extends IBean<?>>, IPersistentBeanContainer<?>> pContainerResolver,
-                              Consumer<Stream<IBean<?>>> pSingleBeanObsoleteRemover)
+                              Consumer<Collection<String>> pSingleBeanObsoleteRemover,
+                              Consumer<Collection<String>> pContainerObsoleteRemover)
   {
     beanResolver = Objects.requireNonNull(pBeanResolver);
     containerResolver = Objects.requireNonNull(pContainerResolver);
     singleBeanObsoleteRemover = Objects.requireNonNull(pSingleBeanObsoleteRemover);
+    containerObsoleteRemover = Objects.requireNonNull(pContainerObsoleteRemover);
   }
 
   @Override
@@ -55,8 +59,14 @@ public class CachingBeanDataStore implements IPersistentBeanDataStore
   }
 
   @Override
-  public void removeObsoleteSingleBeans(Collection<IBean<?>> pStillExistingSingleBeans)
+  public void removeObsoleteSingleBeans(Collection<String> pStillExistingSingleBeans)
   {
-    singleBeanObsoleteRemover.accept(pStillExistingSingleBeans.stream());
+    singleBeanObsoleteRemover.accept(pStillExistingSingleBeans);
+  }
+
+  @Override
+  public void removeObsoleteContainers(Collection<String> pStillExistingContainerIds)
+  {
+    containerObsoleteRemover.accept(pStillExistingContainerIds);
   }
 }

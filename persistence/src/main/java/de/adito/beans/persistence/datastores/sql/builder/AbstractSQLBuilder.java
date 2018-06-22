@@ -6,7 +6,7 @@ import de.adito.beans.persistence.datastores.sql.builder.util.OJDatabaseExceptio
 
 import java.io.IOException;
 import java.sql.*;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.*;
 
 /**
@@ -128,6 +128,17 @@ abstract class AbstractSQLBuilder
   }
 
   /**
+   * Drops a table from the database.
+   *
+   * @param pTableName the name of the table to drop
+   * @return <tt>true</tt>, if the table was dropped successfully
+   */
+  protected boolean dropTable(String pTableName)
+  {
+    return _createSuccessfulExecutor().executeStatement("DROP TABLE " + pTableName);
+  }
+
+  /**
    * Adds a column to a database table.
    *
    * @param pTableName        the name of the table to add the column
@@ -146,20 +157,7 @@ abstract class AbstractSQLBuilder
    */
   protected boolean hasTable(String pTableName)
   {
-    Connection connection = connectionSupplier.get();
-    try
-    {
-      ResultSet tables = connection.getMetaData().getTables(null, null, pTableName.toUpperCase(), null);
-      return tables.next();
-    }
-    catch (SQLException pE)
-    {
-      throw new OJDatabaseException(pE);
-    }
-    finally
-    {
-      _tryCloseConnection(connection);
-    }
+    return getAllTableNames().contains(pTableName);
   }
 
   /**
@@ -172,6 +170,29 @@ abstract class AbstractSQLBuilder
   {
     if (!hasTable(pTableName))
       doCreate(pCreateStatement);
+  }
+
+  /**
+   * All table names of the database.
+   *
+   * @return a list of all table names
+   */
+  protected List<String> getAllTableNames()
+  {
+    List<String> names = new ArrayList<>();
+    Connection connection = connectionSupplier.get();
+    try
+    {
+      ResultSet tables = connection.getMetaData().getTables(null, null, "%", null);
+      while (tables.next())
+        names.add(tables.getString(3));
+      _tryCloseConnection(connection);
+    }
+    catch (SQLException pE)
+    {
+      throw new OJDatabaseException(pE);
+    }
+    return names;
   }
 
   /**
