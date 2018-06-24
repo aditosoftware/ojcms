@@ -62,7 +62,7 @@ public final class EncapsulatedBuilder
    */
   public static <BEAN extends IBean<BEAN>> IBeanContainer<BEAN> injectDefaultEncapsulated(IBeanContainer<BEAN> pContainer)
   {
-    return injectCustomEncapsulated(pContainer, new BeanContainer.DefaultEncapsulatedBuilder<>(pContainer.toListProxy()));
+    return injectCustomEncapsulated(pContainer, new BeanContainer.DefaultEncapsulatedBuilder<>(pContainer.asList()));
   }
 
   /**

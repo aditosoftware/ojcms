@@ -297,12 +297,12 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
   }
 
   /**
-   * Returns this container as List.
+   * This bean container as {@link List}.
    * This can be used as proxy, where it is necessary to provide the bean container as List.
    *
    * @return this container as List interface
    */
-  default List<BEAN> toListProxy()
+  default List<BEAN> asList()
   {
     return new BeanContainerListProxy<>(this);
   }
