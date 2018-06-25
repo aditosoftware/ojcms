@@ -37,6 +37,16 @@ public class FieldTuple<TYPE>
     return value;
   }
 
+  /**
+   * Determines, if the value of this tuple is the field's default value.
+   *
+   * @return <tt>true</tt>, if it is the default value
+   */
+  public boolean isDefaultValue()
+  {
+    return Objects.equals(getField().getDefaultValue(), getValue());
+  }
+
   @Override
   public String toString()
   {

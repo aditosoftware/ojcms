@@ -1,9 +1,11 @@
 package de.adito.beans.persistence;
 
 import de.adito.beans.core.*;
+import de.adito.beans.core.fields.FieldTuple;
 import de.adito.beans.persistence.spi.IPersistentBeanDataStore;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A bean data store for persistent beans or bean containers.
@@ -42,8 +44,18 @@ public final class BeanDataStore
   public <BEAN extends IBean<BEAN>> BEAN getBeanByPersistenceId(String pPersistenceId, Class<BEAN> pBeanType)
   {
     //noinspection unchecked
-    return (BEAN) beanCache.computeIfAbsent(pPersistenceId, pId ->
-        EncapsulatedBuilder.injectCustomEncapsulated(BeanPersistenceUtil.newInstance(pBeanType), dataStore.getSingleBean(pPersistenceId, pBeanType)));
+    return (BEAN) beanCache.computeIfAbsent(pPersistenceId, pId -> {
+      BEAN instance = BeanPersistenceUtil.newInstance(pBeanType);
+      //Store tuples, that where initialized by the default constructor
+      Set<FieldTuple> initializedTuples = instance.stream()
+          .filter(pTuple -> !pTuple.isDefaultValue())
+          .collect(Collectors.toSet());
+      BEAN injectedInstance = EncapsulatedBuilder.injectCustomEncapsulated(instance, dataStore.getSingleBean(pPersistenceId, pBeanType));
+      //Set values from the default constructor for the persistent bean as well
+      //noinspection unchecked
+      initializedTuples.forEach(pTuple -> injectedInstance.setValue(pTuple.getField(), pTuple.getValue()));
+      return injectedInstance;
+    });
   }
 
   /**
