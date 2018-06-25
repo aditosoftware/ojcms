@@ -2,6 +2,7 @@ package de.adito.beans.persistence.datastores.sql.builder.definition.condition;
 
 import de.adito.beans.persistence.datastores.sql.builder.definition.*;
 
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.stream.*;
 
@@ -35,7 +36,7 @@ class InConditionImpl<TYPE> extends ConditionImpl<TYPE>
   private static class _InOperator<TYPE> implements IWhereOperator<TYPE>
   {
     private final BiFunction<IColumnDefinition<TYPE>, TYPE, IColumnValueTuple<TYPE>> tupleCreator;
-    private final Stream<TYPE> values;
+    private final List<TYPE> values;
 
     /**
      * Creates a new in operator.
@@ -47,7 +48,7 @@ class InConditionImpl<TYPE> extends ConditionImpl<TYPE>
     private _InOperator(BiFunction<IColumnDefinition<TYPE>, TYPE, IColumnValueTuple<TYPE>> pTupleCreator, Stream<TYPE> pValues)
     {
       tupleCreator = pTupleCreator;
-      values = pValues;
+      values = pValues.collect(Collectors.toList());
     }
 
     @Override
@@ -60,7 +61,7 @@ class InConditionImpl<TYPE> extends ConditionImpl<TYPE>
     public String toConditionFormat(IWhereCondition<TYPE> pCondition, IValueSerializer pSerializer)
     {
       return pCondition.getColumnDefinition().getColumnName() + " " + getLiteral() + "(" +
-          values
+          values.stream()
               .map(pValue -> pSerializer.serialValueToStatementString(tupleCreator.apply(pCondition.getColumnDefinition(), pValue)))
               .collect(Collectors.joining(", ")) + ")";
     }

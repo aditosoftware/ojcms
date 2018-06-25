@@ -3,6 +3,8 @@ package de.adito.beans.persistence.datastores.sql.builder.modifiers;
 import de.adito.beans.persistence.datastores.sql.builder.definition.*;
 import de.adito.beans.persistence.datastores.sql.builder.definition.condition.*;
 
+import java.util.Optional;
+
 /**
  * Condition based modifiers for SQL statements.
  *
@@ -25,6 +27,17 @@ public class WhereModifiers
   {
     serializer = pSerializer;
     idColumnDefinition = IColumnDefinition.of(pIdColumnName, EColumnType.INT, Integer.class, EColumnModifier.PRIMARY_KEY, EColumnModifier.NOT_NULL);
+  }
+
+  /**
+   * The where id of this modifiers.
+   * Might not be set.
+   *
+   * @return an optional where id
+   */
+  public Optional<Integer> getWhereId()
+  {
+    return idCondition == null ? Optional.empty() : Optional.of(idCondition.getValue());
   }
 
   /**

@@ -80,7 +80,8 @@ abstract class AbstractSQLBuilder
    */
   public boolean doDelete(Function<Delete, Boolean> pDeleteStatement)
   {
-    return _query(configureStatementBeforeExecution(new Delete(_createSuccessfulExecutor(), databaseType, serializer, idColumnName)), pDeleteStatement);
+    return _query(configureStatementBeforeExecution(new Delete(_createSuccessfulExecutor(), databaseType, serializer,
+                                                               _createResultExecutor(), idColumnName)), pDeleteStatement);
   }
 
   /**
@@ -157,7 +158,7 @@ abstract class AbstractSQLBuilder
    */
   protected boolean hasTable(String pTableName)
   {
-    return getAllTableNames().contains(pTableName);
+    return getAllTableNames().contains(pTableName.toUpperCase());
   }
 
   /**

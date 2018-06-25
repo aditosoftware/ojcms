@@ -30,7 +30,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
   private final boolean isAutomaticAdditionMode;
   private final List<BeanColumnIdentification<?>> columns;
   private final OJSQLBuilderForTable builder;
-  private final Map<Integer, BEAN> beanCache = new HashMap<>();
+  private final Map<Integer, _BeanData> beanCache = new HashMap<>();
   private final Map<BEAN, Integer> additionQueue = new HashMap<>();
   private boolean shouldQueueAdditions = false;
 
@@ -128,7 +128,8 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
   @Override
   public BEAN getBean(int pIndex)
   {
-    return beanCache.computeIfAbsent(_requireInRange(pIndex), pCreationIndex -> _injectPersistentCore(_createBeanInstance(), pCreationIndex));
+    return beanCache.computeIfAbsent(_requireInRange(pIndex), pCreationIndex ->
+        _injectPersistentCore(_createBeanInstance(), pCreationIndex)).instance;
   }
 
   @Override
@@ -186,9 +187,10 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
    * @param pIndex    the index of the bean within the container
    * @return the bean instance
    */
-  private BEAN _injectPersistentCore(BEAN pInstance, int pIndex)
+  private _BeanData _injectPersistentCore(BEAN pInstance, int pIndex)
   {
-    return EncapsulatedBuilder.injectCustomEncapsulated(pInstance, new _ContainerBean(pIndex));
+    _ContainerBean persistentCore = new _ContainerBean(pIndex);
+    return new _BeanData(EncapsulatedBuilder.injectCustomEncapsulated(pInstance, persistentCore), persistentCore);
   }
 
   /**
@@ -233,7 +235,8 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
     if (!deleted)
       throw new OJDatabaseException("Unexpected SQL error while removing bean from container!");
 
-    beanCache.remove(pIndex);
+    beanCache.replaceAll((pKey, pValue) -> pKey < pIndex || pKey == beanCache.size() - 1 ? pValue : beanCache.get(pKey + 1).decrementIndex());
+    beanCache.remove(beanCache.size() - 1);
   }
 
   /**
@@ -242,7 +245,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
    */
   private class _ContainerBean implements IPersistentBean
   {
-    private final int index;
+    private int index;
 
     private _ContainerBean(int pIndex)
     {
@@ -297,6 +300,32 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
       return columns.stream()
           .map(pColumn -> ((IField) pColumn.getBeanField()).newTuple(pResultRow.hasColumn(pColumn) ? pResultRow.get(pColumn) : null))
           .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+    }
+  }
+
+  /**
+   * Wraps a bean instance and its persistent data core.
+   */
+  private class _BeanData
+  {
+    private final BEAN instance;
+    private final _ContainerBean persistent;
+
+    private _BeanData(BEAN pInstance, _ContainerBean pPersistent)
+    {
+      instance = pInstance;
+      persistent = pPersistent;
+    }
+
+    /**
+     * Decrements the index of the persistent bean by one.
+     *
+     * @return the bean data itself
+     */
+    public _BeanData decrementIndex()
+    {
+      persistent.index--;
+      return this;
     }
   }
 }

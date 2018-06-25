@@ -270,7 +270,7 @@ public interface IWhereCondition<TYPE> extends IColumnValueTuple<TYPE>, IConditi
    */
   static <TYPE> IWhereCondition<TYPE> in(IColumnDefinition<TYPE> pColumn, Stream<TYPE> pValues)
   {
-    return new InConditionImpl<>(pColumn, IColumnValueTuple::of, pValues);
+    return in(pColumn, IColumnValueTuple::of, pValues);
   }
 
   /**
