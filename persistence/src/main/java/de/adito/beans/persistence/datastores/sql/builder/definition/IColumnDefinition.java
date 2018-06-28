@@ -12,7 +12,7 @@ import java.util.stream.Stream;
  *
  * @author Simon Danner, 28.04.2018
  */
-public interface IColumnDefinition<TYPE>
+public interface IColumnDefinition
 {
   /**
    * The name of the database column.
@@ -27,13 +27,6 @@ public interface IColumnDefinition<TYPE>
    * @return a database column type
    */
   EColumnType getColumnType();
-
-  /**
-   * The data type of this column.
-   *
-   * @return a Java data type.
-   */
-  Class<TYPE> getDataType();
 
   /**
    * The size of the column.
@@ -84,12 +77,11 @@ public interface IColumnDefinition<TYPE>
    *
    * @param pColumnName the name of the database column
    * @param pColumnType the type of the database column
-   * @param pDataType   the data type of the database column
    * @return the newly created column definition
    */
-  static <TYPE> IColumnDefinition<TYPE> of(String pColumnName, EColumnType pColumnType, Class<TYPE> pDataType, EColumnModifier... pModifiers)
+  static IColumnDefinition of(String pColumnName, EColumnType pColumnType, EColumnModifier... pModifiers)
   {
-    return of(pColumnName, pColumnType, pDataType, -1, pModifiers);
+    return of(pColumnName, pColumnType, -1, pModifiers);
   }
 
   /**
@@ -97,14 +89,13 @@ public interface IColumnDefinition<TYPE>
    *
    * @param pColumnName the name of the database column
    * @param pColumnType the type of the database column
-   * @param pDataType   the data type of the database column
    * @param pColumnSize the size of the database column
    * @return the newly created column definition
    */
-  static <TYPE> IColumnDefinition<TYPE> of(String pColumnName, EColumnType pColumnType, Class<TYPE> pDataType, int pColumnSize,
-                                           EColumnModifier... pModifiers)
+  static IColumnDefinition of(String pColumnName, EColumnType pColumnType, int pColumnSize,
+                              EColumnModifier... pModifiers)
   {
-    return new IColumnDefinition<TYPE>()
+    return new IColumnDefinition()
     {
       @Override
       public String getColumnName()
@@ -116,12 +107,6 @@ public interface IColumnDefinition<TYPE>
       public EColumnType getColumnType()
       {
         return pColumnType;
-      }
-
-      @Override
-      public Class<TYPE> getDataType()
-      {
-        return pDataType;
       }
 
       @Override
@@ -144,14 +129,13 @@ public interface IColumnDefinition<TYPE>
    * @param pSourceCollection the collection of source objects
    * @param pNameResolver     a function to resolve the column name of the definition from a source object
    * @param pTypeResolver     a function to resolve the column type of the definition from a source object
-   * @param pDataTypeResolver a function to resolve the data type of the column from a source object
    * @param <SOURCE>          the generic type of the source objects
    * @return an array of column definitions
    */
   static <SOURCE> IColumnDefinition[] ofMultiple(Collection<SOURCE> pSourceCollection, Function<SOURCE, String> pNameResolver,
-                                                 Function<SOURCE, EColumnType> pTypeResolver, Function<SOURCE, Class<?>> pDataTypeResolver)
+                                                 Function<SOURCE, EColumnType> pTypeResolver)
   {
-    return ofMultiple(pSourceCollection, pNameResolver, pTypeResolver, pDataTypeResolver, null);
+    return ofMultiple(pSourceCollection, pNameResolver, pTypeResolver, null);
   }
 
   /**
@@ -160,52 +144,48 @@ public interface IColumnDefinition<TYPE>
    * @param pSourceCollection the collection of source objects
    * @param pNameResolver     a function to resolve the column name of the definition from a source object
    * @param pTypeResolver     a function to resolve the column type of the definition from a source object
-   * @param pDataTypeResolver a function to resolve the data type of the column from a source object
    * @param pSizeResolver     an optional function to resolve the column size of the definition from a source object
    * @param <SOURCE>          the generic type of the source objects
    * @return an array of column definitions
    */
   static <SOURCE> IColumnDefinition[] ofMultiple(Collection<SOURCE> pSourceCollection, Function<SOURCE, String> pNameResolver,
                                                  Function<SOURCE, EColumnType> pTypeResolver,
-                                                 Function<SOURCE, Class<?>> pDataTypeResolver,
                                                  @Nullable Function<SOURCE, Integer> pSizeResolver)
   {
-    return ofMultiple(pSourceCollection.stream(), pNameResolver, pTypeResolver, pDataTypeResolver, pSizeResolver);
+    return ofMultiple(pSourceCollection.stream(), pNameResolver, pTypeResolver, pSizeResolver);
   }
 
   /**
    * Creates an array of column definitions based on a collection of certain source objects to resolve the properties from.
    *
-   * @param pStream           a stream of source objects
-   * @param pNameResolver     a function to resolve the column name of the definition from a source object
-   * @param pTypeResolver     a function to resolve the column type of the definition from a source object
-   * @param pDataTypeResolver a function to resolve the data type of the column from a source object
-   * @param <SOURCE>          the generic type of the source objects
+   * @param pStream       a stream of source objects
+   * @param pNameResolver a function to resolve the column name of the definition from a source object
+   * @param pTypeResolver a function to resolve the column type of the definition from a source object
+   * @param <SOURCE>      the generic type of the source objects
    * @return an array of column definitions
    */
   static <SOURCE> IColumnDefinition[] ofMultiple(Stream<SOURCE> pStream, Function<SOURCE, String> pNameResolver,
-                                                 Function<SOURCE, EColumnType> pTypeResolver, Function<SOURCE, Class<?>> pDataTypeResolver)
+                                                 Function<SOURCE, EColumnType> pTypeResolver)
   {
-    return ofMultiple(pStream, pNameResolver, pTypeResolver, pDataTypeResolver, null);
+    return ofMultiple(pStream, pNameResolver, pTypeResolver, null);
   }
 
   /**
    * Creates an array of column definitions based on a stream of certain source objects to resolve the properties from.
    *
-   * @param pStream           a stream of source objects
-   * @param pNameResolver     a function to resolve the column name of the definition from a source object
-   * @param pTypeResolver     a function to resolve the column type of the definition from a source object
-   * @param pDataTypeResolver a function to resolve the data type of the column from a source object
-   * @param pSizeResolver     an optional function to resolve the column size of the definition from a source object
-   * @param <SOURCE>          the generic type of the source objects
+   * @param pStream       a stream of source objects
+   * @param pNameResolver a function to resolve the column name of the definition from a source object
+   * @param pTypeResolver a function to resolve the column type of the definition from a source object
+   * @param pSizeResolver an optional function to resolve the column size of the definition from a source object
+   * @param <SOURCE>      the generic type of the source objects
    * @return an array of column definitions
    */
   static <SOURCE> IColumnDefinition[] ofMultiple(Stream<SOURCE> pStream, Function<SOURCE, String> pNameResolver,
-                                                 Function<SOURCE, EColumnType> pTypeResolver, Function<SOURCE, Class<?>> pDataTypeResolver,
+                                                 Function<SOURCE, EColumnType> pTypeResolver,
                                                  @Nullable Function<SOURCE, Integer> pSizeResolver)
   {
     return pStream
-        .map(pSource -> of(pNameResolver.apply(pSource), pTypeResolver.apply(pSource), pDataTypeResolver.apply(pSource),
+        .map(pSource -> of(pNameResolver.apply(pSource), pTypeResolver.apply(pSource),
                            pSizeResolver == null ? -1 : pSizeResolver.apply(pSource)))
         .toArray(IColumnDefinition[]::new);
   }

@@ -11,7 +11,7 @@ import java.util.Collection;
  * @param <TYPE> the data type of the field
  * @author Simon Danner, 17.05.2018
  */
-public class BeanColumnDefinition<TYPE> implements IColumnDefinition<TYPE>
+public class BeanColumnDefinition<TYPE> implements IColumnDefinition
 {
   private final IField<TYPE> beanField;
 
@@ -30,12 +30,6 @@ public class BeanColumnDefinition<TYPE> implements IColumnDefinition<TYPE>
   public EColumnType getColumnType()
   {
     return EColumnType.VARCHAR;
-  }
-
-  @Override
-  public Class<TYPE> getDataType()
-  {
-    return beanField.getType();
   }
 
   @Override

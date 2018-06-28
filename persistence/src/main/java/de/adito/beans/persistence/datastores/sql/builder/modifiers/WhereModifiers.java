@@ -13,7 +13,7 @@ import java.util.Optional;
 public class WhereModifiers
 {
   private final IValueSerializer serializer;
-  private final IColumnDefinition<Integer> idColumnDefinition;
+  private final IColumnIdentification<Integer> idColumnIdentification;
   private IWhereCondition<Integer> idCondition;
   private IWhereConditions whereCondition;
 
@@ -26,7 +26,7 @@ public class WhereModifiers
   public WhereModifiers(IValueSerializer pSerializer, String pIdColumnName)
   {
     serializer = pSerializer;
-    idColumnDefinition = IColumnDefinition.of(pIdColumnName, EColumnType.INT, Integer.class, EColumnModifier.PRIMARY_KEY, EColumnModifier.NOT_NULL);
+    idColumnIdentification = IColumnIdentification.of(pIdColumnName, Integer.class);
   }
 
   /**
@@ -47,7 +47,7 @@ public class WhereModifiers
    */
   public void setWhereId(int pId)
   {
-    idCondition = IWhereCondition.isEqual(idColumnDefinition, pId);
+    idCondition = IWhereCondition.isEqual(idColumnIdentification, pId);
   }
 
   /**

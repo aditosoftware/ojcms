@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 public class BeanColumnValueTuple<TYPE> implements IColumnValueTuple<TYPE>
 {
   private final FieldTuple<TYPE> fieldTuple;
-  private final IColumnDefinition<TYPE> columnDefinition;
+  private final IColumnIdentification<TYPE> column;
 
   /**
    * Creates a new column value tuple.
@@ -27,13 +27,13 @@ public class BeanColumnValueTuple<TYPE> implements IColumnValueTuple<TYPE>
   public BeanColumnValueTuple(FieldTuple<TYPE> pFieldTuple)
   {
     fieldTuple = pFieldTuple;
-    columnDefinition = IColumnDefinition.of(fieldTuple.getField().getName(), EColumnType.VARCHAR, pFieldTuple.getField().getType(), 255);
+    column = IColumnIdentification.of(fieldTuple.getField().getName(), fieldTuple.getField().getType());
   }
 
   @Override
-  public IColumnDefinition<TYPE> getColumnDefinition()
+  public IColumnIdentification<TYPE> getColumn()
   {
-    return columnDefinition;
+    return column;
   }
 
   @Override

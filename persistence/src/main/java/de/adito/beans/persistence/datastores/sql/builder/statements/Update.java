@@ -64,7 +64,7 @@ public class Update extends AbstractSQLStatement<WhereModifiers, Void, Void, Upd
   private String _changes()
   {
     return Stream.of(changes)
-        .map(pChange -> pChange.getColumnDefinition().getColumnName().toUpperCase() + " = " + serializer.serialValueToStatementString(pChange))
+        .map(pChange -> pChange.getColumn().getColumnName().toUpperCase() + " = " + serializer.serialValueToStatementString(pChange))
         .collect(Collectors.joining(", "));
   }
 }

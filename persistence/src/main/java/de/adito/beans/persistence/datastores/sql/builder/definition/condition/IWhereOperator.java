@@ -30,7 +30,7 @@ public interface IWhereOperator<TYPE>
    */
   default String toConditionFormat(IWhereCondition<TYPE> pCondition, IValueSerializer pSerializer)
   {
-    return pCondition.getColumnDefinition().getColumnName() + " " + getLiteral() + " " + pSerializer.serialValueToStatementString(pCondition);
+    return pCondition.getColumn().getColumnName() + " " + getLiteral() + " " + pSerializer.serialValueToStatementString(pCondition);
   }
 
   /**

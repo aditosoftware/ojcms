@@ -13,7 +13,7 @@ import java.util.stream.*;
  */
 public class Create extends AbstractBaseStatement<Void, Create>
 {
-  private final IColumnDefinition<Integer> idColumnDefinition;
+  private final IColumnDefinition idColumnDefinition;
   private boolean withIdColumn = false;
   private IColumnDefinition[] columns;
 
@@ -28,7 +28,7 @@ public class Create extends AbstractBaseStatement<Void, Create>
   public Create(IStatementExecutor<Void> pStatementExecutor, EDatabaseType pDatabaseType, IValueSerializer pSerializer, String pIdColumnName)
   {
     super(pStatementExecutor, pDatabaseType, pSerializer);
-    idColumnDefinition = IColumnDefinition.of(pIdColumnName, EColumnType.INT, Integer.class, EColumnModifier.PRIMARY_KEY, EColumnModifier.NOT_NULL);
+    idColumnDefinition = IColumnDefinition.of(pIdColumnName, EColumnType.INT, EColumnModifier.PRIMARY_KEY, EColumnModifier.NOT_NULL);
   }
 
   /**

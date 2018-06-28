@@ -5,7 +5,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
- * A tuple of a column definition and a data value for database statements.
+ * A tuple of a column identification and a data value for database statements.
  *
  * @param <TYPE> the data type of the column of this condition
  * @author Simon Danner, 28.04.2018
@@ -13,9 +13,11 @@ import java.util.stream.Stream;
 public interface IColumnValueTuple<TYPE>
 {
   /**
-   * The column definition.
+   * The column identification of this tuple.
+   *
+   * @return a database column identification
    */
-  IColumnDefinition<TYPE> getColumnDefinition();
+  IColumnIdentification<TYPE> getColumn();
 
   /**
    * The value for the column.
@@ -25,19 +27,19 @@ public interface IColumnValueTuple<TYPE>
   /**
    * Creates a new tuple.
    *
-   * @param pColumnDefinition the column definition
-   * @param pValue            the value for the column
-   * @param <TYPE>            the data type of the value
+   * @param pColumnIdentification the column identification
+   * @param pValue                the value for the column
+   * @param <TYPE>                the data type of the value
    * @return a column value tuple based on the given values
    */
-  static <TYPE> IColumnValueTuple<TYPE> of(IColumnDefinition<TYPE> pColumnDefinition, TYPE pValue)
+  static <TYPE> IColumnValueTuple<TYPE> of(IColumnIdentification<TYPE> pColumnIdentification, TYPE pValue)
   {
     return new IColumnValueTuple<TYPE>()
     {
       @Override
-      public IColumnDefinition<TYPE> getColumnDefinition()
+      public IColumnIdentification<TYPE> getColumn()
       {
-        return pColumnDefinition;
+        return pColumnIdentification;
       }
 
       @Override
@@ -52,12 +54,12 @@ public interface IColumnValueTuple<TYPE>
    * Creates an array of column value tuples based on a collection of certain source objects to resolve the properties from.
    *
    * @param pSourceCollection the collection of source objects
-   * @param pColumnResolver   a function to resolve the column definition from a source object
+   * @param pColumnResolver   a function to resolve the column identification from a source object
    * @param pValueResolver    a function to resolve the value for the column from a source object
    * @param <SOURCE>          the generic type of the source objects
    * @return an array of column value tuples
    */
-  static <SOURCE> IColumnValueTuple[] ofMultiple(Collection<SOURCE> pSourceCollection, Function<SOURCE, IColumnDefinition> pColumnResolver,
+  static <SOURCE> IColumnValueTuple[] ofMultiple(Collection<SOURCE> pSourceCollection, Function<SOURCE, IColumnIdentification> pColumnResolver,
                                                  Function<SOURCE, ?> pValueResolver)
   {
     return ofMultiple(pSourceCollection.stream(), pColumnResolver, pValueResolver);
@@ -67,17 +69,17 @@ public interface IColumnValueTuple<TYPE>
    * Creates an array of column value tuples based on a stream of certain source objects to resolve the properties from.
    *
    * @param pStream         a stream of source objects
-   * @param pColumnResolver a function to resolve the column definition from a source object
+   * @param pColumnResolver a function to resolve the column identification from a source object
    * @param pValueResolver  a function to resolve the value for the column from a source object
    * @param <SOURCE>        the generic type of the source objects
    * @return an array of column value tuples
    */
-  static <SOURCE> IColumnValueTuple[] ofMultiple(Stream<SOURCE> pStream, Function<SOURCE, IColumnDefinition> pColumnResolver,
+  static <SOURCE> IColumnValueTuple[] ofMultiple(Stream<SOURCE> pStream, Function<SOURCE, IColumnIdentification> pColumnResolver,
                                                  Function<SOURCE, ?> pValueResolver)
   {
     //noinspection unchecked
     return pStream
-        .map(pSource -> of((IColumnDefinition<Object>) pColumnResolver.apply(pSource), pValueResolver.apply(pSource)))
+        .map(pSource -> of((IColumnIdentification<Object>) pColumnResolver.apply(pSource), pValueResolver.apply(pSource)))
         .toArray(IColumnValueTuple[]::new);
   }
 }

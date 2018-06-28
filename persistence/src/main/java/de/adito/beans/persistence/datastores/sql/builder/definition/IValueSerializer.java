@@ -47,6 +47,6 @@ public interface IValueSerializer
     String serialValue = toSerial(pColumnValueTuple);
     if (serialValue == null)
       return null;
-    return pColumnValueTuple.getColumnDefinition().getColumnType().isNumeric() ? serialValue : "'" + serialValue + "'";
+    return pColumnValueTuple.getColumn().isNumeric() ? serialValue : "'" + serialValue + "'";
   }
 }

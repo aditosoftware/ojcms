@@ -83,7 +83,7 @@ public class Insert extends AbstractBaseStatement<Void, Insert>
       //Increment all ids after the index to insert
       executeStatement("UPDATE " + getTableName() + " SET " + id + " = " + id + "+1 WHERE " + id + ">=" + index);
     executeStatement("INSERT INTO " + getTableName() + " (" + (index >= 0 ? id + ", " : "") +
-                         _enumerate(pTuple -> pTuple.getColumnDefinition().getColumnName().toUpperCase())
+                         _enumerate(pTuple -> pTuple.getColumn().getColumnName().toUpperCase())
                          + ") VALUES (" + (index >= 0 ? index + ", " : "") + _enumerate(serializer::serialValueToStatementString) + ")");
   }
 

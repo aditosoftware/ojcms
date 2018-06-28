@@ -1,6 +1,6 @@
 package de.adito.beans.persistence.datastores.sql.builder.definition.condition;
 
-import de.adito.beans.persistence.datastores.sql.builder.definition.IColumnDefinition;
+import de.adito.beans.persistence.datastores.sql.builder.definition.IColumnIdentification;
 
 /**
  * Basic implementation of a where condition.
@@ -10,18 +10,18 @@ import de.adito.beans.persistence.datastores.sql.builder.definition.IColumnDefin
  */
 class ConditionImpl<TYPE> extends AbstractNegatable<IWhereCondition<TYPE>> implements IWhereCondition<TYPE>
 {
-  private final IColumnDefinition<TYPE> column;
+  private final IColumnIdentification<TYPE> column;
   private final TYPE value;
   private final IWhereOperator<TYPE> operator;
 
   /**
    * Creates a new where condition.
    *
-   * @param pColumn   the column definition it is based on
+   * @param pColumn   the column identification it is based on
    * @param pValue    the value it is based on
    * @param pOperator the operator to connect the column and the value
    */
-  ConditionImpl(IColumnDefinition<TYPE> pColumn, TYPE pValue, IWhereOperator<TYPE> pOperator)
+  ConditionImpl(IColumnIdentification<TYPE> pColumn, TYPE pValue, IWhereOperator<TYPE> pOperator)
   {
     column = pColumn;
     value = pValue;
@@ -29,7 +29,7 @@ class ConditionImpl<TYPE> extends AbstractNegatable<IWhereCondition<TYPE>> imple
   }
 
   @Override
-  public IColumnDefinition<TYPE> getColumnDefinition()
+  public IColumnIdentification<TYPE> getColumn()
   {
     return column;
   }
