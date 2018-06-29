@@ -36,7 +36,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
   private static final IColumnIdentification<String> BEAN_ID_COLUMN_IDENTIFICATION =
       IColumnIdentification.of(IDatabaseConstants.BEAN_TABLE_BEAN_ID, String.class);
   private static final IColumnDefinition BEAN_ID_COLUMN_DEFINITION =
-      IColumnDefinition.of(IDatabaseConstants.BEAN_TABLE_BEAN_ID, EColumnType.VARCHAR, 255, EColumnModifier.PRIMARY_KEY, EColumnModifier.NOT_NULL);
+      IColumnDefinition.of(IDatabaseConstants.BEAN_TABLE_BEAN_ID, EColumnType.STRING, 255, EColumnModifier.PRIMARY_KEY, EColumnModifier.NOT_NULL);
   private final IWhereCondition<String> beanIdCondition;
   private final Map<IField<?>, _ColumnIdentification<?>> columns;
   private final OJSQLBuilderForTable builder;
@@ -154,7 +154,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
   {
     IntStream.range(builder.getColumnCount() - 1, columns.size())
         .mapToObj(pIndex -> IDatabaseConstants.BEAN_TABLE_COLUMN_PREFIX + pIndex)
-        .forEach(pColumnName -> builder.addColumn(IColumnDefinition.of(pColumnName, EColumnType.VARCHAR, 255)));
+        .forEach(pColumnName -> builder.addColumn(IColumnDefinition.of(pColumnName, EColumnType.STRING, 255)));
   }
 
   /**

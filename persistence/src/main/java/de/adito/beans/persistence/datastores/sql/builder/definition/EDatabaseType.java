@@ -89,9 +89,9 @@ public enum EDatabaseType
   private static Map<EColumnType, Function<Integer, String>> _derbyColumnMapping()
   {
     return _createColumnMapping(pMap -> {
-      pMap.put(EColumnType.BIGINT, pSize -> "BIGINT");
+      pMap.put(EColumnType.LONG, pSize -> "BIGINT");
       pMap.put(EColumnType.BLOB, pSize -> "BLOB");
-      pMap.put(EColumnType.CHAR, pSize -> "CHAR( " + pSize + ")");
+      pMap.put(EColumnType.SINGLE_CHAR, pSize -> "CHAR(1)");
       pMap.put(EColumnType.DATE, pSize -> "DATE");
       pMap.put(EColumnType.DATETIME, pSize -> "DATETIME");
       pMap.put(EColumnType.DOUBLE, pSize -> "DOUBLE");
@@ -99,9 +99,7 @@ public enum EDatabaseType
       pMap.put(EColumnType.INT, pSize -> "INTEGER");
       pMap.put(EColumnType.SHORT, pSize -> "SHORT");
       pMap.put(EColumnType.TIME, pSize -> "TIME");
-      pMap.put(EColumnType.TIMESTAMP, pSize -> "TIMESTAMP");
-      pMap.put(EColumnType.TEXT, pSize -> "TEXT");
-      pMap.put(EColumnType.VARCHAR, pSize -> "VARCHAR(" + pSize + ")");
+      pMap.put(EColumnType.STRING, pSize -> "VARCHAR(" + pSize + ")");
     });
   }
 

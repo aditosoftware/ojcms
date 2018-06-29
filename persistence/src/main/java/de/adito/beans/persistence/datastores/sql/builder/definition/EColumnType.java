@@ -1,5 +1,10 @@
 package de.adito.beans.persistence.datastores.sql.builder.definition;
 
+import de.adito.beans.persistence.datastores.sql.builder.util.OJDatabaseException;
+
+import java.time.*;
+import java.util.stream.Stream;
+
 /**
  * Enumerates all possible database column types.
  *
@@ -8,40 +13,46 @@ package de.adito.beans.persistence.datastores.sql.builder.definition;
 public enum EColumnType
 {
   //text
-  CHAR, VARCHAR, TEXT, BLOB,
+  SINGLE_CHAR(Character.class), STRING(String.class, 255), BLOB(byte[].class),
   //number
-  SHORT(true), INT(true), BIGINT(true), FLOAT(true), DOUBLE(true),
+  SHORT(Short.class), INT(Integer.class), LONG(Long.class), FLOAT(Float.class), DOUBLE(Double.class),
   //date
-  DATE, DATETIME, TIMESTAMP, TIME;
+  DATE(LocalDate.class), DATETIME(LocalDateTime.class), TIME(LocalTime.class);
 
-  private final boolean isNumeric;
+  private final Class javaDataType;
+  private final int defaultSize;
 
   /**
-   * Creates a new column type with a non numeric data value type.
+   * Creates a new column type.
+   *
+   * @param pJavaDataType the Java data type for the column type
    */
-  EColumnType()
+  EColumnType(Class pJavaDataType)
   {
-    this(false);
+    this(pJavaDataType, -1);
   }
 
   /**
    * Creates a new column type.
    *
-   * @param pIsNumeric <tt>true</tt>, if the data value of this column is numeric
+   * @param pJavaDataType the Java data type for the column type
+   * @param pDefaultSize  the default size for this type (-1, if this type has no size)
    */
-  EColumnType(boolean pIsNumeric)
+  EColumnType(Class pJavaDataType, int pDefaultSize)
   {
-    isNumeric = pIsNumeric;
+    javaDataType = pJavaDataType;
+    defaultSize = pDefaultSize;
   }
 
   /**
-   * Determines, if this column type has a numeric value.
+   * The default size for this column type.
+   * -1, if this type has no size.
    *
-   * @return <tt>true</tt>, if the column has a numeric value type
+   * @return the default size for the column type
    */
-  public boolean isNumeric()
+  public int getDefaultSize()
   {
-    return isNumeric;
+    return defaultSize;
   }
 
   /**
@@ -65,5 +76,20 @@ public enum EColumnType
   public String getNameByDatabaseTypeAndSize(EDatabaseType pDatabaseType, int pSize)
   {
     return pDatabaseType.getColumnDefinition(this, pSize);
+  }
+
+  /**
+   * The column type for a certain Java data type.
+   *
+   * @param pJavaDataType the Java data type to look for
+   * @return a column type
+   * @throws OJDatabaseException, if there's no column type for this data type
+   */
+  public static EColumnType getByDataType(Class pJavaDataType)
+  {
+    return Stream.of(values())
+        .filter(pColumnType -> pColumnType.javaDataType == pJavaDataType)
+        .findAny()
+        .orElseThrow(() -> new OJDatabaseException("No column type found for data type " + pJavaDataType.getName()));
   }
 }

@@ -2,6 +2,7 @@ package de.adito.beans.persistence.datastores.sql.builder.definition;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.time.*;
 import java.util.*;
 import java.util.function.Function;
 
@@ -11,7 +12,7 @@ import java.util.function.Function;
  *
  * @author Simon Danner, 18.06.2018
  */
-public class DefaultValueSerializer implements IValueSerializer
+class DefaultValueSerializer implements IValueSerializer
 {
   private static Map<Class, Function<Object, String>> supportedTypesToSerial = new HashMap<>();
   private static Map<Class, Function<String, ?>> supportedTypesFromSerial = new HashMap<>();
@@ -22,6 +23,7 @@ public class DefaultValueSerializer implements IValueSerializer
    */
   static
   {
+    _put(Character.class, String::valueOf, pValue -> pValue.charAt(0));
     _put(String.class, pValue -> pValue, pValue -> pValue);
     _put(Integer.class, String::valueOf, Integer::parseInt);
     _put(Double.class, String::valueOf, Double::parseDouble);
@@ -29,6 +31,9 @@ public class DefaultValueSerializer implements IValueSerializer
     _put(Short.class, String::valueOf, Short::parseShort);
     _put(Long.class, String::valueOf, Long::parseLong);
     _put(Boolean.class, String::valueOf, Boolean::parseBoolean);
+    _put(LocalDate.class, LocalDate::toString, LocalDate::parse);
+    _put(LocalDateTime.class, LocalDateTime::toString, LocalDateTime::parse);
+    _put(LocalTime.class, LocalTime::toString, LocalTime::parse);
   }
 
   @Override

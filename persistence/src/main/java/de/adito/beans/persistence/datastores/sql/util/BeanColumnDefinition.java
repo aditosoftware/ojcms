@@ -29,7 +29,7 @@ public class BeanColumnDefinition<TYPE> implements IColumnDefinition
   @Override
   public EColumnType getColumnType()
   {
-    return EColumnType.VARCHAR;
+    return EColumnType.STRING;
   }
 
   @Override

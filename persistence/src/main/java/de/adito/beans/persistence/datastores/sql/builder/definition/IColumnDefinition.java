@@ -43,11 +43,11 @@ public interface IColumnDefinition
    * All modifiers for this column.
    * Per default there are none.
    *
-   * @return a list of column modifiers
+   * @return a set of column modifiers
    */
-  default List<EColumnModifier> getModifiers()
+  default Set<EColumnModifier> getModifiers()
   {
-    return Collections.emptyList();
+    return Collections.emptySet();
   }
 
   /**
@@ -73,6 +73,21 @@ public interface IColumnDefinition
   }
 
   /**
+   * Creates a default column definition for certain Java data types.
+   * Example: String.class -> STRING(255)
+   *
+   * @param pType       the data type
+   * @param pColumnName the name of the column
+   * @param pModifiers  a variable amount of column modifiers
+   * @return the created column definition
+   */
+  static IColumnDefinition forType(Class pType, String pColumnName, EColumnModifier... pModifiers)
+  {
+    EColumnType columnType = EColumnType.getByDataType(pType);
+    return of(pColumnName, columnType, columnType.getDefaultSize(), pModifiers);
+  }
+
+  /**
    * Creates an instance based on given values.
    *
    * @param pColumnName the name of the database column
@@ -92,35 +107,9 @@ public interface IColumnDefinition
    * @param pColumnSize the size of the database column
    * @return the newly created column definition
    */
-  static IColumnDefinition of(String pColumnName, EColumnType pColumnType, int pColumnSize,
-                              EColumnModifier... pModifiers)
+  static IColumnDefinition of(String pColumnName, EColumnType pColumnType, int pColumnSize, EColumnModifier... pModifiers)
   {
-    return new IColumnDefinition()
-    {
-      @Override
-      public String getColumnName()
-      {
-        return pColumnName;
-      }
-
-      @Override
-      public EColumnType getColumnType()
-      {
-        return pColumnType;
-      }
-
-      @Override
-      public int getColumnSize()
-      {
-        return pColumnSize;
-      }
-
-      @Override
-      public List<EColumnModifier> getModifiers()
-      {
-        return Arrays.asList(pModifiers);
-      }
-    };
+    return new ColumnDefinitionImpl(pColumnName, pColumnType, pColumnSize, pModifiers);
   }
 
   /**
