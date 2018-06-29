@@ -14,10 +14,13 @@ import java.util.Collection;
 public class BeanColumnDefinition<TYPE> implements IColumnDefinition
 {
   private final IField<TYPE> beanField;
+  private final EColumnType columnType;
 
   public BeanColumnDefinition(IField<TYPE> pBeanField)
   {
     beanField = pBeanField;
+    columnType = EColumnType.getByDataType(pBeanField.getType())
+        .orElse(EColumnType.STRING);
   }
 
   @Override
@@ -29,13 +32,13 @@ public class BeanColumnDefinition<TYPE> implements IColumnDefinition
   @Override
   public EColumnType getColumnType()
   {
-    return EColumnType.STRING;
+    return columnType;
   }
 
   @Override
   public int getColumnSize()
   {
-    return 255;
+    return columnType.getDefaultSize();
   }
 
   /**

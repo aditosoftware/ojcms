@@ -1,5 +1,6 @@
 package de.adito.beans.persistence.datastores.sql.builder.definition;
 
+import de.adito.beans.persistence.datastores.sql.builder.util.OJDatabaseException;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -83,7 +84,8 @@ public interface IColumnDefinition
    */
   static IColumnDefinition forType(Class pType, String pColumnName, EColumnModifier... pModifiers)
   {
-    EColumnType columnType = EColumnType.getByDataType(pType);
+    EColumnType columnType = EColumnType.getByDataType(pType)
+        .orElseThrow(() -> new OJDatabaseException("No column type found for data type " + pType.getName()));
     return of(pColumnName, columnType, columnType.getDefaultSize(), pModifiers);
   }
 

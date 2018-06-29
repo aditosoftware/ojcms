@@ -3,6 +3,7 @@ package de.adito.beans.persistence.datastores.sql.builder.definition;
 import de.adito.beans.persistence.datastores.sql.builder.util.OJDatabaseException;
 
 import java.time.*;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -85,11 +86,10 @@ public enum EColumnType
    * @return a column type
    * @throws OJDatabaseException, if there's no column type for this data type
    */
-  public static EColumnType getByDataType(Class pJavaDataType)
+  public static Optional<EColumnType> getByDataType(Class pJavaDataType)
   {
     return Stream.of(values())
         .filter(pColumnType -> pColumnType.javaDataType == pJavaDataType)
-        .findAny()
-        .orElseThrow(() -> new OJDatabaseException("No column type found for data type " + pJavaDataType.getName()));
+        .findAny();
   }
 }
