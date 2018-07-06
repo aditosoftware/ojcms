@@ -1,5 +1,6 @@
 package de.adito.beans.persistence.datastores.sql.builder.definition;
 
+import de.adito.beans.persistence.datastores.sql.builder.definition.column.IColumnDefinition;
 import org.jetbrains.annotations.Nullable;
 
 /**

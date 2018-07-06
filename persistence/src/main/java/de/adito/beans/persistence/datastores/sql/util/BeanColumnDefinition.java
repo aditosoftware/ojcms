@@ -1,12 +1,15 @@
 package de.adito.beans.persistence.datastores.sql.util;
 
-import de.adito.beans.core.IField;
-import de.adito.beans.persistence.datastores.sql.builder.definition.*;
+import de.adito.beans.core.*;
+import de.adito.beans.core.annotations.Identifier;
+import de.adito.beans.core.fields.BeanField;
+import de.adito.beans.persistence.*;
+import de.adito.beans.persistence.datastores.sql.builder.definition.column.*;
 
 import java.util.Collection;
 
 /**
- * A bean column definition based on a bean field
+ * A bean column definition based on a bean field.
  *
  * @param <TYPE> the data type of the field
  * @author Simon Danner, 17.05.2018
@@ -14,13 +17,21 @@ import java.util.Collection;
 public class BeanColumnDefinition<TYPE> implements IColumnDefinition
 {
   private final IField<TYPE> beanField;
-  private final EColumnType columnType;
+  private final IColumnType columnType;
 
+  /**
+   * Creates a column definition for a bean field.
+   *
+   * @param pBeanField the bean field the column is based on
+   */
   public BeanColumnDefinition(IField<TYPE> pBeanField)
   {
     beanField = pBeanField;
     columnType = EColumnType.getByDataType(pBeanField.getType())
         .orElse(EColumnType.STRING);
+    if (beanField.hasAnnotation(Identifier.class))
+      columnType.primaryKey();
+    _setForeignKey();
   }
 
   @Override
@@ -30,15 +41,9 @@ public class BeanColumnDefinition<TYPE> implements IColumnDefinition
   }
 
   @Override
-  public EColumnType getColumnType()
+  public IColumnType getColumnType()
   {
     return columnType;
-  }
-
-  @Override
-  public int getColumnSize()
-  {
-    return columnType.getDefaultSize();
   }
 
   /**
@@ -49,6 +54,24 @@ public class BeanColumnDefinition<TYPE> implements IColumnDefinition
   public IField<TYPE> getBeanField()
   {
     return beanField;
+  }
+
+  /**
+   * Sets a foreign key for the column type, if it is a {@link BeanField} that refers to another persistent bean.
+   */
+  private void _setForeignKey()
+  {
+    if (!(beanField instanceof BeanField))
+      return;
+
+    //noinspection unchecked
+    final Class<? extends IBean> beanType = (Class<? extends IBean>) beanField.getType();
+    if (!beanType.isAnnotationPresent(Persist.class))
+      throw new RuntimeException("A persistent bean can only create a reference to another persistent bean! type: " + beanType.getName());
+    final Persist annotation = beanType.getAnnotation(Persist.class);
+    String tableName = annotation.mode() == EPersistenceMode.SINGLE ? IDatabaseConstants.BEAN_TABLE_NAME : annotation.containerId();
+    String columnName = annotation.mode() == EPersistenceMode.SINGLE ? IDatabaseConstants.BEAN_TABLE_BEAN_ID : IDatabaseConstants.ID_COLUMN;
+    columnType.foreignKey(IForeignKey.of(tableName, columnName));
   }
 
   /**

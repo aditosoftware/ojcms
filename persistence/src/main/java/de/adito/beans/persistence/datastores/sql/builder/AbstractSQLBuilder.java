@@ -1,6 +1,7 @@
 package de.adito.beans.persistence.datastores.sql.builder;
 
 import de.adito.beans.persistence.datastores.sql.builder.definition.*;
+import de.adito.beans.persistence.datastores.sql.builder.definition.column.IColumnDefinition;
 import de.adito.beans.persistence.datastores.sql.builder.statements.*;
 import de.adito.beans.persistence.datastores.sql.builder.util.OJDatabaseException;
 

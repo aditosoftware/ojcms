@@ -2,9 +2,10 @@ package de.adito.beans.persistence.datastores.sql.builder.statements;
 
 import de.adito.beans.persistence.datastores.sql.builder.*;
 import de.adito.beans.persistence.datastores.sql.builder.definition.*;
+import de.adito.beans.persistence.datastores.sql.builder.definition.column.*;
 
-import java.util.List;
-import java.util.stream.*;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A create statement.
@@ -14,8 +15,7 @@ import java.util.stream.*;
 public class Create extends AbstractBaseStatement<Void, Create>
 {
   private final IColumnDefinition idColumnDefinition;
-  private boolean withIdColumn = false;
-  private IColumnDefinition[] columns;
+  private final List<IColumnDefinition> columns = new ArrayList<>();
 
   /**
    * Creates the create statement.
@@ -28,7 +28,7 @@ public class Create extends AbstractBaseStatement<Void, Create>
   public Create(IStatementExecutor<Void> pStatementExecutor, EDatabaseType pDatabaseType, IValueSerializer pSerializer, String pIdColumnName)
   {
     super(pStatementExecutor, pDatabaseType, pSerializer);
-    idColumnDefinition = IColumnDefinition.of(pIdColumnName, EColumnType.INT, EColumnModifier.PRIMARY_KEY, EColumnModifier.NOT_NULL);
+    idColumnDefinition = IColumnDefinition.of(pIdColumnName, EColumnType.INT.primaryKey().modifiers(EColumnModifier.NOT_NULL));
   }
 
   /**
@@ -50,18 +50,18 @@ public class Create extends AbstractBaseStatement<Void, Create>
    */
   public Create columns(IColumnDefinition... pColumnDefinitions)
   {
-    columns = pColumnDefinitions;
+    columns.addAll(Arrays.asList(pColumnDefinitions));
     return this;
   }
 
   /**
-   * Configures the create statement to include a id column additionally.
+   * Configures the create statement to include an id column additionally.
    *
    * @return the create statement itself to enable a pipelining mechanism
    */
   public Create withIdColumn()
   {
-    withIdColumn = true;
+    columns.add(0, idColumnDefinition);
     return this;
   }
 
@@ -70,10 +70,11 @@ public class Create extends AbstractBaseStatement<Void, Create>
    */
   public void create()
   {
-    String query = "CREATE TABLE " + getTableName() + " ("
-        + (withIdColumn ? Stream.concat(Stream.of(idColumnDefinition), Stream.of(columns)) : Stream.of(columns))
+    String query = "CREATE TABLE " + getTableName() + " (" + columns.stream()
         .map(pColumnDefinition -> pColumnDefinition.toStatementFormat(databaseType))
-        .collect(Collectors.joining(",\n")) + _primaryKey() + ")";
+        .collect(Collectors.joining(",\n")) +
+        _primaryKeys() +
+        _foreignKeys() + ")";
     executeStatement(query);
   }
 
@@ -81,15 +82,31 @@ public class Create extends AbstractBaseStatement<Void, Create>
    * Creates the statement string for the primary key columns.
    * Will be empty, if there is no primary key.
    *
-   * @return the primary key part for the create statement
+   * @return the primary key part of the create statement
    */
-  private String _primaryKey()
+  private String _primaryKeys()
   {
-    List<IColumnDefinition> primaryKeyColumns = Stream.concat(withIdColumn ? Stream.of(idColumnDefinition) : Stream.empty(),
-                                                              Stream.of(columns).filter(IColumnDefinition::isPrimaryKey))
-        .collect(Collectors.toList());
-    return primaryKeyColumns.isEmpty() ? "" : ",\nPRIMARY KEY(" + primaryKeyColumns.stream()
+    List<String> primaryKeyColumnNames = columns.stream()
+        .filter(pColumn -> pColumn.getColumnType().isPrimaryKey())
         .map(pColumnDefinition -> pColumnDefinition.getColumnName().toUpperCase())
+        .collect(Collectors.toList());
+    return primaryKeyColumnNames.isEmpty() ? "" : ",\nPRIMARY KEY(" + primaryKeyColumnNames.stream()
         .collect(Collectors.joining(", ")) + ")";
+  }
+
+  /**
+   * Creates the statement string for the foreign keys.
+   * Will be empty, if there are no foreign key constraints.
+   *
+   * @return the foreign key part of the create statement
+   */
+  private String _foreignKeys()
+  {
+    Map<String, IForeignKey> foreignKeyMapping = columns.stream()
+        .filter(pColumn -> pColumn.getColumnType().getForeignKey() != null)
+        .collect(Collectors.toMap(IColumnDefinition::getColumnName, pColumn -> pColumn.getColumnType().getForeignKey()));
+    return foreignKeyMapping.isEmpty() ? "" : "\n" + foreignKeyMapping.entrySet().stream()
+        .map(pEntry -> "FOREIGN KEY (" + pEntry.getKey() + ") REFERENCES " + pEntry.getValue().toStatementFormat(databaseType))
+        .collect(Collectors.joining(",\n"));
   }
 }
