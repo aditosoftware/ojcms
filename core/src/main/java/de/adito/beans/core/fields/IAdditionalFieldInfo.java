@@ -13,6 +13,8 @@ public interface IAdditionalFieldInfo<TYPE>
 {
   /**
    * Defines the data type of this additional information.
+   *
+   * @return a data type
    */
   Class<TYPE> getType();
 }

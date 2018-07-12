@@ -1,7 +1,7 @@
 package de.adito.beans.core.fields;
 
 import de.adito.beans.core.*;
-import de.adito.beans.core.util.beancopy.*;
+import de.adito.beans.core.util.beancopy.CustomFieldCopy;
 import org.jetbrains.annotations.*;
 
 import java.lang.annotation.Annotation;
@@ -45,10 +45,10 @@ public class MapField<TYPE> extends AbstractField<MapBean<TYPE>>
    *
    * @param pMap            the map that will be transformed
    * @param pValueType      the value type of the map
-   * @param pFieldPredicate an optional field predicate, which excludes certain map entries
+   * @param pFieldPredicate an optional field predicate, which determines what fields should be in the map bean
    * @return a (modifiable) bean, which represents the original map
    */
-  public MapBean<TYPE> createBeanFromMap(Map<String, TYPE> pMap, Class<TYPE> pValueType, @Nullable Predicate<IField<TYPE>> pFieldPredicate)
+  public MapBean<TYPE> createBeanFromMap(Map<String, TYPE> pMap, Class<TYPE> pValueType, @Nullable Predicate<IField<?>> pFieldPredicate)
   {
     MapBean<TYPE> bean = new MapBean<>(pMap, pValueType, fieldCache::add, (pFieldType, pName) ->
         fieldCache.stream()
@@ -64,7 +64,7 @@ public class MapField<TYPE> extends AbstractField<MapBean<TYPE>>
    *
    * @param pBean      the bean that this field belongs to
    * @param pValueType the value type of the field/map
-   * @return the original map, which was represented by the bean
+   * @return the original map, which was represented by the bean (new instance of the map)
    */
   public Map<String, TYPE> createMapFromBean(IBean<?> pBean, Class<TYPE> pValueType)
   {

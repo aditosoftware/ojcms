@@ -29,7 +29,7 @@ public class BeanFieldCopyTest
    *
    * @return a stream of field value wrappers
    */
-  private static Stream<_FieldValueWrapper> _fieldsToTest()
+  private static Stream<_FieldValueWrapper<?>> _fieldsToTest()
   {
     final Map<String, Integer> testMap = new HashMap<>();
     testMap.put("test1", 6);

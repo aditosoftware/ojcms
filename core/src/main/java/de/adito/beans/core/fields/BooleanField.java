@@ -8,7 +8,7 @@ import java.lang.annotation.Annotation;
 import java.util.Collection;
 
 /**
- * A bean field that hold a boolean value.
+ * A bean field that holds a boolean value.
  *
  * @author Simon Danner, 19.01.2017
  */

@@ -6,7 +6,7 @@ import java.util.*;
 import java.util.function.*;
 
 /**
- * A special bean that represents a Map.
+ * A special bean that represents a {@link Map}.
  * A key-value pair of the map will be presented as a bean field with the associated value.
  * This bean is based on a generic data type which is the value type of the map and will be used as data type for the bean fields.
  *

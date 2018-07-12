@@ -1,10 +1,9 @@
 package de.adito.beans.core;
 
-import de.adito.beans.core.fields.FieldTuple;
-
 import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * A modifiable bean with dynamical fields.
@@ -84,14 +83,12 @@ public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
    * Removes all fields that apply to a given predicate.
    *
    * @param pFieldPredicate the field predicate that determines which fields should be removed
-   * @param <TYPE>          the field's data type
    */
-  default <TYPE> void removeFieldIf(Predicate<IField<TYPE>> pFieldPredicate)
+  default void removeFieldIf(Predicate<IField<?>> pFieldPredicate)
   {
-    Iterator<FieldTuple<?>> it = getEncapsulated().iterator();
-    while (it.hasNext())
-      //noinspection unchecked
-      if (pFieldPredicate.test((IField<TYPE>) it.next().getField()))
-        it.remove();
+    List<IField<?>> toRemove = streamFields()
+        .filter(pField -> !pFieldPredicate.test(pField))
+        .collect(Collectors.toList());
+    toRemove.forEach(this::removeField);
   }
 }
