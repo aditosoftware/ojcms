@@ -1,5 +1,7 @@
 package de.adito.beans.core;
 
+import de.adito.beans.core.util.BeanUtil;
+
 import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.function.Predicate;
@@ -55,6 +57,8 @@ public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
    */
   default <TYPE> void addField(IField<TYPE> pField, int pIndex)
   {
+    if (hasField(pField))
+      throw new RuntimeException("A bean cannot have the same field twice! field: " + pField.getName());
     IBeanEncapsulated<BEAN> encapsulated = getEncapsulated();
     assert encapsulated != null;
     encapsulated.addField(pField, pIndex);
@@ -80,9 +84,19 @@ public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
   }
 
   /**
+   * Removes a field by its name.
+   *
+   * @param pFieldName the name of the field to remove
+   */
+  default void removeFieldByName(String pFieldName)
+  {
+    removeField(BeanUtil.findFieldByName(this, pFieldName));
+  }
+
+  /**
    * Removes all fields that apply to a given predicate.
    *
-   * @param pFieldPredicate the field predicate that determines which fields should be removed
+   * @param pFieldPredicate the field predicate that determines which fields should be retained
    */
   default void removeFieldIf(Predicate<IField<?>> pFieldPredicate)
   {

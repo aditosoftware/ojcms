@@ -90,7 +90,9 @@ final class BeanListenerUtil
    */
   public static <BEAN extends IBean<BEAN>> void beanAdded(IBeanContainer<BEAN> pContainer, BEAN pBean)
   {
-    pBean.listenWeak(_getListener(pContainer));
+    IBeanChangeListener<BEAN> listener = _getListener(pContainer);
+    if (!pBean.getEncapsulated().getContainers().getWeakListenerContainer().contains(listener))
+      pBean.listenWeak(listener);
     pContainer.getEncapsulated().fire(pListener -> pListener.beanAdded(pBean));
     //Pass the references of the container to the beans as well
     pContainer.getEncapsulated().getHierarchicalStructure().getDirectParents()

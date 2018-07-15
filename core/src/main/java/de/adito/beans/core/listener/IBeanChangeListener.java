@@ -4,7 +4,7 @@ import de.adito.beans.core.*;
 
 /**
  * Defines a listener for changes at a single bean.
- * A change may be a value update or a addition/removal of a field.
+ * A change may be a value update or an addition/removal of a field.
  * All methods of this interface are defined as default methods to enable an adapter behaviour.
  *
  * @param <BEAN> the type of the bean for which this listener should be registered

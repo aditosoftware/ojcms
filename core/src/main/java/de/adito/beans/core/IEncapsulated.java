@@ -66,7 +66,8 @@ interface IEncapsulated<CORE, BEAN extends IBean<BEAN>, LISTENER extends IBeanCh
     assert getWeakListeners() != null;
     synchronized (getWeakListeners())
     {
-      getWeakListeners().add(pListener);
+      if (!getWeakListeners().add(pListener))
+        throw new RuntimeException("Duplicate listeners are not allowed for one bean element!");
     }
   }
 

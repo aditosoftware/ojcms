@@ -125,7 +125,23 @@ public class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
   private void _init(EncapsulatedBuilder.IBeanEncapsulatedBuilder pBuilder)
   {
     setEncapsulated(pBuilder);
+    _checkForDuplicateFields();
     BeanCreationRegistry.fireCreationIfAnnotationPresent(this);
+  }
+
+  /**
+   * Checks, if the bean has duplicate fields, which is not allowed.
+   */
+  private void _checkForDuplicateFields()
+  {
+    final Set<IField<?>> checker = new HashSet<>();
+    List<IField<?>> duplicates = streamFields()
+        .filter(pField -> !checker.add(pField))
+        .collect(Collectors.toList());
+    if (!duplicates.isEmpty())
+      throw new RuntimeException("A bean cannot have a field twice! duplicates: " + duplicates.stream()
+          .map(IField::getName)
+          .collect(Collectors.joining(", ")));
   }
 
   /**
