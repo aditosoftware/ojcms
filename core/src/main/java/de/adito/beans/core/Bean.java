@@ -171,10 +171,10 @@ public class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
   {
     if (this == pOther)
       return true;
+    if (pOther == null || getClass() != pOther.getClass())
+      return false;
     Set<FieldTuple<?>> identifiers = getIdentifiers();
     if (identifiers.isEmpty())
-      return super.equals(pOther);
-    if (pOther == null || getClass() != pOther.getClass())
       return false;
     return !BeanUtil.compareBeanValues(this, (IBean) pOther, identifiers.stream()
         .map(FieldTuple::getField))

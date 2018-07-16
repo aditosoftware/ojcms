@@ -13,24 +13,22 @@ import java.util.*;
  */
 public class StatisticData<TYPE> implements IStatisticData<TYPE>
 {
-  private final long intervall; //in ms
   private final int maxEntrySize;
-  private final _LimitedMap statistics;
+  private final Map<Long, TYPE> statistics;
   private final List<IStatisticsListener<TYPE>> listeners = new ArrayList<>();
 
-  public StatisticData(long pIntervall, long pCapacity, @Nullable TYPE pFirstValue)
+  /**
+   * Creates new statistic data.
+   *
+   * @param pCapacity   the maximum number of entries, or -1 for no limit
+   * @param pFirstValue an optional first value for the data
+   */
+  public StatisticData(int pCapacity, @Nullable TYPE pFirstValue)
   {
-    intervall = pIntervall;
-    maxEntrySize = (int) (pCapacity / intervall);
-    statistics = new _LimitedMap(maxEntrySize);
+    maxEntrySize = pCapacity;
+    statistics = maxEntrySize == -1 ? new LinkedHashMap<>() : new _LimitedMap(maxEntrySize);
     if (pFirstValue != null)
       addEntry(pFirstValue);
-  }
-
-  @Override
-  public long getIntervall()
-  {
-    return intervall;
   }
 
   @Override
@@ -40,7 +38,7 @@ public class StatisticData<TYPE> implements IStatisticData<TYPE>
   }
 
   @Override
-  public Map<Long, TYPE> getStatistics()
+  public Map<Long, TYPE> getChangedDataStatistics()
   {
     return Collections.unmodifiableMap(statistics);
   }

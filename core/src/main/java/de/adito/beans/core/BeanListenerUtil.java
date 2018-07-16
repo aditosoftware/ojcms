@@ -1,7 +1,9 @@
 package de.adito.beans.core;
 
+import de.adito.beans.core.annotations.Statistics;
 import de.adito.beans.core.listener.*;
 import de.adito.beans.core.references.IHierarchicalField;
+import de.adito.beans.core.statistics.IStatisticData;
 import de.adito.beans.core.util.weak.IInputSortedElements;
 import org.jetbrains.annotations.Nullable;
 
@@ -76,6 +78,13 @@ final class BeanListenerUtil
         field.getReferables(pNewValue)
             .forEach(pReferable -> pReferable.addWeakReference(pBean, field));
       }
+      //Add a statistic entry, if the annotation is present
+      if (pField.hasAnnotation(Statistics.class))
+      {
+        IStatisticData<TYPE> statisticData = pBean.getStatisticData(pField);
+        assert statisticData != null;
+        statisticData.addEntry(pNewValue);
+      }
     }
   }
 
@@ -97,6 +106,7 @@ final class BeanListenerUtil
     //Pass the references of the container to the beans as well
     pContainer.getEncapsulated().getHierarchicalStructure().getDirectParents()
         .forEach(pNode -> pBean.getEncapsulated().addWeakReference(pNode.getBean(), pNode.getField()));
+    _tryAddStatisticEntry(pContainer);
   }
 
   /**
@@ -116,6 +126,7 @@ final class BeanListenerUtil
     pBean.getHierarchicalStructure().getDirectParents().stream()
         .filter(pNode -> pNode.getBean().getValue(pNode.getField()) == pContainer) //Filter the references to the affected container
         .forEach(pNode -> pBean.getEncapsulated().removeReference(pNode.getBean(), pNode.getField()));
+    _tryAddStatisticEntry(pContainer);
   }
 
   /**
@@ -136,7 +147,7 @@ final class BeanListenerUtil
     assert enc != null;
     BEAN removedBean = pDeleteFunction.apply(enc);
     if (removedBean != null)
-      BeanListenerUtil.beanRemoved(pContainer, removedBean);
+      beanRemoved(pContainer, removedBean);
     return removedBean;
   }
 
@@ -182,6 +193,22 @@ final class BeanListenerUtil
   {
     //noinspection unchecked
     return LISTENER_CACHE.computeIfAbsent(pContainer, pKey -> new _Listener(pContainer.getEncapsulated().getWeakListeners()));
+  }
+
+  /**
+   * Tries to add a statistic entry for a bean container.
+   * This method should be called, if a bean was added or removed.
+   *
+   * @param pContainer the container, for which an entry may be added
+   * @param <BEAN>     the type of the beans in the container
+   */
+  private static <BEAN extends IBean<BEAN>> void _tryAddStatisticEntry(IBeanContainer<BEAN> pContainer)
+  {
+    if (!pContainer.getBeanType().isAnnotationPresent(Statistics.class))
+      return;
+    IStatisticData<Integer> statisticData = pContainer.getStatisticData();
+    assert statisticData != null;
+    statisticData.addEntry(pContainer.size());
   }
 
   /**

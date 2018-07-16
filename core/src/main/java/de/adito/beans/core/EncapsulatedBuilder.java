@@ -332,7 +332,7 @@ public final class EncapsulatedBuilder
           .collect(Collectors.toMap(pEntry -> BeanUtil.findFieldByName(fieldOrder.stream(), pEntry.getKey()), pEntry ->
           {
             Statistics statistics = pEntry.getValue();
-            return new StatisticData<>(statistics.intervall(), statistics.capacity(), null);
+            return new StatisticData<>(statistics.capacity(), null);
           }));
     }
 
@@ -540,7 +540,7 @@ public final class EncapsulatedBuilder
     private IStatisticData<Integer> _createStatisticData()
     {
       Statistics statistics = BeanReflector.getContainerStatisticAnnotation(beanType);
-      return statistics != null ? new StatisticData<>(statistics.intervall(), statistics.capacity(), size()) : null;
+      return statistics != null ? new StatisticData<>(statistics.capacity(), size()) : null;
     }
 
     /**

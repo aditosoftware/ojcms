@@ -19,6 +19,8 @@ public @interface TypeDefaultField
 {
   /**
    * A collection of data types, which are the default types for the bean field marked by this annotation.
+   *
+   * @return the default data types for a bean field type
    */
   Class[] types();
 }

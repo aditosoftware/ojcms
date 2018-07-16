@@ -38,6 +38,8 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
 {
   /**
    * The type of the beans in this container.
+   *
+   * @return a bean type
    */
   default Class<BEAN> getBeanType()
   {
@@ -174,6 +176,8 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
 
   /**
    * The amount of beans in this container.
+   *
+   * @return the number of beans
    */
   default int size()
   {
@@ -254,8 +258,10 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
 
   /**
    * The statistic data of this container.
-   * This data contains the number of beans in this container at several points of time (based on an intervall).
+   * This data contains the number of beans in this container at several points of time.
    * This data may not be available, if there's no annotation set. In this case this method will return null.
+   *
+   * @return the statistic data of this container, or null if not present
    */
   @Nullable
   default IStatisticData<Integer> getStatisticData()
