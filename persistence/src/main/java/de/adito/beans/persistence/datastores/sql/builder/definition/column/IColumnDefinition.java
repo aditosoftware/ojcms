@@ -1,6 +1,7 @@
 package de.adito.beans.persistence.datastores.sql.builder.definition.column;
 
 import de.adito.beans.persistence.datastores.sql.builder.definition.*;
+import de.adito.beans.persistence.datastores.sql.builder.definition.format.*;
 import de.adito.beans.persistence.datastores.sql.builder.util.OJDatabaseException;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +15,7 @@ import java.util.stream.Stream;
  *
  * @author Simon Danner, 28.04.2018
  */
-public interface IColumnDefinition extends IStatementFormat
+public interface IColumnDefinition extends ITypeStatementFormat
 {
   /**
    * The name of the database column.

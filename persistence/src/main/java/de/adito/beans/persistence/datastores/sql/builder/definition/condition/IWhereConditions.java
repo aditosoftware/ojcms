@@ -1,5 +1,7 @@
 package de.adito.beans.persistence.datastores.sql.builder.definition.condition;
 
+import de.adito.beans.persistence.datastores.sql.builder.definition.format.IValueStatementFormat;
+
 import java.util.List;
 import java.util.stream.*;
 
@@ -10,7 +12,7 @@ import java.util.stream.*;
  *
  * @author Simon Danner, 09.06.2018
  */
-public interface IWhereConditions extends IConditionFormatter, INegatable<IWhereConditions>, Iterable<IConditionFormatter>
+public interface IWhereConditions extends IValueStatementFormat, INegatable<IWhereConditions>, Iterable<IValueStatementFormat>
 {
   /**
    * Creates the multiple condition holder starting with a single condition.
@@ -141,7 +143,7 @@ public interface IWhereConditions extends IConditionFormatter, INegatable<IWhere
    *
    * @return a stream of conditions (single or multiple)
    */
-  default Stream<IConditionFormatter> stream()
+  default Stream<IValueStatementFormat> stream()
   {
     return StreamSupport.stream(spliterator(), false);
   }

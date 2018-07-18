@@ -1,6 +1,7 @@
 package de.adito.beans.persistence.datastores.sql.builder.definition.condition;
 
 import de.adito.beans.persistence.datastores.sql.builder.definition.*;
+import de.adito.beans.persistence.datastores.sql.builder.definition.format.IValueStatementFormat;
 
 import java.util.Collection;
 import java.util.function.*;
@@ -13,7 +14,7 @@ import java.util.stream.*;
  * @param <TYPE> the data type of the value for the condition
  * @author Simon Danner, 06.06.2018
  */
-public interface IWhereCondition<TYPE> extends IColumnValueTuple<TYPE>, IConditionFormatter, INegatable<IWhereCondition<TYPE>>
+public interface IWhereCondition<TYPE> extends IColumnValueTuple<TYPE>, IValueStatementFormat, INegatable<IWhereCondition<TYPE>>
 {
   /**
    * The operator for this condition.

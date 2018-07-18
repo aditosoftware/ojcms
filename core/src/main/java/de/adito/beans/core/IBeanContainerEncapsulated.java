@@ -4,6 +4,8 @@ import de.adito.beans.core.listener.IBeanContainerChangeListener;
 import de.adito.beans.core.statistics.IStatisticData;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Comparator;
+
 /**
  * Defines the data core for a bean container.
  * It allows index based access.
@@ -75,6 +77,13 @@ interface IBeanContainerEncapsulated<BEAN extends IBean<BEAN>> extends IEncapsul
    * The amount of beans.
    */
   int size();
+
+  /**
+   * Sorts this bean container according to a given comparator.
+   *
+   * @param pComparator the comparator
+   */
+  void sort(Comparator<BEAN> pComparator);
 
   /**
    * Defines a limit (=amount of beans) for this container data core.

@@ -1,6 +1,7 @@
 package de.adito.beans.persistence.datastores.sql.builder.definition.column;
 
 import de.adito.beans.persistence.datastores.sql.builder.definition.*;
+import de.adito.beans.persistence.datastores.sql.builder.definition.format.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.stream.*;
@@ -12,7 +13,7 @@ import java.util.stream.*;
  *
  * @author Simon Danner, 02.07.2018
  */
-public interface IColumnType extends IStatementFormat, Iterable<EColumnModifier>
+public interface IColumnType extends ITypeStatementFormat, Iterable<EColumnModifier>
 {
   /**
    * The base column type this type instance is based on.
@@ -25,7 +26,7 @@ public interface IColumnType extends IStatementFormat, Iterable<EColumnModifier>
   default String toStatementFormat(EDatabaseType pDatabaseType)
   {
     return pDatabaseType.columnTypeToStatementFormat(this) + " " + streamModifiers()
-        .map(pModifier -> pModifier.toStatementFormat(pDatabaseType))
+        .map(EColumnModifier::toStatementFormat)
         .collect(Collectors.joining(" "));
   }
 

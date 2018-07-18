@@ -1,5 +1,7 @@
 package de.adito.beans.persistence.datastores.sql.builder.definition;
 
+import de.adito.beans.persistence.datastores.sql.builder.definition.format.IValueStatementFormat;
+
 import java.util.Collection;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -10,7 +12,7 @@ import java.util.stream.Stream;
  * @param <TYPE> the data type of the column of this condition
  * @author Simon Danner, 28.04.2018
  */
-public interface IColumnValueTuple<TYPE>
+public interface IColumnValueTuple<TYPE> extends IValueStatementFormat
 {
   /**
    * The column identification of this tuple.
@@ -23,6 +25,12 @@ public interface IColumnValueTuple<TYPE>
    * The value for the column.
    */
   TYPE getValue();
+
+  @Override
+  default String toStatementFormat(IValueSerializer pSerializer)
+  {
+    return getColumn().getColumnName() + " = " + pSerializer.serialValueToStatementString(this);
+  }
 
   /**
    * Creates a new tuple.

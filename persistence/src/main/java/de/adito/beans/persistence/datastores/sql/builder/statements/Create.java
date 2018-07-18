@@ -106,7 +106,7 @@ public class Create extends AbstractBaseStatement<Void, Create>
         .filter(pColumn -> pColumn.getColumnType().getForeignKey() != null)
         .collect(Collectors.toMap(IColumnDefinition::getColumnName, pColumn -> pColumn.getColumnType().getForeignKey()));
     return foreignKeyMapping.isEmpty() ? "" : "\n" + foreignKeyMapping.entrySet().stream()
-        .map(pEntry -> "FOREIGN KEY (" + pEntry.getKey() + ") REFERENCES " + pEntry.getValue().toStatementFormat(databaseType))
+        .map(pEntry -> "FOREIGN KEY (" + pEntry.getKey() + ") REFERENCES " + pEntry.getValue().toStatementFormat())
         .collect(Collectors.joining(",\n"));
   }
 }

@@ -1,6 +1,7 @@
 package de.adito.beans.persistence.datastores.sql.builder.definition.condition;
 
 import de.adito.beans.persistence.datastores.sql.builder.definition.IValueSerializer;
+import de.adito.beans.persistence.datastores.sql.builder.definition.format.IValueStatementFormat;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -14,15 +15,15 @@ import java.util.stream.*;
  */
 class ConditionsImpl extends AbstractNegatable<IWhereConditions> implements IWhereConditions
 {
-  private final Map<IConditionFormatter, EConcatenationType> conditions = new HashMap<>();
-  private IConditionFormatter lastEntry;
+  private final Map<IValueStatementFormat, EConcatenationType> conditions = new HashMap<>();
+  private IValueStatementFormat lastEntry;
 
   /**
    * Creates a multiple where condition.
    *
    * @param pCondition the initial condition to start from
    */
-  ConditionsImpl(IConditionFormatter pCondition)
+  ConditionsImpl(IValueStatementFormat pCondition)
   {
     lastEntry = pCondition;
   }
@@ -62,7 +63,7 @@ class ConditionsImpl extends AbstractNegatable<IWhereConditions> implements IWhe
 
   @NotNull
   @Override
-  public Iterator<IConditionFormatter> iterator()
+  public Iterator<IValueStatementFormat> iterator()
   {
     return Stream.concat(conditions.keySet().stream(), Stream.of(lastEntry)).iterator();
   }
@@ -76,7 +77,7 @@ class ConditionsImpl extends AbstractNegatable<IWhereConditions> implements IWhe
    * @param pConcatenationType the concatenation type for the last condition
    * @return the concatenated condition itself for a pipelining mechanism
    */
-  private IWhereConditions _add(IConditionFormatter pCondition, EConcatenationType pConcatenationType)
+  private IWhereConditions _add(IValueStatementFormat pCondition, EConcatenationType pConcatenationType)
   {
     conditions.put(lastEntry, pConcatenationType);
     lastEntry = pCondition;

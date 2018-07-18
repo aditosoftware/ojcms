@@ -229,6 +229,13 @@ public final class EncapsulatedBuilder
      * The amount of beans.
      */
     int size();
+
+    /**
+     * Sorts this bean container according to a given comparator.
+     *
+     * @param pComparator the comparator
+     */
+    void sort(Comparator<BEAN> pComparator);
   }
 
   /**
@@ -501,6 +508,12 @@ public final class EncapsulatedBuilder
     public int size()
     {
       return builder.size();
+    }
+
+    @Override
+    public void sort(Comparator<BEAN> pComparator)
+    {
+      builder.sort(pComparator);
     }
 
     @Override

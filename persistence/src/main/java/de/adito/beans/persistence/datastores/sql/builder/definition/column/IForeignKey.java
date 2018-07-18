@@ -1,6 +1,6 @@
 package de.adito.beans.persistence.datastores.sql.builder.definition.column;
 
-import de.adito.beans.persistence.datastores.sql.builder.definition.*;
+import de.adito.beans.persistence.datastores.sql.builder.definition.format.IStatementFormat;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,7 +27,7 @@ public interface IForeignKey extends IStatementFormat
   List<String> getColumnNames();
 
   @Override
-  default String toStatementFormat(EDatabaseType pDatabaseType)
+  default String toStatementFormat()
   {
     return getTableName() + "(" + getColumnNames().stream().collect(Collectors.joining(", ")) + ")";
   }

@@ -5,6 +5,7 @@ import de.adito.beans.core.fields.FieldTuple;
 import de.adito.beans.core.util.*;
 import de.adito.beans.persistence.*;
 import de.adito.beans.persistence.datastores.sql.builder.*;
+import de.adito.beans.persistence.datastores.sql.builder.definition.ENumericOperation;
 import de.adito.beans.persistence.datastores.sql.builder.definition.condition.IWhereCondition;
 import de.adito.beans.persistence.datastores.sql.builder.result.ResultRow;
 import de.adito.beans.persistence.datastores.sql.builder.statements.Select;
@@ -14,6 +15,8 @@ import de.adito.beans.persistence.spi.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.*;
 
 /**
  * Implementation of a persistent bean container based on a SQL database system.
@@ -30,7 +33,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
   private final boolean isAutomaticAdditionMode;
   private final List<BeanColumnIdentification<?>> columns;
   private final OJSQLBuilderForTable builder;
-  private final Map<Integer, _BeanData> beanCache = new HashMap<>();
+  private Map<Integer, _BeanData> beanCache = new HashMap<>();
   private final Map<BEAN, Integer> additionQueue = new HashMap<>();
   private boolean shouldQueueAdditions = false;
 
@@ -156,6 +159,33 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
   public int size()
   {
     return builder.doSelect(Select::countRows);
+  }
+
+  @Override
+  public void sort(Comparator<BEAN> pComparator)
+  {
+    List<BEAN> original = StreamSupport.stream(spliterator(), false)
+        .collect(Collectors.toList());
+    final AtomicInteger index = new AtomicInteger();
+    //Mapping: old index -> new index (based on the new order)
+    final Map<Integer, Integer> newIndexMapping = original.stream()
+        .sorted(pComparator)
+        .collect(Collectors.toMap(original::indexOf, pSortedBean -> index.getAndIncrement()));
+    //Update ids in the database and rebuild cache
+    Map<Integer, _BeanData> oldCache = beanCache;
+    beanCache = new HashMap<>();
+    newIndexMapping.forEach((pOldIndex, pNewIndex) -> {
+      //Set all ids in the database to the negative new index
+      builder.doUpdate(pUpdate -> pUpdate
+          .whereId(pOldIndex)
+          .setId(pNewIndex * -1)
+          .update());
+      beanCache.put(pNewIndex, oldCache.get(pOldIndex).setIndex(pNewIndex));
+    });
+    //Make all ids positive again
+    builder.doUpdate(pUpdate -> pUpdate
+        .adaptId(ENumericOperation.MULTIPLY, -1)
+        .update());
   }
 
   @NotNull
@@ -324,7 +354,23 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
      */
     public _BeanData decrementIndex()
     {
+      if (persistent.index == 0)
+        throw new IllegalStateException("The index 0 cannot be decremented!");
       persistent.index--;
+      return this;
+    }
+
+    /**
+     * Sets the index of a persistent bean.
+     *
+     * @param pIndex the new index
+     * @return the bean data itself
+     */
+    public _BeanData setIndex(int pIndex)
+    {
+      if (pIndex < 0)
+        throw new IllegalArgumentException("The index has to be a positive value!");
+      persistent.index = pIndex;
       return this;
     }
   }

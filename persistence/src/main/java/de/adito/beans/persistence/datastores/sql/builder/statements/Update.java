@@ -4,6 +4,7 @@ import de.adito.beans.persistence.datastores.sql.builder.*;
 import de.adito.beans.persistence.datastores.sql.builder.definition.*;
 import de.adito.beans.persistence.datastores.sql.builder.modifiers.WhereModifiers;
 
+import java.util.*;
 import java.util.stream.*;
 
 /**
@@ -13,7 +14,9 @@ import java.util.stream.*;
  */
 public class Update extends AbstractSQLStatement<WhereModifiers, Void, Void, Update>
 {
-  private IColumnValueTuple<?>[] changes;
+  private final List<IColumnValueTuple<?>> changes = new ArrayList<>();
+  private final List<INumericValueAdaption<?>> updateOldValues = new ArrayList<>();
+  private final IColumnIdentification<Integer> idColumnIdentification;
 
   /**
    * Creates a new update statement.
@@ -26,6 +29,7 @@ public class Update extends AbstractSQLStatement<WhereModifiers, Void, Void, Upd
   public Update(IStatementExecutor<Void> pStatementExecutor, EDatabaseType pDatabaseType, IValueSerializer pSerializer, String pIdColumnName)
   {
     super(pStatementExecutor, pDatabaseType, pSerializer, new WhereModifiers(pSerializer, pIdColumnName));
+    idColumnIdentification = IColumnIdentification.of(pIdColumnName, Integer.class);
   }
 
   /**
@@ -36,8 +40,43 @@ public class Update extends AbstractSQLStatement<WhereModifiers, Void, Void, Upd
    */
   public Update set(IColumnValueTuple<?>... pChanges)
   {
-    changes = pChanges;
+    changes.addAll(Arrays.asList(pChanges));
     return this;
+  }
+
+  /**
+   * Sets the id column value trough this statement.
+   *
+   * @param pNewId the new id
+   * @return the update statement itself to enable a pipelining mechanism
+   */
+  public Update setId(int pNewId)
+  {
+    return set(IColumnValueTuple.of(idColumnIdentification, pNewId));
+  }
+
+  /**
+   * Changes numeric values based on the previous value.
+   *
+   * @param pAdaptations the columns to adapt
+   * @return the update statement itself to enable a pipelining mechanism
+   */
+  public Update adaptNumericValue(INumericValueAdaption<?>... pAdaptations)
+  {
+    updateOldValues.addAll(Arrays.asList(pAdaptations));
+    return this;
+  }
+
+  /**
+   * Changes the id column based on the previous id.
+   *
+   * @param pOperation a numeric operation on the old id
+   * @param pNumber    a number to apply on the numeric operation ant the old id
+   * @return the update statement itself to enable a pipelining mechanism
+   */
+  public Update adaptId(ENumericOperation pOperation, int pNumber)
+  {
+    return adaptNumericValue(INumericValueAdaption.of(idColumnIdentification, pOperation, pNumber));
   }
 
   /**
@@ -51,7 +90,7 @@ public class Update extends AbstractSQLStatement<WhereModifiers, Void, Void, Upd
   @Override
   protected Void doQuery()
   {
-    if (changes.length > 0)
+    if (changes.size() > 0 || updateOldValues.size() > 0)
       executeStatement("UPDATE " + getTableName() + " SET " + _changes() + modifiers.where());
     return null;
   }
@@ -63,8 +102,10 @@ public class Update extends AbstractSQLStatement<WhereModifiers, Void, Void, Upd
    */
   private String _changes()
   {
-    return Stream.of(changes)
-        .map(pChange -> pChange.getColumn().getColumnName().toUpperCase() + " = " + serializer.serialValueToStatementString(pChange))
+    return Stream.concat(changes.stream()
+                             .map(pChange -> pChange.toStatementFormat(serializer)),
+                         updateOldValues.stream()
+                             .map(INumericValueAdaption::toStatementFormat))
         .collect(Collectors.joining(", "));
   }
 }

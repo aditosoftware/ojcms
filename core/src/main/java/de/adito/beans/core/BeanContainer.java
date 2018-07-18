@@ -127,6 +127,12 @@ public class BeanContainer<BEAN extends IBean<BEAN>> implements IBeanContainer<B
       return beanList.size();
     }
 
+    @Override
+    public void sort(Comparator<BEAN> pComparator)
+    {
+      beanList.sort(pComparator);
+    }
+
     @NotNull
     @Override
     public Iterator<BEAN> iterator()

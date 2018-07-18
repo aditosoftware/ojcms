@@ -1,4 +1,4 @@
-package de.adito.beans.persistence.datastores.sql.builder.definition;
+package de.adito.beans.persistence.datastores.sql.builder.definition.format;
 
 /**
  * This definition can be presented in a database statement format.
@@ -10,8 +10,7 @@ public interface IStatementFormat
   /**
    * The definition in its database statement format.
    *
-   * @param pDatabaseType the database type used for the statements
    * @return a string representing the definition
    */
-  String toStatementFormat(EDatabaseType pDatabaseType);
+  String toStatementFormat();
 }

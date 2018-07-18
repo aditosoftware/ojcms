@@ -6,7 +6,6 @@ import de.adito.beans.core.util.BeanContainerListProxy;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.*;
 import java.util.stream.*;
 
@@ -213,11 +212,8 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
    */
   default void sort(Comparator<BEAN> pComparator)
   {
-    List<BEAN> sorted = stream()
-        .sorted(pComparator)
-        .collect(Collectors.toList());
-    final AtomicInteger index = new AtomicInteger();
-    sorted.forEach(pBean -> replaceBean(pBean, index.getAndIncrement()));
+    assert getEncapsulated() != null;
+    getEncapsulated().sort(pComparator);
   }
 
   /**
