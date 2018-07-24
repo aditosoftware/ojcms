@@ -1,17 +1,13 @@
 package de.adito.beans.persistence.datastores.sql.builder.definition.condition;
 
-import de.adito.beans.persistence.datastores.sql.builder.definition.IValueSerializer;
-
 /**
  * An operator for a where condition.
- * This operator is able to create a condition format string based on a {@link IWhereCondition}.
  * This interface is mainly used to retrieve the different kinds of operators via static methods.
  *
- * @param <TYPE> the data type of the {@link IWhereCondition} used for this operator
  * @author Simon Danner, 06.06.2018
  */
 @FunctionalInterface
-public interface IWhereOperator<TYPE>
+public interface IWhereOperator
 {
   /**
    * The literal for this operator the connect the column and the value.
@@ -21,24 +17,11 @@ public interface IWhereOperator<TYPE>
   String getLiteral();
 
   /**
-   * Converts a condition into a string format to use for SQL statements.
-   * An example for the '=' operator is: "COLUMN_NAME = COLUMN_VALUE".
-   *
-   * @param pCondition  the condition to create the statement format
-   * @param pSerializer a serializer to convert the value in a persistent string format
-   * @return the condition in a statement format
-   */
-  default String toConditionFormat(IWhereCondition<TYPE> pCondition, IValueSerializer pSerializer)
-  {
-    return pCondition.getColumn().getColumnName() + " " + getLiteral() + " " + pSerializer.serialValueToStatementString(pCondition);
-  }
-
-  /**
    * The "=" operator.
    *
    * @return a where condition operator.
    */
-  static <TYPE> IWhereOperator<TYPE> isEqual()
+  static IWhereOperator isEqual()
   {
     return () -> "=";
   }
@@ -48,7 +31,7 @@ public interface IWhereOperator<TYPE>
    *
    * @return a where condition operator.
    */
-  static <TYPE> IWhereOperator<TYPE> isNotEqual()
+  static IWhereOperator isNotEqual()
   {
     return () -> "<>";
   }
@@ -58,7 +41,7 @@ public interface IWhereOperator<TYPE>
    *
    * @return a where condition operator.
    */
-  static <TYPE> IWhereOperator<TYPE> greaterThan()
+  static IWhereOperator greaterThan()
   {
     return () -> ">";
   }
@@ -68,7 +51,7 @@ public interface IWhereOperator<TYPE>
    *
    * @return a where condition operator.
    */
-  static <TYPE> IWhereOperator<TYPE> lessThan()
+  static IWhereOperator lessThan()
   {
     return () -> "<";
   }
@@ -78,7 +61,7 @@ public interface IWhereOperator<TYPE>
    *
    * @return a where condition operator.
    */
-  static <TYPE> IWhereOperator<TYPE> greaterThanOrEqual()
+  static IWhereOperator greaterThanOrEqual()
   {
     return () -> ">=";
   }
@@ -88,7 +71,7 @@ public interface IWhereOperator<TYPE>
    *
    * @return a where condition operator.
    */
-  static <TYPE> IWhereOperator<TYPE> lessThanOrEqual()
+  static IWhereOperator lessThanOrEqual()
   {
     return () -> "<=";
   }
@@ -98,7 +81,7 @@ public interface IWhereOperator<TYPE>
    *
    * @return a where condition operator.
    */
-  static <TYPE> IWhereOperator<TYPE> between()
+  static IWhereOperator between()
   {
     return () -> "BETWEEN";
   }
@@ -108,7 +91,7 @@ public interface IWhereOperator<TYPE>
    *
    * @return a where condition operator.
    */
-  static <TYPE> IWhereOperator<TYPE> like()
+  static IWhereOperator like()
   {
     return () -> "LIKE";
   }

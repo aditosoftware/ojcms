@@ -2,10 +2,11 @@ package de.adito.beans.persistence.datastores.sql.builder.statements;
 
 import de.adito.beans.persistence.datastores.sql.builder.*;
 import de.adito.beans.persistence.datastores.sql.builder.definition.*;
+import de.adito.beans.persistence.datastores.sql.builder.definition.condition.IWhereOperator;
+import de.adito.beans.persistence.datastores.sql.builder.format.*;
 import de.adito.beans.persistence.datastores.sql.builder.util.OJDatabaseException;
 
-import java.util.function.Function;
-import java.util.stream.*;
+import java.util.*;
 
 /**
  * An insert statement.
@@ -14,22 +15,23 @@ import java.util.stream.*;
  */
 public class Insert extends AbstractBaseStatement<Void, Insert>
 {
-  private final String idColumnName;
-  private IColumnValueTuple<?>[] values;
-  private int index = -1;
+  private final IColumnIdentification<Integer> idColumnIdentification;
+  private final List<IColumnValueTuple<?>> values = new ArrayList<>();
 
   /**
    * Creates the insert statement.
    *
    * @param pStatementExecutor the executor for this statement
+   * @param pBuilder           the builder that created this statement to use other kinds of statements for a concrete statement
    * @param pDatabaseType      the database type used for this statement
    * @param pSerializer        the value serializer
    * @param pIdColumnName      the name of the id column
    */
-  public Insert(IStatementExecutor<Void> pStatementExecutor, EDatabaseType pDatabaseType, IValueSerializer pSerializer, String pIdColumnName)
+  public Insert(IStatementExecutor<Void> pStatementExecutor, AbstractSQLBuilder pBuilder, EDatabaseType pDatabaseType,
+                IValueSerializer pSerializer, String pIdColumnName)
   {
-    super(pStatementExecutor, pDatabaseType, pSerializer);
-    idColumnName = pIdColumnName;
+    super(pStatementExecutor, pBuilder, pDatabaseType, pSerializer);
+    idColumnIdentification = IColumnIdentification.of(pIdColumnName, Integer.class);
   }
 
   /**
@@ -44,17 +46,16 @@ public class Insert extends AbstractBaseStatement<Void, Insert>
   }
 
   /**
-   * Determines the columns and associated values to insert.
+   * Adds columns and associated values to insert.
    *
-   * @param pTuples a collection of column value tuples
+   * @param pTuples a variable amount of column value tuples
    * @return the insert statement itself to enable a pipelining mechanism
    */
   public Insert values(IColumnValueTuple<?>... pTuples)
   {
-    if (pTuples.length == 0)
-      throw new OJDatabaseException("The tupels to insert can not be empty!");
-
-    values = pTuples;
+    if (pTuples == null || pTuples.length == 0)
+      throw new OJDatabaseException("The tupels to insert cannot be empty!");
+    values.addAll(Arrays.asList(pTuples));
     return this;
   }
 
@@ -68,8 +69,7 @@ public class Insert extends AbstractBaseStatement<Void, Insert>
   {
     if (pIndex < 0)
       throw new IllegalArgumentException("The index can not be smaller than 0! index: " + pIndex);
-
-    index = pIndex;
+    values.add(0, IColumnValueTuple.of(idColumnIdentification, pIndex));
     return this;
   }
 
@@ -78,25 +78,26 @@ public class Insert extends AbstractBaseStatement<Void, Insert>
    */
   public void insert()
   {
-    final String id = idColumnName;
-    if (index >= 0)
-      //Increment all ids after the index to insert
-      executeStatement("UPDATE " + getTableName() + " SET " + id + " = " + id + "+1 WHERE " + id + ">=" + index);
-    executeStatement("INSERT INTO " + getTableName() + " (" + (index >= 0 ? id + ", " : "") +
-                         _enumerate(pTuple -> pTuple.getColumn().getColumnName().toUpperCase())
-                         + ") VALUES (" + (index >= 0 ? index + ", " : "") + _enumerate(serializer::serialValueToStatementString) + ")");
-  }
+    if (values.isEmpty())
+      return;
 
-  /**
-   * Enumerates certain information of the tuples as string separated by commas.
-   *
-   * @param pResolver a resolver function to retrieve a value based on a tuple
-   * @return the concatenated string
-   */
-  private String _enumerate(Function<IColumnValueTuple<?>, String> pResolver)
-  {
-    return Stream.of(values)
-        .map(pResolver)
-        .collect(Collectors.joining(", "));
+    //Increment all ids after the index to insert (if set)
+    if (values.get(0).getColumn() == idColumnIdentification)
+      //noinspection unchecked
+      builder.doUpdate(pUpdate -> pUpdate
+          .adaptId(ENumericOperation.ADD, 1)
+          .whereId(IWhereOperator.greaterThanOrEqual(), ((IColumnValueTuple<Integer>) values.get(0)).getValue())
+          .update());
+    final StatementFormatter statement = EFormatter.INSERT.create(databaseType, idColumnIdentification.getColumnName())
+        .appendTableName(getTableName())
+        .openBracket()
+        .appendEnumeration(values.stream().map(pTuple -> pTuple.getColumn().getColumnName().toUpperCase()),
+                           ESeparator.COMMA_WITH_WHITESPACE)
+        .closeBracket()
+        .appendConstant(EFormatConstant.VALUES)
+        .openBracket()
+        .appendMultipleArgumentEnumeration(values, ESeparator.COMMA_WITH_WHITESPACE)
+        .closeBracket();
+    executeStatement(statement);
   }
 }

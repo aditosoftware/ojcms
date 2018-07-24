@@ -54,6 +54,39 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
   }
 
   /**
+   * Creates a persistent container database table, if it is not existing yet.
+   * This static entry point is necessary, because the table may have to be present before the usage of container. (e.g. for foreign keys)
+   *
+   * @param pConnectionInfo the database connection information
+   * @param pBeanType       the bean type of the container
+   * @param pTableName      the database table name
+   */
+  public static <BEAN extends IBean<BEAN>> void createTableForContainer(DBConnectionInfo pConnectionInfo, Class<BEAN> pBeanType,
+                                                                        String pTableName)
+  {
+    final OJSQLBuilderForTable builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionInfo.getDatabaseType(), IDatabaseConstants.ID_COLUMN)
+        .forSingleTable(pTableName)
+        .withClosingAndRenewingConnection(pConnectionInfo)
+        .create();
+    _createTableIfNotExisting(builder, BeanColumnIdentification.ofMultiple(BeanReflector.reflectBeanFields(pBeanType)));
+  }
+
+  /**
+   * Creates the container database table, if it is not existing yet.
+   * The creation is based on an existing builder and a list of columns.
+   *
+   * @param pBuilder the builder to create the table with
+   * @param pColumns the columns to create
+   */
+  private static void _createTableIfNotExisting(OJSQLBuilderForTable pBuilder, List<BeanColumnIdentification<?>> pColumns)
+  {
+    pBuilder.ifTableNotExistingCreate(pCreate -> pCreate
+        .withIdColumn()
+        .columns(BeanColumnDefinition.ofMultiple(pColumns))
+        .create());
+  }
+
+  /**
    * Creates a new persistent bean container.
    *
    * @param pBeanType       the type of the beans in the container
@@ -71,20 +104,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
         .withClosingAndRenewingConnection(pConnectionInfo)
         .withCustomSerializer(new BeanSQLSerializer(pBeanDataStore))
         .create();
-    //Setup driver
-    try
-    {
-      Class.forName(pConnectionInfo.getDatabaseType().getDriverName());
-    }
-    catch (ClassNotFoundException pE)
-    {
-      throw new RuntimeException("Driver '" + pConnectionInfo.getDatabaseType().getDriverName() + "' not found!", pE);
-    }
-    //Create table if necessary
-    builder.ifTableNotExistingCreate(pCreate -> pCreate
-        .withIdColumn()
-        .columns(BeanColumnDefinition.ofMultiple(columns))
-        .create());
+    _createTableIfNotExisting(builder, columns);
   }
 
   @Override

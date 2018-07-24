@@ -3,10 +3,10 @@ package de.adito.beans.persistence.datastores.sql.builder;
 import de.adito.beans.persistence.datastores.sql.builder.definition.*;
 import de.adito.beans.persistence.datastores.sql.builder.definition.column.IColumnDefinition;
 import de.adito.beans.persistence.datastores.sql.builder.statements.Create;
+import de.adito.beans.persistence.datastores.sql.builder.util.DBConnectionInfo;
 
-import java.sql.Connection;
 import java.util.List;
-import java.util.function.*;
+import java.util.function.Consumer;
 
 /**
  * A sql statement builder.
@@ -22,15 +22,15 @@ public class OJSQLBuilder extends AbstractSQLBuilder
    * Creates a new builder.
    *
    * @param pDatabaseType        the database type to use for this builder
-   * @param pConnectionSupplier  the database connection supplier
+   * @param pConnectionInfo      the database connection information
    * @param pCloseAfterStatement <tt>true</tt>, if the connection should be closed after executing one statement
    * @param pSerializer          the value serializer
    * @param pIdColumnName        a global id column name for this builder instance
    */
-  OJSQLBuilder(EDatabaseType pDatabaseType, Supplier<Connection> pConnectionSupplier, boolean pCloseAfterStatement,
+  OJSQLBuilder(EDatabaseType pDatabaseType, DBConnectionInfo pConnectionInfo, boolean pCloseAfterStatement,
                IValueSerializer pSerializer, String pIdColumnName)
   {
-    super(pDatabaseType, pConnectionSupplier, pCloseAfterStatement, pSerializer, pIdColumnName);
+    super(pDatabaseType, pConnectionInfo, pCloseAfterStatement, pSerializer, pIdColumnName);
   }
 
   @Override

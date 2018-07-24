@@ -1,6 +1,6 @@
 package de.adito.beans.persistence.datastores.sql.builder.definition;
 
-import de.adito.beans.persistence.datastores.sql.builder.definition.format.IStatementFormat;
+import de.adito.beans.persistence.datastores.sql.builder.format.IStatementFormat;
 
 import java.util.Collection;
 import java.util.function.Function;
@@ -37,7 +37,7 @@ public interface INumericValueAdaption<NUMBER extends Number> extends IStatement
   NUMBER getNumber();
 
   @Override
-  default String toStatementFormat()
+  default String toStatementFormat(EDatabaseType pDatabaseType, String pIdColumnName)
   {
     return getColumn().getColumnName() + " = " + getColumn().getColumnName() + " " + getOperation().getLiteral() + " " + getNumber();
   }

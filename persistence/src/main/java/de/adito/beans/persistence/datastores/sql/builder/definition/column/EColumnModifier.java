@@ -1,6 +1,7 @@
 package de.adito.beans.persistence.datastores.sql.builder.definition.column;
 
-import de.adito.beans.persistence.datastores.sql.builder.definition.format.IStatementFormat;
+import de.adito.beans.persistence.datastores.sql.builder.definition.EDatabaseType;
+import de.adito.beans.persistence.datastores.sql.builder.format.IStatementFormat;
 
 /**
  * All possible database column modifiers.
@@ -24,7 +25,7 @@ public enum EColumnModifier implements IStatementFormat
   }
 
   @Override
-  public String toStatementFormat()
+  public String toStatementFormat(EDatabaseType pDatabaseType, String pIdColumnName)
   {
     return descriptor;
   }

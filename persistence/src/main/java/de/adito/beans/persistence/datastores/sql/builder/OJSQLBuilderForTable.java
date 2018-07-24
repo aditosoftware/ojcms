@@ -3,9 +3,9 @@ package de.adito.beans.persistence.datastores.sql.builder;
 import de.adito.beans.persistence.datastores.sql.builder.definition.*;
 import de.adito.beans.persistence.datastores.sql.builder.definition.column.IColumnDefinition;
 import de.adito.beans.persistence.datastores.sql.builder.statements.Create;
+import de.adito.beans.persistence.datastores.sql.builder.util.DBConnectionInfo;
 
-import java.sql.Connection;
-import java.util.function.*;
+import java.util.function.Consumer;
 
 /**
  * A sql statement builder for a single database table.
@@ -22,16 +22,16 @@ public class OJSQLBuilderForTable extends AbstractSQLBuilder
    * Creates a new builder.
    *
    * @param pDatabaseType        the database type to use for this builder
-   * @param pConnectionSupplier  the database connection supplier
+   * @param pConnectionInfo      the database connection information
    * @param pCloseAfterStatement <tt>true</tt>, if the connection should be closed after executing one statement
    * @param pSerializer          the value serializer
    * @param pTableName           the name of the table to use for this builder
    * @param pIdColumnName        a global id column name for this builder instance
    */
-  OJSQLBuilderForTable(EDatabaseType pDatabaseType, Supplier<Connection> pConnectionSupplier, boolean pCloseAfterStatement,
+  OJSQLBuilderForTable(EDatabaseType pDatabaseType, DBConnectionInfo pConnectionInfo, boolean pCloseAfterStatement,
                        IValueSerializer pSerializer, String pTableName, String pIdColumnName)
   {
-    super(pDatabaseType, pConnectionSupplier, pCloseAfterStatement, pSerializer, pIdColumnName);
+    super(pDatabaseType, pConnectionInfo, pCloseAfterStatement, pSerializer, pIdColumnName);
     if (pTableName == null || pTableName.isEmpty())
       throw new IllegalArgumentException("The table name must not be null or empty!");
     tableName = pTableName;

@@ -2,10 +2,10 @@ package de.adito.beans.persistence.datastores.sql.builder.statements;
 
 import de.adito.beans.persistence.datastores.sql.builder.*;
 import de.adito.beans.persistence.datastores.sql.builder.definition.*;
-import de.adito.beans.persistence.datastores.sql.builder.modifiers.WhereModifiers;
+import de.adito.beans.persistence.datastores.sql.builder.definition.condition.WhereModifiers;
+import de.adito.beans.persistence.datastores.sql.builder.format.*;
 
 import java.util.*;
-import java.util.stream.*;
 
 /**
  * An update statement.
@@ -22,13 +22,15 @@ public class Update extends AbstractSQLStatement<WhereModifiers, Void, Void, Upd
    * Creates a new update statement.
    *
    * @param pStatementExecutor the executor for this statement
+   * @param pBuilder           the builder that created this statement to use other kinds of statements for a concrete statement
    * @param pDatabaseType      the database type used for this statement
    * @param pSerializer        the value serializer
    * @param pIdColumnName      the id column name
    */
-  public Update(IStatementExecutor<Void> pStatementExecutor, EDatabaseType pDatabaseType, IValueSerializer pSerializer, String pIdColumnName)
+  public Update(IStatementExecutor<Void> pStatementExecutor, AbstractSQLBuilder pBuilder, EDatabaseType pDatabaseType,
+                IValueSerializer pSerializer, String pIdColumnName)
   {
-    super(pStatementExecutor, pDatabaseType, pSerializer, new WhereModifiers(pSerializer, pIdColumnName));
+    super(pStatementExecutor, pBuilder, pDatabaseType, pSerializer, new WhereModifiers());
     idColumnIdentification = IColumnIdentification.of(pIdColumnName, Integer.class);
   }
 
@@ -90,22 +92,19 @@ public class Update extends AbstractSQLStatement<WhereModifiers, Void, Void, Upd
   @Override
   protected Void doQuery()
   {
-    if (changes.size() > 0 || updateOldValues.size() > 0)
-      executeStatement("UPDATE " + getTableName() + " SET " + _changes() + modifiers.where());
+    if (!changes.isEmpty() || !updateOldValues.isEmpty())
+    {
+      final StatementFormatter statement = EFormatter.UPDATE.create(databaseType, idColumnIdentification.getColumnName())
+          .appendTableName(getTableName())
+          .appendConstant(EFormatConstant.SET)
+          .conditional(!changes.isEmpty(), pFormatter -> pFormatter.appendMultiplePrepared(changes.stream(), ESeparator.COMMA_WITH_WHITESPACE))
+          .conditional(!updateOldValues.isEmpty(), pFormatter -> {
+            pFormatter.conditional(!changes.isEmpty(), pInnerFormatter -> pInnerFormatter.appendSeparator(ESeparator.COMMA_WITH_WHITESPACE));
+            pFormatter.appendMultiple(updateOldValues.stream(), ESeparator.COMMA_WITH_WHITESPACE);
+          })
+          .appendWhereCondition(modifiers);
+      executeStatement(statement);
+    }
     return null;
-  }
-
-  /**
-   * Enumerates the changes as one string in this format: 'COLUMN_NAME = VALUE'.
-   *
-   * @return the concatenated string
-   */
-  private String _changes()
-  {
-    return Stream.concat(changes.stream()
-                             .map(pChange -> pChange.toStatementFormat(serializer)),
-                         updateOldValues.stream()
-                             .map(INumericValueAdaption::toStatementFormat))
-        .collect(Collectors.joining(", "));
   }
 }

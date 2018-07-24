@@ -1,12 +1,13 @@
 package de.adito.beans.persistence.datastores.sql.builder;
 
 import de.adito.beans.persistence.datastores.sql.builder.definition.*;
-import de.adito.beans.persistence.datastores.sql.builder.modifiers.SelectModifiers;
+import de.adito.beans.persistence.datastores.sql.builder.format.*;
 import de.adito.beans.persistence.datastores.sql.builder.result.Result;
-import de.adito.beans.persistence.datastores.sql.builder.util.OJDatabaseException;
+import de.adito.beans.persistence.datastores.sql.builder.util.*;
 
 import java.sql.*;
 import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * An abstract base class for select statements.
@@ -24,15 +25,16 @@ public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>> exte
    * Creates a new select statement.
    *
    * @param pStatementExecutor the executor for the statement
+   * @param pBuilder           the builder that created this statement to use other kinds of statements for a concrete statement
    * @param pDatabaseType      the database type used for this select statement
    * @param pSerializer        the value serializer
    * @param pIdColumnName      the name of the id column
    * @param pColumns           the column names to select
    */
-  protected AbstractSelect(IStatementExecutor<ResultSet> pStatementExecutor, EDatabaseType pDatabaseType, IValueSerializer pSerializer,
-                           String pIdColumnName, IColumnIdentification<?>... pColumns)
+  protected AbstractSelect(IStatementExecutor<ResultSet> pStatementExecutor, AbstractSQLBuilder pBuilder, EDatabaseType pDatabaseType,
+                           IValueSerializer pSerializer, String pIdColumnName, IColumnIdentification<?>... pColumns)
   {
-    super(pStatementExecutor, pDatabaseType, pSerializer, new SelectModifiers(pSerializer, pIdColumnName));
+    super(pStatementExecutor, pBuilder, pDatabaseType, pSerializer, new SelectModifiers());
     columns = Arrays.asList(pColumns);
     idColumnName = pIdColumnName;
   }
@@ -48,7 +50,7 @@ public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>> exte
     try
     {
       ResultSet resultSet = _query();
-      return resultSet.next() ? resultSet.getInt(SelectModifiers.COUNT_RESULT) : 0;
+      return resultSet.next() ? resultSet.getInt(EFormatConstant.StaticConstants.COUNT_AS) : 0;
     }
     catch (SQLException pE)
     {
@@ -108,6 +110,25 @@ public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>> exte
    */
   private ResultSet _query()
   {
-    return executeStatement("SELECT " + modifiers.distinct() + modifiers.columns(columns) + " FROM " + getTableName() + modifiers.where());
+    final Supplier<String> columnSupplier = () -> StatementFormatter.join(columns.stream().map(IColumnIdentification::getColumnName),
+                                                                          ESeparator.COMMA_WITH_WHITESPACE);
+    final StatementFormatter statement = EFormatter.SELECT.create(databaseType, idColumnName)
+        .conditional(modifiers.distinct(), pFormatter -> pFormatter.appendConstant(EFormatConstant.DISTINCT))
+        .conditionalOrElse(modifiers.count(),
+                           //with count
+                           pFormatter -> pFormatter.conditionalOrElse(columns.isEmpty(),
+                                                                      //use * for all columns
+                                                                      pInner -> pInner.appendConstant(EFormatConstant.COUNT, EFormatConstant.STAR.toStatementFormat()),
+                                                                      //the columns to select are defined
+                                                                      pInner -> pInner.appendConstant(EFormatConstant.COUNT, columnSupplier.get())),
+                           //without count
+                           pFormatter -> pFormatter.conditionalOrElse(columns.isEmpty(),
+                                                                      //use * for all columns
+                                                                      pInner -> pInner.appendConstant(EFormatConstant.STAR),
+                                                                      //the columns to select are defined
+                                                                      pInner -> pInner.appendMultiple(columns.stream(), ESeparator.COMMA_WITH_WHITESPACE)))
+        .appendTableName(getTableName())
+        .appendWhereCondition(modifiers);
+    return executeStatement(statement);
   }
 }

@@ -3,6 +3,7 @@ package de.adito.beans.persistence.datastores.sql.builder.statements;
 import de.adito.beans.persistence.datastores.sql.builder.*;
 import de.adito.beans.persistence.datastores.sql.builder.definition.*;
 import de.adito.beans.persistence.datastores.sql.builder.definition.column.*;
+import de.adito.beans.persistence.datastores.sql.builder.format.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,14 +22,16 @@ public class Create extends AbstractBaseStatement<Void, Create>
    * Creates the create statement.
    *
    * @param pStatementExecutor the executor fot this statement
+   * @param pBuilder           the builder that created this statement to use other kinds of statements for a concrete statement
    * @param pDatabaseType      the database type used for this statement
    * @param pSerializer        the value serializer
    * @param pIdColumnName      the name of the id column for this table
    */
-  public Create(IStatementExecutor<Void> pStatementExecutor, EDatabaseType pDatabaseType, IValueSerializer pSerializer, String pIdColumnName)
+  public Create(IStatementExecutor<Void> pStatementExecutor, AbstractSQLBuilder pBuilder, EDatabaseType pDatabaseType,
+                IValueSerializer pSerializer, String pIdColumnName)
   {
-    super(pStatementExecutor, pDatabaseType, pSerializer);
-    idColumnDefinition = IColumnDefinition.of(pIdColumnName, EColumnType.INT.primaryKey().modifiers(EColumnModifier.NOT_NULL));
+    super(pStatementExecutor, pBuilder, pDatabaseType, pSerializer);
+    idColumnDefinition = IColumnDefinition.of(pIdColumnName, EColumnType.INT.create().primaryKey().modifiers(EColumnModifier.NOT_NULL));
   }
 
   /**
@@ -70,43 +73,54 @@ public class Create extends AbstractBaseStatement<Void, Create>
    */
   public void create()
   {
-    String query = "CREATE TABLE " + getTableName() + " (" + columns.stream()
-        .map(pColumnDefinition -> pColumnDefinition.toStatementFormat(databaseType))
-        .collect(Collectors.joining(",\n")) +
-        _primaryKeys() +
-        _foreignKeys() + ")";
-    executeStatement(query);
+    final StatementFormatter statement = EFormatter.CREATE.create(databaseType, idColumnDefinition.getColumnName())
+        .appendTableName(getTableName())
+        .openBracket()
+        .appendMultiple(columns.stream(), ESeparator.COMMA, ESeparator.NEW_LINE)
+        .appendFunctional(this::_primaryKeys)
+        .appendFunctional(this::_foreignKeys)
+        .closeBracket();
+    executeStatement(statement);
   }
 
   /**
-   * Creates the statement string for the primary key columns.
-   * Will be empty, if there is no primary key.
+   * Adds a primary key to the statement format, if there are columns markes as primary keys.
    *
-   * @return the primary key part of the create statement
+   * @param pFormatter the formatter for the statement
    */
-  private String _primaryKeys()
+  private void _primaryKeys(StatementFormatter pFormatter)
   {
     List<String> primaryKeyColumnNames = columns.stream()
         .filter(pColumn -> pColumn.getColumnType().isPrimaryKey())
         .map(pColumnDefinition -> pColumnDefinition.getColumnName().toUpperCase())
         .collect(Collectors.toList());
-    return primaryKeyColumnNames.isEmpty() ? "" : ",\nPRIMARY KEY(" + primaryKeyColumnNames.stream()
-        .collect(Collectors.joining(", ")) + ")";
+    if (primaryKeyColumnNames.isEmpty())
+      return;
+    pFormatter.appendSeparator(ESeparator.COMMA, ESeparator.NEW_LINE);
+    pFormatter.appendConstant(EFormatConstant.PRIMARY_KEY, primaryKeyColumnNames.stream().collect(Collectors.joining(", ")));
   }
 
   /**
-   * Creates the statement string for the foreign keys.
-   * Will be empty, if there are no foreign key constraints.
+   * Adds foreign key constraints to the statement format, if present.
+   * The referenced database tables of the foreign keys may be created, if necessary.
    *
-   * @return the foreign key part of the create statement
+   * @param pFormatter the formatter for the statement
    */
-  private String _foreignKeys()
+  private void _foreignKeys(StatementFormatter pFormatter)
   {
     Map<String, IForeignKey> foreignKeyMapping = columns.stream()
         .filter(pColumn -> pColumn.getColumnType().getForeignKey() != null)
         .collect(Collectors.toMap(IColumnDefinition::getColumnName, pColumn -> pColumn.getColumnType().getForeignKey()));
-    return foreignKeyMapping.isEmpty() ? "" : "\n" + foreignKeyMapping.entrySet().stream()
-        .map(pEntry -> "FOREIGN KEY (" + pEntry.getKey() + ") REFERENCES " + pEntry.getValue().toStatementFormat())
-        .collect(Collectors.joining(",\n"));
+    if (foreignKeyMapping.isEmpty())
+      return;
+    final OJSQLBuilder tableChecker = OJSQLBuilderFactory.newSQLBuilder(builder)
+        .create();
+    foreignKeyMapping.forEach((pColumn, pReference) -> {
+      if (!tableChecker.hasTable(pReference.getTableName()))
+        pReference.createReferencedTable(tableChecker.getConnectionInfo()); //Create referenced table, if necessary
+      pFormatter.appendSeparator(ESeparator.COMMA, ESeparator.NEW_LINE);
+      pFormatter.appendConstant(EFormatConstant.FOREIGN_KEY, pColumn, pReference.getTableName(),
+                                pReference.getColumnNames().stream().collect(Collectors.joining(", ")));
+    });
   }
 }

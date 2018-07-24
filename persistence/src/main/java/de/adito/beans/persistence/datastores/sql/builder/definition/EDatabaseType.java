@@ -7,7 +7,7 @@ import java.util.*;
 import java.util.function.*;
 
 /**
- * Enumerates all possible database types for this query builder framework.
+ * Enumerates all possible database types for this statement builder framework.
  *
  * @author Simon Danner, 29.04.2018
  */
@@ -18,11 +18,12 @@ public enum EDatabaseType
    * - VARCHAR: 255
    * - CHAR: 1
    */
-  DERBY("org.apache.derby.jdbc.ClientDriver",
+  DERBY("org.apache.derby.jdbc.ClientDriver", "SYS",
         (pHost, pPort, pDatabaseName) -> "jdbc:derby://" + pHost + ":" + pPort + "/" + pDatabaseName + ";create=true",
         _derbyColumnMapping());
 
   private final String driverName;
+  private final String systemTablesPrefix;
   private final ConnectionStringBuilder connectionStringBuilder;
   private final Map<EColumnType, Function<IColumnType, String>> columnDefinitions;
 
@@ -30,25 +31,42 @@ public enum EDatabaseType
    * Creates a new database type.
    *
    * @param pDriverName              the fully qualified JDBC driver name
+   * @param pSystemTablesPrefix      the prefix of system tables
    * @param pConnectionStringBuilder a JDBC connection string builder
    * @param pColumnDefinitions       a map of column definitions for this specific database type
    */
-  EDatabaseType(String pDriverName, ConnectionStringBuilder pConnectionStringBuilder,
+  EDatabaseType(String pDriverName, String pSystemTablesPrefix, ConnectionStringBuilder pConnectionStringBuilder,
                 Map<EColumnType, Function<IColumnType, String>> pColumnDefinitions)
   {
     driverName = pDriverName;
+    systemTablesPrefix = pSystemTablesPrefix;
     connectionStringBuilder = pConnectionStringBuilder;
     columnDefinitions = Collections.unmodifiableMap(pColumnDefinitions);
   }
 
   /**
-   * The type's JDBC driver name.
-   *
-   * @return the JDBC driver name
+   * Initializes the driver of the database type.
    */
-  public String getDriverName()
+  public void initDriver()
   {
-    return driverName;
+    try
+    {
+      Class.forName(driverName);
+    }
+    catch (ClassNotFoundException pE)
+    {
+      throw new RuntimeException("Driver '" + driverName + "' not found!", pE);
+    }
+  }
+
+  /**
+   * The prefix of system tables of this database type.
+   *
+   * @return a system table prefix
+   */
+  public String getSystemTablesPrefix()
+  {
+    return systemTablesPrefix;
   }
 
   /**

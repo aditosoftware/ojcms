@@ -15,7 +15,7 @@ import java.util.function.Function;
  */
 public class BeanWhereCondition<TYPE> extends BeanColumnValueTuple<TYPE> implements IWhereCondition<TYPE>
 {
-  private final IWhereOperator<TYPE> operator;
+  private final IWhereOperator operator;
   private boolean negated = false;
 
   /**
@@ -24,14 +24,14 @@ public class BeanWhereCondition<TYPE> extends BeanColumnValueTuple<TYPE> impleme
    * @param pFieldTuple the bean field value tuple its based on
    * @param pOperator   the operator for the condition
    */
-  public BeanWhereCondition(FieldTuple<TYPE> pFieldTuple, IWhereOperator<TYPE> pOperator)
+  public BeanWhereCondition(FieldTuple<TYPE> pFieldTuple, IWhereOperator pOperator)
   {
     super(pFieldTuple);
     operator = Objects.requireNonNull(pOperator);
   }
 
   @Override
-  public IWhereOperator<TYPE> getOperator()
+  public IWhereOperator getOperator()
   {
     return operator;
   }
@@ -80,7 +80,7 @@ public class BeanWhereCondition<TYPE> extends BeanColumnValueTuple<TYPE> impleme
    * @param pOperatorResolver a function to resolve the where operator from the bean field tuple
    * @return an array of where conditions
    */
-  public static BeanWhereCondition<?>[] ofBean(IBean<?> pBean, Function<FieldTuple<?>, IWhereOperator<?>> pOperatorResolver)
+  public static BeanWhereCondition<?>[] ofBean(IBean<?> pBean, Function<FieldTuple<?>, IWhereOperator> pOperatorResolver)
   {
     //noinspection unchecked
     return ofMultiple(pBean.stream(), BeanWhereCondition.class, pBeanTuple -> new BeanWhereCondition(pBeanTuple, pOperatorResolver.apply(pBeanTuple)));
@@ -93,7 +93,7 @@ public class BeanWhereCondition<TYPE> extends BeanColumnValueTuple<TYPE> impleme
    * @param pOperatorResolver a function to resolve the where operator from the bean field tuple
    * @return an array of where conditions
    */
-  public static BeanWhereCondition<?>[] ofBeanIdentifiers(IBean<?> pBean, Function<FieldTuple<?>, IWhereOperator<?>> pOperatorResolver)
+  public static BeanWhereCondition<?>[] ofBeanIdentifiers(IBean<?> pBean, Function<FieldTuple<?>, IWhereOperator> pOperatorResolver)
   {
     //noinspection unchecked
     return ofMultiple(pBean.getIdentifiers().stream(), BeanWhereCondition.class,

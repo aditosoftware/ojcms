@@ -1,18 +1,16 @@
 package de.adito.beans.persistence.datastores.sql.builder.definition.column;
 
-import de.adito.beans.persistence.datastores.sql.builder.util.OJDatabaseException;
-import org.jetbrains.annotations.NotNull;
-
 import java.time.*;
-import java.util.*;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
  * Enumerates all possible database column types.
+ * These elements can be used to create a {@link IColumnType} instance from predefined column types.
  *
  * @author Simon Danner, 28.04.2018
  */
-public enum EColumnType implements IColumnType
+public enum EColumnType
 {
   //text
   CHAR(Character.class), STRING(String.class), BLOB(byte[].class),
@@ -34,65 +32,26 @@ public enum EColumnType implements IColumnType
   }
 
   /**
+   * Creates a column type instance from this column type.
+   *
+   * @return a column type instance
+   */
+  public IColumnType create()
+  {
+    return new ColumnTypeImpl(this);
+  }
+
+  /**
    * The column type for a certain Java data type.
    *
    * @param pJavaDataType the Java data type to look for
-   * @return a column type
-   * @throws OJDatabaseException, if there's no column type for this data type
+   * @return an optional column type (there may be no according data type)
    */
-  public static Optional<EColumnType> getByDataType(Class pJavaDataType)
+  public static Optional<IColumnType> getByDataType(Class pJavaDataType)
   {
     return Stream.of(values())
         .filter(pColumnType -> pColumnType.javaDataType == pJavaDataType)
-        .findAny();
-  }
-
-  @Override
-  public EColumnType getType()
-  {
-    return this;
-  }
-
-  @Override
-  public IColumnType length(int pLength)
-  {
-    return new ColumnTypeImpl(this).length(pLength);
-  }
-
-  @Override
-  public IColumnType precision(int pPrecision)
-  {
-    return new ColumnTypeImpl(this).precision(pPrecision);
-  }
-
-  @Override
-  public IColumnType scale(int pScale)
-  {
-    return new ColumnTypeImpl(this).scale(pScale);
-  }
-
-  @Override
-  public IColumnType primaryKey()
-  {
-    return new ColumnTypeImpl(this).primaryKey();
-  }
-
-  @Override
-  public IColumnType foreignKey(IForeignKey pForeignKey)
-  {
-    return new ColumnTypeImpl(this).foreignKey(pForeignKey);
-  }
-
-  @Override
-  public IColumnType modifiers(EColumnModifier... pModifiers)
-  {
-    return new ColumnTypeImpl(this).modifiers(pModifiers);
-  }
-
-  @NotNull
-  @Override
-  public Iterator<EColumnModifier> iterator()
-  {
-    return Collections.emptyIterator();
+        .findAny()
+        .map(EColumnType::create);
   }
 }

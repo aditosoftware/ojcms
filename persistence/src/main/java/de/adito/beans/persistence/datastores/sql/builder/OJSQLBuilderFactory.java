@@ -4,7 +4,6 @@ import de.adito.beans.persistence.datastores.sql.builder.definition.*;
 import de.adito.beans.persistence.datastores.sql.builder.util.DBConnectionInfo;
 
 import java.sql.Connection;
-import java.util.function.Supplier;
 
 /**
  * Factory for the SQL statement builders {@link OJSQLBuilder} and {@link OJSQLBuilderForTable}.
@@ -32,6 +31,25 @@ public final class OJSQLBuilderFactory
   public static Builder newSQLBuilder(EDatabaseType pDatabaseType, String pGlobalIdColumnName)
   {
     return new Builder(pDatabaseType, pGlobalIdColumnName);
+  }
+
+  /**
+   * Creates a new builder to configure a SQL statement builder.
+   * This builder will be based on an existing SQL builder, which can be adapted by the builder.
+   * The default {@link Builder} is used to create an {@link OJSQLBuilder}.
+   * If a sql builder for a single database table is necessary,
+   * {@link Builder#forSingleTable(String)} can be used to create an {@link OJSQLBuilderForTable}
+   *
+   * @param pExistingBuilder an existing builder to take the information from
+   * @return a builder to configure the SQL statement builder
+   */
+  public static Builder newSQLBuilder(AbstractSQLBuilder pExistingBuilder)
+  {
+    final Builder builder = newSQLBuilder(pExistingBuilder.getDatabaseType(), pExistingBuilder.getIdColumnName());
+    builder.connectionInfo = pExistingBuilder.getConnectionInfo();
+    builder.closeConnectionAfterStatement = pExistingBuilder.closeAfterStatement();
+    builder.serializer = pExistingBuilder.getSerializer();
+    return builder;
   }
 
   /**
@@ -75,7 +93,7 @@ public final class OJSQLBuilderFactory
     @Override
     public OJSQLBuilder create()
     {
-      return new OJSQLBuilder(databaseType, connectionSupplier, closeConnectionAfterStatement, serializer, idColumnName);
+      return new OJSQLBuilder(databaseType, connectionInfo, closeConnectionAfterStatement, serializer, idColumnName);
     }
   }
 
@@ -126,7 +144,7 @@ public final class OJSQLBuilderFactory
     @Override
     public OJSQLBuilderForTable create()
     {
-      return new OJSQLBuilderForTable(databaseType, connectionSupplier, closeConnectionAfterStatement, serializer, tableName, idColumnName);
+      return new OJSQLBuilderForTable(databaseType, connectionInfo, closeConnectionAfterStatement, serializer, tableName, idColumnName);
     }
   }
 
@@ -140,7 +158,7 @@ public final class OJSQLBuilderFactory
   {
     protected final EDatabaseType databaseType;
     protected final String idColumnName;
-    protected Supplier<Connection> connectionSupplier;
+    protected DBConnectionInfo connectionInfo;
     protected IValueSerializer serializer = IValueSerializer.DEFAULT;
     protected boolean closeConnectionAfterStatement = true;
 
@@ -165,7 +183,8 @@ public final class OJSQLBuilderFactory
     {
       databaseType = pOther.databaseType;
       idColumnName = pOther.idColumnName;
-      connectionSupplier = pOther.connectionSupplier;
+      connectionInfo = pOther.connectionInfo;
+      serializer = pOther.serializer;
       closeConnectionAfterStatement = pOther.closeConnectionAfterStatement;
     }
 
@@ -178,7 +197,7 @@ public final class OJSQLBuilderFactory
      */
     public BUILDER withPermanentConnection(DBConnectionInfo pConnectionInfo)
     {
-      connectionSupplier = pConnectionInfo::createConnection;
+      connectionInfo = pConnectionInfo;
       closeConnectionAfterStatement = false;
       //noinspection unchecked
       return (BUILDER) this;
@@ -194,19 +213,7 @@ public final class OJSQLBuilderFactory
      */
     public BUILDER withClosingAndRenewingConnection(DBConnectionInfo pConnectionInfo)
     {
-      return withClosingAndRenewingConnection(pConnectionInfo::createConnection);
-    }
-
-    /**
-     * Configures the builder to obtain a new connection the database for every statement.
-     * A used connection will be closed after every execution of a SQL statement.
-     *
-     * @param pConnectionSupplier the supplier for new connections
-     * @return the builder itself to enable a pipelining mechanism
-     */
-    public BUILDER withClosingAndRenewingConnection(Supplier<Connection> pConnectionSupplier)
-    {
-      connectionSupplier = pConnectionSupplier;
+      connectionInfo = pConnectionInfo;
       //noinspection unchecked
       return (BUILDER) this;
     }

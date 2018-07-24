@@ -1,7 +1,7 @@
 package de.adito.beans.persistence.datastores.sql.builder.definition.column;
 
-import de.adito.beans.persistence.datastores.sql.builder.definition.*;
-import de.adito.beans.persistence.datastores.sql.builder.definition.format.*;
+import de.adito.beans.persistence.datastores.sql.builder.definition.EDatabaseType;
+import de.adito.beans.persistence.datastores.sql.builder.format.IStatementFormat;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.stream.*;
@@ -13,7 +13,7 @@ import java.util.stream.*;
  *
  * @author Simon Danner, 02.07.2018
  */
-public interface IColumnType extends ITypeStatementFormat, Iterable<EColumnModifier>
+public interface IColumnType extends IStatementFormat, Iterable<EColumnModifier>
 {
   /**
    * The base column type this type instance is based on.
@@ -23,11 +23,12 @@ public interface IColumnType extends ITypeStatementFormat, Iterable<EColumnModif
   EColumnType getType();
 
   @Override
-  default String toStatementFormat(EDatabaseType pDatabaseType)
+  default String toStatementFormat(EDatabaseType pDatabaseType, String pIdColumnName)
   {
-    return pDatabaseType.columnTypeToStatementFormat(this) + " " + streamModifiers()
-        .map(EColumnModifier::toStatementFormat)
+    final String modifiers = streamModifiers()
+        .map(pModifier -> pModifier.toStatementFormat(pDatabaseType, pIdColumnName))
         .collect(Collectors.joining(" "));
+    return pDatabaseType.columnTypeToStatementFormat(this) + (modifiers.isEmpty() ? "" : " " + modifiers);
   }
 
   /**

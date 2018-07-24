@@ -1,7 +1,7 @@
 package de.adito.beans.persistence.datastores.sql.builder.definition.column;
 
-import de.adito.beans.persistence.datastores.sql.builder.definition.*;
-import de.adito.beans.persistence.datastores.sql.builder.definition.format.*;
+import de.adito.beans.persistence.datastores.sql.builder.definition.EDatabaseType;
+import de.adito.beans.persistence.datastores.sql.builder.format.IStatementFormat;
 import de.adito.beans.persistence.datastores.sql.builder.util.OJDatabaseException;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,7 +15,7 @@ import java.util.stream.Stream;
  *
  * @author Simon Danner, 28.04.2018
  */
-public interface IColumnDefinition extends ITypeStatementFormat
+public interface IColumnDefinition extends IStatementFormat
 {
   /**
    * The name of the database column.
@@ -32,9 +32,9 @@ public interface IColumnDefinition extends ITypeStatementFormat
   IColumnType getColumnType();
 
   @Override
-  default String toStatementFormat(EDatabaseType pDatabaseType)
+  default String toStatementFormat(EDatabaseType pDatabaseType, String pIdColumnName)
   {
-    return getColumnName().toUpperCase() + " " + getColumnType().toStatementFormat(pDatabaseType);
+    return getColumnName().toUpperCase() + " " + getColumnType().toStatementFormat(pDatabaseType, pIdColumnName);
   }
 
   /**
@@ -46,9 +46,9 @@ public interface IColumnDefinition extends ITypeStatementFormat
    * @param pModifier   an optional function to modify the column type
    * @return the created column definition
    */
-  static IColumnDefinition forType(Class pType, String pColumnName, @Nullable Function<EColumnType, IColumnType> pModifier)
+  static IColumnDefinition forType(Class pType, String pColumnName, @Nullable Function<IColumnType, IColumnType> pModifier)
   {
-    EColumnType columnType = EColumnType.getByDataType(pType)
+    IColumnType columnType = EColumnType.getByDataType(pType)
         .orElseThrow(() -> new OJDatabaseException("No column type found for data type " + pType.getName()));
     return of(pColumnName, pModifier == null ? columnType : pModifier.apply(columnType));
   }

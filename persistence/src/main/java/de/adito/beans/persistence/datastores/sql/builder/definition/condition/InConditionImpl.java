@@ -1,8 +1,9 @@
 package de.adito.beans.persistence.datastores.sql.builder.definition.condition;
 
 import de.adito.beans.persistence.datastores.sql.builder.definition.*;
+import de.adito.beans.persistence.datastores.sql.builder.format.*;
 
-import java.util.List;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.*;
 
@@ -14,6 +15,8 @@ import java.util.stream.*;
  */
 class InConditionImpl<TYPE> extends ConditionImpl<TYPE>
 {
+  private final List<IColumnValueTuple<TYPE>> values;
+
   /**
    * Creates a new "IN" condition.
    *
@@ -25,45 +28,24 @@ class InConditionImpl<TYPE> extends ConditionImpl<TYPE>
   InConditionImpl(IColumnIdentification<TYPE> pColumn, BiFunction<IColumnIdentification<TYPE>, TYPE, IColumnValueTuple<TYPE>> pTupleCreator,
                   Stream<TYPE> pValues)
   {
-    super(pColumn, null, new _InOperator<>(pTupleCreator, pValues));
+    super(pColumn, null, () -> ""); //value and operator do not matter
+    values = pValues
+        .map(pValue -> pTupleCreator.apply(pColumn, pValue))
+        .collect(Collectors.toList());
+    if (values.isEmpty())
+      throw new RuntimeException("The elements of an 'IN'-condition cannot be empty!");
   }
 
-  /**
-   * The operator for the "IN" condition.
-   *
-   * @param <TYPE> the data type of the values of the condition
-   */
-  private static class _InOperator<TYPE> implements IWhereOperator<TYPE>
+  @Override
+  public String toStatementFormat(EDatabaseType pDatabaseType, String pIdColumnName)
   {
-    private final BiFunction<IColumnIdentification<TYPE>, TYPE, IColumnValueTuple<TYPE>> tupleCreator;
-    private final List<TYPE> values;
+    return getColumn().getColumnName().toUpperCase() + " " + EFormatConstant.IN.toStatementFormat(
+        StatementFormatter.join(IntStream.range(0, values.size()).mapToObj(pIndex -> "?"), ESeparator.COMMA_WITH_WHITESPACE));
+  }
 
-    /**
-     * Creates a new in operator.
-     *
-     * @param pTupleCreator a function to create a column value tuple for the values for the in condition
-     *                      this is mainly used for serialization
-     * @param pValues       the values for the in condition
-     */
-    private _InOperator(BiFunction<IColumnIdentification<TYPE>, TYPE, IColumnValueTuple<TYPE>> pTupleCreator, Stream<TYPE> pValues)
-    {
-      tupleCreator = pTupleCreator;
-      values = pValues.collect(Collectors.toList());
-    }
-
-    @Override
-    public String getLiteral()
-    {
-      return "IN";
-    }
-
-    @Override
-    public String toConditionFormat(IWhereCondition<TYPE> pCondition, IValueSerializer pSerializer)
-    {
-      return pCondition.getColumn().getColumnName() + " " + getLiteral() + "(" +
-          values.stream()
-              .map(pValue -> pSerializer.serialValueToStatementString(tupleCreator.apply(pCondition.getColumn(), pValue)))
-              .collect(Collectors.joining(", ")) + ")";
-    }
+  @Override
+  public List<IColumnValueTuple<?>> getArguments(EDatabaseType pDatabaseType, String pIdColumnName)
+  {
+    return Collections.unmodifiableList(values);
   }
 }

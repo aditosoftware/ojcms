@@ -1,5 +1,6 @@
 package de.adito.beans.persistence.datastores.sql.builder.definition;
 
+import de.adito.beans.persistence.datastores.sql.builder.format.IStatementFormat;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -12,7 +13,7 @@ import java.util.stream.Stream;
  * @param <TYPE> the data type of the column
  * @author Simon Danner, 05.05.2018
  */
-public interface IColumnIdentification<TYPE>
+public interface IColumnIdentification<TYPE> extends IStatementFormat
 {
   /**
    * The name of the database column.
@@ -27,6 +28,12 @@ public interface IColumnIdentification<TYPE>
    * @return the data type for the database column
    */
   Class<TYPE> getDataType();
+
+  @Override
+  default String toStatementFormat(EDatabaseType pDatabaseType, String pIdColumnName)
+  {
+    return getColumnName();
+  }
 
   /**
    * Determines, if the column has a numeric value.

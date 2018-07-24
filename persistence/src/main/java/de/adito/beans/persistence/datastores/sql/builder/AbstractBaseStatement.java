@@ -1,6 +1,7 @@
 package de.adito.beans.persistence.datastores.sql.builder;
 
 import de.adito.beans.persistence.datastores.sql.builder.definition.*;
+import de.adito.beans.persistence.datastores.sql.builder.format.StatementFormatter;
 import de.adito.beans.persistence.datastores.sql.builder.util.OJDatabaseException;
 
 import java.io.IOException;
@@ -18,6 +19,7 @@ import java.io.IOException;
 public abstract class AbstractBaseStatement<RESULT, STATEMENT extends AbstractBaseStatement<RESULT, STATEMENT>> implements IStatement
 {
   private final IStatementExecutor<RESULT> executor;
+  protected final AbstractSQLBuilder builder;
   protected final EDatabaseType databaseType;
   protected final IValueSerializer serializer;
   private String tableName;
@@ -26,12 +28,15 @@ public abstract class AbstractBaseStatement<RESULT, STATEMENT extends AbstractBa
    * Creates the base statement.
    *
    * @param pExecutor     the executor for the statements
+   * @param pBuilder      the builder that created this statement to use other kinds of statements for a concrete statement
    * @param pDatabaseType the database type used for this statement
    * @param pSerializer   the value serializer
    */
-  protected AbstractBaseStatement(IStatementExecutor<RESULT> pExecutor, EDatabaseType pDatabaseType, IValueSerializer pSerializer)
+  protected AbstractBaseStatement(IStatementExecutor<RESULT> pExecutor, AbstractSQLBuilder pBuilder, EDatabaseType pDatabaseType,
+                                  IValueSerializer pSerializer)
   {
     executor = pExecutor;
+    builder = pBuilder;
     databaseType = pDatabaseType;
     serializer = pSerializer;
   }
@@ -39,12 +44,12 @@ public abstract class AbstractBaseStatement<RESULT, STATEMENT extends AbstractBa
   /**
    * Executes a SQL statement.
    *
-   * @param pSQLStatement the statement to execute
+   * @param pFormat the statement defined through a formatter
    * @return the result of the execution
    */
-  protected RESULT executeStatement(String pSQLStatement)
+  protected RESULT executeStatement(StatementFormatter pFormat)
   {
-    return executor.executeStatement(pSQLStatement);
+    return executor.executeStatement(pFormat.getStatement(), pFormat.getSerialArguments(serializer));
   }
 
   /**

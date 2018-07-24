@@ -37,7 +37,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
   private static final IColumnIdentification<String> BEAN_ID_COLUMN_IDENTIFICATION =
       IColumnIdentification.of(IDatabaseConstants.BEAN_TABLE_BEAN_ID, String.class);
   private static final IColumnDefinition BEAN_ID_COLUMN_DEFINITION =
-      IColumnDefinition.of(IDatabaseConstants.BEAN_TABLE_BEAN_ID, EColumnType.STRING.primaryKey().modifiers(EColumnModifier.NOT_NULL));
+      IColumnDefinition.of(IDatabaseConstants.BEAN_TABLE_BEAN_ID, EColumnType.STRING.create().primaryKey().modifiers(EColumnModifier.NOT_NULL));
   private final IWhereCondition<String> beanIdCondition;
   private final Map<IField<?>, _ColumnIdentification<?>> columns;
   private final OJSQLBuilderForTable builder;
@@ -60,6 +60,34 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
   }
 
   /**
+   * Creates the single bean database table, if it is not existing yet.
+   * This static entry point is necessary, because the table may have to be present before the usage of single bean. (e.g. for foreign keys)
+   *
+   * @param pConnectionInfo the database connection information
+   */
+  public static void createBeanTable(DBConnectionInfo pConnectionInfo)
+  {
+    final OJSQLBuilderForTable builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionInfo.getDatabaseType(), IDatabaseConstants.ID_COLUMN)
+        .forSingleTable(IDatabaseConstants.BEAN_TABLE_NAME)
+        .withClosingAndRenewingConnection(pConnectionInfo)
+        .create();
+    _createTableIfNotExisting(builder);
+  }
+
+  /**
+   * Creates the single bean database table, if it is not existing yet.
+   * The creation is based on an existing builder.
+   *
+   * @param pBuilder the builder to create the table with
+   */
+  private static void _createTableIfNotExisting(OJSQLBuilderForTable pBuilder)
+  {
+    pBuilder.ifTableNotExistingCreate(pCreate -> pCreate
+        .columns(BEAN_ID_COLUMN_DEFINITION)
+        .create());
+  }
+
+  /**
    * Creates a persistent bean.
    *
    * @param pBeanId         the id of the bean
@@ -76,9 +104,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
         .withClosingAndRenewingConnection(pConnectionInfo)
         .withCustomSerializer(new BeanSQLSerializer(pBeanDataStore))
         .create();
-    builder.ifTableNotExistingCreate(pCreate -> pCreate
-        .columns(BEAN_ID_COLUMN_DEFINITION)
-        .create());
+    _createTableIfNotExisting(builder);
     _checkColumnSize();
     _checkRowExisting();
   }
@@ -155,7 +181,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
   {
     IntStream.range(builder.getColumnCount() - 1, columns.size())
         .mapToObj(pIndex -> IDatabaseConstants.BEAN_TABLE_COLUMN_PREFIX + pIndex)
-        .forEach(pColumnName -> builder.addColumn(IColumnDefinition.of(pColumnName, EColumnType.STRING)));
+        .forEach(pColumnName -> builder.addColumn(IColumnDefinition.of(pColumnName, EColumnType.STRING.create())));
   }
 
   /**

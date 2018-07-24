@@ -12,7 +12,7 @@ class ConditionImpl<TYPE> extends AbstractNegatable<IWhereCondition<TYPE>> imple
 {
   private final IColumnIdentification<TYPE> column;
   private final TYPE value;
-  private final IWhereOperator<TYPE> operator;
+  private final IWhereOperator operator;
 
   /**
    * Creates a new where condition.
@@ -21,7 +21,7 @@ class ConditionImpl<TYPE> extends AbstractNegatable<IWhereCondition<TYPE>> imple
    * @param pValue    the value it is based on
    * @param pOperator the operator to connect the column and the value
    */
-  ConditionImpl(IColumnIdentification<TYPE> pColumn, TYPE pValue, IWhereOperator<TYPE> pOperator)
+  ConditionImpl(IColumnIdentification<TYPE> pColumn, TYPE pValue, IWhereOperator pOperator)
   {
     column = pColumn;
     value = pValue;
@@ -41,7 +41,7 @@ class ConditionImpl<TYPE> extends AbstractNegatable<IWhereCondition<TYPE>> imple
   }
 
   @Override
-  public IWhereOperator<TYPE> getOperator()
+  public IWhereOperator getOperator()
   {
     return operator;
   }

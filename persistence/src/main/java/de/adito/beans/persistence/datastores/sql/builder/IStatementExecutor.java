@@ -1,6 +1,7 @@
 package de.adito.beans.persistence.datastores.sql.builder;
 
 import java.io.Closeable;
+import java.util.*;
 
 /**
  * An executor for SQL statements.
@@ -15,7 +16,20 @@ public interface IStatementExecutor<RESULT> extends Closeable
    * Executes a SQL statement.
    *
    * @param pSQLStatement the statement to execute
+   * @param pArgs         arguments for prepared statements
    * @return the result of the execution
    */
-  RESULT executeStatement(String pSQLStatement);
+  RESULT executeStatement(String pSQLStatement, List<String> pArgs);
+
+  /**
+   * Executes a SQL statement.
+   *
+   * @param pSQLStatement the statement to execute
+   * @param pArgs         arguments for prepared statements
+   * @return the result of the execution
+   */
+  default RESULT executeStatement(String pSQLStatement, String... pArgs)
+  {
+    return executeStatement(pSQLStatement, Arrays.asList(pArgs));
+  }
 }

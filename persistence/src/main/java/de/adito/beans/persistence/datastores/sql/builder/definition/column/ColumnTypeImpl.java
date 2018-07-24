@@ -122,6 +122,6 @@ class ColumnTypeImpl implements IColumnType
   @Override
   public Iterator<EColumnModifier> iterator()
   {
-    return modifiers.iterator();
+    return modifiers == null ? Collections.emptyIterator() : modifiers.iterator();
   }
 }

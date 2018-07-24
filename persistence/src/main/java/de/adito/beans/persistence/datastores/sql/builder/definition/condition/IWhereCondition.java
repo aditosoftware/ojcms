@@ -1,7 +1,7 @@
 package de.adito.beans.persistence.datastores.sql.builder.definition.condition;
 
 import de.adito.beans.persistence.datastores.sql.builder.definition.*;
-import de.adito.beans.persistence.datastores.sql.builder.definition.format.IValueStatementFormat;
+import de.adito.beans.persistence.datastores.sql.builder.format.IPreparedStatementFormat;
 
 import java.util.Collection;
 import java.util.function.*;
@@ -14,7 +14,7 @@ import java.util.stream.*;
  * @param <TYPE> the data type of the value for the condition
  * @author Simon Danner, 06.06.2018
  */
-public interface IWhereCondition<TYPE> extends IColumnValueTuple<TYPE>, IValueStatementFormat, INegatable<IWhereCondition<TYPE>>
+public interface IWhereCondition<TYPE> extends IColumnValueTuple<TYPE>, IPreparedStatementFormat, INegatable<IWhereCondition<TYPE>>
 {
   /**
    * The operator for this condition.
@@ -22,16 +22,15 @@ public interface IWhereCondition<TYPE> extends IColumnValueTuple<TYPE>, IValueSt
    *
    * @return the operator for the condition
    */
-  default IWhereOperator<TYPE> getOperator()
+  default IWhereOperator getOperator()
   {
     return IWhereOperator.isEqual();
   }
 
   @Override
-  default String toStatementFormat(IValueSerializer pSerializer)
+  default String toStatementFormat(EDatabaseType pDatabaseType, String pIdColumnName)
   {
-    //noinspection unchecked
-    return (isNegated() ? "NOT " : "") + getOperator().toConditionFormat(this, pSerializer);
+    return getColumn().getColumnName().toUpperCase() + " " + getOperator().getLiteral() + " ?";
   }
 
   /**
@@ -166,7 +165,7 @@ public interface IWhereCondition<TYPE> extends IColumnValueTuple<TYPE>, IValueSt
    * @param <TYPE>    the data type of the value
    * @return the where condition
    */
-  static <TYPE> IWhereCondition<TYPE> of(IColumnIdentification<TYPE> pColumn, TYPE pValue, IWhereOperator<TYPE> pOperator)
+  static <TYPE> IWhereCondition<TYPE> of(IColumnIdentification<TYPE> pColumn, TYPE pValue, IWhereOperator pOperator)
   {
     return new ConditionImpl<>(pColumn, pValue, pOperator);
   }

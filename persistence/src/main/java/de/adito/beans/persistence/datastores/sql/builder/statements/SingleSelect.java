@@ -21,15 +21,16 @@ public class SingleSelect<TYPE> extends AbstractSelect<SingleSelect<TYPE>>
    * Creates a new select statement based on single column.
    *
    * @param pStatementExecutor the executor for this statement
+   * @param pBuilder           the builder that created this statement to use other kinds of statements for a concrete statement
    * @param pDatabaseType      the database type used for this statement
    * @param pSerializer        the value serializer
    * @param pIdColumnName      the name of the id column
    * @param pColumn            the single column to select
    */
-  public SingleSelect(IStatementExecutor<ResultSet> pStatementExecutor, EDatabaseType pDatabaseType, IValueSerializer pSerializer,
-                      String pIdColumnName, IColumnIdentification<TYPE> pColumn)
+  public SingleSelect(IStatementExecutor<ResultSet> pStatementExecutor, AbstractSQLBuilder pBuilder, EDatabaseType pDatabaseType,
+                      IValueSerializer pSerializer, String pIdColumnName, IColumnIdentification<TYPE> pColumn)
   {
-    super(pStatementExecutor, pDatabaseType, pSerializer, pIdColumnName, pColumn);
+    super(pStatementExecutor, pBuilder, pDatabaseType, pSerializer, pIdColumnName, pColumn);
     column = pColumn;
   }
 
