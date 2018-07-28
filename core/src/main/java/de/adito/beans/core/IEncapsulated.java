@@ -24,7 +24,7 @@ interface IEncapsulated<CORE, BEAN extends IBean<BEAN>, LISTENER extends IBeanCh
 {
   /**
    * The additional information containers of this core. (Not the data itself)
-   * This is the replacement for a abstract class.
+   * This is the replacement for an abstract class.
    * All other methods have a default implementation that relate to this base data.
    *
    * @return additional information containers
@@ -86,7 +86,7 @@ interface IEncapsulated<CORE, BEAN extends IBean<BEAN>, LISTENER extends IBeanCh
   }
 
   /**
-   * Fires a event to all registered listeners.
+   * Fires an event to all registered listeners.
    *
    * @param pAction the action to perform
    */

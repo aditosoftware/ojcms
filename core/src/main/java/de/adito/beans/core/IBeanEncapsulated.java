@@ -14,7 +14,7 @@ import static de.adito.beans.core.BeanEncapsulatedContainers.BeanDataMapper;
 
 /**
  * Defines the data core for a bean.
- * It contains a collection of key-value pairs, which represent the fields and their associated values.
+ * It contains a collection of field value tuples.
  *
  * @param <BEAN> the generic bean type that uses this data core
  * @author Simon Danner, 20.01.2017

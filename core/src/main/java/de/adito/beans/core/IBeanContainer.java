@@ -24,7 +24,7 @@ import java.util.stream.*;
  * This might seem like a solution to the not available multi inheritance in Java, but here only the base interface type
  * is transferred to the extending class.
  *
- * This interface is very similar to the Java List interface.
+ * This interface is very similar to {@link List}.
  * There are two reasons why it is not used as an extension of this interface:
  * - Some methods of {@link List} are not necessary and would increase to complexity, which would be contrary to concept of the bean modell
  * - It would not be possible to use this interface for a class, that implements {@link Iterable} trough its abstract base class, for example
@@ -121,7 +121,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
   }
 
   /**
-   * Removes all beans which apply to a given predicate successfully.
+   * Removes all beans, that apply to a given predicate successfully.
    * The registered listeners will be informed.
    *
    * @param pPredicate the predicate to determine which beans should be removed
@@ -294,13 +294,12 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
     return stream()
         .map(pValueResolver)
         .filter(Objects::nonNull)
-        .distinct()
         .collect(Collectors.toSet());
   }
 
   /**
    * This bean container as {@link List}.
-   * This can be used as proxy, where it is necessary to provide the bean container as List.
+   * This can be used as proxy, where it is necessary to provide the bean container as list.
    *
    * @return this container as List interface
    */

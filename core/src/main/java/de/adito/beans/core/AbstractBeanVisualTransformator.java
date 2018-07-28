@@ -1,7 +1,8 @@
 package de.adito.beans.core;
 
 /**
- * Abstract base for a visual bean transformator. Defines the generic types.
+ * Abstract base class for a visual bean transformator.
+ * Defines the generic types.
  *
  * @param <LOGIC>  the logic bean type to transform
  * @param <VISUAL> the visual counter type to which the bean component will be transformed

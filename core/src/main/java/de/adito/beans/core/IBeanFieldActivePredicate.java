@@ -3,10 +3,10 @@ package de.adito.beans.core;
 import de.adito.beans.core.annotations.OptionalField;
 
 /**
- * Determines, if a optional bean field is active at a certain time.
+ * Determines, if an optional bean field is active at a certain time.
  * The actual condition is deposited by the field itself.
- * However this condition needs a bean to be applied to.
- * So a implementing class only has to provide the actual bean, where the active status of the field should be checked.
+ * However, this condition needs a bean to be applied to.
+ * So an implementing class only has to provide the actual bean, where the active status of the field should be checked.
  * This leads to a very comfortable way to use this interface, especially if implemented as lambda expression.
  * For example, the bean interface may simply implement this interface as the following: "return () -> (BEAN) this;"
  *
@@ -20,7 +20,7 @@ interface IBeanFieldActivePredicate<BEAN extends IBean<BEAN>>
   BEAN getBean();
 
   /**
-   * Determines, if a optional bean field is active at this moment.
+   * Determines, if an optional bean field is active at this moment.
    * If the field is not marked as optional, it will be treated as active.
    *
    * @param pField the bean field

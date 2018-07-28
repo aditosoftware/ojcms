@@ -16,10 +16,10 @@ import java.util.stream.Collectors;
  * This class should be extended by any bean type of the application.
  * It may also be extended by another base class, if more base data is necessary.
  *
- * It also provides the possibility the read and change private data.
+ * It also provides the possibility to read and change private data.
  * This can be used to enable the typical behaviour of any Java POJO.
  *
- * A specific bean of the application defines its fields as static to allow access without reflection.
+ * A specific bean of the application defines its fields static to allow access without reflection.
  * Here is an example:
  * "public class SomeBean extends Bean {
  * public static final TextField someField = BeanFieldFactory.create(SomeBean.class)"
@@ -139,7 +139,7 @@ public class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
         .filter(pField -> !checker.add(pField))
         .collect(Collectors.toList());
     if (!duplicates.isEmpty())
-      throw new RuntimeException("A bean cannot have a field twice! duplicates: " + duplicates.stream()
+      throw new RuntimeException("A bean cannot define a field twice! duplicates: " + duplicates.stream()
           .map(IField::getName)
           .collect(Collectors.joining(", ")));
   }

@@ -3,7 +3,7 @@ package de.adito.beans.core;
 import java.util.*;
 
 /**
- * Abstract base for a visual transformator.
+ * Abstract base class for a visual transformator.
  * Stores the reference to the original bean source and provides a queue to store operations to perform after the transformation.
  *
  * @param <LOGIC>        the logic bean type to transform

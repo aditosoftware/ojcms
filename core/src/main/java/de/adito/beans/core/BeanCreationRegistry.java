@@ -11,7 +11,7 @@ import java.util.stream.Stream;
  * Central registration for bean creation events.
  * A bean annotated with {@link ObserveCreation} or another annotation annotated with {@link ObserveCreation}
  * will fire an event, when its constructor is called.
- * Here it is possible to register listeners to react to those creation events.
+ * Here, it is possible to register listeners to react to those creation events.
  *
  * @author Simon Danner, 09.02.2018
  */
@@ -97,7 +97,7 @@ public final class BeanCreationRegistry
   }
 
   /**
-   * Fires a bean creation event with a previous annotation check.
+   * Fires a bean creation event with an annotation check.
    *
    * @param pCreatedBean the created bean
    */

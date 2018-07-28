@@ -18,6 +18,8 @@ interface IBeanContainerEncapsulated<BEAN extends IBean<BEAN>> extends IEncapsul
 {
   /**
    * The type of the beans in this container.
+   *
+   * @return a bean type
    */
   Class<BEAN> getBeanType();
 

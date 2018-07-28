@@ -13,8 +13,8 @@ import java.util.function.Supplier;
  * Through providing a reference to the bean core {@link IEncapsulated} the transformation can be executed.
  * For detailed information of the separation of functional wrapper and bean cores, take a look at the interfaces above.
  *
- * A transformation can be performed on different levels. (That means wich bean element will be transformed to what graphical part)
- * These are the reasonable possibilities:
+ * A transformation can be performed on different levels. (That means, wich bean element will be transformed to what graphical part)
+ * These are these reasonable possibilities:
  *
  * - {@link IField} -> sub component of a graphical parent component. (e.g. login form)
  * - {@link IBean} -> graphical component that represents the bean directly
@@ -34,8 +34,10 @@ interface ITransformable<LOGIC, VISUAL, ENCAPSULATED extends IEncapsulated, SOUR
     extends IEncapsulatedHolder<ENCAPSULATED>
 {
   /**
-   * The transformator that performs the transformation of the single components.
+   * The transformator, that performs the transformation of the single components.
    * Must be based on the same generic types, which define the transformation level.
+   *
+   * @return a visual transformator
    */
   IVisualTransformator<LOGIC, VISUAL, ENCAPSULATED, SOURCE> getTransformator();
 

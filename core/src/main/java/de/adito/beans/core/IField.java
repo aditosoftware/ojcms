@@ -12,7 +12,7 @@ import java.util.function.Function;
 
 /**
  * Describes a field of a bean.
- * It's based on a inner data type.
+ * It's based on an inner data type.
  * A bean field is just a wrapper for the actual data, that contains additional information.
  *
  * @param <TYPE> the inner data type of this bean field
@@ -100,6 +100,8 @@ public interface IField<TYPE>
 
   /**
    * All annotations of this field.
+   *
+   * @return a collection of annotations
    */
   Collection<Annotation> getAnnotations();
 

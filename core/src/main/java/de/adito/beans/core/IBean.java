@@ -21,14 +21,14 @@ import java.util.stream.*;
  * This interface provides the whole functionality via default methods.
  * The default methods use the only non-default method {@link IEncapsulatedHolder#getEncapsulated()} to get access to the data core.
  * This method may be called 'virtual field', because it gives access to an imaginary field that holds the data core.
- * This means you only have to give a reference to any bean core to get a completed bean, when this interface is used.
+ * This means, you only have to give a reference to any bean core to get a completed bean, if this interface is used.
  *
  * This interface is implemented by the default bean class {@link Bean}, which is used to create the application's beans.
  * But it may also be used for any other class that should be treated as bean.
  * Furthermore you are able to extend this interface through special methods for your use case.
  * Through the use of an interface it is possible to extend the bean type to a class that already extends another class.
- * This might seem like a solution to the not available multi inheritance in Java, but here only the base interface type
- * is transferred to the extending class. Methods and the static field definitions stay at the concrete bean types.
+ * This might seem like a solution to the not available multi inheritance in Java, but only the base interface type
+ * is transferred to the extending class. Methods and static field definitions stay at the concrete bean types.
  *
  * @param <BEAN> the concrete type of the bean that is implementing the interface
  * @author Simon Danner, 23.08.2016
@@ -86,7 +86,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
       //noinspection unchecked
       return (SOURCE) actualValue;
     return pField.getFromConverter(pConvertType)
-        .orElseThrow(() -> new RuntimeException("The field " + pField.getName() + " cannot convert to " + pConvertType.getSimpleName()))
+        .orElseThrow(() -> new RuntimeException("The field " + pField.getName() + " is not able to convert to " + pConvertType.getSimpleName()))
         .apply(actualValue);
   }
 
@@ -149,7 +149,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   }
 
   /**
-   * An interface to determine if an optional bean field is active at a certain time.
+   * An interface to determine, if an optional bean field is active at a certain time.
    *
    * @see IBeanFieldActivePredicate
    */
@@ -173,6 +173,8 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
 
   /**
    * The amount of fields of this bean.
+   *
+   * @return the field count
    */
   default int getFieldCount()
   {
@@ -200,7 +202,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
    * The structure contains direct and deep parent-references to this bean.
    * A reference occurs through a bean or container field. (Default Java references are ignored)
    *
-   * @return a interface to retrieve information about the hierarchical reference structure
+   * @return an interface to retrieve information about the hierarchical reference structure
    * @see IHierarchicalBeanStructure
    */
   default IHierarchicalBeanStructure getHierarchicalStructure()
@@ -288,6 +290,8 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   /**
    * All field tuples marked as identifiers within this bean.
    * Identifiers could be used to find related beans in two containers. (comparable to primary key columns in DB-systems)
+   *
+   * @return a set of field tuples
    */
   default Set<FieldTuple<?>> getIdentifiers()
   {
@@ -396,6 +400,8 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
 
   /**
    * A stream containing all fields of this bean.
+   *
+   * @return a stream of bean fields
    */
   default Stream<IField<?>> streamFields()
   {
@@ -407,6 +413,8 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   /**
    * This bean as stream.
    * It contains key value pairs describing the field-value combinations.
+   *
+   * @return a stream of field tuples
    */
   default Stream<FieldTuple<?>> stream()
   {

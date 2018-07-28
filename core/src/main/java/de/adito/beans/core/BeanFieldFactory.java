@@ -13,7 +13,7 @@ import java.util.stream.*;
 /**
  * A static factory to create bean fields.
  * Fields should only be created via the methods of this class.
- * They take care of a lot of initialization work.
+ * They take care of some initialization work.
  *
  * All specific beans of the application should use this class to create their fields.
  * For an example, take a look at the {@link Bean}.
@@ -29,14 +29,14 @@ public final class BeanFieldFactory
   }
 
   /**
-   * Takes a look at all static bean fields of a certain class and creates the first not initialised field automatically.
+   * Takes a look at all static bean fields of a certain class and creates the first not initialized field automatically.
    * In this way all bean fields can be created through this method.
    * Usage: "public static final TextField name = BeanFieldFactory.create(CLASSNAME.class);"
    * This method takes care about the whole initialization of the certain field. (name, type, annotations, etc.)
    *
    * @param pBeanType the bean type to which the created field should belong to
    * @param <BEAN>    the generic type of the parameter above
-   *                  (is here based on the concrete {@link Bean} class rather than on the interface. so it can not be a transformed bean type
+   *                  (is here based on the concrete {@link Bean} class rather than on the interface, so it can not be a transformed bean type
    * @param <FIELD>   the generic type of the field that will be created
    * @return the newly created field instance
    */
@@ -64,7 +64,7 @@ public final class BeanFieldFactory
   /**
    * Provides the bean field type for a certain inner data type.
    * This depends on the field types annotated with {@link TypeDefaultField}.
-   * They determine what field type is the default for the searched data type.
+   * They determine, what field type is the default for the searched data type.
    *
    * @param pType  the inner data type of a field
    * @param <TYPE> the generic data type
@@ -163,7 +163,7 @@ public final class BeanFieldFactory
 
   /**
    * Checks, if a bean field is marked (via {@link OptionalField}) as optional field.
-   * In this case the condition, which is defined through the annotation, will be stored as additional information in the field.
+   * In this case the condition, which is defined through the annotation, will be stored as an additional information in the field.
    * So this information can be used later to determine if the field is active at any moment.
    *
    * @param pField the bean field to check

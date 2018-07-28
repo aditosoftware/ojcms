@@ -22,6 +22,8 @@ public interface ITransformableBeanContainer<BEAN extends IBean<BEAN>, LOGIC, VI
 
   /**
    * A stream of all visible beans of this container.
+   *
+   * @return a stream of beans
    */
   default Stream<BEAN> streamVisibleBeans()
   {
@@ -30,6 +32,8 @@ public interface ITransformableBeanContainer<BEAN extends IBean<BEAN>, LOGIC, VI
 
   /**
    * The count of the visible beans of this container.
+   *
+   * @return the number of visible beans
    */
   default int getVisibleBeanCount()
   {

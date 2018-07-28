@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 /**
  * Utility methods concerning bean listeners.
  * They fire events, when a value of a bean was changed or a bean was added or removed to/from a container.
- * Furthermore this class provides a static listener cache for bean-listeners of a container (one listener per container).
+ * Furthermore this class provides a static listener cache for bean listeners of a container (one listener per container).
  * This cache is used automatically by the utility methods.
  *
  * @author Simon Danner, 31.01.2017
@@ -120,7 +120,8 @@ final class BeanListenerUtil
    */
   public static <BEAN extends IBean<BEAN>> void beanRemoved(IBeanContainer<BEAN> pContainer, BEAN pBean)
   {
-    pBean.unlisten(_getListener(pContainer));
+    if (!pContainer.contains(pBean)) //may still be there as duplicate, then do not remove the listener!
+      pBean.unlisten(_getListener(pContainer));
     pContainer.getEncapsulated().fire(pListener -> pListener.beanRemoved(pBean));
     //Remove the references from the bean, which were created through the container
     pBean.getHierarchicalStructure().getDirectParents().stream()
