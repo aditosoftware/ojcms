@@ -83,7 +83,6 @@ class BeanListenerTest extends AbstractCallCountTest
       assertEquals(fieldName, pField.getName());
       assertEquals(String.class, pField.getType());
       assertTrue(pField.hasAnnotation(Private.class));
-      assertEquals(3, pBean.getFieldCount());
     })));
     bean.addField(TextField.class, fieldName, Collections.singleton(new Private()
     {

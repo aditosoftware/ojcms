@@ -45,11 +45,11 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
    */
   default <TYPE> TYPE getValue(IField<TYPE> pField)
   {
-    if (!hasField(pField))
+    assert getEncapsulated() != null;
+    if (!getEncapsulated().containsField((Objects.requireNonNull(pField))))
       throw new BeanFieldDoesNotExistException(this, pField);
     if (pField.isPrivate())
       throw new BeanIllegalAccessException(this, pField);
-    assert getEncapsulated() != null;
     return getEncapsulated().getValue(pField);
   }
 
@@ -101,7 +101,8 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
    */
   default <TYPE> void setValue(IField<TYPE> pField, TYPE pValue)
   {
-    if (!hasField(pField))
+    assert getEncapsulated() != null;
+    if (!getEncapsulated().containsField(Objects.requireNonNull(pField)))
       throw new BeanFieldDoesNotExistException(this, pField);
     if (pField.isPrivate())
       throw new BeanIllegalAccessException(this, pField);
@@ -160,41 +161,48 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   }
 
   /**
-   * Determines if this bean has a certain field.
+   * Determines, if this bean has a certain field.
+   * Ignores private fields.
    *
    * @param pField the bean field to check
    * @return <tt>true</tt> if the field is present
    */
   default boolean hasField(IField<?> pField)
   {
+    if (pField.isPrivate())
+      throw new BeanIllegalAccessException(this, pField);
     assert getEncapsulated() != null;
     return getEncapsulated().containsField(pField);
   }
 
   /**
    * The amount of fields of this bean.
+   * Ignores private fields.
    *
-   * @return the field count
+   * @return the public field count
    */
   default int getFieldCount()
   {
     assert getEncapsulated() != null;
-    return getEncapsulated().getFieldCount();
+    return (int) streamFields().count();
   }
 
   /**
    * The index of a bean field.
    * Generally the index depends on the order of the defined fields.
+   * Ignores private fields.
    *
    * @param pField the bean field
    * @param <TYPE> the field's data type
-   * @return the index of the field
-   * @throws BeanFieldDoesNotExistException if, the field does not exists
+   * @return the index of the field, or -1 if not present
    */
   default <TYPE> int getFieldIndex(IField<TYPE> pField)
   {
-    assert getEncapsulated() != null;
-    return getEncapsulated().getFieldIndex(pField);
+    if (pField.isPrivate())
+      throw new BeanIllegalAccessException(this, pField);
+    return streamFields()
+        .collect(Collectors.toList())
+        .indexOf(pField);
   }
 
   /**
@@ -219,7 +227,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   default void listenWeak(IBeanChangeListener<BEAN> pListener)
   {
     assert getEncapsulated() != null;
-    getEncapsulated().addListener(pListener);
+    getEncapsulated().addListener(Objects.requireNonNull(pListener));
   }
 
   /**
@@ -230,7 +238,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   default void unlisten(IBeanChangeListener<BEAN> pListener)
   {
     assert getEncapsulated() != null;
-    getEncapsulated().removeListener(pListener);
+    getEncapsulated().removeListener(Objects.requireNonNull(pListener));
   }
 
   /**
@@ -280,7 +288,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   @Nullable
   default <TYPE> IStatisticData<TYPE> getStatisticData(IField<TYPE> pField)
   {
-    if (!hasField(pField))
+    if (!hasField(Objects.requireNonNull(pField)))
       throw new BeanFieldDoesNotExistException(this, pField);
     assert getEncapsulated() != null;
     //noinspection unchecked
@@ -400,6 +408,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
 
   /**
    * A stream containing all fields of this bean.
+   * Ignores private fields.
    *
    * @return a stream of bean fields
    */
@@ -407,12 +416,14 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   {
     assert getEncapsulated() != null;
     return getEncapsulated().streamFields()
+        .filter(pField -> !pField.isPrivate())
         .filter(pField -> getFieldActiveSupplier().isOptionalActive(pField));
   }
 
   /**
    * This bean as stream.
-   * It contains key value pairs describing the field-value combinations.
+   * It contains all field value tuples.
+   * Ignores private fields.
    *
    * @return a stream of field tuples
    */
@@ -420,6 +431,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
   {
     assert getEncapsulated() != null;
     return getEncapsulated().stream()
+        .filter(pFieldTuple -> !pFieldTuple.getField().isPrivate())
         .filter(pFieldTuple -> getFieldActiveSupplier().isOptionalActive(pFieldTuple.getField()));
   }
 }

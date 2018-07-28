@@ -44,7 +44,7 @@ interface IBeanEncapsulated<BEAN extends IBean<BEAN>> extends IEncapsulated<Fiel
    * Adds a bean field to the data core.
    *
    * @param pField the bean field to add
-   * @param pIndex the index at which the field should be added
+   * @param pIndex the index at which the field should be added (the index includes private fields)
    * @param <TYPE> the data type of the field
    */
   <TYPE> void addField(IField<TYPE> pField, int pIndex);
@@ -58,17 +58,9 @@ interface IBeanEncapsulated<BEAN extends IBean<BEAN>> extends IEncapsulated<Fiel
   <TYPE> void removeField(IField<TYPE> pField);
 
   /**
-   * The index of a certain bean field.
-   * The index depends in the definition order of the fields.
-   *
-   * @param pField the bean field field
-   * @param <TYPE> the data type of the field
-   * @return the index of the field
-   */
-  <TYPE> int getFieldIndex(IField<TYPE> pField);
-
-  /**
    * The amount of bean fields of this data core.
+   *
+   * @return the amount of fields (includes private fields)
    */
   int getFieldCount();
 

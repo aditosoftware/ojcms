@@ -83,7 +83,8 @@ public class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
    */
   protected <TYPE> TYPE getPrivateValue(IField<TYPE> pField)
   {
-    if (!hasField(pField))
+    assert getEncapsulated() != null;
+    if (!getEncapsulated().containsField(pField))
       throw new BeanFieldDoesNotExistException(this, pField);
     _checkNotPrivateAndWarn(pField);
     return encapsulated.getValue(pField);
@@ -98,7 +99,8 @@ public class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
    */
   protected <TYPE> void setPrivateValue(IField<TYPE> pField, TYPE pValue)
   {
-    if (!hasField(pField))
+    assert getEncapsulated() != null;
+    if (!getEncapsulated().containsField(pField))
       throw new BeanFieldDoesNotExistException(this, pField);
     _checkNotPrivateAndWarn(pField);
     //noinspection unchecked

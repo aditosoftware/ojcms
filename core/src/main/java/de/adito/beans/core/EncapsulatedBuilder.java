@@ -286,13 +286,6 @@ public final class EncapsulatedBuilder
     }
 
     @Override
-    public <TYPE> int getFieldIndex(IField<TYPE> pField)
-    {
-      return _ifFieldExistsWithResult(pField, pCheckedField -> isFieldFiltered() ?
-          streamFields().collect(Collectors.toList()).indexOf(pCheckedField) : fieldOrder.indexOf(pCheckedField));
-    }
-
-    @Override
     public int getFieldCount()
     {
       return isFieldFiltered() ? (int) streamFields().count() : fieldOrder.size();

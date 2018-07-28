@@ -28,12 +28,32 @@ public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
    */
   default <TYPE, FIELD extends IField<TYPE>> FIELD addField(Class<FIELD> pFieldType, String pName, Collection<Annotation> pAnnotations)
   {
+    return addField(pFieldType, pName, pAnnotations, -1);
+  }
+
+  /**
+   * Extends this bean by one field.
+   * A new field instance will be created.
+   *
+   * @param pFieldType   the new field's data type
+   * @param pName        the new field's name
+   * @param pAnnotations the new field's annotations
+   * @param pIndex       the index to add the field, or -1 to put the field at the end (includes private fields)
+   * @param <TYPE>       the generic data type of the new field
+   * @return the created field instance
+   */
+  default <TYPE, FIELD extends IField<TYPE>> FIELD addField(Class<FIELD> pFieldType, String pName,
+                                                            Collection<Annotation> pAnnotations, int pIndex)
+  {
     IBeanEncapsulated<BEAN> encapsulated = getEncapsulated();
     assert encapsulated != null;
     if (encapsulated.streamFields().anyMatch(pField -> pField.getName().equals(pName)))
       throw new RuntimeException("A field with the name '" + pName + "' is already existing at this bean!");
     FIELD newField = BeanFieldFactory.createField(pFieldType, pName, pAnnotations);
-    addField(newField);
+    if (pIndex == -1)
+      addField(newField);
+    else
+      addField(newField, pIndex);
     return newField;
   }
 
@@ -45,22 +65,22 @@ public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
    */
   default <TYPE> void addField(IField<TYPE> pField)
   {
-    addField(pField, getFieldCount());
+    addField(pField, getEncapsulated().getFieldCount());
   }
 
   /**
    * Extends this bean by a already existing field instance at a certain index.
    *
    * @param pField the field to add
-   * @param pIndex the index
+   * @param pIndex the index of the field (includes private fields)
    * @param <TYPE> the field's data type
    */
   default <TYPE> void addField(IField<TYPE> pField, int pIndex)
   {
-    if (hasField(pField))
-      throw new RuntimeException("A bean cannot have the same field twice! field: " + pField.getName());
     IBeanEncapsulated<BEAN> encapsulated = getEncapsulated();
     assert encapsulated != null;
+    if (encapsulated.containsField(pField))
+      throw new RuntimeException("A bean cannot have the same field twice! field: " + pField.getName());
     encapsulated.addField(pField, pIndex);
     if (getFieldActiveSupplier().isOptionalActive(pField))
       //noinspection unchecked

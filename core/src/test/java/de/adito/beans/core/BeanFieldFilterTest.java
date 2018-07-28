@@ -57,7 +57,7 @@ class BeanFieldFilterTest
   @Test
   public void testFieldIndex()
   {
-    assertThrows(BeanFieldDoesNotExistException.class, () -> bean.getFieldIndex(SomeBean.someField));
+    assertEquals(-1, bean.getFieldIndex(SomeBean.someField));
   }
 
   @Test
