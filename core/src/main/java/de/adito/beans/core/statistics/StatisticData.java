@@ -15,7 +15,7 @@ public class StatisticData<TYPE> implements IStatisticData<TYPE>
 {
   private final int maxEntrySize;
   private final Map<Long, TYPE> statistics;
-  private final List<IStatisticsListener<TYPE>> listeners = new ArrayList<>();
+  private final Set<IStatisticsListener<TYPE>> listeners = Collections.newSetFromMap(new WeakHashMap<>());
 
   /**
    * Creates new statistic data.
@@ -52,7 +52,7 @@ public class StatisticData<TYPE> implements IStatisticData<TYPE>
   }
 
   @Override
-  public synchronized void listen(IStatisticsListener<TYPE> pListener)
+  public synchronized void listenWeak(IStatisticsListener<TYPE> pListener)
   {
     listeners.add(pListener);
   }

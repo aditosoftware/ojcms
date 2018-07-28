@@ -455,7 +455,7 @@ public final class EncapsulatedBuilder
     @Override
     public void addBean(BEAN pBean, int pIndex)
     {
-      if (pIndex < 0 || pIndex >= size())
+      if (pIndex < 0 || pIndex > size())
         throw new IndexOutOfBoundsException("index: " + pIndex);
 
       //Is the limit reached?

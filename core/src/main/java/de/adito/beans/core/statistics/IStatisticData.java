@@ -5,7 +5,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.*;
 
 /**
  * Statistic data of bean elements.
@@ -38,6 +37,7 @@ public interface IStatisticData<TYPE>
    * The changes of the bean element.
    * A collection of timestamps with an associated value for each change.
    * The entries are ordered by their timestamps.
+   * This map is a read only view of the original changes. Future changes will be updated.
    *
    * @return a map that holds a timestamp as key and an associated value as value
    */
@@ -48,6 +48,8 @@ public interface IStatisticData<TYPE>
    * Creates a key value pair for every timestamp at a certain interval with the according data value at the specific time.
    * This creates time based entries from the first entry of changed statistic data until the very last.
    * Be aware that this could result in a large set of data and may reach memory limits, if the interval is not chosen properly.
+   *
+   * The entries of the resulting map will be extended, if a change of an according value happens.
    *
    * @return a map that holds a timestamp as key and an associated value as value (interval based)
    */
@@ -60,7 +62,6 @@ public interface IStatisticData<TYPE>
     final LinkedList<Long> timestamps = new LinkedList<>(changes.keySet());
     final long firstTimestamp = timestamps.getFirst();
     final long lastTimestamp = timestamps.getLast();
-
     //Resolves the value for a timestamp (removes all outdated timestamps from the list -> the first entry will be current timestamp)
     final Function<Long, TYPE> valueResolver = pTimestamp -> {
       while (timestamps.size() > 1 && timestamps.get(1) <= pTimestamp)
@@ -68,12 +69,7 @@ public interface IStatisticData<TYPE>
       return changes.get(timestamps.getFirst());
     };
 
-    final long totalDiff = lastTimestamp - firstTimestamp;
-    return LongStream.iterate(firstTimestamp, pTimeStamp -> pTimeStamp + pInterval)
-        //Add two entries, if the last entry surpasses the last entry of the changes
-        .limit(totalDiff / pInterval + (totalDiff % pInterval == 0 ? 1 : 2))
-        .boxed()
-        .collect(Collectors.toMap(pTimestamp -> pTimestamp, valueResolver, (pData1, pData2) -> pData1, LinkedHashMap::new));
+    return new IntervalStatisticsMap<>(pInterval, valueResolver, firstTimestamp, lastTimestamp, this);
   }
 
   /**
@@ -84,11 +80,11 @@ public interface IStatisticData<TYPE>
   void addEntry(@NotNull TYPE pEntry);
 
   /**
-   * Registers a listener for this data.
+   * Registers a weak listener for this data.
    *
    * @param pListener the listener that describes how to react to an addition of a new statistic entry
    */
-  void listen(IStatisticsListener<TYPE> pListener);
+  void listenWeak(IStatisticsListener<TYPE> pListener);
 
   /**
    * Unregisters a listener from this data.
@@ -98,7 +94,7 @@ public interface IStatisticData<TYPE>
   void unlisten(IStatisticsListener<TYPE> pListener);
 
   /**
-   * Deletes this statistic data.
+   * Deletes this statistic data and removes all listeners.
    */
   void destroy();
 }

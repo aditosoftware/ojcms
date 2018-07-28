@@ -65,7 +65,7 @@ class BeanStatisticsTest extends AbstractCallCountTest
     IStatisticData<String> statisticData = bean.getStatisticData(SomeBean.field);
     assertNotNull(statisticData);
     final AtomicInteger index = new AtomicInteger();
-    statisticData.listen((pTimeStamp, pEntry) -> {
+    statisticData.listenWeak((pTimeStamp, pEntry) -> {
       called();
       assertEquals("value" + index.getAndIncrement(), pEntry);
     });
@@ -73,7 +73,7 @@ class BeanStatisticsTest extends AbstractCallCountTest
   }
 
   @Test
-  public void testIntervalStatistics()
+  public void testIntervalStatistics() throws InterruptedException
   {
     _setupTestStatistics(10);
     final IStatisticData<String> beanStatistics = bean.getStatisticData(SomeBean.field);
@@ -83,7 +83,14 @@ class BeanStatisticsTest extends AbstractCallCountTest
     final long totalTimestampDiff = timestamps.getLast() - timestamps.getFirst();
     final int expectedEntryCount = (int) totalTimestampDiff / interval + (totalTimestampDiff % interval == 0 ? 1 : 2);
     final Map<Long, String> intervalStatistics = beanStatistics.getIntervalStatistics(interval);
-    assertEquals(expectedEntryCount, intervalStatistics.size());
+    final int actualEntrySize = intervalStatistics.size();
+    assertEquals(expectedEntryCount, actualEntrySize);
+    //wait a short time and add an entry, for that a statistic entry will be added
+    Thread.sleep(10);
+    final String newEntry = "someEntry";
+    bean.setValue(SomeBean.field, newEntry);
+    assertTrue(actualEntrySize < intervalStatistics.size());
+    assertEquals(newEntry, intervalStatistics.get(new LinkedList<>(intervalStatistics.keySet()).getLast()));
   }
 
   @Test
