@@ -17,7 +17,7 @@ public interface IHierarchicalStructure
 {
   /**
    * All direct parents (references) to this bean element.
-   * A reference is described as a node consisting of the bean and the field, that holds the reference.
+   * A reference is described as a node consisting of the bean and the field that holds the reference.
    *
    * @return a collection of hierarchical nodes describing the references
    */

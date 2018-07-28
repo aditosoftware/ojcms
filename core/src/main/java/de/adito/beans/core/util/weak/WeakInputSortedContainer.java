@@ -3,7 +3,6 @@ package de.adito.beans.core.util.weak;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * A weak reference container for any elements sorted by their input order.
@@ -68,7 +67,6 @@ public class WeakInputSortedContainer<ELEMENT> implements IInputSortedElements<E
     return content.entrySet().stream()
         .sorted(Map.Entry.comparingByValue())
         .map(Map.Entry::getKey)
-        .collect(Collectors.toList())
         .iterator();
   }
 
@@ -82,7 +80,7 @@ public class WeakInputSortedContainer<ELEMENT> implements IInputSortedElements<E
   private ELEMENT _requireNonNull(ELEMENT pElement)
   {
     if (pElement == null)
-      throw new IllegalArgumentException("null elements are not allowed!");
+      throw new IllegalArgumentException("Null elements are not allowed!");
     return pElement;
   }
 }

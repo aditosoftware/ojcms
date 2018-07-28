@@ -552,7 +552,7 @@ public final class EncapsulatedBuilder
     @Nullable
     private IStatisticData<Integer> _createStatisticData()
     {
-      Statistics statistics = BeanReflector.getContainerStatisticAnnotation(beanType);
+      Statistics statistics = beanType.getAnnotation(Statistics.class);
       return statistics != null ? new StatisticData<>(statistics.capacity(), size()) : null;
     }
 

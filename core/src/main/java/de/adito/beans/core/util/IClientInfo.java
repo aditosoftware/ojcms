@@ -12,11 +12,15 @@ public interface IClientInfo
 {
   /**
    * The client's locale.
+   *
+   * @return a locale
    */
   Locale getLocale();
 
   /**
    * The client's zone id.
+   *
+   * @return a zone id
    */
   ZoneId getZoneId();
 }

@@ -25,7 +25,7 @@ public interface IStatisticData<TYPE>
 
   /**
    * The size of the statistic data.
-   * This will be number of entries, that represent a value change at a certain time.
+   * This will be the number of entries, that represent a value change at a certain time.
    *
    * @return the size of the data
    */

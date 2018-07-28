@@ -6,7 +6,7 @@ import de.adito.beans.core.fields.FieldTuple;
 import java.util.stream.Stream;
 
 /**
- * Definition of an internal data mapper for bean values to modify the data in a any way before presenting it via streams.
+ * Definition of an internal data mapper for bean values to modify the data in any way before presenting it via streams.
  * This mapper affects one tuple, which leads to exactly one resulting tuple (1:1)
  * This may be used to present bean values in another format in certain situations.
  * This special mapper can be used to map a certain field only.

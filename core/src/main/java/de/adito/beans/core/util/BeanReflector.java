@@ -2,7 +2,7 @@ package de.adito.beans.core.util;
 
 import de.adito.beans.core.*;
 import de.adito.beans.core.annotations.Statistics;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.*;
 import java.util.*;
@@ -25,7 +25,7 @@ public final class BeanReflector
   /**
    * Reflects the bean fields of a certain bean type.
    *
-   * @param pBeanType the type of the bean, which must be an extension of {@link Bean} to own specific fields
+   * @param pBeanType the type of the bean, which must be a sub class of {@link Bean} to own specific fields
    * @return a list of bean fields
    */
   public static List<IField<?>> reflectBeanFields(Class<? extends IBean> pBeanType)
@@ -36,24 +36,12 @@ public final class BeanReflector
   /**
    * Reflects the declared bean fields of a certain bean type.
    *
-   * @param pBeanType the type of the bean, which must be an extension of {@link Bean} to own specific fields
+   * @param pBeanType the type of the bean, which must be a sub class of {@link Bean} to own specific fields
    * @return a list of the declared fields
    */
   public static List<Field> reflectDeclaredBeanFields(Class<? extends IBean> pBeanType)
   {
     return Collections.unmodifiableList(REFLECTION_CACHE.computeIfAbsent(pBeanType, BeanReflector::_createDeclaredFields));
-  }
-
-  /**
-   * Reflects the statistic annotation of a bean type. (null if not existing)
-   *
-   * @param pBeanType the bean's type
-   * @return the statistic annotation
-   */
-  @Nullable
-  public static Statistics getContainerStatisticAnnotation(Class<? extends IBean> pBeanType)
-  {
-    return pBeanType.getAnnotation(Statistics.class);
   }
 
   /**
@@ -96,7 +84,7 @@ public final class BeanReflector
   /**
    * Returns all public and static fields from a bean class type.
    *
-   * @param pBeanType the type of the bean, which must be an extension of {@link Bean} to own specific fields
+   * @param pBeanType the type of the bean, which must be a sub class of {@link Bean} to own specific fields
    * @return a list of declared fields of the bean type
    */
   private static List<Field> _createDeclaredFields(Class<? extends IBean> pBeanType)

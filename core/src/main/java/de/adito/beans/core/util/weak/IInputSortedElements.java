@@ -15,7 +15,7 @@ public interface IInputSortedElements<ELEMENT> extends Iterable<ELEMENT>
 {
   /**
    * Adds a element.
-   * It is not allowed to add null elements or duplicates
+   * It is not allowed to add null elements or duplicates.
    *
    * @param pElement the element to add
    * @return <tt>true</tt>, if the element has been added successfully
@@ -70,7 +70,7 @@ public interface IInputSortedElements<ELEMENT> extends Iterable<ELEMENT>
   }
 
   /**
-   * A stream of all elements in this collections
+   * A stream of all elements in this collections.
    *
    * @return a stream of elements
    */

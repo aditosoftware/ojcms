@@ -6,7 +6,7 @@ import de.adito.beans.core.fields.FieldTuple;
 import java.util.stream.Stream;
 
 /**
- * Definition of an internal data mapper for bean values to modify the data in a any way before presenting it via streams.
+ * Definition of an internal data mapper for bean values to modify the data in any way before presenting it via streams.
  * This mapper can be used to perform flat mapping operations to modify one tuple to multiple tuples.
  * This may be used to present bean values in a more detailed way in certain moments.
  *
@@ -27,7 +27,7 @@ public interface IBeanFlatDataMapper
   /**
    * Determines, if this mapping operation has been completed already.
    * This method can be used to implement iterative mapping operations.
-   * By default all operations only includes one step.
+   * By default all operations only include one step.
    *
    * @param pLastIterationChangesCount the number of changes/mappings made within the last iteration
    * @return <tt>true</tt>, if the mapping is completed

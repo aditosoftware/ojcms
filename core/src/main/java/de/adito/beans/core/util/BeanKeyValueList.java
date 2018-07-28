@@ -8,13 +8,18 @@ import java.util.*;
 /**
  * A list of key-value pairs which represent a bean.
  * This may be used to utilize the bean in a structure, where a list is required.
- * The list will react to changes at the original bean.
+ * The list is able to react to changes at the original bean.
  *
  * @param <BEAN> the type of the bean wich is represented
  * @author Simon Danner, 08.06.2017
  */
 public class BeanKeyValueList<BEAN extends IBean<BEAN>> extends ArrayList<BeanKeyValueList.KeyValue> implements IBeanChangeListener<BEAN>
 {
+  /**
+   * Create the key value list.
+   *
+   * @param pBean the bean it is based on
+   */
   public BeanKeyValueList(BEAN pBean)
   {
     pBean.stream()

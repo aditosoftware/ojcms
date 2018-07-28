@@ -35,9 +35,9 @@ public final class BeanUtil
 
   /**
    * Finds a field by its name.
-   * This method will lead to a runtime exception if the search isn't successful.
+   * This method will lead to a runtime exception, if the search isn't successful.
    *
-   * @param pBean      the bean where the field should exist
+   * @param pBean      the bean, where the field should exist
    * @param pFieldName the name of the searched field
    * @return the found bean field
    */
@@ -48,7 +48,7 @@ public final class BeanUtil
 
   /**
    * Finds a field by its name.
-   * This method will lead to a runtime exception if the search isn't successful.
+   * This method will lead to a runtime exception, if the search isn't successful.
    *
    * @param pFieldStream a stream of bean fields, which should contain the field
    * @param pFieldName   the name of the searched field
@@ -69,7 +69,7 @@ public final class BeanUtil
    * @param pBean1         the first bean to compare
    * @param pBean2         the second bean to compare
    * @param pFieldsToCheck a stream of fields, which should be used for the comparison
-   * @return a Optional that may contain the field with a different value (it is empty if all values are equal)
+   * @return an Optional that may contain the field with a different value (it is empty if all values are equal)
    */
   public static Optional<IField> compareBeanValues(IBean pBean1, IBean pBean2, Stream<IField<?>> pFieldsToCheck)
   {

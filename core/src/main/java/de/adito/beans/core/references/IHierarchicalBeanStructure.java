@@ -7,14 +7,14 @@ import java.util.stream.Collectors;
 
 /**
  * An extension of {@link IHierarchicalStructure} for beans.
- * Its main purpose is to analyze the deep references within a bean hierarchical structure.
+ * Its main purpose is to analyze deep references within a bean hierarchical structure.
  *
  * @author Simon Danner, 29.08.2017
  */
 public interface IHierarchicalBeanStructure extends IHierarchicalStructure
 {
   /**
-   * All bean fields of a certain bean within the parent reference structure, which lead to this bean at some moment.
+   * All bean fields of a certain bean within the parent reference structure, which lead to this bean at some place.
    * The references may be direct or accomplished over many nodes.
    *
    * @param pBean the bean that holds the reference

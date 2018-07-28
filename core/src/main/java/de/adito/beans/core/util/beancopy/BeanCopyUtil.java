@@ -18,8 +18,8 @@ public final class BeanCopyUtil
    * Creates a copy of a bean.
    * This method expects an existing default constructor for this concrete bean type.
    * If the copy should include deep fields, all deep beans are supposed to have default constructors as well.
-   * If it is not possible to provide a default constructor, you may use the other method to create bean copies.
-   * It allows you to define a custom constructor call to create the new instance.
+   * If it is not possible to provide a default constructor, you may use {@link #createCopy(IBean, boolean, Function, CustomFieldCopy[])}
+   * to create bean copies. It allows you to define a custom constructor call to create the new instance.
    *
    * @param pOriginal     the original bean to create the copy of
    * @param pDeepCopy     <tt>true</tt>, if the copy of the bean should also include deep values
@@ -43,7 +43,8 @@ public final class BeanCopyUtil
   /**
    * Creates a copy of a bean.
    * This method should be used, if there's no default constructor to create a new instance automatically.
-   * Otherwise use the other method to create the copy, where you are not supposed to define a custom constructor call.
+   * Otherwise use {@link #createCopy(IBean, boolean, CustomFieldCopy[])} to create the copy,
+   * where you are not supposed to define a custom constructor call.
    * If the copy should be deep, all deep bean values are supposed to have a default constructors.
    *
    * @param pOriginal              the original bean to create the copy of
