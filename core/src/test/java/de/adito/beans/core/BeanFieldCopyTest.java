@@ -39,7 +39,7 @@ public class BeanFieldCopyTest
         new _GenericFieldValueWrapper<>(BeanField.class, new SomeBean()),
         new _FieldValueWrapper<>(BooleanField.class, true),
         new _FieldValueWrapper<>(CharacterField.class, 'a'),
-        new _GenericFieldValueWrapper<>(ContainerField.class, new BeanContainer<>(SomeBean.class)),
+        new _GenericFieldValueWrapper<>(ContainerField.class, IBeanContainer.empty(SomeBean.class)),
         new _FieldValueWrapper<>(DateField.class, Instant.now()),
         new _FieldValueWrapper<>(DecimalField.class, 5.2),
         new _GenericFieldValueWrapper<>(GenericField.class, new ArrayList<>()),

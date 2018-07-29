@@ -144,7 +144,7 @@ class BeanListenerTest extends AbstractCallCountTest
   @CallCount
   public void testSingleContainerAddition()
   {
-    final IBeanContainer<SomeBean> container = new BeanContainer<>(SomeBean.class);
+    final IBeanContainer<SomeBean> container = IBeanContainer.empty(SomeBean.class);
     container.listenWeak(new _CallCountContainerListener(true, pBean -> assertSame(bean, pBean)));
     container.addBean(bean);
   }
@@ -153,7 +153,7 @@ class BeanListenerTest extends AbstractCallCountTest
   @CallCount(expectedCallCount = 2)
   public void testSingleContainerRemoval()
   {
-    final IBeanContainer<SomeBean> container = new BeanContainer<>(SomeBean.class);
+    final IBeanContainer<SomeBean> container = IBeanContainer.empty(SomeBean.class);
     container.listenWeak(new _CallCountContainerListener(false, pBean -> assertSame(bean, pBean)));
     container.addBean(bean);
     container.removeBean(bean);
@@ -163,7 +163,7 @@ class BeanListenerTest extends AbstractCallCountTest
   @CallCount(expectedCallCount = 10)
   public void testMultipleContainerAddition()
   {
-    final IBeanContainer<SomeBean> container = new BeanContainer<>(SomeBean.class);
+    final IBeanContainer<SomeBean> container = IBeanContainer.empty(SomeBean.class);
     container.listenWeak(new _CallCountContainerListener(false, pBean -> assertSame(bean, pBean)));
     IntStream.range(0, 10).forEach(pIndex -> container.addBean(bean));
   }
@@ -172,7 +172,7 @@ class BeanListenerTest extends AbstractCallCountTest
   @CallCount
   public void testBeanChangeWithinContainer()
   {
-    final IBeanContainer<SomeBean> container = new BeanContainer<>(SomeBean.class);
+    final IBeanContainer<SomeBean> container = IBeanContainer.empty(SomeBean.class);
     final String newValue = "changed";
     container.addBean(bean);
     container.listenWeak(new _CallCountContainerListener(new IBeanContainerChangeListener<SomeBean>()

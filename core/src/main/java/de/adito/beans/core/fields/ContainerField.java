@@ -2,9 +2,8 @@ package de.adito.beans.core.fields;
 
 import de.adito.beans.core.*;
 import de.adito.beans.core.annotations.TypeDefaultField;
-import de.adito.beans.core.references.IHierarchicalField;
-import de.adito.beans.core.references.IReferable;
-import de.adito.beans.core.util.beancopy.*;
+import de.adito.beans.core.references.*;
+import de.adito.beans.core.util.beancopy.CustomFieldCopy;
 import org.jetbrains.annotations.*;
 
 import java.lang.annotation.Annotation;
@@ -28,11 +27,8 @@ public class ContainerField<BEAN extends IBean<BEAN>> extends AbstractField<IBea
   @Override
   public IBeanContainer<BEAN> copyValue(IBeanContainer<BEAN> pOriginalContainer, CustomFieldCopy<?>... pCustomFieldCopies)
   {
-    IBeanContainer<BEAN> copy = new BeanContainer<>(pOriginalContainer.getBeanType());
-    pOriginalContainer.stream()
-        .map(pOriginalBean -> pOriginalBean.createCopy(true, pCustomFieldCopies))
-        .forEach(copy::addBean);
-    return copy;
+    return IBeanContainer.ofStream(pOriginalContainer.getBeanType(), pOriginalContainer.stream()
+        .map(pOriginalBean -> pOriginalBean.createCopy(true, pCustomFieldCopies)));
   }
 
   @Override

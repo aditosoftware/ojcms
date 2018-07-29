@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 /**
  * A default implementation of the bean container interface.
  * It stores the encapsulated data core.
+ * Instances can be created via static methods in {@link IBeanContainer}.
  *
  * @param <BEAN> the type of the beans in the container
  * @author Simon Danner, 23.08.2016
@@ -22,7 +23,7 @@ public class BeanContainer<BEAN extends IBean<BEAN>> implements IBeanContainer<B
    *
    * @param pBeanType the type of the beans in the container
    */
-  public BeanContainer(Class<BEAN> pBeanType)
+  protected BeanContainer(Class<BEAN> pBeanType)
   {
     this(pBeanType, Collections.emptyList());
   }
@@ -33,7 +34,7 @@ public class BeanContainer<BEAN extends IBean<BEAN>> implements IBeanContainer<B
    * @param pBeanType the type of the beans in the container
    * @param pBeans    the initial collection of beans in this container
    */
-  public BeanContainer(Class<BEAN> pBeanType, Collection<BEAN> pBeans)
+  protected BeanContainer(Class<BEAN> pBeanType, Iterable<BEAN> pBeans)
   {
     this(pBeanType, new DefaultEncapsulatedBuilder<>(pBeans));
   }
@@ -45,7 +46,7 @@ public class BeanContainer<BEAN extends IBean<BEAN>> implements IBeanContainer<B
    * @param pBeanType the type of the beans in the container
    * @param pBuilder  the encapsulated builder
    */
-  public BeanContainer(Class<BEAN> pBeanType, EncapsulatedBuilder.IContainerEncapsulatedBuilder<BEAN> pBuilder)
+  protected BeanContainer(Class<BEAN> pBeanType, EncapsulatedBuilder.IContainerEncapsulatedBuilder<BEAN> pBuilder)
   {
     beanType = pBeanType;
     setEncapsulated(pBuilder);
@@ -86,9 +87,10 @@ public class BeanContainer<BEAN extends IBean<BEAN>> implements IBeanContainer<B
   {
     private final List<BEAN> beanList;
 
-    DefaultEncapsulatedBuilder(Collection<BEAN> pBeans)
+    DefaultEncapsulatedBuilder(Iterable<BEAN> pBeans)
     {
-      beanList = new ArrayList<>(pBeans);
+      beanList = new ArrayList<>();
+      pBeans.forEach(beanList::add);
     }
 
     @Override

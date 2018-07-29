@@ -71,7 +71,7 @@ public final class BeanDataStore
   {
     //noinspection unchecked
     return (IBeanContainer<BEAN>) containerCache.computeIfAbsent(pPersistenceId, pId ->
-        EncapsulatedBuilder.injectCustomEncapsulated(new BeanContainer<>(pBeanType), dataStore.getContainer(pId, pBeanType)));
+        EncapsulatedBuilder.injectCustomEncapsulated(IBeanContainer.empty(pBeanType), dataStore.getContainer(pId, pBeanType)));
   }
 
   /**

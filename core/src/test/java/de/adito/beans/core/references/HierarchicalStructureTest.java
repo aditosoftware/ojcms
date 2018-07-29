@@ -84,7 +84,7 @@ class HierarchicalStructureTest
 
     public PersonRegistry()
     {
-      setValue(persons, new BeanContainer<>(Person.class, Arrays.asList(new Person(), new Person(), new Person())));
+      setValue(persons, IBeanContainer.ofVariableNotEmpty(new Person(), new Person(), new Person()));
     }
   }
 

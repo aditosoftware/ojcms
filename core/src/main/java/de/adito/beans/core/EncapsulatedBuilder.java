@@ -457,6 +457,7 @@ public final class EncapsulatedBuilder
         if (!limitInfo.evicting)
           throw new RuntimeException("The limit of this container is reached! limit: " + limitInfo.limit);
         removeBean(getBean(0)); //Remove first bean if limit is reached and evicting flag is set
+        pIndex--;
       }
 
       builder.addBean(pBean, pIndex);
@@ -515,6 +516,13 @@ public final class EncapsulatedBuilder
     @Override
     public void setLimit(int pMaxCount, boolean pEvicting)
     {
+      if (pMaxCount >= 0)
+      {
+        int diffToMany = size() - pMaxCount;
+        if (diffToMany > 0)
+          IntStream.range(0, diffToMany)
+              .forEach(pIndex -> removeBean(0));
+      }
       limitInfo = pMaxCount < 0 ? null : new _LimitInfo(pMaxCount, pEvicting);
     }
 

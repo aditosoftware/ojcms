@@ -89,6 +89,7 @@ interface IBeanContainerEncapsulated<BEAN extends IBean<BEAN>> extends IEncapsul
 
   /**
    * Defines a limit (=amount of beans) for this container data core.
+   * If the number of beans exceeds the limit, beans will be removed from the beginning of this container until the limit is reached.
    *
    * @param pMaxCount the maximum amount of beans in this core
    * @param pEvicting <tt>true</tt>, if the first beans should be removed, when the limit is reached

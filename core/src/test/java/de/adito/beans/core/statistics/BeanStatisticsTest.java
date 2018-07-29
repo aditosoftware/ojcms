@@ -43,7 +43,7 @@ class BeanStatisticsTest extends AbstractCallCountTest
   @Test
   public void testEntryAdditionForContainer() throws InterruptedException
   {
-    final IBeanContainer<SomeBean> container = new BeanContainer<>(SomeBean.class);
+    final IBeanContainer<SomeBean> container = IBeanContainer.empty(SomeBean.class);
     IStatisticData<Integer> statisticData = container.getStatisticData();
     assertNotNull(statisticData);
     Thread.sleep(5); //Avoid overriding the initial entry

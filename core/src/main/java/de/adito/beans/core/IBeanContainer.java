@@ -17,7 +17,8 @@ import java.util.stream.*;
  * This method may be called 'virtual field', because it gives access to an imaginary field that holds the data core.
  * This means you only have to give a reference to any bean container core to get a completed container, when this interface is used.
  *
- * This interface is implemented by the default bean container type {@link BeanContainer}, which is used to create containers for beans anywhere.
+ * This interface is implemented by the default bean container type {@link BeanContainer}.
+ * Via static methods of this interface it is possible to create container instances.
  * But it may also be used for any other class that should be treated as a bean container.
  * Furthermore you are able to extend this interface through special methods for your use case.
  * Through the use of an interface it is possible to extend the container type to a class that already extends another class.
@@ -35,6 +36,139 @@ import java.util.stream.*;
  */
 public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBeanContainerEncapsulated<BEAN>>
 {
+  /**
+   * Creates an empty bean container.
+   *
+   * @param pBeanType the type of the beans in the container
+   * @param <BEAN>    the generic type of the beans in the container
+   * @return an empty bean container
+   */
+  static <BEAN extends IBean<BEAN>> IBeanContainer<BEAN> empty(Class<BEAN> pBeanType)
+  {
+    return new BeanContainer<>(pBeanType);
+  }
+
+  /**
+   * Creates a bean container containing a single bean.
+   *
+   * @param pBean  the initial bean to add
+   * @param <BEAN> the generic type of the beans in the container
+   * @return a new bean container with one initial bean
+   */
+  static <BEAN extends IBean<BEAN>> IBeanContainer<BEAN> ofSingleBean(BEAN pBean)
+  {
+    return ofVariableNotEmpty(pBean);
+  }
+
+  /**
+   * Creates a bean container containing an initial amount of beans from a stream.
+   * The stream must at least contain one bean to infer the bean type from.
+   *
+   * @param pBeans a stream of beans to add to the new container
+   * @param <BEAN> the generic type of the beans in the container
+   * @return a new bean container with multiple initial beans
+   */
+  static <BEAN extends IBean<BEAN>> IBeanContainer<BEAN> ofStreamNotEmpty(Stream<BEAN> pBeans)
+  {
+    return ofIterableNotEmpty(pBeans.collect(Collectors.toList()));
+  }
+
+  /**
+   * Creates a bean container containing an initial amount of beans from a stream.
+   * The stream may be empty.
+   *
+   * @param pBeanType the type of the beans in the container
+   * @param pBeans    a stream of beans to add to the new container
+   * @param <BEAN>    the generic type of the beans in the container
+   * @return a new bean container with multiple initial beans
+   */
+  static <BEAN extends IBean<BEAN>> IBeanContainer<BEAN> ofStream(Class<BEAN> pBeanType, Stream<BEAN> pBeans)
+  {
+    final IBeanContainer<BEAN> container = empty(pBeanType);
+    container.addMultiple(pBeans);
+    return container;
+  }
+
+  /**
+   * Creates a new bean container containing an initial amount of beans from a varargs parameter.
+   * Has to be one bean at least to infer the bean type.
+   *
+   * @param pBeans the beans to add initially
+   * @param <BEAN> the generic type of the beans in the container
+   * @return a new bean container with multiple initial beans
+   */
+  @SafeVarargs
+  static <BEAN extends IBean<BEAN>> IBeanContainer<BEAN> ofVariableNotEmpty(BEAN... pBeans)
+  {
+    if (pBeans.length == 0)
+      throw new RuntimeException("Unable to infer bean type! Empty varargs argument not allowed here!");
+    //noinspection unchecked
+    final Class<BEAN> type = (Class<BEAN>) pBeans[0].getClass();
+    return ofVariable(type, pBeans);
+  }
+
+  /**
+   * Creates a new bean container containing an initial amount of beans from a varargs parameter.
+   *
+   * @param pBeanType the type of the beans in the container
+   * @param pBeans    the beans to add initially
+   * @param <BEAN>    the generic type of the beans in the container
+   * @return a new bean container with multiple initial beans
+   */
+  @SafeVarargs
+  static <BEAN extends IBean<BEAN>> IBeanContainer<BEAN> ofVariable(Class<BEAN> pBeanType, BEAN... pBeans)
+  {
+    return ofIterable(pBeanType, Arrays.asList(pBeans));
+  }
+
+  /**
+   * Creates a bean container containing an initial amount of beans from an iterable.
+   * The iterable must at least contain one bean to infer the bean type from.
+   *
+   * @param pBeans an iterable of beans to add to the container initially
+   * @param <BEAN> the generic type of the beans in the container
+   * @return a new bean container with multiple initial beans
+   */
+  static <BEAN extends IBean<BEAN>> IBeanContainer<BEAN> ofIterableNotEmpty(Iterable<BEAN> pBeans)
+  {
+    final Iterator<BEAN> it = pBeans.iterator();
+    if (!it.hasNext())
+      throw new RuntimeException("Unable to infer bean type! The amount of beans cannot be empty!");
+    //noinspection unchecked
+    final Class<BEAN> type = (Class<BEAN>) it.next().getClass();
+    return ofIterable(type, pBeans);
+  }
+
+  /**
+   * Creates a bean container containing an initial amount of beans from an iterable.
+   * The iterable may be empty.
+   *
+   * @param pBeanType the type of the beans in the container
+   * @param pBeans    an iterable of beans to add to the container initially
+   * @param <BEAN>    the generic type of the beans in the container
+   * @return a new bean container with multiple initial beans
+   */
+  static <BEAN extends IBean<BEAN>> IBeanContainer<BEAN> ofIterable(Class<BEAN> pBeanType, Iterable<BEAN> pBeans)
+  {
+    return new BeanContainer<>(pBeanType, pBeans);
+  }
+
+  /**
+   * Creates a new bean container with a custom encapsulated data core builder.
+   * The custom data core may be used for another level of abstraction.
+   *
+   * @param pBeanType the type of the beans in the container
+   * @param pBuilder  the custom data core builder
+   * @param <BEAN>    the generic bean type of the container
+   * @return an empty bean container with a custom data core
+   * @see EncapsulatedBuilder
+   */
+  static <BEAN extends IBean<BEAN>> IBeanContainer<BEAN> withCustomEncapsulated(Class<BEAN> pBeanType,
+                                                                                EncapsulatedBuilder.IContainerEncapsulatedBuilder<BEAN> pBuilder)
+  {
+    return new BeanContainer<>(pBeanType, pBuilder);
+  }
+
   /**
    * The type of the beans in this container.
    *
@@ -67,8 +201,40 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
   default void addBean(BEAN pBean, int pIndex)
   {
     assert getEncapsulated() != null;
-    getEncapsulated().addBean(pBean, pIndex);
+    getEncapsulated().addBean(Objects.requireNonNull(pBean), pIndex);
     BeanListenerUtil.beanAdded(this, pBean);
+  }
+
+  /**
+   * Adds multiple beans to this container.
+   *
+   * @param pBeans iterable beans
+   */
+  default void addMultiple(Iterable<BEAN> pBeans)
+  {
+    addMultiple(StreamSupport.stream(pBeans.spliterator(), false));
+  }
+
+  /**
+   * Adds multiple beans to this container.
+   *
+   * @param pBeanStream a stream of beans
+   */
+  default void addMultiple(Stream<BEAN> pBeanStream)
+  {
+    pBeanStream.forEach(this::addBean);
+  }
+
+  /**
+   * Merges another container with this container.
+   *
+   * @param pOtherContainer the container to merge
+   */
+  default void merge(IBeanContainer<? extends BEAN> pOtherContainer)
+  {
+    //noinspection unchecked
+    pOtherContainer.stream()
+        .forEach(this::addBean);
   }
 
   /**
@@ -86,7 +252,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
       throw new IndexOutOfBoundsException("index: " + pIndex);
 
     assert getEncapsulated() != null;
-    BEAN removed = getEncapsulated().replaceBean(pBean, pIndex);
+    BEAN removed = getEncapsulated().replaceBean(Objects.requireNonNull(pBean), pIndex);
     if (removed != null)
       BeanListenerUtil.beanRemoved(this, removed);
     BeanListenerUtil.beanAdded(this, pBean);
@@ -102,6 +268,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
    */
   default boolean removeBean(BEAN pBean)
   {
+    Objects.requireNonNull(pBean);
     return BeanListenerUtil.removeFromContainer(this, pEncapsulated -> pEncapsulated.removeBean(pBean) ? pBean : null) != null;
   }
 
@@ -153,8 +320,8 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
    */
   default BEAN getBean(int pIndex)
   {
-    if (pIndex < 0)
-      throw new RuntimeException("The index must be greater than 0. Given index: " + pIndex);
+    if (pIndex < 0 || pIndex >= size())
+      throw new IndexOutOfBoundsException("index: " + pIndex);
 
     assert getEncapsulated() != null;
     return getEncapsulated().getBean(pIndex);
@@ -170,7 +337,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
   default int indexOf(BEAN pBean)
   {
     assert getEncapsulated() != null;
-    return getEncapsulated().indexOfBean(pBean);
+    return getEncapsulated().indexOfBean(Objects.requireNonNull(pBean));
   }
 
   /**
@@ -182,6 +349,16 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
   {
     assert getEncapsulated() != null;
     return getEncapsulated().size();
+  }
+
+  /**
+   * Determines, if this container is empty.
+   *
+   * @return <tt>true</tt>, if the container contains no beans
+   */
+  default boolean isEmpty()
+  {
+    return size() == 0;
   }
 
   /**
@@ -218,6 +395,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
 
   /**
    * Sets a limit (= number of beans) for this container.
+   * If the number of beans exceeds the limit, beans will be removed from the beginning of this container until the limit is reached.
    *
    * @param pMaxCount the limit (-1 for no limit)
    * @param pEvicting <tt>true</tt>, if the first beans should be removed, when the limit is reached
@@ -277,7 +455,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
    */
   default <TYPE> Set<TYPE> getDistinctValuesFromField(IField<TYPE> pField)
   {
-    return getDistinctValues(pBean -> pBean.getValue(pField));
+    return getDistinctValues(pBean -> pBean.getValue(Objects.requireNonNull(pField)));
   }
 
   /**
@@ -317,7 +495,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
   default IBeanContainer<BEAN> asReadOnly()
   {
     assert getEncapsulated() != null;
-    return new ReadOnly<>(getEncapsulated());
+    return new ReadOnly<>(this);
   }
 
   /**
@@ -356,17 +534,17 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
   class ReadOnly<BEAN extends IBean<BEAN>> implements IBeanContainer<BEAN>
   {
     private static final String ERROR = "This container is read-only! The content can not be modified!";
-    private final IBeanContainerEncapsulated<BEAN> originalEncapsulated;
+    private final IBeanContainer<BEAN> originalContainer;
 
-    public ReadOnly(IBeanContainerEncapsulated<BEAN> pOriginalEncapsulated)
+    public ReadOnly(IBeanContainer<BEAN> pOriginalContainer)
     {
-      originalEncapsulated = pOriginalEncapsulated;
+      originalContainer = pOriginalContainer;
     }
 
     @Override
     public IBeanContainerEncapsulated<BEAN> getEncapsulated()
     {
-      return originalEncapsulated;
+      return originalContainer.getEncapsulated();
     }
 
     @Override
@@ -394,7 +572,19 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
     }
 
     @Override
+    public BEAN removeBean(int pIndex)
+    {
+      throw new UnsupportedOperationException(ERROR);
+    }
+
+    @Override
     public boolean removeBeanIf(Predicate<BEAN> pPredicate) throws UnsupportedOperationException
+    {
+      throw new UnsupportedOperationException(ERROR);
+    }
+
+    @Override
+    public boolean removeBeanIfAndBreak(Predicate<BEAN> pPredicate)
     {
       throw new UnsupportedOperationException(ERROR);
     }
@@ -403,6 +593,30 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
     public void clear() throws UnsupportedOperationException
     {
       throw new UnsupportedOperationException(ERROR);
+    }
+
+    @Override
+    public IBeanContainer<BEAN> withLimit(int pMaxCount, boolean pEvicting)
+    {
+      throw new UnsupportedOperationException(ERROR);
+    }
+
+    @Override
+    public void sort(Comparator<BEAN> pComparator)
+    {
+      throw new UnsupportedOperationException(ERROR);
+    }
+
+    @Override
+    public void merge(IBeanContainer<? extends BEAN> pOtherContainer)
+    {
+      throw new UnsupportedOperationException(ERROR);
+    }
+
+    @Override
+    public List<BEAN> asList()
+    {
+      return Collections.unmodifiableList(originalContainer.asList());
     }
   }
 }
