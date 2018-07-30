@@ -13,14 +13,14 @@ interface ISelfVisualTransformator<ENCAPSULATED extends IEncapsulated, SOURCE ex
     extends IVisualTransformator<SOURCE, TRANSFORMATOR, ENCAPSULATED, SOURCE>
 {
   @Override
-  default TRANSFORMATOR getVisualComponent(SOURCE pLogicComponent)
+  default TRANSFORMATOR createVisualComponent(SOURCE pLogicComponent)
   {
     //noinspection unchecked
     return (TRANSFORMATOR) this;
   }
 
   @Override
-  default TRANSFORMATOR getLinkedVisualComponent(SOURCE pLogicComponent)
+  default TRANSFORMATOR createLinkedVisualComponent(SOURCE pLogicComponent)
   {
     //noinspection unchecked
     return (TRANSFORMATOR) this;

@@ -76,7 +76,14 @@ interface ITransformable<LOGIC, VISUAL, ENCAPSULATED extends IEncapsulated, SOUR
    */
   default boolean isTransformed()
   {
-    return getOriginalSource() != null && getOriginalSource().getEncapsulated().isLinked(this);
+    try
+    {
+      return getEncapsulated().isLinked(this);
+    }
+    catch (NotTransformedException pE)
+    {
+      return false;
+    }
   }
 
   /**
@@ -104,7 +111,7 @@ interface ITransformable<LOGIC, VISUAL, ENCAPSULATED extends IEncapsulated, SOUR
    */
   default void transformedOrThrow() throws NotTransformedException
   {
-    transformedOrThrow(() -> new NotTransformedException(getClass().getSimpleName()));
+    transformedOrThrow(() -> new NotTransformedException(getClass().getName()));
   }
 
   /**
@@ -126,7 +133,8 @@ interface ITransformable<LOGIC, VISUAL, ENCAPSULATED extends IEncapsulated, SOUR
    */
   default SOURCE getOriginalSource()
   {
-    assert getTransformator().getOriginalSource() != null;
+    if (getTransformator() == null || getTransformator().getOriginalSource() == null)
+      throw new NotTransformedException(getClass().getName());
     return getTransformator().getOriginalSource();
   }
 

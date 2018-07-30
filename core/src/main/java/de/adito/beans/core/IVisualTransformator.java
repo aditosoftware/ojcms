@@ -29,12 +29,12 @@ interface IVisualTransformator<LOGIC, VISUAL, ENCAPSULATED extends IEncapsulated
   SOURCE getOriginalSource();
 
   /**
-   * The graphical presentation for a logical counterpart.
+   * Creates a new graphical presentation for a logical counterpart.
    *
    * @param pLogicComponent the logical bean element
    * @return a graphical component that represents the logical part
    */
-  VISUAL getVisualComponent(LOGIC pLogicComponent);
+  VISUAL createVisualComponent(LOGIC pLogicComponent);
 
   /**
    * Links the logical and graphical component based on the data model.
@@ -47,14 +47,14 @@ interface IVisualTransformator<LOGIC, VISUAL, ENCAPSULATED extends IEncapsulated
 
   /**
    * A linked graphical component for a logical counterpart.
-   * Combines {@link IVisualTransformator#getVisualComponent(LOGIC)} and {@link IVisualTransformator#link(LOGIC, VISUAL)}
+   * Combines {@link IVisualTransformator#createVisualComponent(LOGIC)} and {@link IVisualTransformator#link(LOGIC, VISUAL)}
    *
    * @param pLogicComponent the logical component (field, bean or container)
    * @return a graphical component that represents the logical part
    */
-  default VISUAL getLinkedVisualComponent(LOGIC pLogicComponent)
+  default VISUAL createLinkedVisualComponent(LOGIC pLogicComponent)
   {
-    VISUAL visualComponent = getVisualComponent(pLogicComponent);
+    VISUAL visualComponent = createVisualComponent(pLogicComponent);
     link(pLogicComponent, visualComponent);
     return visualComponent;
   }
