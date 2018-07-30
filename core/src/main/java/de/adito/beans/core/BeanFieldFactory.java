@@ -168,14 +168,18 @@ public final class BeanFieldFactory
    *
    * @param pField the bean field to check
    */
-  private static void _checkOptionalField(IField<?> pField) throws IllegalAccessException, InstantiationException
+  private static void _checkOptionalField(IField<?> pField) throws IllegalAccessException, InstantiationException, NoSuchMethodException,
+      InvocationTargetException
   {
     if (!pField.isOptional())
       return;
 
     OptionalField optional = pField.getAnnotation(OptionalField.class);
     assert optional != null;
-    OptionalField.IActiveCondition<?> activeCondition = optional.value().newInstance();
+    Constructor<? extends OptionalField.IActiveCondition> constructor = optional.value().getDeclaredConstructor();
+    if (!constructor.isAccessible())
+      constructor.setAccessible(true);
+    OptionalField.IActiveCondition<?> activeCondition = constructor.newInstance();
     pField.addAdditionalInformation(OptionalField.ACTIVE_CONDITION, activeCondition);
   }
 }

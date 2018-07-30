@@ -45,6 +45,7 @@ public class BeanFieldCopyTest
         new _GenericFieldValueWrapper<>(GenericField.class, new ArrayList<>()),
         new _FieldValueWrapper<>(IntegerField.class, 1),
         new _FieldValueWrapper<>(LongField.class, 4L),
+        new _FieldValueWrapper<>(ShortField.class, (short) 7),
         new _GenericFieldValueWrapper<>(MapField.class, new MapBean<>(testMap, Integer.class), pMapBean -> pMapBean.stream().count() == 2),
         new _FieldValueWrapper<>(TextField.class, "testing"));
   }

@@ -116,6 +116,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
     return builder.doSelectOne((IColumnIdentification<TYPE>) columns.get(pField), pSelect -> pSelect
         .where(beanIdCondition)
         .firstResult()
+        .map(pValue -> pValue == null ? pField.getInitialValue() : pValue)
         .orIfNotPresentThrow(() -> new OJDatabaseException("No result for bean id " + beanIdCondition.getValue() + " found. field: " + pField)));
   }
 
@@ -156,7 +157,9 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
   {
     //noinspection unchecked
     return columns.entrySet().stream()
-        .map(pEntry -> ((IField) pEntry.getKey()).newTuple(pResultRow.hasColumn(pEntry.getValue()) ? pResultRow.get(pEntry.getValue()) : null))
+        .map(pEntry -> ((IField) pEntry.getKey()).newTuple(
+            pResultRow.hasColumn(pEntry.getValue()) && pResultRow.get(pEntry.getValue()) == null ? pResultRow.get(pEntry.getValue()) :
+                pEntry.getKey().getInitialValue()))
         .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
   }
 

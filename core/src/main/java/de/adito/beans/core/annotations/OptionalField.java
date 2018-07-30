@@ -1,6 +1,6 @@
 package de.adito.beans.core.annotations;
 
-import de.adito.beans.core.*;
+import de.adito.beans.core.IBean;
 import de.adito.beans.core.fields.IAdditionalFieldInfo;
 
 import java.lang.annotation.*;
@@ -10,6 +10,7 @@ import java.util.function.Predicate;
  * Marks a bean field as an optional field.
  * This annotation also provides a predicate, which determines when this field is active.
  * If this field isn't active according to the predicate, the bean behaves like this field isn't existing at all.
+ * But it is still allowed to change the value of a non active bean field, because the condition may be based on the value.
  *
  * @author Simon Danner, 17.08.2017
  */
@@ -24,6 +25,8 @@ public @interface OptionalField
 
   /**
    * The condition that determines, when the bean-field should be active.
+   * The type can be private. An instance will be created via reflection.
+   * The type must define a default constructor.
    *
    * @return the type of the condition
    */

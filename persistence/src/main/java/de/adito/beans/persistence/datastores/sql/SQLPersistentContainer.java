@@ -308,6 +308,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
       return builder.doSelectOne(new BeanColumnIdentification<>(pField), pSelect -> pSelect
           .whereId(index)
           .firstResult()
+          .map(pValue -> pValue == null ? pField.getInitialValue() : pValue)
           .orIfNotPresentThrow(() -> new OJDatabaseException("No result for index " + index + " found. field: " + pField)));
     }
 
@@ -348,7 +349,8 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
     {
       //noinspection unchecked
       return columns.stream()
-          .map(pColumn -> ((IField) pColumn.getBeanField()).newTuple(pResultRow.hasColumn(pColumn) ? pResultRow.get(pColumn) : null))
+          .map(pColumn -> ((IField) pColumn.getBeanField()).newTuple(
+              pResultRow.hasColumn(pColumn) && pResultRow.get(pColumn) != null ? pResultRow.get(pColumn) : pColumn.getBeanField().getInitialValue()))
           .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
     }
   }

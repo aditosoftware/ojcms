@@ -207,7 +207,7 @@ public class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
     DefaultEncapsulatedBuilder(List<IField<?>> pFields)
     {
       values = pFields.stream()
-          .collect(LinkedHashMap::new, (pMap, pField) -> pMap.put(pField, null), HashMap::putAll);
+          .collect(LinkedHashMap::new, (pMap, pField) -> pMap.put(pField, pField.getInitialValue()), LinkedHashMap::putAll);
     }
 
     /**
@@ -227,7 +227,10 @@ public class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
      */
     DefaultEncapsulatedBuilder(Map<? extends IField<?>, Object> pPreset)
     {
-      values = new LinkedHashMap<>(pPreset);
+      values = pPreset.entrySet().stream()
+          .collect(LinkedHashMap::new,
+                   (pMap, pEntry) -> pMap.put(pEntry.getKey(), pEntry.getValue() == null ? pEntry.getKey().getInitialValue() :
+                       pEntry.getValue()), LinkedHashMap::putAll);
     }
 
     @Override

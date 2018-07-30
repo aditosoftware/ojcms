@@ -27,6 +27,12 @@ public class IntegerField extends AbstractField<Integer> implements ISerializabl
   }
 
   @Override
+  public Integer getInitialValue()
+  {
+    return 0;
+  }
+
+  @Override
   public Integer copyValue(Integer pValue, CustomFieldCopy<?>... pCustomFieldCopies)
   {
     return pValue;

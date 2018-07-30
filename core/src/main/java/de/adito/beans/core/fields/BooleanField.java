@@ -27,6 +27,12 @@ public class BooleanField extends AbstractField<Boolean> implements ISerializabl
   }
 
   @Override
+  public Boolean getInitialValue()
+  {
+    return false;
+  }
+
+  @Override
   public Boolean copyValue(Boolean pValue, CustomFieldCopy<?>... pCustomFieldCopies)
   {
     return pValue;

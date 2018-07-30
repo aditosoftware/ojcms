@@ -21,6 +21,18 @@ public class CharacterField extends AbstractField<Character> implements ISeriali
   }
 
   @Override
+  public Character getDefaultValue()
+  {
+    return '\u0000';
+  }
+
+  @Override
+  public Character getInitialValue()
+  {
+    return '\u0000';
+  }
+
+  @Override
   public Character copyValue(Character pValue, CustomFieldCopy<?>... pCustomFieldCopies)
   {
     return pValue;

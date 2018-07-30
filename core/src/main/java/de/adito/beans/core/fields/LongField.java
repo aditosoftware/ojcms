@@ -8,7 +8,7 @@ import java.lang.annotation.Annotation;
 import java.util.Collection;
 
 /**
- * A bean field that holds a Long.
+ * A bean field that holds a long.
  *
  * @author Simon Danner, 14.02.2017
  */
@@ -22,6 +22,12 @@ public class LongField extends AbstractField<Long> implements ISerializableField
 
   @Override
   public Long getDefaultValue()
+  {
+    return 0L;
+  }
+
+  @Override
+  public Long getInitialValue()
   {
     return 0L;
   }

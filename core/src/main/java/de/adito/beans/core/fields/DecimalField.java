@@ -27,6 +27,12 @@ public class DecimalField extends AbstractField<Double> implements ISerializable
   }
 
   @Override
+  public Double getInitialValue()
+  {
+    return 0.0;
+  }
+
+  @Override
   public Double copyValue(Double pValue, CustomFieldCopy<?>... pCustomFieldCopies)
   {
     return pValue;

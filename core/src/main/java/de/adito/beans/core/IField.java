@@ -32,9 +32,22 @@ public interface IField<TYPE>
 
   /**
    * A default value for this field.
-   * By default it's null.
+   * By default it is null.
+   *
+   * @return the default value for this field
    */
   default TYPE getDefaultValue()
+  {
+    return null;
+  }
+
+  /**
+   * An initial value for this field.
+   * By default it is null for reference types.
+   *
+   * @return the initial value for this field
+   */
+  default TYPE getInitialValue()
   {
     return null;
   }
