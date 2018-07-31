@@ -67,7 +67,7 @@ public class StatementFormatter
   /**
    * A static helper method to join multiple string with several {@link ESeparator}.
    *
-   * @param pMultipleStrings a stream of string to concatenate
+   * @param pMultipleStrings a stream of strings to concatenate
    * @param pSeparators      the separators for the single elements
    * @return the concatenated string
    */
@@ -187,7 +187,7 @@ public class StatementFormatter
   /**
    * Appends multiple statement format instances separated by several separators.
    *
-   * @param pFormatStream a stream of statement formats to appends
+   * @param pFormatStream a stream of statement formats to append
    * @param pSeparators   the separators to divide the single formats
    * @return this formatter itself to enable a pipelining mechanism
    */
@@ -200,7 +200,7 @@ public class StatementFormatter
    * Appends multiple prepared statement format instances separated by several separators.
    * The arguments of the formats will be collected.
    *
-   * @param pFormatStream a stream of prepared statement formats to appends
+   * @param pFormatStream a stream of prepared statement formats to append
    * @param pSeparators   the separators to divide the single formats
    * @return this formatter itself to enable a pipelining mechanism
    */
@@ -213,7 +213,7 @@ public class StatementFormatter
 
   /**
    * Appends an enumeration of multiple (prepared) arguments.
-   * For every argument a '?' divided by the given separators will be added to the format
+   * For every argument a '?' divided by the given separators will be added to the format.
    * The arguments will be added to the prepared argument collection.
    * A format example with a comma separator would be: "?, ?, ?, ?".
    * This could be used for the 'VALUES' clause of an insert statement.
@@ -348,7 +348,7 @@ public class StatementFormatter
 
     /**
      * Appends a string format with a leading whitespace.
-     * If the lastAddition ends with 'blacklisted' characters, no whitespace will be added. (see static set at the top)
+     * If the lastAddition ends with 'blacklisted' characters, no whitespace will be added. (see the static set at the top)
      *
      * @param pFormat the string format to append
      * @return the statement formatter itself
@@ -361,7 +361,7 @@ public class StatementFormatter
     }
 
     /**
-     * Adds a string format directly without a whitespace
+     * Adds a string format directly without a whitespace.
      *
      * @param pFormat the string format to append
      * @return the statement formatter itself

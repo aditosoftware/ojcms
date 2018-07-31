@@ -63,7 +63,7 @@ public class DBConnectionInfo
   }
 
   /**
-   * The port of the database to connect to
+   * The port of the database to connect to.
    *
    * @return a port number
    */
@@ -73,7 +73,7 @@ public class DBConnectionInfo
   }
 
   /**
-   * The name of the database to connect to
+   * The name of the database to connect to.
    *
    * @return a database name
    */
@@ -83,7 +83,7 @@ public class DBConnectionInfo
   }
 
   /**
-   * An optional username to use for the connection
+   * An optional username to use for the connection.
    *
    * @return a username or null, if not necessary
    */
@@ -94,7 +94,7 @@ public class DBConnectionInfo
   }
 
   /**
-   * An optional password to use for the connection
+   * An optional password to use for the connection.
    *
    * @return a password or null, if not necessary
    */

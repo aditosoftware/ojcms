@@ -12,7 +12,7 @@ import java.util.function.*;
 
 /**
  * Abstract base class for the SQL builder.
- * The database statements can be used and adapted in an functional way like the Java streams.
+ * The database statements can be used and adapted in a functional way like the Java streams.
  *
  * @author Simon Danner, 19.02.2018
  */
@@ -125,7 +125,7 @@ public abstract class AbstractSQLBuilder
 
   /**
    * Configures a statement before it will be executed.
-   * This method may be overwritten by child classes to adapt the statements in a specific way.
+   * This method may be overwritten by sub classes to adapt the statements in a specific way.
    *
    * @param pStatement  the statement to configure
    * @param <RESULT>    the generic type of the result of the statement
@@ -231,9 +231,9 @@ public abstract class AbstractSQLBuilder
   }
 
   /**
-   * The database connection information of the builder
+   * The database connection information of the builder.
    *
-   * @return database connection information
+   * @return the database connection information
    */
   public DBConnectionInfo getConnectionInfo()
   {
@@ -261,7 +261,7 @@ public abstract class AbstractSQLBuilder
   }
 
   /**
-   * The global id column id name used for this builder.
+   * The global id column name used for this builder.
    *
    * @return the global id column name
    */
@@ -272,7 +272,7 @@ public abstract class AbstractSQLBuilder
 
   /**
    * Creates the connection supplier for this builder.
-   * If connections should be closed after every statement, a supplier returning new connection on every call will be returned.
+   * If connections should be closed after every statement, a supplier returning new connections on every call will be returned.
    * Otherwise one connection will be created, that is always returned by the resulting supplier.
    *
    * @return a connection supplier
@@ -299,7 +299,7 @@ public abstract class AbstractSQLBuilder
   }
 
   /**
-   * Performs a database query with a certain result and closes the connectionSupplier afterwards, if necessary.
+   * Performs a database query with a certain result and closes the connection supplier afterwards, if necessary.
    *
    * @param pQuery         the initial query to configure and to execute afterwards
    * @param pQueryConsumer a function that will be provided with the query to configure it before the execution
@@ -423,7 +423,7 @@ public abstract class AbstractSQLBuilder
      *
      * @param pArgument the argument
      * @return the result of this function
-     * @throws EXCEPTION if, there went something wrong
+     * @throws EXCEPTION if something went wrong there
      */
     RESULT apply(ARG pArgument) throws EXCEPTION;
   }

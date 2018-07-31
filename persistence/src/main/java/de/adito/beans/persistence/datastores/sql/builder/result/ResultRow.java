@@ -64,12 +64,12 @@ public class ResultRow
    * The id/index of the row, if available.
    *
    * @return the id of this result row
-   * @throws OJDatabaseException if not available)
+   * @throws OJDatabaseException if not available
    */
   public Integer getIdIfAvailable()
   {
     if (index < 0)
-      throw new OJDatabaseException("A id column is not available in this result row!");
+      throw new OJDatabaseException("An id column is not available in this result row!");
     return index;
   }
 

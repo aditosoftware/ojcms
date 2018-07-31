@@ -8,7 +8,7 @@ import de.adito.beans.persistence.datastores.sql.builder.util.DBConnectionInfo;
 import java.util.function.Consumer;
 
 /**
- * A sql statement builder for a single database table.
+ * A SQL statement builder for a single database table.
  * The database statements can be used and adapted in an functional way like the Java streams.
  * This builder can be configured via {@link OJSQLBuilderFactory}.
  *
@@ -58,7 +58,7 @@ public class OJSQLBuilderForTable extends AbstractSQLBuilder
   }
 
   /**
-   * Checks, if a the table of this builder exists in the database.
+   * Checks, if the table of this builder exists in the database.
    *
    * @return <tt>true</tt>, if the table is existing
    */
@@ -68,7 +68,7 @@ public class OJSQLBuilderForTable extends AbstractSQLBuilder
   }
 
   /**
-   * Executes a create statement, if a the table of this builder is not existing in the database.
+   * Executes a create statement, if the table of this builder is not existing in the database.
    *
    * @param pCreateStatement the create statement to execute (defined in a pipelining mechanism)
    */

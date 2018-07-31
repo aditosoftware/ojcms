@@ -73,7 +73,7 @@ public class Update extends AbstractSQLStatement<WhereModifiers, Void, Void, Upd
    * Changes the id column based on the previous id.
    *
    * @param pOperation a numeric operation on the old id
-   * @param pNumber    a number to apply on the numeric operation ant the old id
+   * @param pNumber    a number to apply on the numeric operation and the old id
    * @return the update statement itself to enable a pipelining mechanism
    */
   public Update adaptId(ENumericOperation pOperation, int pNumber)

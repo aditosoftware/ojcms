@@ -22,7 +22,7 @@ public final class OJPersistence
   }
 
   /**
-   * Sets the configuration for the persistence framework.
+   * Configures the persistence framework.
    * If the configuration is not given, the framework is not enabled.
    *
    * @param pDataStoreSupplier a function that supplies a persistent data store created by {@link DataStoreFactory}
@@ -57,7 +57,7 @@ public final class OJPersistence
 
   /**
    * Removes all obsolete persistent single beans.
-   * Has to be package protected to ensure this method cannot be accessed by the user's of the framework.
+   * Has to be package protected to ensure this method cannot be accessed by the users of the framework.
    *
    * @param pStillExistingBeans all remaining single beans(to find the obsoletes)
    */
@@ -68,7 +68,7 @@ public final class OJPersistence
 
   /**
    * Removes all obsolete persistent containers.
-   * Has to be package protected to ensure this method cannot be accessed by the user's of the framework.
+   * Has to be package protected to ensure this method cannot be accessed by the users of the framework.
    *
    * @param pStillExistingContainers all remaining containers (to find the obsoletes)
    */

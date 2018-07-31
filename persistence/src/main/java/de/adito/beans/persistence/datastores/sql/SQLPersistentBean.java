@@ -25,8 +25,8 @@ import static de.adito.beans.persistence.datastores.sql.builder.definition.condi
  * This persistent bean is a {@link de.adito.beans.core.EncapsulatedBuilder.IBeanEncapsulatedBuilder} to create a bean later on.
  * Single persistent beans are stored in one database table.
  * Each row represents a bean. It will be identified by a unique id. (according to {@link Persist#containerId()})
- * If a bean is added, that has more columns than existing, the missing columns will be added.
- * Also columns will be removed, when the 'largest' bean is removed.
+ * If a bean is added, that has more columns than all existing ones, the missing columns will be added.
+ * Also, columns will be removed, when the 'largest' bean is removed.
  * The values of the fields are stored in a general serial string format, because columns types may be different.
  *
  * @param <BEAN> the type of the bean, that will be created from this persistent bean builder
@@ -45,7 +45,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
   /**
    * Removes all obsolete single beans from the database table and removes columns, if necessary.
    *
-   * @param pConnectionInfo       information for the database connection
+   * @param pConnectionInfo       the database connection information
    * @param pStillExistingBeanIds a collection of still existing single bean ids
    */
   public static void removeObsoletes(DBConnectionInfo pConnectionInfo, Collection<String> pStillExistingBeanIds)
@@ -61,7 +61,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
 
   /**
    * Creates the single bean database table, if it is not existing yet.
-   * This static entry point is necessary, because the table may have to be present before the usage of single bean. (e.g. for foreign keys)
+   * This static entry point is necessary, because the table may have to be present before the usage of a single bean. (e.g. for foreign keys)
    *
    * @param pConnectionInfo the database connection information
    */
@@ -92,7 +92,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
    *
    * @param pBeanId         the id of the bean
    * @param pBeanType       the final bean type, which will be created by this persistent bean
-   * @param pConnectionInfo information for the database connection
+   * @param pConnectionInfo the database connection information
    * @param pBeanDataStore  the data store for persistent bean elements
    */
   public SQLPersistentBean(String pBeanId, Class<BEAN> pBeanType, DBConnectionInfo pConnectionInfo, BeanDataStore pBeanDataStore)
@@ -148,7 +148,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
   }
 
   /**
-   * Transfers the result of a select query to a list of bean tuples.
+   * Transforms the result of a select query to a list of bean tuples.
    *
    * @param pResultRow the result row of the select query
    * @return a list of field value tuples

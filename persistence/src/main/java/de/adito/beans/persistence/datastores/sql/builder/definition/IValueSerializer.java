@@ -1,6 +1,5 @@
 package de.adito.beans.persistence.datastores.sql.builder.definition;
 
-import de.adito.beans.persistence.datastores.sql.builder.definition.column.IColumnDefinition;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -25,7 +24,7 @@ public interface IValueSerializer
 
   /**
    * Converts a serial value back to its original data value.
-   * The conversion is based on a {@link IColumnDefinition} to know where the value came from.
+   * The conversion is based on a {@link IColumnIdentification} to know where the value came from.
    *
    * @param pColumnIdentification the column identification for the value
    * @param pSerialValue          the serial value in a string format

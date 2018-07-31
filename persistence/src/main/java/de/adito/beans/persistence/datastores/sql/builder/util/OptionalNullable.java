@@ -9,7 +9,7 @@ import java.util.function.*;
  * A container for a nullable value.
  * The presence of this value is optional.
  * If the value isn't available, it is possible to provide a default value or throw a exception.
- * Furthermore there are several other methods, which a allow a comfortable usage in a functional way.
+ * Furthermore there are several other methods, which allow a comfortable usage in a functional way.
  * This implementation is based on the concept {@link java.util.Optional}.
  *
  * @param <TYPE> the data type of the value of this optional
@@ -47,7 +47,7 @@ public final class OptionalNullable<TYPE>
    * This means the optional condition is negative.
    *
    * @param <TYPE> the generic data type of the optional value
-   * @return a optional with a not present value
+   * @return an optional with a not present value
    */
   public static <TYPE> OptionalNullable<TYPE> notPresent()
   {
@@ -60,7 +60,7 @@ public final class OptionalNullable<TYPE>
    *
    * @param pValue the nullable value
    * @param <TYPE> the type of the value
-   * @return a optional with a present value
+   * @return an optional with a present value
    */
   public static <TYPE> OptionalNullable<TYPE> of(@Nullable TYPE pValue)
   {

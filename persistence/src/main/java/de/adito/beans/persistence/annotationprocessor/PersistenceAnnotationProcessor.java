@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 /**
  * Annotation processor for {@link Persist}.
  * It parses all annotations of the project and creates static access fields for persistent beans and containers.
- * There will be a class for beans and and an extra class for containers.
+ * There will be a class for beans and an extra class for containers.
  * The name of the static fields will be obtained from {@link Persist#containerId()}.
  *
  * @author Simon Danner, 26.02.2018
@@ -89,9 +89,7 @@ public class PersistenceAnnotationProcessor extends AbstractProcessor
             .build())
         .collect(Collectors.toSet());
 
-    final String allFields = pMapping.keySet().stream()
-        .collect(Collectors.joining(", "));
-
+    final String allFields = String.join(", ", pMapping.keySet());
     TypeSpec.Builder classBuilder = TypeSpec.classBuilder(pClassName)
         .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
         .addFields(fieldSpecs)
@@ -113,7 +111,7 @@ public class PersistenceAnnotationProcessor extends AbstractProcessor
 
   /**
    * The type name of a field based on the annotated bean type.
-   * It's either the type itself (single bean) or a bean container, that contains bean of the annotated class type.
+   * It's either the type itself (single bean) or a bean container, that contains beans of the annotated class type.
    *
    * @param pElement     the annotated class
    * @param pIsContainer <tt>true</tt>, if the field should provide a bean or a container (no single bean)

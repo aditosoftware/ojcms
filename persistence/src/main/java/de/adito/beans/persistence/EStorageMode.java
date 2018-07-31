@@ -10,7 +10,7 @@ import de.adito.beans.core.IBean;
 public enum EStorageMode
 {
   /**
-   * The beans have to be added to the container manually by calling {@link de.adito.beans.core.IBeanContainer#addBean(IBean)}.
+   * The beans have to be added to the container manually by calling {@link de.adito.beans.core.IBeanContainer#addBean(IBean)}, for example.
    */
   MANUAL,
 

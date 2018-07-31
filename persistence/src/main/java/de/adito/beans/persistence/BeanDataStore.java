@@ -33,10 +33,10 @@ public final class BeanDataStore
   }
 
   /**
-   * Returns a persistent bean by its persistence ID.
+   * Returns a persistent bean by its persistence id.
    * The bean will be created, if it isn't present in the cache.
    *
-   * @param pPersistenceId the persistence ID of the bean
+   * @param pPersistenceId the persistence id of the bean
    * @param pBeanType      the bean's type
    * @param <BEAN>         the generic bean type
    * @return the persistent bean
@@ -48,7 +48,7 @@ public final class BeanDataStore
       BEAN instance = BeanPersistenceUtil.newInstance(pBeanType);
       //Store tuples, that where initialized by the default constructor
       Set<FieldTuple> initializedTuples = instance.stream()
-          .filter(pTuple -> !pTuple.isDefaultValue())
+          .filter(pTuple -> !pTuple.isInitialValue())
           .collect(Collectors.toSet());
       BEAN injectedInstance = EncapsulatedBuilder.injectCustomEncapsulated(instance, dataStore.getSingleBean(pPersistenceId, pBeanType));
       //Set values from the default constructor for the persistent bean as well
@@ -59,10 +59,10 @@ public final class BeanDataStore
   }
 
   /**
-   * Returns a persistent bean container by its persistence ID.
+   * Returns a persistent bean container by its persistence id.
    * The container will be created, if it isn't present in the cache.
    *
-   * @param pPersistenceId the persistence ID of the container
+   * @param pPersistenceId the persistence id of the container
    * @param pBeanType      the type of the beans in the container
    * @param <BEAN>         the generic bean type
    * @return the persistent container
@@ -103,7 +103,7 @@ public final class BeanDataStore
   /**
    * Removes all obsolete persistent containers.
    *
-   * @param pStillExistingContainerIds all remaining containers ids (to find the obsoletes)
+   * @param pStillExistingContainerIds all remaining container ids (to find the obsoletes)
    */
   void removeObsoleteContainers(Collection<String> pStillExistingContainerIds)
   {

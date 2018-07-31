@@ -13,7 +13,7 @@ import java.util.List;
 public interface IPreparedStatementFormat extends IStatementFormat
 {
   /**
-   * The arguments for the prepared statement
+   * The arguments for the prepared statement.
    *
    * @param pDatabaseType the database type used for the statement
    * @param pIdColumnName the global name of the id column

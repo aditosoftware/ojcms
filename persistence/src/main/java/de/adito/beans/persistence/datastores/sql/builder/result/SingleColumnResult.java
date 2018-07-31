@@ -33,7 +33,7 @@ public class SingleColumnResult<TYPE> implements Iterable<TYPE>
    * The value of the result from the first row.
    * The result is optional because there may not be a first row.
    *
-   * @return a optional result value of the first row
+   * @return an optional result value of the first row
    */
   public OptionalNullable<TYPE> getFirst()
   {

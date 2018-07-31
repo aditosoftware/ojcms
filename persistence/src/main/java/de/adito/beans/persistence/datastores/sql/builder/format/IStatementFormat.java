@@ -12,7 +12,7 @@ public interface IStatementFormat
   /**
    * The definition in its database statement format.
    *
-   * @param pDatabaseType the database type used for statement
+   * @param pDatabaseType the database type used for the statement
    * @param pIdColumnName the global name of the id column
    * @return a string representing the definition
    */

@@ -1,7 +1,7 @@
 package de.adito.beans.persistence.datastores.sql.builder.util;
 
 /**
- * Exception class regarding sql/database errors within the OJ database statement builder framework.
+ * Exception class regarding SQL/database errors within the OJ database statement builder framework.
  *
  * @author Simon Danner, 20.02.2018
  */

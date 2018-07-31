@@ -9,7 +9,7 @@ import java.util.function.*;
 
 /**
  * A caching persistent data store implementation for {@link IPersistentBeanDataStore}.
- * The cache maps by the persistence id defined in {@link Persist#containerId()}.
+ * The cache maps by the persistence id, defined in {@link Persist#containerId()}.
  * The cache stores once created beans, that were injected with the persistent data cores.
  * This data store has to be provided with functions to retrieve the persistent data cores for a certain container id.
  *
@@ -25,13 +25,13 @@ public class CachingBeanDataStore implements IPersistentBeanDataStore
   private final Consumer<Collection<String>> containerObsoleteRemover;
 
   /**
-   * Create the caching persistent data store.
+   * Creates the caching persistent data store.
    *
-   * @param pBeanResolver              a function to get a persistent bean (data core) from a container id
+   * @param pBeanResolver              a function to get a persistent bean (data core) from a container id and a certain bean type
    * @param pContainerResolver         a function to get a persistent bean container (data core) from a container id and a certain bean type
    * @param pSingleBeanObsoleteRemover a function to clean up obsolete single beans in the persistent data store,
    *                                   takes a collection of all still existing single bean persistent ids
-   * @param pContainerObsoleteRemover  a function to clean up all obsolete containers in the persistent data store
+   * @param pContainerObsoleteRemover  a function to clean up all obsolete containers in the persistent data store,
    *                                   takes a collection of all still existing container persistent ids
    */
   public CachingBeanDataStore(BiFunction<String, Class<? extends IBean<?>>, IPersistentBean> pBeanResolver,

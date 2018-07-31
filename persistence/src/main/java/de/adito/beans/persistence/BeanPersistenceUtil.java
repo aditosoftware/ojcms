@@ -1,6 +1,6 @@
 package de.adito.beans.persistence;
 
-import de.adito.beans.core.*;
+import de.adito.beans.core.IBean;
 
 /**
  * General utility class for the persistence framework.
@@ -26,12 +26,12 @@ public final class BeanPersistenceUtil
     try
     {
       if (!pBeanType.isAnnotationPresent(Persist.class))
-        throw new RuntimeException("The bean type '" + pBeanType.getName() + "' is not marked as a persistent bean!");
+        throw new RuntimeException("The bean type '" + pBeanType.getName() + "' is not marked as persistent bean!");
       return pBeanType.newInstance();
     }
     catch (InstantiationException | IllegalAccessException pE)
     {
-      throw new RuntimeException("The persistent bean type '" + pBeanType.getName() + "' must have a default constructor!");
+      throw new RuntimeException("The persistent bean type '" + pBeanType.getName() + "' must define a default constructor!");
     }
   }
 }

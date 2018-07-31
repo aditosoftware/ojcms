@@ -23,14 +23,14 @@ public interface INumericValueAdaption<NUMBER extends Number> extends IStatement
   IColumnIdentification<NUMBER> getColumn();
 
   /**
-   * The mathematical operation that will be applied to the current value
+   * The mathematical operation that will be applied to the current value.
    *
    * @return a mathematical operation type
    */
   ENumericOperation getOperation();
 
   /**
-   * The adaption number for the operation
+   * The adaption number for the operation.
    *
    * @return a number for the operation
    */

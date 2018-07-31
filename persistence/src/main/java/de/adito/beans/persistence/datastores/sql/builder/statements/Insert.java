@@ -35,7 +35,7 @@ public class Insert extends AbstractBaseStatement<Void, Insert>
   }
 
   /**
-   * Determines the table name to perform the insertion on
+   * Determines the table name to perform the insertion on.
    *
    * @param pTableName the table name
    * @return the insert statement itself to enable a pipelining mechanism

@@ -60,8 +60,8 @@ class DefaultValueSerializer implements IValueSerializer
    * Adds a supported data type for this serializer.
    *
    * @param pType         the data type
-   * @param pSerializer   an function to get a serial string value from an actual value
-   * @param pDeserializer an function to get the actual value from the serial value
+   * @param pSerializer   a function to get a serial string value from an actual value
+   * @param pDeserializer a function to get the actual value from the serial value
    * @param <TYPE>        the generic data type
    */
   private static <TYPE> void _put(Class<TYPE> pType, Function<TYPE, String> pSerializer, Function<String, TYPE> pDeserializer)

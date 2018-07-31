@@ -9,7 +9,7 @@ import java.util.*;
 
 /**
  * The result of a select statement.
- * This result can only be used once, because it is based on a open database connection
+ * This result can only be used once, because it is based on an open database connection
  * and a cursor, which is moved through a {@link ResultSet}.
  * Either use {@link #getFirst()} or {@link #iterator()}.
  *

@@ -170,7 +170,7 @@ public class BeanSQLSerializer implements IValueSerializer
   }
 
   /**
-   * Generates a error message for non convertable values.
+   * Generates an error message for non convertable values.
    *
    * @param pField    the bean field the value belongs to
    * @param pToSerial <tt>true</tt>, if the conversion is from data value to persistent value

@@ -21,7 +21,7 @@ public class Create extends AbstractBaseStatement<Void, Create>
   /**
    * Creates the create statement.
    *
-   * @param pStatementExecutor the executor fot this statement
+   * @param pStatementExecutor the executor for this statement
    * @param pBuilder           the builder that created this statement to use other kinds of statements for a concrete statement
    * @param pDatabaseType      the database type used for this statement
    * @param pSerializer        the value serializer
@@ -97,7 +97,7 @@ public class Create extends AbstractBaseStatement<Void, Create>
     if (primaryKeyColumnNames.isEmpty())
       return;
     pFormatter.appendSeparator(ESeparator.COMMA, ESeparator.NEW_LINE);
-    pFormatter.appendConstant(EFormatConstant.PRIMARY_KEY, primaryKeyColumnNames.stream().collect(Collectors.joining(", ")));
+    pFormatter.appendConstant(EFormatConstant.PRIMARY_KEY, String.join(", ", primaryKeyColumnNames));
   }
 
   /**
@@ -120,7 +120,7 @@ public class Create extends AbstractBaseStatement<Void, Create>
         pReference.createReferencedTable(tableChecker.getConnectionInfo()); //Create referenced table, if necessary
       pFormatter.appendSeparator(ESeparator.COMMA, ESeparator.NEW_LINE);
       pFormatter.appendConstant(EFormatConstant.FOREIGN_KEY, pColumn, pReference.getTableName(),
-                                pReference.getColumnNames().stream().collect(Collectors.joining(", ")));
+                                String.join(", ", pReference.getColumnNames()));
     });
   }
 }

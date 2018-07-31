@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * A sql statement builder.
- * The database statements can be used and adapted in an functional way like the Java streams.
+ * A SQL statement builder.
+ * The database statements can be used and adapted in a functional way like the Java streams.
  * This builder can be used for multiple database tables.
  * This builder can be configured via {@link OJSQLBuilderFactory}.
  *

@@ -38,8 +38,7 @@ public interface IColumnDefinition extends IStatementFormat
   }
 
   /**
-   * Creates a default column definition for certain Java data types.
-   * Example: String.class -> STRING(255)
+   * Creates a column definition from a Java data type.
    *
    * @param pType       the data type
    * @param pColumnName the name of the column
@@ -79,7 +78,7 @@ public interface IColumnDefinition extends IStatementFormat
   }
 
   /**
-   * Creates an array of column definition based on a collection of certain source objects to resolve the properties from.
+   * Creates an array of column definitions based on a collection of certain source objects to resolve the properties from.
    *
    * @param pSourceCollection the collection of source objects
    * @param pNameResolver     a function to resolve the column name of the definition from a source object

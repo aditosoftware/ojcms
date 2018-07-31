@@ -37,7 +37,7 @@ public class Select extends AbstractSelect<Select>
    * @param pDatabaseType      the database type used for this statement
    * @param pSerializer        the value serializer
    * @param pIdColumnName      the id column name
-   * @param pColumns           the  columns to select
+   * @param pColumns           the columns to select
    */
   public Select(IStatementExecutor<ResultSet> pStatementExecutor, AbstractSQLBuilder pBuilder, EDatabaseType pDatabaseType,
                 IValueSerializer pSerializer, String pIdColumnName, IColumnIdentification<?>... pColumns)

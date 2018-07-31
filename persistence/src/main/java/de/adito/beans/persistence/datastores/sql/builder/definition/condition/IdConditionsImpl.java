@@ -3,7 +3,7 @@ package de.adito.beans.persistence.datastores.sql.builder.definition.condition;
 /**
  * Implementation for multiple, concatenated where conditions for id columns.
  * This class holds the added conditions and the concatenation types.
- * It stores {@link OperatorWithId} objects as condition. They provide a where condition statement format later on.
+ * It stores {@link OperatorWithId} objects as conditions. They provide a where condition statement format later on.
  *
  * @author Simon Danner, 21.07.2018
  */

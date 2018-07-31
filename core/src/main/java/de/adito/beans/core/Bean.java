@@ -246,7 +246,7 @@ public class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
       boolean existing = values.containsKey(pField);
       if (!pAllowNewField && !existing)
         throw new RuntimeException("It is not allowed to add new fields for this bean. field: " + pField.getName());
-      values.put(pField, pValue);
+      values.put(pField, pValue == null ? pField.getInitialValue() : pValue);
     }
 
     @Override

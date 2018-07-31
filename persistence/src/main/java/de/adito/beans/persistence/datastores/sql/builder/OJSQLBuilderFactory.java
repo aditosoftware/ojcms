@@ -3,12 +3,10 @@ package de.adito.beans.persistence.datastores.sql.builder;
 import de.adito.beans.persistence.datastores.sql.builder.definition.*;
 import de.adito.beans.persistence.datastores.sql.builder.util.DBConnectionInfo;
 
-import java.sql.Connection;
-
 /**
  * Factory for the SQL statement builders {@link OJSQLBuilder} and {@link OJSQLBuilderForTable}.
- * This is the only public entry point for the sql builder framework.
- * The builders can here be configured in a functional way.
+ * This is the only public entry point for the SQL builder framework.
+ * The builders can be configured in a functional way.
  *
  * @author Simon Danner, 15.05.2018
  */
@@ -21,7 +19,7 @@ public final class OJSQLBuilderFactory
   /**
    * Creates a new builder to configure a SQL statement builder.
    * The default {@link Builder} is used to create an {@link OJSQLBuilder}.
-   * If a sql builder for a single database table is necessary,
+   * If a SQL builder for a single database table is necessary,
    * {@link Builder#forSingleTable(String)} can be used to create an {@link OJSQLBuilderForTable}
    *
    * @param pDatabaseType       the type of the database to use for the builder
@@ -132,7 +130,7 @@ public final class OJSQLBuilderFactory
     }
 
     /**
-     * Configures the SQL builder for a multiple database tables.
+     * Configures the SQL builder for multiple database tables.
      *
      * @return the builder the SQL statement builder
      */
@@ -149,7 +147,7 @@ public final class OJSQLBuilderFactory
   }
 
   /**
-   * Abstract base for the builders to create SQL statement builders.
+   * Abstract base class for the builders to create SQL statement builders.
    *
    * @param <SQLBUILDER> the type of the final SQL statement builder, which will be created by this builder
    * @param <BUILDER>    the concrete type of this builder (used for pipelining)
@@ -204,8 +202,8 @@ public final class OJSQLBuilderFactory
     }
 
     /**
-     * Configures the builder to obtain a new connection the database for every statement.
-     * A used connection will be closed after every execution of a SQL statement.
+     * Configures the builder to obtain a new connection to the database for every statement.
+     * An used connection will be closed after every execution of a SQL statement.
      * The connections are based on several connection information.
      *
      * @param pConnectionInfo information for the database connection

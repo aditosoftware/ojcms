@@ -47,6 +47,16 @@ public class FieldTuple<TYPE>
     return Objects.equals(getField().getDefaultValue(), getValue());
   }
 
+  /**
+   * Determines, if the value of this tuple is the field's initial value.
+   *
+   * @return <tt>true</tt>, if it is the initial value
+   */
+  public boolean isInitialValue()
+  {
+    return Objects.equals(getField().getInitialValue(), getValue());
+  }
+
   @Override
   public String toString()
   {

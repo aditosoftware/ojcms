@@ -15,7 +15,7 @@ public class WhereModifiers
   private IWhereConditions whereCondition;
 
   /**
-   * Sets a multiple where condition for the id column
+   * Sets a multiple where condition for the id column.
    *
    * @param pMultipleIdCondition the multiple id condition
    */

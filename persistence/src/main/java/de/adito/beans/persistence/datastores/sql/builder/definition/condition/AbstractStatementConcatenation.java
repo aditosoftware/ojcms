@@ -8,7 +8,7 @@ import java.util.*;
 import java.util.stream.*;
 
 /**
- * Abstract base class for any AND-OR statement concatenations, which is negatable.
+ * Abstract base class for any AND-OR statement concatenation, which is negatable.
  *
  * @param <NEGATE>        the concrete type of the negatable class type
  * @param <CONCATENATION> the concrete type of the concatenation class

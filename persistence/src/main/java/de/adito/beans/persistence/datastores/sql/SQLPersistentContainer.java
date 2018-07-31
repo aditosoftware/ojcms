@@ -40,7 +40,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
   /**
    * Removes all obsolete bean container database tables.
    *
-   * @param pConnectionInfo            information for the database connection
+   * @param pConnectionInfo            the database connection information
    * @param pStillExistingContainerIds the ids of all still existing containers
    */
   public static void removeObsoletes(DBConnectionInfo pConnectionInfo, Collection<String> pStillExistingContainerIds)
@@ -55,7 +55,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
 
   /**
    * Creates a persistent container database table, if it is not existing yet.
-   * This static entry point is necessary, because the table may have to be present before the usage of container. (e.g. for foreign keys)
+   * This static entry point is necessary, because the table may have to be present before the usage of this container. (e.g. for foreign keys)
    *
    * @param pConnectionInfo the database connection information
    * @param pBeanType       the bean type of the container
@@ -90,7 +90,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
    * Creates a new persistent bean container.
    *
    * @param pBeanType       the type of the beans in the container
-   * @param pConnectionInfo information for the database connection
+   * @param pConnectionInfo the database connection information
    * @param pTableName      the name of the database table that represents this container core
    * @param pBeanDataStore  the data store for persistent bean elements
    */
@@ -188,6 +188,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
         .collect(Collectors.toList());
     final AtomicInteger index = new AtomicInteger();
     //Mapping: old index -> new index (based on the new order)
+    //noinspection RedundantStreamOptionalCall
     final Map<Integer, Integer> newIndexMapping = original.stream()
         .sorted(pComparator)
         .collect(Collectors.toMap(original::indexOf, pSortedBean -> index.getAndIncrement()));
@@ -283,7 +284,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
         .delete());
 
     if (!deleted)
-      throw new OJDatabaseException("Unexpected SQL error while removing bean from container!");
+      throw new OJDatabaseException("Unexpected SQL error while removing a bean from container! index: " + pIndex);
 
     beanCache.replaceAll((pKey, pValue) -> pKey < pIndex || pKey == beanCache.size() - 1 ? pValue : beanCache.get(pKey + 1).decrementIndex());
     beanCache.remove(beanCache.size() - 1);

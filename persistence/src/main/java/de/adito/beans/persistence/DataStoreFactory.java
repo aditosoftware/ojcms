@@ -19,7 +19,7 @@ import java.util.function.Function;
 public final class DataStoreFactory
 {
   /**
-   * Creates an SQL persistent bean data store.
+   * Creates a SQL persistent bean data store.
    *
    * @param pDatabaseType the database type
    * @param pHost         the host to connect to
@@ -33,7 +33,7 @@ public final class DataStoreFactory
   }
 
   /**
-   * Creates an SQL persistent bean data store.
+   * Creates a SQL persistent bean data store.
    *
    * @param pDatabaseType the database type
    * @param pHost         the host to connect to
