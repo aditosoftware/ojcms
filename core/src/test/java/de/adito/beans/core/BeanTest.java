@@ -59,7 +59,7 @@ class BeanTest
     bean.setValue(SomeBean.someField, null);
     bean.setValue(SomeBean.numberField, null);
     assertNull(bean.getValueOrDefault(SomeBean.someField));
-    assertNull(bean.getValue(SomeBean.numberField));
+    assertEquals(SomeBean.numberField.getInitialValue(), bean.getValue(SomeBean.numberField));
     assertEquals(0, (int) bean.getValueOrDefault(SomeBean.numberField));
   }
 
@@ -80,9 +80,7 @@ class BeanTest
   public void testClear()
   {
     bean.clear();
-    bean.stream()
-        .map(FieldTuple::getValue)
-        .forEach(Assertions::assertNull);
+    bean.stream().forEach(pTuple -> assertEquals(pTuple.getField().getInitialValue(), pTuple.getValue()));
   }
 
   @Test
