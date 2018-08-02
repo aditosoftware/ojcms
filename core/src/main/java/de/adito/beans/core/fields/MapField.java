@@ -6,80 +6,73 @@ import org.jetbrains.annotations.*;
 
 import java.lang.annotation.Annotation;
 import java.util.*;
-import java.util.function.*;
-import java.util.stream.Collectors;
+import java.util.function.Predicate;
 
 /**
- * A bean field that holds a map.
- * The original map will be transformed into a bean, which represents the mapping by its fields and according values.
+ * A bean field that holds a {@link Map}.
+ * The original map will be transformed into a bean, which represents the mapping by its fields and associated values.
  *
- * @param <TYPE> the value-type of the map.
+ * @param <KEY>   the key type of the map
+ * @param <VALUE> the value type of the map
  * @author Simon Danner, 01.02.2017
  */
-public class MapField<TYPE> extends AbstractField<MapBean<TYPE>>
+public class MapField<KEY, VALUE> extends AbstractField<MapBean<KEY, VALUE>>
 {
-  private final Set<IField<TYPE>> fieldCache = new HashSet<>();
+  private final Map<KEY, IField<?>> fieldCache = new HashMap<>();
 
-  public MapField(@NotNull Class<MapBean<TYPE>> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
+  public MapField(@NotNull Class<MapBean<KEY, VALUE>> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {
     super(pType, pName, pAnnotations);
   }
 
   /**
-   * Creates a bean from a map that contains strings as keys and any objects as values.
-   * The key defines the bean field's name.
+   * Creates a bean from a map.
+   * The key's hashcode defines the bean field's name.
+   * Each entry in the map will result in one bean field with the associated value.
    *
    * @param pMap       the map that will be transformed
    * @param pValueType the value type of the map
-   * @return a (modifiable) bean, which represents the original map
+   * @return a (modifiable) bean, that represents the original map
    */
-  public MapBean<TYPE> createBeanFromMap(Map<String, TYPE> pMap, Class<TYPE> pValueType)
+  public MapBean<KEY, VALUE> createBeanFromMap(Map<KEY, VALUE> pMap, Class<VALUE> pValueType)
   {
     return createBeanFromMap(pMap, pValueType, null);
   }
 
   /**
-   * Creates a bean from a map that contains strings as keys and any objects as values.
-   * The key defines the bean field's name.
+   * Creates a bean from a map.
+   * Each entry in the map will result in one bean field with the associated value.
    * This method is also able to define a field predicate, which excludes certain bean fields / map values.
    *
-   * @param pMap            the map that will be transformed
-   * @param pValueType      the value type of the map
-   * @param pFieldPredicate an optional field predicate, which determines what fields should be in the map bean
-   * @return a (modifiable) bean, which represents the original map
+   * @param pMap       the map that will be transformed
+   * @param pValueType the value type of the map
+   * @param pPredicate an optional field value predicate, which determines what fields should be in the map bean
+   * @return a (modifiable) bean, that represents the original map
    */
-  public MapBean<TYPE> createBeanFromMap(Map<String, TYPE> pMap, Class<TYPE> pValueType, @Nullable Predicate<IField<?>> pFieldPredicate)
+  public MapBean<KEY, VALUE> createBeanFromMap(Map<KEY, VALUE> pMap, Class<VALUE> pValueType, @Nullable Predicate<FieldTuple<VALUE>> pPredicate)
   {
-    MapBean<TYPE> bean = new MapBean<>(pMap, pValueType, fieldCache::add, (pFieldType, pName) ->
-        fieldCache.stream()
-            .filter(pField -> pField.getClass() == pFieldType && pField.getName().equals(pName))
-            .findAny());
-    if (pFieldPredicate != null)
-      bean.removeFieldIf(pFieldPredicate);
+    MapBean<KEY, VALUE> bean = new MapBean<>(pMap, pValueType, fieldCache::put, pKey -> Optional.ofNullable(fieldCache.get(pKey)));
+    if (pPredicate != null)
+      //noinspection unchecked
+      bean.removeFieldIf(pField -> pPredicate.test((FieldTuple<VALUE>) pField.newUntypedTuple(bean.getValueConverted(pField, pValueType))));
     return bean;
   }
 
   /**
-   * Transforms the bean back to the original map.
+   * Transforms the bean back to a normal map.
+   * The map will be a {@link LinkedHashMap}.
    *
-   * @param pBean      the bean that this field belongs to
-   * @param pValueType the value type of the field/map
+   * @param pBean the bean that this field belongs to
    * @return the original map, which was represented by the bean (new instance of the map)
    */
-  public Map<String, TYPE> createMapFromBean(IBean<?> pBean, Class<TYPE> pValueType)
+  public Map<KEY, VALUE> createMapFromBean(IBean<?> pBean)
   {
-    MapBean<TYPE> mapBean = pBean.getValue(this);
-    return mapBean.streamFields()
-        .collect(LinkedHashMap::new,
-                 (pMap, pField) -> pMap.put(pField.getName(), mapBean.getValueConverted(pField, pValueType)),
-                 LinkedHashMap::putAll);
+    return new LinkedHashMap<>(pBean.getValue(this));
   }
 
   @Override
-  public MapBean<TYPE> copyValue(MapBean<TYPE> pValue, CustomFieldCopy<?>... pCustomFieldCopies)
+  public MapBean<KEY, VALUE> copyValue(MapBean<KEY, VALUE> pValue, CustomFieldCopy<?>... pCustomFieldCopies)
   {
-    Function<MapBean<TYPE>, MapBean<TYPE>> creator = pMapBean -> new MapBean<>(pValue.streamFields().collect(Collectors.toList()),
-                                                                               pValue.getValueType());
-    return pValue.createCopy(true, creator, pCustomFieldCopies);
+    return pValue.createCopy(true, MapBean::new, pCustomFieldCopies);
   }
 }
