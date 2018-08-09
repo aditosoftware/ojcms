@@ -248,15 +248,19 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
    * If it is not possible to provide a default constructor, you may use the other method to create bean copies.
    * It allows you to define a custom constructor call to create the new instance.
    *
-   * @param pDeepCopy          <tt>true</tt>, if the copy of the bean should also include deep values
+   * A copy will always be created with the default encapsulated data core.
+   * If a custom data core should be injected,
+   * use {@link EncapsulatedBuilder#injectCustomEncapsulated(IBean, EncapsulatedBuilder.IBeanEncapsulatedBuilder)}.
+   *
+   * @param pMode              the copy mode
    * @param pCustomFieldCopies a collection of custom copy mechanisms for specific bean fields
    * @return a copy of this bean
    */
-  default BEAN createCopy(boolean pDeepCopy, CustomFieldCopy<?>... pCustomFieldCopies)
+  default BEAN createCopy(ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
   {
     assert getEncapsulated() != null;
     //noinspection unchecked
-    return BeanCopyUtil.createCopy((BEAN) this, pDeepCopy, pCustomFieldCopies);
+    return BeanCopyUtil.createCopy((BEAN) this, pMode, pCustomFieldCopies);
   }
 
   /**
@@ -265,16 +269,16 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
    * Otherwise use the other method to create the copy, where you are not supposed to define a custom constructor call.
    * If the copy should be deep, all deep bean values are supposed to have a default constructors.
    *
-   * @param pDeepCopy              <tt>true</tt>, if the copy of the bean should also include deep values
+   * @param pMode                  the copy mode
    * @param pCustomConstructorCall a custom constructor call defined as function (the input is the existing bean, the function should create the copy)
    * @param pCustomFieldCopies     a collection of custom copy mechanisms for specific bean fields
    * @return a copy of this bean
    */
-  default BEAN createCopy(boolean pDeepCopy, Function<BEAN, BEAN> pCustomConstructorCall, CustomFieldCopy<?>... pCustomFieldCopies)
+  default BEAN createCopy(ECopyMode pMode, Function<BEAN, BEAN> pCustomConstructorCall, CustomFieldCopy<?>... pCustomFieldCopies)
   {
     assert getEncapsulated() != null;
     //noinspection unchecked
-    return BeanCopyUtil.createCopy((BEAN) this, pDeepCopy, pCustomConstructorCall, pCustomFieldCopies);
+    return BeanCopyUtil.createCopy((BEAN) this, pMode, pCustomConstructorCall, pCustomFieldCopies);
   }
 
   /**

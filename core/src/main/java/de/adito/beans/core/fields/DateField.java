@@ -2,7 +2,7 @@ package de.adito.beans.core.fields;
 
 import de.adito.beans.core.annotations.TypeDefaultField;
 import de.adito.beans.core.util.IClientInfo;
-import de.adito.beans.core.util.beancopy.CustomFieldCopy;
+import de.adito.beans.core.util.beancopy.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
@@ -36,7 +36,7 @@ public class DateField extends AbstractField<Instant> implements ISerializableFi
   }
 
   @Override
-  public Instant copyValue(Instant pValue, CustomFieldCopy<?>... pCustomFieldCopies)
+  public Instant copyValue(Instant pValue, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
   {
     return Instant.ofEpochMilli(pValue.toEpochMilli());
   }

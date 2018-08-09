@@ -1,6 +1,7 @@
 package de.adito.beans.core.fields;
 
 import de.adito.beans.core.*;
+import de.adito.beans.core.util.beancopy.*;
 import org.junit.jupiter.api.*;
 
 import java.util.*;
@@ -31,14 +32,7 @@ class MapFieldTest
   {
     final SomeBean bean = new SomeBean();
     bean.setValue(SomeBean.mapField, SomeBean.mapField.createBeanFromMap(data, String.class));
-    MapBean<Integer, String> mapBean = bean.getValue(SomeBean.mapField);
-    final AtomicInteger index = new AtomicInteger();
-    //Test in order and proper to bean transformation
-    mapBean.stream()
-        .forEach(pTuple -> {
-          assertEquals(String.valueOf(index.get()), pTuple.getField().getName());
-          assertEquals("value" + index.getAndIncrement(), pTuple.getValue());
-        });
+    _testFieldTuples(bean.getValue(SomeBean.mapField));
     //Test backwards transformation to map
     Map<Integer, String> backToMap = SomeBean.mapField.createMapFromBean(bean);
     assertEquals(data, backToMap);
@@ -49,7 +43,7 @@ class MapFieldTest
   {
     //Allow only odd numbers
     MapBean<Integer, String> mapBean = SomeBean.mapField.createBeanFromMap(data, String.class,
-                                                                           pTuple -> Integer.parseInt(pTuple.getValue().substring(5)) % 2 == 1);
+                                                                           pTuple -> Integer.parseInt(pTuple.getValue().substring(5)) % 2 == 0);
     final AtomicInteger index = new AtomicInteger(1);
     mapBean.stream()
         .forEach(pTuple -> {
@@ -76,6 +70,32 @@ class MapFieldTest
     map.entrySet().removeIf(pEntry -> pEntry.getKey() == 5);
     assertEquals(9, map.size());
     assertTrue(map.values().stream().noneMatch(pValue -> pValue.equals("value5")));
+  }
+
+  @Test
+  public void testFlatMapBean()
+  {
+    final SomeBean bean = new SomeBean();
+    bean.setValue(SomeBean.mapField, SomeBean.mapField.createBeanFromMap(data, String.class));
+    final SomeBean flatBean = BeanFlattenUtil.makeFlat(bean.createCopy(ECopyMode.DEEP_ONLY_BEAN_FIELDS), true);
+    assertEquals(10, flatBean.stream().count());
+    _testFieldTuples(flatBean);
+  }
+
+  /**
+   * Tests, if the field tuples of a bean fit to the map entries accordingly.
+   *
+   * @param pBean the bean to test
+   */
+  private void _testFieldTuples(IBean<?> pBean)
+  {
+    final AtomicInteger index = new AtomicInteger();
+    //Test in order and proper to bean transformation
+    pBean.stream()
+        .forEach(pTuple -> {
+          assertEquals(String.valueOf(index.get()), pTuple.getField().getName());
+          assertEquals("value" + index.getAndIncrement(), pTuple.getValue());
+        });
   }
 
   /**

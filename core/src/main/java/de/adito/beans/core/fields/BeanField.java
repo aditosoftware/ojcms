@@ -30,8 +30,8 @@ public class BeanField<BEAN extends IBean<BEAN>> extends AbstractField<BEAN> imp
   }
 
   @Override
-  public BEAN copyValue(BEAN pValue, CustomFieldCopy<?>... pCustomFieldCopies)
+  public BEAN copyValue(BEAN pValue, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
   {
-    return pValue.createCopy(true, pCustomFieldCopies);
+    return pValue.createCopy(pMode, pCustomFieldCopies);
   }
 }

@@ -1,7 +1,7 @@
 package de.adito.beans.core.fields;
 
 import de.adito.beans.core.annotations.TypeDefaultField;
-import de.adito.beans.core.util.beancopy.CustomFieldCopy;
+import de.adito.beans.core.util.beancopy.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
@@ -33,7 +33,7 @@ public class ShortField extends AbstractField<Short> implements ISerializableFie
   }
 
   @Override
-  public Short copyValue(Short pValue, CustomFieldCopy<?>... pCustomFieldCopies)
+  public Short copyValue(Short pValue, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
   {
     return pValue;
   }

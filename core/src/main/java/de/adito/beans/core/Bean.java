@@ -10,7 +10,7 @@ import java.util.logging.*;
 import java.util.stream.Collectors;
 
 /**
- * The default concrete class of the bean interface.
+ * The default implementing class of the bean interface.
  * It holds the encapsulated data core, which is the only state of the bean.
  *
  * This class should be extended by any bean type of the application.
@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  * @author Simon Danner, 23.08.2016
  * @see BeanFieldFactory
  */
-public class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
+public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
 {
   private static final Logger LOGGER = Logger.getLogger(Bean.class.getName());
   private IBeanEncapsulated<BEAN> encapsulated;

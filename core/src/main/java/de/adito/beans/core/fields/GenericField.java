@@ -22,15 +22,16 @@ public class GenericField<TYPE> extends AbstractField<TYPE>
   }
 
   @Override
-  public TYPE copyValue(TYPE pValue, CustomFieldCopy<?>... pCustomFieldCopies) throws BeanCopyUnsupportedException
+  public TYPE copyValue(TYPE pValue, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies) throws BeanCopyUnsupportedException
   {
     try
     {
-      return BeanCopyUtil.tryCopyPerDefaultConstructor(pValue);
+      //noinspection unchecked
+      return (TYPE) pValue.getClass().newInstance();
     }
-    catch (UnsupportedOperationException pE)
+    catch (IllegalAccessException | InstantiationException pE)
     {
-      throw new BeanCopyUnsupportedException(this);
+      throw new BeanCopyUnsupportedException(this, pE);
     }
   }
 

@@ -4,6 +4,7 @@ import de.adito.beans.core.*;
 import de.adito.beans.core.fields.FieldTuple;
 import org.jetbrains.annotations.*;
 
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -31,6 +32,25 @@ public final class BeanUtil
         .filter(pFieldTuple -> pFieldPredicate == null || pFieldPredicate.test(pFieldTuple.getField(), pFieldTuple.getValue()))
         //Use the LinkedHashMap-Collector to keep the order and allow null values
         .collect(LinkedHashMap::new, (pMap, pFieldTuple) -> pMap.put(pFieldTuple.getField(), pFieldTuple.getValue()), LinkedHashMap::putAll);
+  }
+
+  /**
+   * Checks, if a bean type is a valid declared type.
+   * It has to be public and an extension of {@link Bean}.
+   * Throws a runtime exception, if the type is invalid.
+   * This check can be used in any cases, where especially transformed types are not allowed.
+   *
+   * @param pBeanType the bean type to check
+   * @return the valid bean type
+   */
+  public static Class<? extends IBean> requiresDeclaredBeanType(Class<? extends IBean> pBeanType)
+  {
+    if (!Modifier.isPublic(pBeanType.getModifiers()))
+      throw new RuntimeException(pBeanType.getName() + " is not a valid bean type! It has to be declared public to create fields!");
+
+    if (!Bean.class.isAssignableFrom(pBeanType) && !MapBean.class.isAssignableFrom(pBeanType)) //To make sure it isn't a transformed type
+      throw new RuntimeException(pBeanType.getName() + " is not a valid bean type to reflect fields from. Do not use transformed bean types!");
+    return pBeanType;
   }
 
   /**

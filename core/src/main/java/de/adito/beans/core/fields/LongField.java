@@ -1,7 +1,7 @@
 package de.adito.beans.core.fields;
 
 import de.adito.beans.core.annotations.TypeDefaultField;
-import de.adito.beans.core.util.beancopy.CustomFieldCopy;
+import de.adito.beans.core.util.beancopy.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
@@ -33,7 +33,7 @@ public class LongField extends AbstractField<Long> implements ISerializableField
   }
 
   @Override
-  public Long copyValue(Long pValue, CustomFieldCopy<?>... pCustomFieldCopies)
+  public Long copyValue(Long pValue, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
   {
     return pValue;
   }

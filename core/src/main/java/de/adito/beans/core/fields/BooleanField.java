@@ -1,7 +1,7 @@
 package de.adito.beans.core.fields;
 
 import de.adito.beans.core.annotations.TypeDefaultField;
-import de.adito.beans.core.util.beancopy.CustomFieldCopy;
+import de.adito.beans.core.util.beancopy.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
@@ -33,7 +33,7 @@ public class BooleanField extends AbstractField<Boolean> implements ISerializabl
   }
 
   @Override
-  public Boolean copyValue(Boolean pValue, CustomFieldCopy<?>... pCustomFieldCopies)
+  public Boolean copyValue(Boolean pValue, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
   {
     return pValue;
   }

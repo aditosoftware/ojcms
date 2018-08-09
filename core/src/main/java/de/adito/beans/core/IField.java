@@ -2,7 +2,7 @@ package de.adito.beans.core;
 
 import de.adito.beans.core.fields.*;
 import de.adito.beans.core.util.IClientInfo;
-import de.adito.beans.core.util.beancopy.CustomFieldCopy;
+import de.adito.beans.core.util.beancopy.*;
 import de.adito.beans.core.util.exceptions.BeanCopyUnsupportedException;
 import org.jetbrains.annotations.Nullable;
 
@@ -68,11 +68,13 @@ public interface IField<TYPE>
   /**
    * Creates a copy of the value of this field.
    *
-   * @param pValue the value to create the copy from
+   * @param pValue             the value to create the copy from
+   * @param pMode              the copy mode
+   * @param pCustomFieldCopies a collection of custom copy mechanisms for specific bean fields
    * @return a copy of the field value
    * @throws UnsupportedOperationException if, it is not possible to create a copy
    */
-  default TYPE copyValue(TYPE pValue, CustomFieldCopy<?>... pCustomFieldCopies) throws BeanCopyUnsupportedException
+  default TYPE copyValue(TYPE pValue, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies) throws BeanCopyUnsupportedException
   {
     throw new BeanCopyUnsupportedException(this);
   }

@@ -1,6 +1,6 @@
 package de.adito.beans.core.fields;
 
-import de.adito.beans.core.util.beancopy.CustomFieldCopy;
+import de.adito.beans.core.util.beancopy.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
@@ -43,7 +43,7 @@ public class EnumField<ENUM extends Enum> extends AbstractField<ENUM> implements
   }
 
   @Override
-  public ENUM copyValue(ENUM pValue, CustomFieldCopy<?>... pCustomFieldCopies)
+  public ENUM copyValue(ENUM pValue, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
   {
     return pValue;
   }

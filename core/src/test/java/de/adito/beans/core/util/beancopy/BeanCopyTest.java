@@ -4,7 +4,7 @@ import de.adito.beans.core.*;
 import de.adito.beans.core.fields.*;
 import org.junit.jupiter.api.Test;
 
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -16,10 +16,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class BeanCopyTest
 {
   @Test
-  public void testNonDeepCopy()
+  public void testShallowCopy()
   {
     Data original = new Data();
-    Data copy = original.createCopy(false);
+    Data copy = original.createCopy(ECopyMode.SHALLOW_ONLY_BEAN_FIELDS);
     assertNotSame(original, copy);
     final String newName = "newName";
     original.getValue(Data.person1).setValue(Person.name, newName);
@@ -27,10 +27,10 @@ class BeanCopyTest
   }
 
   @Test
-  public void testNonDeepCopyWithCustomConstructor()
+  public void testShallowCopyWithCustomConstructor()
   {
     Data original = new Data();
-    Data copy = original.createCopy(false, pData -> new Data(new Person(), new Person()));
+    Data copy = original.createCopy(ECopyMode.SHALLOW_ONLY_BEAN_FIELDS, pData -> new Data(new Person(), new Person()));
     assertNotSame(original, copy);
     assertSame(original.getValue(Data.person1), copy.getValue(Data.person1));
   }
@@ -39,7 +39,7 @@ class BeanCopyTest
   public void testDeepCopy()
   {
     Data original = new Data();
-    Data copy = original.createCopy(true);
+    Data copy = original.createCopy(ECopyMode.DEEP_ONLY_BEAN_FIELDS);
     original.getValue(Data.person1).getValue(Person.address).setValue(Address.city, null);
     assertNotNull(copy.getValue(Data.person1).getValue(Person.address).getValue(Address.city));
   }
@@ -49,8 +49,18 @@ class BeanCopyTest
   {
     final String copyValue = "copy";
     Data original = new Data();
-    Data copy = original.createCopy(true, Address.city.customFieldCopy(pValue -> copyValue));
+    Data copy = original.createCopy(ECopyMode.DEEP_ONLY_BEAN_FIELDS, Address.city.customFieldCopy(pValue -> copyValue));
     assertEquals(copy.getValue(Data.person1).getValue(Person.address).getValue(Address.city), copyValue);
+  }
+
+  @Test
+  public void testAllFieldCopy()
+  {
+    Data original = new Data();
+    Data copy = original.createCopy(ECopyMode.DEEP_ALL_FIELDS);
+    assertEquals(original.someNormalList, copy.someNormalList);
+    assertEquals(original.getValue(Data.person1).getValue(Person.address).someNormalField,
+                 copy.getValue(Data.person1).getValue(Person.address).someNormalField);
   }
 
   /**
@@ -60,6 +70,7 @@ class BeanCopyTest
   {
     public static final BeanField<Person> person1 = BeanFieldFactory.create(Data.class);
     public static final BeanField<Person> person2 = BeanFieldFactory.create(Data.class);
+    private List<Integer> someNormalList = new ArrayList<>();
 
     public Data()
     {
@@ -70,6 +81,7 @@ class BeanCopyTest
     {
       setValue(person1, pPerson1);
       setValue(person2, pPerson2);
+      someNormalList.add(42);
     }
   }
 
@@ -95,6 +107,7 @@ class BeanCopyTest
   {
     public static final TextField city = BeanFieldFactory.create(Address.class);
     public static final IntegerField postalCode = BeanFieldFactory.create(Address.class);
+    private final String someNormalField = "value";
 
     public Address()
     {

@@ -3,7 +3,7 @@ package de.adito.beans.core.fields;
 import de.adito.beans.core.*;
 import de.adito.beans.core.annotations.TypeDefaultField;
 import de.adito.beans.core.references.*;
-import de.adito.beans.core.util.beancopy.CustomFieldCopy;
+import de.adito.beans.core.util.beancopy.*;
 import org.jetbrains.annotations.*;
 
 import java.lang.annotation.Annotation;
@@ -25,10 +25,10 @@ public class ContainerField<BEAN extends IBean<BEAN>> extends AbstractField<IBea
   }
 
   @Override
-  public IBeanContainer<BEAN> copyValue(IBeanContainer<BEAN> pOriginalContainer, CustomFieldCopy<?>... pCustomFieldCopies)
+  public IBeanContainer<BEAN> copyValue(IBeanContainer<BEAN> pOriginalContainer, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
   {
     return IBeanContainer.ofStream(pOriginalContainer.getBeanType(), pOriginalContainer.stream()
-        .map(pOriginalBean -> pOriginalBean.createCopy(true, pCustomFieldCopies)));
+        .map(pOriginalBean -> pOriginalBean.createCopy(pMode, pCustomFieldCopies)));
   }
 
   @Override

@@ -112,7 +112,7 @@ class BeanListenerTest extends AbstractCallCountTest
   @CallCount(expectedCallCount = 2)
   public void testRemoveFieldIfMultiple()
   {
-    _testRemoval(pBean -> pBean.removeFieldIf(pField -> false));
+    _testRemoval(pBean -> pBean.removeFieldIf(pField -> true));
   }
 
   @Test

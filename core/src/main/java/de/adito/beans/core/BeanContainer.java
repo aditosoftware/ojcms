@@ -48,7 +48,7 @@ public class BeanContainer<BEAN extends IBean<BEAN>> implements IBeanContainer<B
    */
   protected BeanContainer(Class<BEAN> pBeanType, EncapsulatedBuilder.IContainerEncapsulatedBuilder<BEAN> pBuilder)
   {
-    beanType = pBeanType;
+    beanType = Objects.requireNonNull(pBeanType);
     setEncapsulated(pBuilder);
     encapsulated.stream().forEach(pBean -> BeanListenerUtil.beanAdded(this, pBean));
   }

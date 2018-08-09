@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.*;
 
 /**
@@ -15,7 +16,8 @@ import java.util.stream.*;
  */
 public final class BeanReflector
 {
-  private static final Map<Class<? extends IBean>, List<Field>> REFLECTION_CACHE = new HashMap<>();
+  private static final Map<Class<? extends IBean>, List<Field>> REFLECTION_BEAN_CACHE = new HashMap<>();
+  private static final Map<Class<? extends IBean>, List<Field>> REFLECTION_NON_BEAN_CACHE = new HashMap<>();
   private static final Map<Class<? extends IBean>, List<IField<?>>> METADATA_CACHE = new HashMap<>();
 
   private BeanReflector()
@@ -41,7 +43,18 @@ public final class BeanReflector
    */
   public static List<Field> reflectDeclaredBeanFields(Class<? extends IBean> pBeanType)
   {
-    return Collections.unmodifiableList(REFLECTION_CACHE.computeIfAbsent(pBeanType, BeanReflector::_createDeclaredFields));
+    return Collections.unmodifiableList(REFLECTION_BEAN_CACHE.computeIfAbsent(pBeanType, BeanReflector::_getDeclaredBeanFields));
+  }
+
+  /**
+   * Reflects the declared non bean fields of a certain bean type.
+   *
+   * @param pBeanType the type of the bean to find the non bean fields
+   * @return a list of the declared fields
+   */
+  public static List<Field> reflectDeclaredNonBeanFields(Class<? extends IBean> pBeanType)
+  {
+    return Collections.unmodifiableList(REFLECTION_NON_BEAN_CACHE.computeIfAbsent(pBeanType, BeanReflector::_getDeclaredNonBeanFields));
   }
 
   /**
@@ -67,7 +80,7 @@ public final class BeanReflector
    */
   private static List<IField<?>> _createBeanMetadata(Class<? extends IBean> pBeanType)
   {
-    return reflectDeclaredBeanFields(_checkValidBeanType(pBeanType)).stream()
+    return reflectDeclaredBeanFields(BeanUtil.requiresDeclaredBeanType(pBeanType)).stream()
         .map(pField -> {
           try
           {
@@ -82,45 +95,55 @@ public final class BeanReflector
   }
 
   /**
-   * Returns all public and static fields from a bean class type.
+   * Returns all public and static bean fields from a bean class type.
    *
    * @param pBeanType the type of the bean, which must be a sub class of {@link Bean} to own specific fields
    * @return a list of declared fields of the bean type
    */
-  private static List<Field> _createDeclaredFields(Class<? extends IBean> pBeanType)
+  private static List<Field> _getDeclaredBeanFields(Class<? extends IBean> pBeanType)
   {
-    _checkValidBeanType(pBeanType);
-    List<Field> declaredFields = new ArrayList<>();
-    //Collect all fields, also from the superclasses
-    Class current = pBeanType;
-    do
-    {
-      declaredFields.addAll(Arrays.asList(current.getDeclaredFields()));
-    }
-    while ((current = current.getSuperclass()) != null && !current.equals(Bean.class));
-
-    return declaredFields.stream()
-        .filter(pField -> Modifier.isStatic(pField.getModifiers()))
-        .filter(pField -> Modifier.isPublic(pField.getModifiers()))
-        .filter(pField -> IField.class.isAssignableFrom(pField.getType()))
-        .collect(Collectors.toList());
+    return _getDeclaredFields(pBeanType,
+                              pField -> Modifier.isStatic(pField.getModifiers()),
+                              pField -> Modifier.isPublic(pField.getModifiers()),
+                              pField -> IField.class.isAssignableFrom(pField.getType()));
   }
 
   /**
-   * Checks, if a bean type is valid for reflecting declared fields.
-   * It has to be an extension of {@link Bean}.
-   * Throws a runtime exception, if the type is invalid
+   * Returns all non bean fields from a bean type.
+   * The access modifier is irrelevant for this method.
    *
-   * @param pBeanType the bean type to check
-   * @return the valid bean type
+   * @param pBeanType the type of the bean to find the non bean fields
+   * @return a list of declared fields
    */
-  private static Class<? extends IBean> _checkValidBeanType(Class<? extends IBean> pBeanType)
+  private static List<Field> _getDeclaredNonBeanFields(Class<? extends IBean> pBeanType)
   {
-    if (!Modifier.isPublic(pBeanType.getModifiers()))
-      throw new RuntimeException(pBeanType.getName() + " is not a valid bean type! It has to be declared public to create fields!");
+    return _getDeclaredFields(pBeanType,
+                              pField -> !Modifier.isStatic(pField.getModifiers()),
+                              pField -> !IField.class.isAssignableFrom(pField.getType()));
+  }
 
-    if (!Bean.class.isAssignableFrom(pBeanType)) //To make sure it isn't a transformed type
-      throw new RuntimeException(pBeanType.getName() + " is not a valid bean type to reflect fields from. Do not use transformed bean types!");
-    return pBeanType;
+  /**
+   * All declared fields from a certain bean type, which apply to a variable amount of predicates.
+   *
+   * @param pBeanType        the bean type to find the fields
+   * @param pFieldPredicates the field predicates, that determine which fields should be collected
+   * @return a list of declared fields
+   */
+  @SafeVarargs
+  private static List<Field> _getDeclaredFields(Class<? extends IBean> pBeanType, Predicate<Field>... pFieldPredicates)
+  {
+    BeanUtil.requiresDeclaredBeanType(pBeanType);
+    final List<Field> declaredFields = new ArrayList<>();
+    final Predicate<Field> combinedPredicate = pField -> Stream.of(pFieldPredicates)
+        .allMatch(pPredicate -> pPredicate.test(pField));
+    Class current = pBeanType;
+    do
+    {
+      Stream.of(current.getDeclaredFields())
+          .filter(combinedPredicate)
+          .forEach(declaredFields::add);
+    }
+    while ((current = current.getSuperclass()) != null && !current.equals(Bean.class));
+    return declaredFields;
   }
 }

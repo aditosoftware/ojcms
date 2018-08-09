@@ -3,9 +3,7 @@ package de.adito.beans.core.util.beancopy;
 import de.adito.beans.core.*;
 import de.adito.beans.core.fields.FieldTuple;
 import de.adito.beans.core.mappers.IBeanFlatDataMapper;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
@@ -31,33 +29,12 @@ public final class BeanFlattenUtil
    *
    * @param pBean  the bean to flat
    * @param pDeep  <tt>true</tt> if fields should flattened deeply (includes deep fields iteratively)
-   * @param pCopy  <tt>true</tt> if a copy of the bean should be created before flattening
    * @param <BEAN> the type of the bean to flat
    * @return a flat bean with no reference fields
    */
-  public static <BEAN extends IBean<BEAN>> BEAN makeFlat(BEAN pBean, boolean pDeep, boolean pCopy, CustomFieldCopy<?>... pCustomFieldCopies)
+  public static <BEAN extends IBean<BEAN>> BEAN makeFlat(BEAN pBean, boolean pDeep)
   {
-    if (pCopy)
-      pBean = pBean.createCopy(pDeep, pCustomFieldCopies);
     return _addFlatMapper(pBean, pDeep);
-  }
-
-  /**
-   * Makes a copy of an original bean flat.
-   * A flat bean has no bean reference field.
-   * It's not possible to flat container fields!
-   * An internal data mapper will be added for this purpose.
-   *
-   * @param pBean        the bean to flat
-   * @param pDeep        <tt>true</tt> if fields should flattened deeply (includes deep fields iteratively)
-   * @param pCopyCreator a function to create a copy of an original bean (custom constructor call)
-   * @param <BEAN>       the type of the bean to flat
-   * @return a flat bean with no reference fields
-   */
-  public static <BEAN extends IBean<BEAN>> BEAN makeFlat(BEAN pBean, boolean pDeep, @NotNull Function<BEAN, BEAN> pCopyCreator,
-                                                         CustomFieldCopy<?>... pCustomFieldCopies)
-  {
-    return _addFlatMapper(pBean.createCopy(pDeep, pCopyCreator, pCustomFieldCopies), pDeep);
   }
 
   /**

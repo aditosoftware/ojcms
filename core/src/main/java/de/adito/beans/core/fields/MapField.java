@@ -1,7 +1,7 @@
 package de.adito.beans.core.fields;
 
 import de.adito.beans.core.*;
-import de.adito.beans.core.util.beancopy.CustomFieldCopy;
+import de.adito.beans.core.util.beancopy.*;
 import org.jetbrains.annotations.*;
 
 import java.lang.annotation.Annotation;
@@ -46,15 +46,15 @@ public class MapField<KEY, VALUE> extends AbstractField<MapBean<KEY, VALUE>>
    *
    * @param pMap       the map that will be transformed
    * @param pValueType the value type of the map
-   * @param pPredicate an optional field value predicate, which determines what fields should be in the map bean
+   * @param pExclude   an optional field value predicate, which determines what fields should be excluded
    * @return a (modifiable) bean, that represents the original map
    */
-  public MapBean<KEY, VALUE> createBeanFromMap(Map<KEY, VALUE> pMap, Class<VALUE> pValueType, @Nullable Predicate<FieldTuple<VALUE>> pPredicate)
+  public MapBean<KEY, VALUE> createBeanFromMap(Map<KEY, VALUE> pMap, Class<VALUE> pValueType, @Nullable Predicate<FieldTuple<VALUE>> pExclude)
   {
     MapBean<KEY, VALUE> bean = new MapBean<>(pMap, pValueType, fieldCache::put, pKey -> Optional.ofNullable(fieldCache.get(pKey)));
-    if (pPredicate != null)
+    if (pExclude != null)
       //noinspection unchecked
-      bean.removeFieldIf(pField -> pPredicate.test((FieldTuple<VALUE>) pField.newUntypedTuple(bean.getValueConverted(pField, pValueType))));
+      bean.removeFieldIf(pField -> pExclude.test((FieldTuple<VALUE>) pField.newUntypedTuple(bean.getValueConverted(pField, pValueType))));
     return bean;
   }
 
@@ -71,8 +71,8 @@ public class MapField<KEY, VALUE> extends AbstractField<MapBean<KEY, VALUE>>
   }
 
   @Override
-  public MapBean<KEY, VALUE> copyValue(MapBean<KEY, VALUE> pValue, CustomFieldCopy<?>... pCustomFieldCopies)
+  public MapBean<KEY, VALUE> copyValue(MapBean<KEY, VALUE> pValue, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
   {
-    return pValue.createCopy(true, MapBean::new, pCustomFieldCopies);
+    return pValue.createCopy(pMode, MapBean::new, pCustomFieldCopies);
   }
 }

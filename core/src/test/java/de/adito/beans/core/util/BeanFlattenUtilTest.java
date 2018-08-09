@@ -2,7 +2,7 @@ package de.adito.beans.core.util;
 
 import de.adito.beans.core.*;
 import de.adito.beans.core.fields.*;
-import de.adito.beans.core.util.beancopy.BeanFlattenUtil;
+import de.adito.beans.core.util.beancopy.*;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
@@ -41,7 +41,7 @@ class BeanFlattenUtilTest
   public void testFlattingDeepWithCopy()
   {
     Data original = new Data();
-    Data flatBean = BeanFlattenUtil.makeFlat(original, true, true);
+    Data flatBean = BeanFlattenUtil.makeFlat(original.createCopy(ECopyMode.DEEP_ONLY_BEAN_FIELDS), true);
     //Remove mappers and change a value at the original bean
     original.clearDataMappers();
     final String newValue = "someName";
@@ -59,7 +59,7 @@ class BeanFlattenUtilTest
   public void testNormalize()
   {
     Data original = new Data();
-    Data flatBean = BeanFlattenUtil.makeFlat(original, false, false);
+    Data flatBean = BeanFlattenUtil.makeFlat(original, false);
     _checkFieldAmount(flatBean.stream().collect(Collectors.toList()), null, 4);
     BeanFlattenUtil.normalize(flatBean);
     _checkFieldAmount(flatBean.stream().collect(Collectors.toList()), null, 2);
@@ -88,7 +88,7 @@ class BeanFlattenUtilTest
    */
   private List<FieldTuple<?>> _flat(boolean pDeep)
   {
-    Data flatBean = BeanFlattenUtil.makeFlat(new Data(), pDeep, false);
+    Data flatBean = BeanFlattenUtil.makeFlat(new Data(), pDeep);
     return flatBean.stream().collect(Collectors.toList());
   }
 

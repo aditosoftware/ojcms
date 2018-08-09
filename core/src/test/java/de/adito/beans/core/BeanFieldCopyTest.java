@@ -1,7 +1,7 @@
 package de.adito.beans.core;
 
 import de.adito.beans.core.fields.*;
-import de.adito.beans.core.util.beancopy.CustomFieldCopy;
+import de.adito.beans.core.util.beancopy.*;
 import de.adito.beans.core.util.exceptions.BeanCopyUnsupportedException;
 import org.apache.commons.lang3.ClassUtils;
 import org.jetbrains.annotations.Nullable;
@@ -10,13 +10,13 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.time.Instant;
 import java.util.*;
-import java.util.function.Predicate;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test class for the copy mechanism of a bean field. ({@link IField#copyValue(Object, CustomFieldCopy[])}.
+ * Test class for the copy mechanism of a bean field. ({@link IField#copyValue(Object, ECopyMode, CustomFieldCopy[])}.
  * Tuples of bean field types and associated data values can be defined here.
  * For each tuple a test case will be executed, that will copy the value and test, if it is a real copy.
  *
@@ -34,6 +34,12 @@ public class BeanFieldCopyTest
     final Map<String, Integer> testMap = new HashMap<>();
     testMap.put("test1", 6);
     testMap.put("test2", 60);
+    final Consumer<MapBean<String, Integer>> mapTest = pMapBean -> {
+      assertEquals(2, pMapBean.stream().count());
+      assertEquals(6, pMapBean.getValue(pMapBean.getFieldFromKey("test1")));
+      assertEquals(60, pMapBean.getValue(pMapBean.getFieldFromKey("test2")));
+      assertEquals(testMap, pMapBean);
+    };
 
     return Stream.of(
         new _GenericFieldValueWrapper<>(BeanField.class, new SomeBean()),
@@ -46,7 +52,7 @@ public class BeanFieldCopyTest
         new _FieldValueWrapper<>(IntegerField.class, 1),
         new _FieldValueWrapper<>(LongField.class, 4L),
         new _FieldValueWrapper<>(ShortField.class, (short) 7),
-        new _GenericFieldValueWrapper<>(MapField.class, new MapBean<>(testMap, Integer.class), pMapBean -> pMapBean.stream().count() == 2),
+        new _GenericFieldValueWrapper<>(MapField.class, new MapBean<>(testMap, Integer.class), mapTest),
         new _FieldValueWrapper<>(TextField.class, "testing"));
   }
 
@@ -59,11 +65,9 @@ public class BeanFieldCopyTest
                                                       "test", Collections.emptySet());
     try
     {
-      TYPE copiedValue = field.copyValue(pFieldValueWrapper.value);
+      TYPE copiedValue = field.copyValue(pFieldValueWrapper.value, ECopyMode.DEEP_ONLY_BEAN_FIELDS);
       assertTrue(ClassUtils.isPrimitiveOrWrapper(copiedValue.getClass()) || copiedValue != pFieldValueWrapper.value);
-      //Also test the optional predicate
-      pFieldValueWrapper.getOptionalPredicate()
-          .ifPresent(pPredicate -> assertTrue(pPredicate.test(copiedValue)));
+      pFieldValueWrapper.getOptionalTest().ifPresent(pTest -> pTest.accept((copiedValue)));
     }
     catch (BeanCopyUnsupportedException pE)
     {
@@ -108,14 +112,14 @@ public class BeanFieldCopyTest
      * Creates a field value wrapper.
      * Additionally a predicate may be defined to test the copied value afterwards.
      *
-     * @param pFieldType         the field's type
-     * @param pValue             the data value for the field
-     * @param pOptionalPredicate an optional predicate the test the copied value afterwards
+     * @param pFieldType    the field's type
+     * @param pValue        the data value for the field
+     * @param pOptionalTest an optional test for the copied value afterwards
      */
-    public _GenericFieldValueWrapper(Class<? extends IField> pFieldType, TYPE pValue, @Nullable Predicate<TYPE> pOptionalPredicate)
+    public _GenericFieldValueWrapper(Class<? extends IField> pFieldType, TYPE pValue, @Nullable Consumer<TYPE> pOptionalTest)
     {
       //noinspection unchecked
-      super((Class<? extends IField<TYPE>>) pFieldType, pValue, pOptionalPredicate);
+      super((Class<? extends IField<TYPE>>) pFieldType, pValue, pOptionalTest);
     }
 
     @Nullable
@@ -137,7 +141,7 @@ public class BeanFieldCopyTest
     protected final TYPE value;
     private final Class<? extends IField<TYPE>> fieldType;
     @Nullable
-    private final Predicate<TYPE> optionalPredicate;
+    private final Consumer<TYPE> optionalTest;
 
     /**
      * Creates a field value wrapper.
@@ -154,15 +158,15 @@ public class BeanFieldCopyTest
      * Creates a field value wrapper.
      * Additionally a predicate may be defined to test the copied value afterwards.
      *
-     * @param pFieldType         the field's type
-     * @param pValue             the data value for the field
-     * @param pOptionalPredicate an optional predicate the test the copied value afterwards
+     * @param pFieldType    the field's type
+     * @param pValue        the data value for the field
+     * @param pOptionalTest an optional test for the copied value afterwards
      */
-    public _FieldValueWrapper(Class<? extends IField<TYPE>> pFieldType, TYPE pValue, @Nullable Predicate<TYPE> pOptionalPredicate)
+    public _FieldValueWrapper(Class<? extends IField<TYPE>> pFieldType, TYPE pValue, @Nullable Consumer<TYPE> pOptionalTest)
     {
       fieldType = pFieldType;
       value = pValue;
-      optionalPredicate = pOptionalPredicate;
+      optionalTest = pOptionalTest;
     }
 
     /**
@@ -178,11 +182,13 @@ public class BeanFieldCopyTest
     }
 
     /**
-     * The optional predicate, that allows to define a test after the copy-process.
+     * The optional test, that allows to define a test after the copy-process.
+     *
+     * @return an optional test
      */
-    public Optional<Predicate<TYPE>> getOptionalPredicate()
+    public Optional<Consumer<TYPE>> getOptionalTest()
     {
-      return Optional.ofNullable(optionalPredicate);
+      return Optional.ofNullable(optionalTest);
     }
   }
 }

@@ -116,12 +116,12 @@ public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
   /**
    * Removes all fields that apply to a given predicate.
    *
-   * @param pFieldPredicate the field predicate that determines which fields should be retained
+   * @param pFieldPredicate the field predicate that determines which fields should be removed
    */
   default void removeFieldIf(Predicate<IField<?>> pFieldPredicate)
   {
     List<IField<?>> toRemove = streamFields()
-        .filter(pField -> !pFieldPredicate.test(pField))
+        .filter(pFieldPredicate)
         .collect(Collectors.toList());
     toRemove.forEach(this::removeField);
   }

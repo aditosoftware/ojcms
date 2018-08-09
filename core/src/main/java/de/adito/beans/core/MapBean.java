@@ -22,8 +22,8 @@ public class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMod
   private final IBeanEncapsulated<MapBean<KEY, VALUE>> encapsulated;
   private final Class<? extends IField<?>> fieldType; //the field type may differ from the generic type due to converters
   private final Class<VALUE> valueType;
-  private final Map<KEY, IField<?>> keyFieldMapping = new HashMap<>();
-  private final Map<IField<?>, KEY> fieldKeyMapping = new HashMap<>();
+  private final Map<KEY, IField<?>> keyFieldMapping;
+  private final Map<IField<?>, KEY> fieldKeyMapping;
   private final Function<KEY, Optional<IField<?>>> fieldCache;
   private final BiConsumer<KEY, IField<?>> fieldCacheCallback;
   private _EntrySet entrySet;
@@ -57,6 +57,8 @@ public class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMod
   {
     fieldType = BeanFieldFactory.getFieldTypeFromType(pValueType);
     valueType = pValueType;
+    keyFieldMapping = new HashMap<>();
+    fieldKeyMapping = new HashMap<>();
     fieldCache = pFieldCache;
     fieldCacheCallback = pFieldCacheCallback;
     BiConsumer<LinkedHashMap<IField<?>, VALUE>, Map.Entry<KEY, VALUE>> accumulator =
@@ -79,8 +81,11 @@ public class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMod
   {
     fieldType = pExistingMapBean.fieldType;
     valueType = pExistingMapBean.valueType;
+    keyFieldMapping = new HashMap<>(pExistingMapBean.keyFieldMapping);
+    fieldKeyMapping = new HashMap<>(pExistingMapBean.fieldKeyMapping);
     fieldCache = pExistingMapBean.fieldCache;
     fieldCacheCallback = pExistingMapBean.fieldCacheCallback;
+    entrySet = pExistingMapBean.entrySet;
     final List<IField<?>> fields = pExistingMapBean.streamFields().collect(Collectors.toList());
     //noinspection unchecked
     encapsulated = EncapsulatedBuilder.createBeanEncapsulated(new Bean.DefaultEncapsulatedBuilder(fields),
