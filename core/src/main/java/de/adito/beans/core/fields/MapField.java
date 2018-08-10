@@ -1,6 +1,7 @@
 package de.adito.beans.core.fields;
 
 import de.adito.beans.core.*;
+import de.adito.beans.core.annotations.Detail;
 import de.adito.beans.core.util.beancopy.*;
 import org.jetbrains.annotations.*;
 
@@ -51,7 +52,8 @@ public class MapField<KEY, VALUE> extends AbstractField<MapBean<KEY, VALUE>>
    */
   public MapBean<KEY, VALUE> createBeanFromMap(Map<KEY, VALUE> pMap, Class<VALUE> pValueType, @Nullable Predicate<FieldTuple<VALUE>> pExclude)
   {
-    MapBean<KEY, VALUE> bean = new MapBean<>(pMap, pValueType, fieldCache::put, pKey -> Optional.ofNullable(fieldCache.get(pKey)));
+    MapBean<KEY, VALUE> bean = new MapBean<>(pMap, pValueType, fieldCache::put, pKey -> Optional.ofNullable(fieldCache.get(pKey)),
+                                             hasAnnotation(Detail.class));
     if (pExclude != null)
       //noinspection unchecked
       bean.removeFieldIf(pField -> pExclude.test((FieldTuple<VALUE>) pField.newUntypedTuple(bean.getValueConverted(pField, pValueType))));

@@ -1,5 +1,6 @@
 package de.adito.beans.core;
 
+import de.adito.beans.core.annotations.Detail;
 import de.adito.beans.core.fields.FieldTuple;
 import de.adito.beans.core.util.BeanUtil;
 import org.jetbrains.annotations.NotNull;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 public class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IModifiableBean<MapBean<KEY, VALUE>>
 {
   private final IBeanEncapsulated<MapBean<KEY, VALUE>> encapsulated;
+  private final boolean isDetail;
   private final Class<? extends IField<?>> fieldType; //the field type may differ from the generic type due to converters
   private final Class<VALUE> valueType;
   private final Map<KEY, IField<?>> keyFieldMapping;
@@ -33,10 +35,11 @@ public class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMod
    *
    * @param pMap       the source from which the bean will be created
    * @param pValueType the map's value type
+   * @param pIsDetail  <tt>true</tt>, if this map bean is considered as detail
    */
-  public MapBean(Map<KEY, VALUE> pMap, Class<VALUE> pValueType)
+  public MapBean(Map<KEY, VALUE> pMap, Class<VALUE> pValueType, boolean pIsDetail)
   {
-    this(pMap, pValueType, (pKey, pField) -> {}, pHashCode -> Optional.empty());
+    this(pMap, pValueType, (pKey, pField) -> {}, pHashCode -> Optional.empty(), pIsDetail);
   }
 
   /**
@@ -51,12 +54,14 @@ public class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMod
    * @param pValueType          the map's value type
    * @param pFieldCacheCallback callback for the cache to record newly created fields
    * @param pFieldCache         the field cache for keys/fields with the same key
+   * @param pIsDetail           <tt>true</tt>, if this map bean is considered as detail
    */
   public MapBean(Map<KEY, VALUE> pMap, Class<VALUE> pValueType, BiConsumer<KEY, IField<?>> pFieldCacheCallback,
-                 Function<KEY, Optional<IField<?>>> pFieldCache)
+                 Function<KEY, Optional<IField<?>>> pFieldCache, boolean pIsDetail)
   {
     fieldType = BeanFieldFactory.getFieldTypeFromType(pValueType);
     valueType = pValueType;
+    isDetail = pIsDetail;
     keyFieldMapping = new HashMap<>();
     fieldKeyMapping = new HashMap<>();
     fieldCache = pFieldCache;
@@ -79,6 +84,7 @@ public class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMod
    */
   public MapBean(MapBean<KEY, VALUE> pExistingMapBean)
   {
+    isDetail = pExistingMapBean.isDetail;
     fieldType = pExistingMapBean.fieldType;
     valueType = pExistingMapBean.valueType;
     keyFieldMapping = new HashMap<>(pExistingMapBean.keyFieldMapping);
@@ -152,7 +158,8 @@ public class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMod
         .orElseGet(() ->
                    {
                      //noinspection unchecked
-                     IField<?> field = BeanFieldFactory.createField((Class<? extends IField>) fieldType, Objects.toString(pKey), Collections.emptySet());
+                     IField<?> field = BeanFieldFactory.createField((Class<? extends IField>) fieldType, Objects.toString(pKey),
+                                                                    Collections.singleton(Detail.INSTANCE));
                      fieldCacheCallback.accept(pKey, field);
                      return field;
                    });

@@ -52,7 +52,7 @@ public class BeanFieldCopyTest
         new _FieldValueWrapper<>(IntegerField.class, 1),
         new _FieldValueWrapper<>(LongField.class, 4L),
         new _FieldValueWrapper<>(ShortField.class, (short) 7),
-        new _GenericFieldValueWrapper<>(MapField.class, new MapBean<>(testMap, Integer.class), mapTest),
+        new _GenericFieldValueWrapper<>(MapField.class, new MapBean<>(testMap, Integer.class, false), mapTest),
         new _FieldValueWrapper<>(TextField.class, "testing"));
   }
 

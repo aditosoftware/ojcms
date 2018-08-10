@@ -109,7 +109,6 @@ public final class BeanUtil
    * @param pToCompare the collection of beans to compare
    * @return the equivalent bean that was removed (optional, because it may have not been found)
    */
-  @Nullable
   public static <BEAN extends IBean<BEAN>> Optional<BEAN> findRelatedBeanAndRemove(BEAN pBean, Collection<BEAN> pToCompare)
   {
     Iterator<BEAN> it = pToCompare.iterator();

@@ -12,4 +12,11 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Detail
 {
+  Detail INSTANCE = new Detail() {
+    @Override
+    public Class<? extends Annotation> annotationType()
+    {
+      return Detail.class;
+    }
+  };
 }
