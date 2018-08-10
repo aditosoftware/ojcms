@@ -5,6 +5,7 @@ import de.adito.beans.core.util.beancopy.*;
 import de.adito.beans.core.util.exceptions.*;
 import org.objenesis.*;
 
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.*;
@@ -30,9 +31,11 @@ final class BeanCopyUtil
    */
   static <BEAN extends IBean<BEAN>> BEAN createCopy(BEAN pOriginal, ECopyMode pMode, CustomFieldCopy<?>... pCustomCopies)
   {
-    BeanUtil.requiresDeclaredBeanType(pOriginal.getClass());
     //noinspection unchecked
-    BEAN copyInstance = (BEAN) copyCreator.newInstance(pOriginal.getClass());
+    final Class<BEAN> beanType = (Class<BEAN>) pOriginal.getClass();
+    BeanUtil.requiresDeclaredBeanType(beanType);
+    BEAN copyInstance = _tryPerDefaultConstructor(beanType)
+        .orElse(copyCreator.newInstance(beanType));
     EncapsulatedBuilder.injectCustomEncapsulated(copyInstance,
                                                  new Bean.DefaultEncapsulatedBuilder(pOriginal.streamFields().collect(Collectors.toList())));
     return _setValues(pOriginal, copyInstance, pMode, pCustomCopies);
@@ -54,6 +57,26 @@ final class BeanCopyUtil
                                                     CustomFieldCopy<?>... pCustomCopies)
   {
     return _setValues(pOriginal, pCustomConstructorCall.apply(pOriginal), pMode, pCustomCopies);
+  }
+
+  /**
+   * Tries to create the bean copy per default constructor call.
+   *
+   * @param pBeanType the bean type to copy
+   * @param <BEAN>    the generic bean type
+   * @return an optional instance of the copied bean
+   */
+  private static <BEAN extends IBean<BEAN>> Optional<BEAN> _tryPerDefaultConstructor(Class<BEAN> pBeanType)
+  {
+    try
+    {
+      final Constructor<BEAN> constructor = pBeanType.getDeclaredConstructor();
+      return Optional.of(constructor.newInstance());
+    }
+    catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException pE)
+    {
+      return Optional.empty();
+    }
   }
 
   /**

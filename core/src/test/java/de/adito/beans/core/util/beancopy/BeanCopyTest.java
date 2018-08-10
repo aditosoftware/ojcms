@@ -18,7 +18,7 @@ class BeanCopyTest
   @Test
   public void testShallowCopy()
   {
-    Data original = new Data();
+    Data original = new Data(new Person(), new Person());
     Data copy = original.createCopy(ECopyMode.SHALLOW_ONLY_BEAN_FIELDS);
     assertNotSame(original, copy);
     final String newName = "newName";
@@ -29,7 +29,7 @@ class BeanCopyTest
   @Test
   public void testShallowCopyWithCustomConstructor()
   {
-    Data original = new Data();
+    Data original = new Data(new Person(), new Person());
     Data copy = original.createCopy(ECopyMode.SHALLOW_ONLY_BEAN_FIELDS, pData -> new Data(new Person(), new Person()));
     assertNotSame(original, copy);
     assertSame(original.getValue(Data.person1), copy.getValue(Data.person1));
@@ -38,7 +38,7 @@ class BeanCopyTest
   @Test
   public void testDeepCopy()
   {
-    Data original = new Data();
+    Data original = new Data(new Person(), new Person());
     Data copy = original.createCopy(ECopyMode.DEEP_ONLY_BEAN_FIELDS);
     original.getValue(Data.person1).getValue(Person.address).setValue(Address.city, null);
     assertNotNull(copy.getValue(Data.person1).getValue(Person.address).getValue(Address.city));
@@ -48,7 +48,7 @@ class BeanCopyTest
   public void testDeepCopyWithCustomCopy()
   {
     final String copyValue = "copy";
-    Data original = new Data();
+    Data original = new Data(new Person(), new Person());
     Data copy = original.createCopy(ECopyMode.DEEP_ONLY_BEAN_FIELDS, Address.city.customFieldCopy(pValue -> copyValue));
     assertEquals(copy.getValue(Data.person1).getValue(Person.address).getValue(Address.city), copyValue);
   }
@@ -56,7 +56,7 @@ class BeanCopyTest
   @Test
   public void testAllFieldCopy()
   {
-    Data original = new Data();
+    Data original = new Data(new Person(), new Person());
     Data copy = original.createCopy(ECopyMode.DEEP_ALL_FIELDS);
     assertEquals(original.someNormalList, copy.someNormalList);
     assertEquals(original.getValue(Data.person1).getValue(Person.address).someNormalField,
@@ -71,11 +71,6 @@ class BeanCopyTest
     public static final BeanField<Person> person1 = BeanFieldFactory.create(Data.class);
     public static final BeanField<Person> person2 = BeanFieldFactory.create(Data.class);
     private List<Integer> someNormalList = new ArrayList<>();
-
-    public Data()
-    {
-      this(new Person(), new Person());
-    }
 
     public Data(Person pPerson1, Person pPerson2)
     {
