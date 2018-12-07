@@ -1,7 +1,8 @@
 package de.adito.beans.core.fields;
 
-import de.adito.beans.core.*;
+import de.adito.beans.core.IField;
 import de.adito.beans.core.annotations.*;
+import de.adito.beans.core.fields.util.IAdditionalFieldInfo;
 import org.jetbrains.annotations.*;
 
 import java.lang.annotation.Annotation;
@@ -15,7 +16,7 @@ import java.util.function.Function;
  * @param <TYPE> the data type that is wrapped by this field type (e.g. String, Integer etc)
  * @author Simon Danner, 23.08.2016
  */
-public abstract class AbstractField<TYPE> implements IField<TYPE>
+abstract class AbstractField<TYPE> implements IField<TYPE>
 {
   private final Class<TYPE> type;
   private final String name;
@@ -32,7 +33,7 @@ public abstract class AbstractField<TYPE> implements IField<TYPE>
    * @param pName        the name of this field
    * @param pAnnotations a collection of annotations of this field
    */
-  public AbstractField(@NotNull Class<TYPE> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
+  protected AbstractField(@NotNull Class<TYPE> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {
     type = pType;
     name = pName;
@@ -67,13 +68,13 @@ public abstract class AbstractField<TYPE> implements IField<TYPE>
 
   @Override
   @Nullable
-  public <ANNOTATION extends Annotation> ANNOTATION getAnnotation(Class<ANNOTATION> pType)
+  public <ANNOTATION extends Annotation> Optional<ANNOTATION> getAnnotation(Class<ANNOTATION> pType)
   {
     //noinspection unchecked
-    return (ANNOTATION) annotations.stream()
+    return annotations.stream()
         .filter(pAnnotation -> pAnnotation.annotationType().equals(pType))
         .findAny()
-        .orElse(null);
+        .map(pAnnotation -> (ANNOTATION) pAnnotation);
   }
 
   @Override

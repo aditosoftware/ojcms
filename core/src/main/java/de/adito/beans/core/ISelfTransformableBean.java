@@ -11,7 +11,7 @@ package de.adito.beans.core;
  * @see ISelfTransformable
  */
 public interface ISelfTransformableBean<BEAN extends IBean<BEAN>, VISUAL extends ISelfTransformableBean<BEAN, VISUAL>>
-    extends ISelfTransformable<IBeanEncapsulated<BEAN>, BEAN, VISUAL>, ITransformableBean<BEAN, VISUAL, BEAN>, IVisualBeanTransformator<BEAN, VISUAL, BEAN>
+    extends ISelfTransformable<IBeanEncapsulated, BEAN, VISUAL>, ITransformableBean<BEAN, VISUAL, BEAN>, IVisualBeanTransformator<BEAN, VISUAL, BEAN>
 {
   @Override
   default VISUAL getTransformator()

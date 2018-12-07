@@ -10,6 +10,6 @@ package de.adito.beans.core;
  * @author Simon Danner, 07.02.2017
  */
 public abstract class AbstractBeanVisualTransformator<LOGIC, VISUAL, BEAN extends IBean<BEAN>>
-    extends AbstractVisualTransformator<LOGIC, VISUAL, IBeanEncapsulated<BEAN>, BEAN> implements IVisualBeanTransformator<LOGIC, VISUAL, BEAN>
+    extends AbstractVisualTransformator<LOGIC, VISUAL, IBeanEncapsulated, BEAN> implements IVisualBeanTransformator<LOGIC, VISUAL, BEAN>
 {
 }

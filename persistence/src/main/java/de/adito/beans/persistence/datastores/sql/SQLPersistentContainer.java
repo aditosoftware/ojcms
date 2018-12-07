@@ -1,7 +1,7 @@
 package de.adito.beans.persistence.datastores.sql;
 
 import de.adito.beans.core.*;
-import de.adito.beans.core.fields.FieldTuple;
+import de.adito.beans.core.fields.util.FieldTuple;
 import de.adito.beans.core.util.*;
 import de.adito.beans.persistence.*;
 import de.adito.beans.persistence.datastores.sql.builder.*;
@@ -20,7 +20,7 @@ import java.util.stream.*;
 
 /**
  * Implementation of a persistent bean container based on a SQL database system.
- * It defines a builder for the data core of a bean container. ({@link IBeanContainerEncapsulated})
+ * It defines a builder for the data core of a bean container.
  * This means the data comes from the database directly,
  * but the bean container interface ({@link IBeanContainer}) is used like with normal data cores.
  *

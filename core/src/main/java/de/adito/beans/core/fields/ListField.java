@@ -1,5 +1,6 @@
 package de.adito.beans.core.fields;
 
+import de.adito.beans.core.fields.serialization.ISerializableFieldJson;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
@@ -10,7 +11,7 @@ import java.util.*;
  *
  * @author Simon Danner, 01.08.2018
  */
-public class ListField<TYPE> extends AbstractField<List<TYPE>>
+public class ListField<TYPE> extends AbstractField<List<TYPE>> implements ISerializableFieldJson<List<TYPE>>
 {
   public ListField(@NotNull Class<List<TYPE>> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {

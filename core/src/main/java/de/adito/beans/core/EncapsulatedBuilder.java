@@ -1,15 +1,18 @@
 package de.adito.beans.core;
 
 import de.adito.beans.core.annotations.Statistics;
-import de.adito.beans.core.fields.FieldTuple;
-import de.adito.beans.core.listener.*;
+import de.adito.beans.core.fields.util.FieldTuple;
 import de.adito.beans.core.mappers.IBeanFlatDataMapper;
+import de.adito.beans.core.reactive.IEvent;
 import de.adito.beans.core.statistics.*;
 import de.adito.beans.core.util.*;
 import de.adito.beans.core.util.exceptions.BeanFieldDoesNotExistException;
+import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 import org.jetbrains.annotations.*;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.*;
 import java.util.stream.*;
@@ -97,7 +100,6 @@ public final class EncapsulatedBuilder
   {
     if (!BeanContainer.class.isAssignableFrom(pContainer.getClass()))
       throw new RuntimeException(pContainer + " has to be a regular bean container (based on the bean container base class).");
-    //noinspection unchecked
     ((BeanContainer<BEAN>) pContainer).setEncapsulated(pCustomBuilder);
     return pContainer;
   }
@@ -110,7 +112,7 @@ public final class EncapsulatedBuilder
    * @param <BEAN>    the generic bean type
    * @return the newly created encapsulated data core
    */
-  static <BEAN extends IBean<BEAN>> IBeanEncapsulated<BEAN> createBeanEncapsulated(IBeanEncapsulatedBuilder pBuilder, Class<BEAN> pBeanType)
+  static <BEAN extends IBean<BEAN>> IBeanEncapsulated createBeanEncapsulated(IBeanEncapsulatedBuilder pBuilder, Class<BEAN> pBeanType)
   {
     return new _BeanEncapsulated<>(pBuilder, pBeanType, null);
   }
@@ -124,8 +126,8 @@ public final class EncapsulatedBuilder
    * @param <BEAN>      the generic bean type
    * @return the newly created encapsulated data core
    */
-  static <BEAN extends IBean<BEAN>> IBeanEncapsulated<BEAN> createBeanEncapsulated(IBeanEncapsulatedBuilder pBuilder,
-                                                                                   Class<BEAN> pBeanType, List<IField<?>> pBeanFields)
+  static <BEAN extends IBean<BEAN>> IBeanEncapsulated createBeanEncapsulated(IBeanEncapsulatedBuilder pBuilder,
+                                                                             Class<BEAN> pBeanType, List<IField<?>> pBeanFields)
   {
     return new _BeanEncapsulated<>(pBuilder, pBeanType, pBeanFields);
   }
@@ -243,12 +245,11 @@ public final class EncapsulatedBuilder
    *
    * @param <BEAN> the type of the bean the core is for
    */
-  private static class _BeanEncapsulated<BEAN extends IBean<BEAN>> implements IBeanEncapsulated<BEAN>
+  private static class _BeanEncapsulated<BEAN extends IBean<BEAN>> extends AbstractBeanEncapsulated
   {
     private final IBeanEncapsulatedBuilder builder;
     private final List<IField<?>> fieldOrder;
     private Map<IField<?>, IStatisticData> statisticData;
-    private final BeanEncapsulatedContainers<BEAN, IBeanChangeListener<BEAN>> containers = new BeanEncapsulatedContainers<>();
 
     private _BeanEncapsulated(IBeanEncapsulatedBuilder pBuilder, Class<BEAN> pBeanType, @Nullable List<IField<?>> pFields)
     {
@@ -288,7 +289,7 @@ public final class EncapsulatedBuilder
     @Override
     public int getFieldCount()
     {
-      return isFieldFiltered() ? (int) streamFields().count() : fieldOrder.size();
+      return getFieldFilters().size() > 0 ? (int) streamFields().count() : fieldOrder.size();
     }
 
     @Override
@@ -300,16 +301,9 @@ public final class EncapsulatedBuilder
     @Override
     public Stream<IField<?>> streamFields()
     {
-      assert getContainers() != null;
       return fieldOrder.stream()
-          .filter(pField -> containers.getFieldFilters().stream()
+          .filter(pField -> getFieldFilters().stream()
               .allMatch(pFieldPredicate -> pFieldPredicate.test(pField, builder.getValue(pField))));
-    }
-
-    @Override
-    public BeanEncapsulatedContainers<BEAN, IBeanChangeListener<BEAN>> getContainers()
-    {
-      return containers;
     }
 
     @NotNull
@@ -345,7 +339,7 @@ public final class EncapsulatedBuilder
     private Stream<FieldTuple<?>> _createFilteredTupleStream()
     {
       return _applyMappings()
-          .filter(pTuple -> containers.getFieldFilters().stream()
+          .filter(pTuple -> getFieldFilters().stream()
               .allMatch(pPredicate -> pPredicate.test(pTuple.getField(), pTuple.getValue())));
     }
 
@@ -358,7 +352,7 @@ public final class EncapsulatedBuilder
     private Stream<FieldTuple<?>> _applyMappings()
     {
       Stream<FieldTuple<?>> stream = StreamSupport.stream(builder.spliterator(), false);
-      for (BeanEncapsulatedContainers.BeanDataMapper dataMapper : containers.getDataMappers())
+      for (BeanDataMapper dataMapper : getDataMappers())
       {
         IBeanFlatDataMapper mapper = dataMapper.getDataMapper();
         final AtomicInteger changes = new AtomicInteger(); //Changes for each mapping iteration
@@ -366,8 +360,8 @@ public final class EncapsulatedBuilder
         {
           changes.set(0);
           stream = stream.flatMap(pTuple -> {
-            IField<?> beanField = dataMapper.getBeanField();
-            if ((beanField == null || beanField == pTuple.getField()) && mapper.affectsTuple(pTuple.getField(), pTuple.getValue()))
+            Optional<IField<?>> beanField = dataMapper.getBeanField();
+            if ((!beanField.isPresent() || beanField.get() == pTuple.getField()) && mapper.affectsTuple(pTuple.getField(), pTuple.getValue()))
             {
               changes.getAndIncrement();
               return mapper.flatMapTuple(pTuple.getField(), pTuple.getValue());
@@ -424,19 +418,22 @@ public final class EncapsulatedBuilder
    *
    * @param <BEAN> the type of the beans in the container
    */
-  private static class _ContainerEncapsulated<BEAN extends IBean<BEAN>> implements IBeanContainerEncapsulated<BEAN>
+  private static class _ContainerEncapsulated<BEAN extends IBean<BEAN>> extends AbstractEncapsulated<BEAN>
+      implements IBeanContainerEncapsulated<BEAN>
   {
     private final IContainerEncapsulatedBuilder<BEAN> builder;
     private final Class<BEAN> beanType;
     private _LimitInfo limitInfo = null;
     private final IStatisticData<Integer> statisticData;
-    private final EncapsulatedContainers<BEAN, IBeanContainerChangeListener<BEAN>> containers = new EncapsulatedContainers<>();
+    private final Map<BEAN, Disposable> beanDisposableMapping = new ConcurrentHashMap<>();
 
     public _ContainerEncapsulated(IContainerEncapsulatedBuilder<BEAN> pBuilder, Class<BEAN> pBeanType)
     {
       builder = pBuilder;
       beanType = pBeanType;
       statisticData = _createStatisticData();
+      StreamSupport.stream(pBuilder.spliterator(), false)
+          .forEach(this::_observeBean);
     }
 
     @Override
@@ -460,7 +457,7 @@ public final class EncapsulatedBuilder
         pIndex--;
       }
 
-      builder.addBean(pBean, pIndex);
+      builder.addBean(_observeBean(pBean), pIndex);
     }
 
     @Override
@@ -477,6 +474,7 @@ public final class EncapsulatedBuilder
     @Override
     public boolean removeBean(BEAN pBean)
     {
+      beanDisposableMapping.remove(pBean).dispose();
       return builder.removeBean(pBean);
     }
 
@@ -533,12 +531,6 @@ public final class EncapsulatedBuilder
       return statisticData;
     }
 
-    @Override
-    public EncapsulatedContainers<BEAN, IBeanContainerChangeListener<BEAN>> getContainers()
-    {
-      return containers;
-    }
-
     @NotNull
     @Override
     public Iterator<BEAN> iterator()
@@ -558,6 +550,23 @@ public final class EncapsulatedBuilder
     {
       Statistics statistics = beanType.getAnnotation(Statistics.class);
       return statistics != null ? new StatisticData<>(statistics.capacity(), size()) : null;
+    }
+
+    /**
+     * Observers value and field changes of a bean within this container.
+     *
+     * @param pBean the bean to observe
+     * @return the observed bean
+     */
+    private BEAN _observeBean(BEAN pBean)
+    {
+      final Observable<IEvent<BEAN>> combinedObservables = Observable.concat(pBean.observeValues(), pBean.observeFieldAdditions(),
+                                                                             pBean.observeFieldRemovals());
+      //noinspection unchecked
+      final Disposable disposable = combinedObservables
+          .subscribe(pChangeEvent -> getEventObserverFromType((Class<IEvent<BEAN>>) pChangeEvent.getClass()).onNext(pChangeEvent));
+      beanDisposableMapping.put(pBean, disposable);
+      return pBean;
     }
 
     /**

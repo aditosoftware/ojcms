@@ -1,10 +1,8 @@
 package de.adito.beans.core;
 
 import de.adito.beans.core.annotations.Identifier;
-import de.adito.beans.core.fields.FieldTuple;
-import de.adito.beans.core.listener.IBeanChangeListener;
+import de.adito.beans.core.fields.util.FieldTuple;
 import de.adito.beans.core.mappers.*;
-import de.adito.beans.core.references.IHierarchicalBeanStructure;
 import de.adito.beans.core.statistics.IStatisticData;
 import de.adito.beans.core.util.IBeanFieldPredicate;
 import de.adito.beans.core.util.beancopy.*;
@@ -33,7 +31,7 @@ import java.util.stream.*;
  * @param <BEAN> the concrete type of the bean that is implementing the interface
  * @author Simon Danner, 23.08.2016
  */
-public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBeanEncapsulated<BEAN>>
+public interface IBean<BEAN extends IBean<BEAN>> extends IObervableBeanValues<BEAN, IBeanEncapsulated>, IReferenceProvider
 {
   /**
    * The value for a bean field.
@@ -107,7 +105,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
     if (pField.isPrivate())
       throw new BeanIllegalAccessException(this, pField);
     //noinspection unchecked
-    BeanListenerUtil.setValueAndFire((BEAN) this, pField, pValue);
+    BeanEvents.setValueAndPropagate((BEAN) this, pField, pValue);
   }
 
   /**
@@ -205,41 +203,6 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
         .indexOf(pField);
   }
 
-  /**
-   * A hierarchical structure of references to this bean.
-   * The structure contains direct and deep parent-references to this bean.
-   * A reference occurs through a bean or container field. (Default Java references are ignored)
-   *
-   * @return an interface to retrieve information about the hierarchical reference structure
-   * @see IHierarchicalBeanStructure
-   */
-  default IHierarchicalBeanStructure getHierarchicalStructure()
-  {
-    assert getEncapsulated() != null;
-    return getEncapsulated().getHierarchicalStructure();
-  }
-
-  /**
-   * Registers a weak change listener.
-   *
-   * @param pListener a listener that gets informed about value changes of this bean
-   */
-  default void listenWeak(IBeanChangeListener<BEAN> pListener)
-  {
-    assert getEncapsulated() != null;
-    getEncapsulated().addListener(Objects.requireNonNull(pListener));
-  }
-
-  /**
-   * Unregisters a change listener.
-   *
-   * @param pListener the listener to deregister
-   */
-  default void unlisten(IBeanChangeListener<BEAN> pListener)
-  {
-    assert getEncapsulated() != null;
-    getEncapsulated().removeListener(Objects.requireNonNull(pListener));
-  }
 
   /**
    * Creates a copy of this bean.
@@ -437,5 +400,12 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBe
     return getEncapsulated().stream()
         .filter(pFieldTuple -> !pFieldTuple.getField().isPrivate())
         .filter(pFieldTuple -> getFieldActiveSupplier().isOptionalActive(pFieldTuple.getField()));
+  }
+
+  @Override
+  default Set<BeanReference> getDirectReferences()
+  {
+    assert getEncapsulated() != null;
+    return getEncapsulated().getDirectReferences();
   }
 }

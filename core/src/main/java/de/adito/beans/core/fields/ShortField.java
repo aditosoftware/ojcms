@@ -1,6 +1,7 @@
 package de.adito.beans.core.fields;
 
 import de.adito.beans.core.annotations.TypeDefaultField;
+import de.adito.beans.core.fields.serialization.*;
 import de.adito.beans.core.util.beancopy.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,7 +14,7 @@ import java.util.Collection;
  * @author Simon Danner, 30.07.2018
  */
 @TypeDefaultField(types = Short.class)
-public class ShortField extends AbstractField<Short> implements ISerializableField<Short>
+public class ShortField extends AbstractField<Short> implements ISerializableFieldToString<Short>
 {
   public ShortField(@NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {

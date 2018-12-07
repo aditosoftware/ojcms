@@ -1,9 +1,9 @@
 package de.adito.beans.core;
 
 import de.adito.beans.core.annotations.OptionalField;
-import de.adito.beans.core.base.*;
+import de.adito.beans.core.base.AbstractOnNextCallCountTest;
 import de.adito.beans.core.fields.*;
-import de.adito.beans.core.listener.IBeanChangeListener;
+import de.adito.beans.core.fields.util.FieldTuple;
 import org.junit.jupiter.api.*;
 
 import java.time.*;
@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * @author Simon Danner, 30.07.2018
  */
-public class BeanOptionalFieldTest extends AbstractCallCountTest
+public class BeanOptionalFieldTest extends AbstractOnNextCallCountTest
 {
   private static final String DEFAULT_STRING_VALUE = "optional";
   private SomeBean bean;
@@ -47,23 +47,10 @@ public class BeanOptionalFieldTest extends AbstractCallCountTest
   }
 
   @Test
-  @CallCount(expectedCallCount = 3)
-  public void testFieldListener()
+  public void testFieldObservers()
   {
-    bean.listenWeak(new IBeanChangeListener<SomeBean>()
-    {
-      @Override
-      public <TYPE> void fieldAdded(SomeBean pBean, IField<TYPE> pField)
-      {
-        called();
-      }
-
-      @Override
-      public <TYPE> void fieldRemoved(SomeBean pBean, IField<TYPE> pField, TYPE pOldValue)
-      {
-        called();
-      }
-    });
+    justCallCheck(bean.observeFieldAdditions(), 2);
+    justCallCheck(bean.observeFieldRemovals(), 1);
     bean.setValue(SomeBean.optionalField1, 1);
     bean.setValue(SomeBean.normalField, "test");
   }

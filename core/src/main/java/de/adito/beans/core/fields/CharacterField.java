@@ -1,6 +1,7 @@
 package de.adito.beans.core.fields;
 
 import de.adito.beans.core.annotations.TypeDefaultField;
+import de.adito.beans.core.fields.serialization.*;
 import de.adito.beans.core.util.beancopy.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,7 +14,7 @@ import java.util.Collection;
  * @author Simon Danner, 07.09.2017
  */
 @TypeDefaultField(types = Character.class)
-public class CharacterField extends AbstractField<Character> implements ISerializableField<Character>
+public class CharacterField extends AbstractField<Character> implements ISerializableFieldToString<Character>
 {
   public CharacterField(@NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {

@@ -1,6 +1,7 @@
 package de.adito.beans.core.fields;
 
 import de.adito.beans.core.annotations.TypeDefaultField;
+import de.adito.beans.core.fields.serialization.*;
 import de.adito.beans.core.util.beancopy.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,7 +14,7 @@ import java.util.Collection;
  * @author Simon Danner, 14.02.2017
  */
 @TypeDefaultField(types = Long.class)
-public class LongField extends AbstractField<Long> implements ISerializableField<Long>
+public class LongField extends AbstractField<Long> implements ISerializableFieldToString<Long>
 {
   public LongField(@NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {

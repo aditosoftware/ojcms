@@ -1,6 +1,7 @@
 package de.adito.beans.core.fields;
 
 import de.adito.beans.core.annotations.TypeDefaultField;
+import de.adito.beans.core.fields.serialization.*;
 import de.adito.beans.core.util.IClientInfo;
 import de.adito.beans.core.util.beancopy.*;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +18,7 @@ import java.util.*;
  * @author Simon Danner, 23.08.2016
  */
 @TypeDefaultField(types = {Instant.class, Date.class})
-public class DateField extends AbstractField<Instant> implements ISerializableField<Instant>
+public class DateField extends AbstractField<Instant> implements ISerializableFieldToString<Instant>
 {
   public DateField(@NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {

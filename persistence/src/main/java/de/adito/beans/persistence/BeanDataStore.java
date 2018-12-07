@@ -1,7 +1,7 @@
 package de.adito.beans.persistence;
 
 import de.adito.beans.core.*;
-import de.adito.beans.core.fields.FieldTuple;
+import de.adito.beans.core.fields.util.FieldTuple;
 import de.adito.beans.persistence.spi.IPersistentBeanDataStore;
 
 import java.util.*;

@@ -1,8 +1,9 @@
 package de.adito.beans.core;
 
-import de.adito.beans.core.listener.IBeanContainerChangeListener;
+import de.adito.beans.core.reactive.events.*;
 import de.adito.beans.core.statistics.IStatisticData;
 import de.adito.beans.core.util.BeanContainerListProxy;
+import io.reactivex.Observable;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -34,7 +35,8 @@ import java.util.stream.*;
  * @param <BEAN> the type of beans in this container
  * @author Simon Danner, 23.08.2016
  */
-public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedHolder<IBeanContainerEncapsulated<BEAN>>
+public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IObervableBeanValues<BEAN, IBeanContainerEncapsulated<BEAN>>,
+    IReferenceProvider
 {
   /**
    * Creates an empty bean container.
@@ -182,7 +184,6 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
 
   /**
    * Adds a bean to this container.
-   * The registered listeners will be informed.
    *
    * @param pBean the bean to add
    */
@@ -193,7 +194,6 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
 
   /**
    * Adds a bean at a certain index.
-   * The registered listeners will be informed.
    *
    * @param pBean  the bean to add
    * @param pIndex the index to add the bean
@@ -202,7 +202,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
   {
     assert getEncapsulated() != null;
     getEncapsulated().addBean(Objects.requireNonNull(pBean), pIndex);
-    BeanListenerUtil.beanAdded(this, pBean);
+    BeanEvents.beanAdded(this, pBean);
   }
 
   /**
@@ -226,20 +226,18 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
   }
 
   /**
-   * Merges another container with this container.
+   * Merges this container with another container.
    *
    * @param pOtherContainer the container to merge
    */
   default void merge(IBeanContainer<? extends BEAN> pOtherContainer)
   {
-    //noinspection unchecked
     pOtherContainer.stream()
         .forEach(this::addBean);
   }
 
   /**
    * Replaces a bean at a certain index.
-   * The registered listeners will be informed.
    *
    * @param pBean  the bean to replace
    * @param pIndex the index of the replacement
@@ -254,14 +252,13 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
     assert getEncapsulated() != null;
     BEAN removed = getEncapsulated().replaceBean(Objects.requireNonNull(pBean), pIndex);
     if (removed != null)
-      BeanListenerUtil.beanRemoved(this, removed);
-    BeanListenerUtil.beanAdded(this, pBean);
+      BeanEvents.beanRemoved(this, removed);
+    BeanEvents.beanAdded(this, pBean);
     return removed;
   }
 
   /**
    * Removes a bean (first occurrence) from the container.
-   * The registered listeners will be informed.
    *
    * @param pBean the bean to remove
    * @return <tt>true</tt>, if the bean was removed successfully
@@ -269,7 +266,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
   default boolean removeBean(BEAN pBean)
   {
     Objects.requireNonNull(pBean);
-    return BeanListenerUtil.removeFromContainer(this, pEncapsulated -> pEncapsulated.removeBean(pBean) ? pBean : null) != null;
+    return BeanEvents.removeFromContainer(this, pEncapsulated -> pEncapsulated.removeBean(pBean) ? pBean : null) != null;
   }
 
   /**
@@ -284,7 +281,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
     if (pIndex < 0 || pIndex >= size())
       throw new IndexOutOfBoundsException("index: " + pIndex);
 
-    return BeanListenerUtil.removeFromContainer(this, pEncapsulated -> pEncapsulated.removeBean(pIndex));
+    return BeanEvents.removeFromContainer(this, pEncapsulated -> pEncapsulated.removeBean(pIndex));
   }
 
   /**
@@ -296,7 +293,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
    */
   default boolean removeBeanIf(Predicate<BEAN> pPredicate)
   {
-    return BeanListenerUtil.removeBeanIf(this, pPredicate, false);
+    return BeanEvents.removeBeanIf(this, pPredicate, false);
   }
 
   /**
@@ -309,7 +306,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
    */
   default boolean removeBeanIfAndBreak(Predicate<BEAN> pPredicate)
   {
-    return BeanListenerUtil.removeBeanIf(this, pPredicate, true);
+    return BeanEvents.removeBeanIf(this, pPredicate, true);
   }
 
   /**
@@ -408,26 +405,29 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
   }
 
   /**
-   * Registers a weak change listener for this container.
-   * It will be informed about additions and removals and also about the single changes of each bean in the container.
+   * Creates an {@link Observable} to observe bean addition events.
    *
-   * @param pChangeListener the listener to register
+   * @return an observable that publishes {@link BeanContainerAddition} events
    */
-  default void listenWeak(IBeanContainerChangeListener<BEAN> pChangeListener)
+  default Observable<BeanContainerAddition<BEAN>> observeAdditions()
   {
     assert getEncapsulated() != null;
-    getEncapsulated().addListener(pChangeListener);
+    //noinspection unchecked
+    return getEncapsulated().observeByType(BeanContainerAddition.class)
+        .map(pChange -> (BeanContainerAddition<BEAN>) pChange);
   }
 
   /**
-   * Unregisters a listener.
+   * Creates an {@link Observable} to observe bean removal events.
    *
-   * @param pChangeListener the listener to unregister
+   * @return an observable that publishes {@link BeanContainerRemoval} events
    */
-  default void unlisten(IBeanContainerChangeListener<BEAN> pChangeListener)
+  default Observable<BeanContainerRemoval<BEAN>> observeRemovals()
   {
     assert getEncapsulated() != null;
-    getEncapsulated().removeListener(pChangeListener);
+    //noinspection unchecked
+    return getEncapsulated().observeByType(BeanContainerRemoval.class)
+        .map(pChange -> (BeanContainerRemoval<BEAN>) pChange);
   }
 
   /**
@@ -459,13 +459,13 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
   }
 
   /**
-   * Evaluates all distinct values of beans that are determined by a certain value-resolver.
-   * The resolver will be applied to all beans of the container and the unique resulting values will be returned as a Set.
+   * Evaluates all distinct values of beans that are determined by a certain value-resolverType.
+   * The resolverType will be applied to all beans of the container and the unique resulting values will be returned as a Set.
    * Null-values are not collected.
    *
-   * @param pValueResolver the resolver to retrieve a value from a bean
+   * @param pValueResolver the resolverType to retrieve a value from a bean
    * @param <TYPE>         the generic data type of the values
-   * @return a Set containing all distinct values based on the resolver
+   * @return a Set containing all distinct values based on the resolverType
    */
   default <TYPE> Set<TYPE> getDistinctValues(Function<BEAN, TYPE> pValueResolver)
   {
@@ -524,6 +524,13 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IEncapsulatedH
   default void forEachBean(Consumer<BEAN> pAction)
   {
     stream().forEach(pAction);
+  }
+
+  @Override
+  default Set<BeanReference> getDirectReferences()
+  {
+    assert getEncapsulated() != null;
+    return getEncapsulated().getDirectReferences();
   }
 
   /**

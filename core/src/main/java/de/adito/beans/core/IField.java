@@ -1,6 +1,6 @@
 package de.adito.beans.core;
 
-import de.adito.beans.core.fields.*;
+import de.adito.beans.core.fields.util.*;
 import de.adito.beans.core.util.IClientInfo;
 import de.adito.beans.core.util.beancopy.*;
 import de.adito.beans.core.util.exceptions.BeanCopyUnsupportedException;
@@ -13,7 +13,7 @@ import java.util.function.Function;
 /**
  * Describes a field of a bean.
  * It's based on an inner data type.
- * A bean field is just a wrapper for the actual data, that contains additional information.
+ * A bean field is just a wrapper for the actual data that contains additional information.
  *
  * @param <TYPE> the inner data type of this bean field
  * @author Simon Danner, 23.08.2016
@@ -98,12 +98,27 @@ public interface IField<TYPE>
   <SOURCE> Optional<Function<TYPE, SOURCE>> getFromConverter(Class<SOURCE> pSourceType);
 
   /**
-   * The annotation of this field for a certain annotation type. (null, if not present)
+   * An optional annotation instance of this field for a certain annotation type.
+   * The annotation may not be present.
    *
    * @param pType the annotation's type
-   * @return the annotation object for the given type, or null if not present
+   * @return an optional annotation instance for a certain type
    */
-  @Nullable <ANNOTATION extends Annotation> ANNOTATION getAnnotation(Class<ANNOTATION> pType);
+  <ANNOTATION extends Annotation> Optional<ANNOTATION> getAnnotation(Class<ANNOTATION> pType);
+
+  /**
+   * An annotation instance of this field for a certain annotation type.
+   * If the annotation is not present, this will lead to a runtime exception
+   *
+   * @param pType the annotation's type
+   * @return an annotation instance for a certain type
+   * @throws RuntimeException if, the requested annotation is not present
+   */
+  default <ANNOTATION extends Annotation> ANNOTATION getAnnotationOrThrow(Class<ANNOTATION> pType)
+  {
+    return getAnnotation(pType)
+        .orElseThrow(() -> new RuntimeException("This field is not annotated by the annotation type: " + pType.getName()));
+  }
 
   /**
    * Determines, if this field has a certain annotation.

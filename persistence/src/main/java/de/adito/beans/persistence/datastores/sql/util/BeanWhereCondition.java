@@ -1,7 +1,7 @@
 package de.adito.beans.persistence.datastores.sql.util;
 
 import de.adito.beans.core.IBean;
-import de.adito.beans.core.fields.FieldTuple;
+import de.adito.beans.core.fields.util.FieldTuple;
 import de.adito.beans.persistence.datastores.sql.builder.definition.condition.*;
 
 import java.util.Objects;

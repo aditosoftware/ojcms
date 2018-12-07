@@ -10,6 +10,7 @@ import java.lang.annotation.*;
  *
  * @author Simon Danner, 09.02.2018
  */
+@Documented
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ObserveCreation

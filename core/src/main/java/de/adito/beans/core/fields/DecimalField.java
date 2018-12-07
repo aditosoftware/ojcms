@@ -1,6 +1,7 @@
 package de.adito.beans.core.fields;
 
 import de.adito.beans.core.annotations.TypeDefaultField;
+import de.adito.beans.core.fields.serialization.*;
 import de.adito.beans.core.util.beancopy.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,7 +14,7 @@ import java.util.Collection;
  * @author Simon Danner, 23.08.2016
  */
 @TypeDefaultField(types = Double.class)
-public class DecimalField extends AbstractField<Double> implements ISerializableField<Double>
+public class DecimalField extends AbstractField<Double> implements ISerializableFieldToString<Double>
 {
   public DecimalField(@NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {

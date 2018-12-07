@@ -1,7 +1,7 @@
 package de.adito.beans.core.util;
 
 import de.adito.beans.core.*;
-import de.adito.beans.core.fields.FieldTuple;
+import de.adito.beans.core.fields.util.FieldTuple;
 import org.jetbrains.annotations.*;
 
 import java.lang.reflect.Modifier;

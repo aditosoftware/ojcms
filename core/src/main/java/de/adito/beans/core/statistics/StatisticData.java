@@ -1,6 +1,8 @@
 package de.adito.beans.core.statistics;
 
-import de.adito.beans.core.listener.IStatisticsListener;
+import de.adito.beans.core.reactive.events.NewStatisticEntry;
+import io.reactivex.Observable;
+import io.reactivex.subjects.PublishSubject;
 import org.jetbrains.annotations.*;
 
 import java.util.*;
@@ -15,7 +17,7 @@ public class StatisticData<TYPE> implements IStatisticData<TYPE>
 {
   private final int maxEntrySize;
   private final Map<Long, TYPE> statistics;
-  private final Set<IStatisticsListener<TYPE>> listeners = Collections.newSetFromMap(new WeakHashMap<>());
+  private final PublishSubject<NewStatisticEntry<TYPE>> newEntryPublisher = PublishSubject.create();
 
   /**
    * Creates new statistic data.
@@ -26,7 +28,7 @@ public class StatisticData<TYPE> implements IStatisticData<TYPE>
   public StatisticData(int pCapacity, @Nullable TYPE pFirstValue)
   {
     maxEntrySize = pCapacity;
-    statistics = maxEntrySize == -1 ? new LinkedHashMap<>() : new _LimitedMap(maxEntrySize);
+    statistics = Collections.synchronizedMap(maxEntrySize == -1 ? new LinkedHashMap<>() : new _LimitedMap(maxEntrySize));
     if (pFirstValue != null)
       addEntry(pFirstValue);
   }
@@ -44,30 +46,24 @@ public class StatisticData<TYPE> implements IStatisticData<TYPE>
   }
 
   @Override
-  public synchronized void addEntry(@NotNull TYPE pEntry)
+  public void addEntry(@NotNull TYPE pEntry)
   {
     long timeStamp = System.currentTimeMillis();
     statistics.put(timeStamp, pEntry);
-    listeners.forEach(pListener -> pListener.entryAdded(timeStamp, pEntry));
+    newEntryPublisher.onNext(new NewStatisticEntry<>(this, timeStamp, pEntry));
   }
 
   @Override
-  public synchronized void listenWeak(IStatisticsListener<TYPE> pListener)
-  {
-    listeners.add(pListener);
-  }
-
-  @Override
-  public synchronized void unlisten(IStatisticsListener<TYPE> pListener)
-  {
-    listeners.remove(pListener);
-  }
-
-  @Override
-  public synchronized void destroy()
+  public void destroy()
   {
     statistics.clear();
-    listeners.clear();
+    newEntryPublisher.onComplete();
+  }
+
+  @Override
+  public Observable<NewStatisticEntry<TYPE>> observeStatistics()
+  {
+    return newEntryPublisher;
   }
 
   /**

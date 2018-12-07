@@ -8,6 +8,7 @@ import java.lang.annotation.*;
  *
  * @author Simon Danner, 23.08.2016
  */
+@Documented
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Detail

@@ -2,7 +2,7 @@ package de.adito.beans.core.statistics;
 
 import de.adito.beans.core.*;
 import de.adito.beans.core.annotations.Statistics;
-import de.adito.beans.core.base.*;
+import de.adito.beans.core.base.AbstractOnNextCallCountTest;
 import de.adito.beans.core.fields.TextField;
 import org.junit.jupiter.api.*;
 
@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * @author Simon Danner, 16.07.2018
  */
-class BeanStatisticsTest extends AbstractCallCountTest
+class BeanStatisticsTest extends AbstractOnNextCallCountTest
 {
   private static final int FIELD_STATISTICS_LIMIT = 10;
   private SomeBean bean;
@@ -59,16 +59,12 @@ class BeanStatisticsTest extends AbstractCallCountTest
   }
 
   @Test
-  @CallCount(expectedCallCount = 10)
-  public void testEntryListener()
+  public void testEntryObserver()
   {
     IStatisticData<String> statisticData = bean.getStatisticData(SomeBean.field);
     assertNotNull(statisticData);
     final AtomicInteger index = new AtomicInteger();
-    statisticData.listenWeak((pTimeStamp, pEntry) -> {
-      called();
-      assertEquals("value" + index.getAndIncrement(), pEntry);
-    });
+    observeWithCallCheck(statisticData.observeStatistics(), 10, pEntry -> assertEquals("value" + index.getAndIncrement(), pEntry.getValue()));
     IntStream.range(0, 10).forEach(pIndex -> bean.setValue(SomeBean.field, "value" + pIndex));
   }
 
@@ -85,7 +81,7 @@ class BeanStatisticsTest extends AbstractCallCountTest
     final Map<Long, String> intervalStatistics = beanStatistics.getIntervalStatistics(interval);
     final int actualEntrySize = intervalStatistics.size();
     assertEquals(expectedEntryCount, actualEntrySize);
-    //wait a short time and add an entry, for that a statistic entry will be added
+    //wait a short time and add an entry, for which a statistic entry will be added
     Thread.sleep(10);
     final String newEntry = "someEntry";
     bean.setValue(SomeBean.field, newEntry);

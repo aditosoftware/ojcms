@@ -1,7 +1,5 @@
 package de.adito.beans.core.statistics;
 
-import de.adito.beans.core.listener.IStatisticsListener;
-
 import java.util.LinkedHashMap;
 import java.util.function.Function;
 import java.util.stream.LongStream;
@@ -19,8 +17,6 @@ class IntervalStatisticsMap<TYPE> extends LinkedHashMap<Long, TYPE>
   private Function<Long, TYPE> valueResolver;
   private long firstTimestamp;
   private long lastTimestamp;
-  @SuppressWarnings("FieldCanBeLocal")
-  private final IStatisticsListener<TYPE> listener; //Hold reference
 
   /**
    * Creates a new interval based statistic map.
@@ -39,24 +35,22 @@ class IntervalStatisticsMap<TYPE> extends LinkedHashMap<Long, TYPE>
     valueResolver = pValueResolver;
     firstTimestamp = pFirstTimestamp;
     lastTimestamp = pLastTimestamp;
-
-    //listener for new statistic entries to add intervalls from the old last entry to the new entry
-    listener = (pTimeStamp, pEntry) -> {
-      final TYPE lastValue = valueResolver.apply(lastTimestamp);
-      firstTimestamp = lastTimestamp + interval;
-      lastTimestamp = pTimeStamp;
-      valueResolver = pTime -> pTime < lastTimestamp ? lastValue : pEntry; //The last value before or the new value, when the time is reached
-      if (lastTimestamp >= firstTimestamp)
-        _addEntries();
-    };
-
-    //Add initial entries and register listener for future changes
-    _addEntries(); //Initial entries
-    pStatisticData.listenWeak(listener);
+    //Add initial entries and register observer for future changes
+    _addEntries();
+    pStatisticData.observeStatistics()
+        .subscribe(pEvent -> {
+          final TYPE lastValue = valueResolver.apply(lastTimestamp);
+          firstTimestamp = lastTimestamp + interval;
+          lastTimestamp = pEvent.getTimestamp();
+          //The last value before or the new value, when the time is reached
+          valueResolver = pTime -> pTime < lastTimestamp ? lastValue : pEvent.getValue();
+          if (lastTimestamp >= firstTimestamp)
+            _addEntries();
+        });
   }
 
   /**
-   * Adds intervalls from the current first timestamp until the last in the given interval.
+   * Adds intervals from the current first timestamp until the last in the given interval.
    * The according values will be retrieved from the value resolver function.
    */
   private void _addEntries()

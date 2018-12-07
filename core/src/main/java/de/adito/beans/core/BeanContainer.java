@@ -3,7 +3,7 @@ package de.adito.beans.core;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.stream.*;
 
 /**
  * A default implementation of the bean container interface.
@@ -50,7 +50,7 @@ public class BeanContainer<BEAN extends IBean<BEAN>> implements IBeanContainer<B
   {
     beanType = Objects.requireNonNull(pBeanType);
     setEncapsulated(pBuilder);
-    encapsulated.stream().forEach(pBean -> BeanListenerUtil.beanAdded(this, pBean));
+    encapsulated.stream().forEach(pBean -> BeanEvents.beanAdded(this, pBean));
   }
 
   /**
@@ -89,8 +89,8 @@ public class BeanContainer<BEAN extends IBean<BEAN>> implements IBeanContainer<B
 
     DefaultEncapsulatedBuilder(Iterable<BEAN> pBeans)
     {
-      beanList = new ArrayList<>();
-      pBeans.forEach(beanList::add);
+      beanList = StreamSupport.stream(pBeans.spliterator(), false)
+          .collect(Collectors.toList());
     }
 
     @Override

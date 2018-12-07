@@ -1,7 +1,7 @@
 package de.adito.beans.persistence.datastores.sql;
 
 import de.adito.beans.core.*;
-import de.adito.beans.core.fields.FieldTuple;
+import de.adito.beans.core.fields.util.*;
 import de.adito.beans.core.util.BeanReflector;
 import de.adito.beans.persistence.*;
 import de.adito.beans.persistence.datastores.sql.builder.*;
@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.*;
+import java.util.stream.IntStream;
 
 import static de.adito.beans.persistence.datastores.sql.builder.definition.condition.IWhereCondition.*;
 
@@ -139,7 +139,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
   @Override
   public Iterator<FieldTuple<?>> iterator()
   {
-    List<FieldTuple<?>> fieldTuples = builder.doSelect(pSelect -> pSelect
+    final List<FieldTuple<?>> fieldTuples = builder.doSelect(pSelect -> pSelect
         .where(beanIdCondition)
         .firstResult()
         .map(this::_mapResultToFieldTuples))
@@ -158,7 +158,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
     //noinspection unchecked
     return columns.entrySet().stream()
         .map(pEntry -> ((IField) pEntry.getKey()).newTuple(
-            pResultRow.hasColumn(pEntry.getValue()) && pResultRow.get(pEntry.getValue()) == null ? pResultRow.get(pEntry.getValue()) :
+            pResultRow.hasColumn(pEntry.getValue()) && pResultRow.get(pEntry.getValue()) != null ? pResultRow.get(pEntry.getValue()) :
                 pEntry.getKey().getInitialValue()))
         .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
   }
@@ -174,7 +174,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
     final AtomicInteger id = new AtomicInteger();
     //noinspection unchecked
     return BeanReflector.reflectBeanFields(pBeanType).stream()
-        .collect(Collectors.toMap(pField -> pField, pField -> new _ColumnIdentification(pField, id.getAndIncrement())));
+        .collect(LinkedHashMap::new, (pMap, pField) -> pMap.put(pField, new _ColumnIdentification(pField, id.getAndIncrement())), Map::putAll);
   }
 
   /**
@@ -206,9 +206,9 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
    *
    * @param <TYPE> the data type of the associated bean field
    */
-  private class _ColumnIdentification<TYPE> implements IColumnIdentification<TYPE>
+  private class _ColumnIdentification<TYPE> implements IColumnIdentification<TYPE>, IBeanFieldBased<TYPE>
   {
-    private final Class<TYPE> dataType;
+    private final IField<TYPE> beanField;
     private final int id;
 
     /**
@@ -219,7 +219,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
      */
     private _ColumnIdentification(IField<TYPE> pBeanField, int pId)
     {
-      dataType = pBeanField.getType();
+      beanField = pBeanField;
       id = pId;
     }
 
@@ -232,7 +232,13 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
     @Override
     public Class<TYPE> getDataType()
     {
-      return dataType;
+      return beanField.getType();
+    }
+
+    @Override
+    public IField<TYPE> getBeanField()
+    {
+      return beanField;
     }
   }
 

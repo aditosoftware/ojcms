@@ -13,6 +13,8 @@ interface IEncapsulatedHolder<ENCAPSULATED extends IEncapsulated>
    * The encapsulated data core of a bean element.
    * This method may be used as 'virtual' field.
    * Examples could be found in {@link IBean} or {@link IBeanContainer}
+   *
+   * @return the encapsulated data core of this component
    */
   ENCAPSULATED getEncapsulated();
 }

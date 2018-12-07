@@ -164,7 +164,6 @@ public final class BeanCreationRegistry
    */
   private static Class<? extends Annotation> _getObservableAnnotation(Class<? extends IBean> pBeanType)
   {
-    //noinspection unchecked
     return _searchObservableAnnotation(pBeanType)
         .orElseThrow(() -> new _NotObservableException(pBeanType));
   }

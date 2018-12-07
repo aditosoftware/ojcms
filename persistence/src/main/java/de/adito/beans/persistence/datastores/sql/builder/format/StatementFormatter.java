@@ -22,7 +22,7 @@ import java.util.stream.*;
  * @see EFormatConstant
  * @see ESeparator
  */
-public class StatementFormatter
+public final class StatementFormatter
 {
   //These strings will not be followed by a whitespace
   private static final Set<String> noWhitespace = new HashSet<>(Arrays.asList("(", System.lineSeparator()));

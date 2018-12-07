@@ -2,6 +2,7 @@ package de.adito.beans.core.fields;
 
 import de.adito.beans.core.*;
 import de.adito.beans.core.annotations.Detail;
+import de.adito.beans.core.fields.util.FieldTuple;
 import de.adito.beans.core.util.beancopy.*;
 import org.jetbrains.annotations.*;
 

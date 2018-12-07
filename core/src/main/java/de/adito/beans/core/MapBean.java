@@ -1,7 +1,7 @@
 package de.adito.beans.core;
 
 import de.adito.beans.core.annotations.Detail;
-import de.adito.beans.core.fields.FieldTuple;
+import de.adito.beans.core.fields.util.FieldTuple;
 import de.adito.beans.core.util.BeanUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  */
 public class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IModifiableBean<MapBean<KEY, VALUE>>
 {
-  private final IBeanEncapsulated<MapBean<KEY, VALUE>> encapsulated;
+  private final IBeanEncapsulated encapsulated;
   private final boolean isDetail;
   private final Class<? extends IField<?>> fieldType; //the field type may differ from the generic type due to converters
   private final Class<VALUE> valueType;
@@ -72,8 +72,7 @@ public class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMod
         .collect(LinkedHashMap::new, accumulator, LinkedHashMap::putAll);
     final List<IField<?>> fields = new ArrayList<>(fieldValueMapping.keySet());
     //noinspection unchecked
-    encapsulated = EncapsulatedBuilder.createBeanEncapsulated(new Bean.DefaultEncapsulatedBuilder(fields),
-                                                              (Class<MapBean<KEY, VALUE>>) getClass(), fields);
+    encapsulated = EncapsulatedBuilder.createBeanEncapsulated(new Bean.DefaultEncapsulatedBuilder(fields), getClass(), fields);
     fieldValueMapping.forEach(this::setValueConverted);
   }
 
@@ -94,12 +93,11 @@ public class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMod
     entrySet = pExistingMapBean.entrySet;
     final List<IField<?>> fields = pExistingMapBean.streamFields().collect(Collectors.toList());
     //noinspection unchecked
-    encapsulated = EncapsulatedBuilder.createBeanEncapsulated(new Bean.DefaultEncapsulatedBuilder(fields),
-                                                              (Class<MapBean<KEY, VALUE>>) getClass(), fields);
+    encapsulated = EncapsulatedBuilder.createBeanEncapsulated(new Bean.DefaultEncapsulatedBuilder(fields), getClass(), fields);
   }
 
   @Override
-  public IBeanEncapsulated<MapBean<KEY, VALUE>> getEncapsulated()
+  public IBeanEncapsulated getEncapsulated()
   {
     return encapsulated;
   }

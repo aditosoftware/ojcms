@@ -9,6 +9,7 @@ import java.lang.annotation.*;
  *
  * @author Simon Danner, 14.02.2017
  */
+@Documented
 @Target({ElementType.FIELD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Statistics

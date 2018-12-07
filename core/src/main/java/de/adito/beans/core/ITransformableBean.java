@@ -11,7 +11,7 @@ package de.adito.beans.core;
  * @author Simon Danner, 07.02.2017
  */
 public interface ITransformableBean<LOGIC, VISUAL, BEAN extends IBean<BEAN>>
-    extends IBean<BEAN>, ITransformable<LOGIC, VISUAL, IBeanEncapsulated<BEAN>, BEAN>
+    extends IBean<BEAN>, ITransformable<LOGIC, VISUAL, IBeanEncapsulated, BEAN>
 {
   @Override
   IVisualBeanTransformator<LOGIC, VISUAL, BEAN> getTransformator();

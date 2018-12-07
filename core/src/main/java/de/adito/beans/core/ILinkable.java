@@ -2,7 +2,7 @@ package de.adito.beans.core;
 
 /**
  * Describes any component that is able to register links to itself.
- * Links are based on the transformable bean components.
+ * Links are based on the {@link ITransformable} bean components.
  * When a bean is transformed to any other component, a link will be registered by the bean.
  *
  * @author Simon Danner, 18.07.2017

@@ -1,6 +1,6 @@
 package de.adito.beans.core;
 
-import de.adito.beans.core.fields.FieldTuple;
+import de.adito.beans.core.fields.util.FieldTuple;
 import de.adito.beans.core.util.*;
 import de.adito.beans.core.util.exceptions.BeanFieldDoesNotExistException;
 import org.jetbrains.annotations.NotNull;
@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
 {
   private static final Logger LOGGER = Logger.getLogger(Bean.class.getName());
-  private IBeanEncapsulated<BEAN> encapsulated;
+  private IBeanEncapsulated encapsulated;
 
   /**
    * Creates the bean with a default encapsulated core builder, which is based on a map.
@@ -69,7 +69,7 @@ public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
   }
 
   @Override
-  public IBeanEncapsulated<BEAN> getEncapsulated()
+  public IBeanEncapsulated getEncapsulated()
   {
     return encapsulated;
   }
@@ -104,7 +104,7 @@ public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
       throw new BeanFieldDoesNotExistException(this, pField);
     _checkNotPrivateAndWarn(pField);
     //noinspection unchecked
-    BeanListenerUtil.setValueAndFire((BEAN) this, pField, pValue);
+    BeanEvents.setValueAndPropagate((BEAN) this, pField, pValue);
   }
 
   /**
@@ -116,7 +116,7 @@ public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
   void setEncapsulated(EncapsulatedBuilder.IBeanEncapsulatedBuilder pBuilder)
   {
     //noinspection unchecked
-    encapsulated = EncapsulatedBuilder.createBeanEncapsulated(pBuilder, (Class<BEAN>) getClass());
+    encapsulated = EncapsulatedBuilder.createBeanEncapsulated(pBuilder, getClass());
   }
 
   /**

@@ -1,7 +1,6 @@
 package de.adito.beans.core.util;
 
 import de.adito.beans.core.*;
-import de.adito.beans.core.listener.IBeanChangeListener;
 
 import java.util.*;
 
@@ -13,7 +12,7 @@ import java.util.*;
  * @param <BEAN> the type of the bean wich is represented
  * @author Simon Danner, 08.06.2017
  */
-public class BeanKeyValueList<BEAN extends IBean<BEAN>> extends ArrayList<BeanKeyValueList.KeyValue> implements IBeanChangeListener<BEAN>
+public class BeanKeyValueList<BEAN extends IBean<BEAN>> extends ArrayList<BeanKeyValueList.KeyValue>
 {
   /**
    * Create the key value list.
@@ -25,16 +24,11 @@ public class BeanKeyValueList<BEAN extends IBean<BEAN>> extends ArrayList<BeanKe
     pBean.stream()
         .map(pFieldTuple -> new KeyValue(pFieldTuple.getField(), pFieldTuple.getValue()))
         .forEach(this::add);
-    pBean.listenWeak(this);
-  }
-
-  @Override
-  public <TYPE> void beanChanged(BEAN pBean, IField<TYPE> pField, TYPE pOldValue)
-  {
-    stream()
-        .filter(pKeyValue -> pKeyValue.getField() == pField)
-        .findAny()
-        .ifPresent(pKeyValue -> pKeyValue.value = pBean.getValue(pField));
+    pBean.observeValues()
+        .subscribe(pChange -> stream()
+            .filter(pKeyValue -> pKeyValue.getField() == pChange.getField())
+            .findAny()
+            .ifPresent(pKeyValue -> pKeyValue.value = pChange.getNewValue()));
   }
 
   /**

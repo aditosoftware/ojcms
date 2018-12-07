@@ -1,5 +1,6 @@
 package de.adito.beans.core;
 
+import de.adito.beans.core.reactive.events.*;
 import de.adito.beans.core.util.BeanUtil;
 
 import java.lang.annotation.Annotation;
@@ -45,7 +46,7 @@ public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
   default <TYPE, FIELD extends IField<TYPE>> FIELD addField(Class<FIELD> pFieldType, String pName,
                                                             Collection<Annotation> pAnnotations, int pIndex)
   {
-    IBeanEncapsulated<BEAN> encapsulated = getEncapsulated();
+    IBeanEncapsulated encapsulated = getEncapsulated();
     assert encapsulated != null;
     if (encapsulated.streamFields().anyMatch(pField -> pField.getName().equals(pName)))
       throw new RuntimeException("A field with the name '" + pName + "' is already existing at this bean!");
@@ -77,14 +78,14 @@ public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
    */
   default <TYPE> void addField(IField<TYPE> pField, int pIndex)
   {
-    IBeanEncapsulated<BEAN> encapsulated = getEncapsulated();
+    IBeanEncapsulated encapsulated = getEncapsulated();
     assert encapsulated != null;
     if (encapsulated.containsField(pField))
       throw new RuntimeException("A bean cannot have the same field twice! field: " + pField.getName());
     encapsulated.addField(pField, pIndex);
     if (getFieldActiveSupplier().isOptionalActive(pField))
       //noinspection unchecked
-      encapsulated.fire(pListener -> pListener.fieldAdded((BEAN) this, pField));
+      BeanEvents.propagate(new BeanFieldAddition<>((BEAN) this, pField));
   }
 
   /**
@@ -95,12 +96,12 @@ public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
    */
   default <TYPE> void removeField(IField<TYPE> pField)
   {
-    IBeanEncapsulated<BEAN> encapsulated = getEncapsulated();
+    IBeanEncapsulated encapsulated = getEncapsulated();
     assert encapsulated != null;
     TYPE oldValue = encapsulated.getValue(pField);
     encapsulated.removeField(pField);
     //noinspection unchecked
-    encapsulated.fire(pListener -> pListener.fieldRemoved((BEAN) this, pField, oldValue));
+    BeanEvents.propagate(new BeanFieldRemoval<>((BEAN) this, pField, oldValue));
   }
 
   /**

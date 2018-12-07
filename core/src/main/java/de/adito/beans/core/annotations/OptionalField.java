@@ -1,7 +1,7 @@
 package de.adito.beans.core.annotations;
 
 import de.adito.beans.core.IBean;
-import de.adito.beans.core.fields.IAdditionalFieldInfo;
+import de.adito.beans.core.fields.util.IAdditionalFieldInfo;
 
 import java.lang.annotation.*;
 import java.util.function.Predicate;
@@ -14,6 +14,7 @@ import java.util.function.Predicate;
  *
  * @author Simon Danner, 17.08.2017
  */
+@Documented
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface OptionalField
@@ -24,16 +25,16 @@ public @interface OptionalField
   IAdditionalFieldInfo<IActiveCondition> ACTIVE_CONDITION = () -> IActiveCondition.class;
 
   /**
-   * The condition that determines, when the bean-field should be active.
-   * The type can be private. An instance will be created via reflection.
-   * The type must define a default constructor.
+   * The type of the condition determining when the bean field should be active.
+   * It may be declared privately. An instance will be created via reflection.
+   * It must define a default constructor.
    *
    * @return the type of the condition
    */
   Class<? extends IActiveCondition> value();
 
   /**
-   * Describes a predicate that determines, when the bean field should be active.
+   * A predicate determining when the bean field should be active.
    *
    * @param <BEAN> the type of the bean, which the field belongs to
    */

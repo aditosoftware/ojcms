@@ -15,7 +15,7 @@ import java.util.*;
  *
  * @author Simon Danner, 26.04.2018
  */
-public class Result implements Iterable<ResultRow>
+public final class Result implements Iterable<ResultRow>
 {
   private final IValueSerializer serializer;
   private final ResultSet resultSet;

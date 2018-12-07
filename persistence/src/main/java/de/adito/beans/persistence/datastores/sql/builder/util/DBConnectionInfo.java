@@ -11,7 +11,7 @@ import java.util.Objects;
  *
  * @author Simon Danner, 23.05.2018
  */
-public class DBConnectionInfo
+public final class DBConnectionInfo
 {
   private final EDatabaseType databaseType;
   private final String host, databaseName;

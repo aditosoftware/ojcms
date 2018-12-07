@@ -1,6 +1,7 @@
 package de.adito.beans.core.statistics;
 
-import de.adito.beans.core.listener.IStatisticsListener;
+import de.adito.beans.core.reactive.events.NewStatisticEntry;
+import io.reactivex.Observable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -80,21 +81,14 @@ public interface IStatisticData<TYPE>
   void addEntry(@NotNull TYPE pEntry);
 
   /**
-   * Registers a weak listener for this data.
-   *
-   * @param pListener the listener that describes how to react to an addition of a new statistic entry
-   */
-  void listenWeak(IStatisticsListener<TYPE> pListener);
-
-  /**
-   * Unregisters a listener from this data.
-   *
-   * @param pListener the listener to remove
-   */
-  void unlisten(IStatisticsListener<TYPE> pListener);
-
-  /**
-   * Deletes this statistic data and removes all listeners.
+   * Deletes this statistic data.
    */
   void destroy();
+
+  /**
+   * Observes the statistic entries of this data.
+   *
+   * @return a observable which publishes new statistic entries
+   */
+  Observable<NewStatisticEntry<TYPE>> observeStatistics();
 }

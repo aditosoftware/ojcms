@@ -64,7 +64,6 @@ public final class BeanReflector
    * @return a map with the field names as keys and the annotations as values
    */
   @NotNull
-  @SuppressWarnings("unchecked")
   public static Map<String, Statistics> getBeanStatisticAnnotations(Class<? extends IBean> pBeanType)
   {
     return Stream.of(pBeanType.getDeclaredFields())

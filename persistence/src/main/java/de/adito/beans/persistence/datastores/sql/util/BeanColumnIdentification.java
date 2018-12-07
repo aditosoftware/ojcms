@@ -1,6 +1,7 @@
 package de.adito.beans.persistence.datastores.sql.util;
 
 import de.adito.beans.core.IField;
+import de.adito.beans.core.fields.util.IBeanFieldBased;
 import de.adito.beans.persistence.datastores.sql.builder.definition.IColumnIdentification;
 
 import java.util.*;
@@ -13,7 +14,7 @@ import java.util.stream.Collectors;
  * @param <TYPE> the data type of the column and according bean field
  * @author Simon Danner, 07.05.2018
  */
-public class BeanColumnIdentification<TYPE> implements IColumnIdentification<TYPE>
+public class BeanColumnIdentification<TYPE> implements IColumnIdentification<TYPE>, IBeanFieldBased<TYPE>
 {
   private final IField<TYPE> field;
 
@@ -27,11 +28,7 @@ public class BeanColumnIdentification<TYPE> implements IColumnIdentification<TYP
     field = pField;
   }
 
-  /**
-   * The original bean field of this identification.
-   *
-   * @return the bean field
-   */
+  @Override
   public IField<TYPE> getBeanField()
   {
     return field;

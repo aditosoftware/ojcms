@@ -1,5 +1,6 @@
 package de.adito.beans.core.fields;
 
+import de.adito.beans.core.fields.serialization.ISerializableFieldJson;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
@@ -10,7 +11,7 @@ import java.util.*;
  *
  * @author Simon Danner, 01.08.2018
  */
-public class SetField<TYPE> extends AbstractField<Set<TYPE>>
+public class SetField<TYPE> extends AbstractField<Set<TYPE>> implements ISerializableFieldJson<Set<TYPE>>
 {
   public SetField(@NotNull Class<Set<TYPE>> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {

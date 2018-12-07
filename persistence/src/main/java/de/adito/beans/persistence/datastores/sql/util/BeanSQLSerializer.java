@@ -2,7 +2,8 @@ package de.adito.beans.persistence.datastores.sql.util;
 
 import de.adito.beans.core.*;
 import de.adito.beans.core.fields.*;
-import de.adito.beans.core.references.IHierarchicalField;
+import de.adito.beans.core.fields.serialization.ISerializableField;
+import de.adito.beans.core.fields.util.*;
 import de.adito.beans.persistence.*;
 import de.adito.beans.persistence.datastores.sql.builder.definition.*;
 import org.jetbrains.annotations.*;
@@ -14,10 +15,7 @@ import org.jetbrains.annotations.*;
  */
 public class BeanSQLSerializer implements IValueSerializer
 {
-  private static final String REF_FIELD = IHierarchicalField.class.getSimpleName();
-  private static final String SERIALIZABLE_FIELD = ISerializableField.class.getSimpleName();
   private static final String SEPARATOR = ";";
-
   private final BeanDataStore beanDataStore;
 
   /**
@@ -33,16 +31,18 @@ public class BeanSQLSerializer implements IValueSerializer
   @Override
   public @Nullable <TYPE> String toSerial(IColumnValueTuple<TYPE> pColumnValueTuple)
   {
-    return pColumnValueTuple instanceof BeanColumnValueTuple ?
-        _toPersistent(((BeanColumnValueTuple<TYPE>) pColumnValueTuple).getFieldTuple()) :
+    //noinspection unchecked
+    return pColumnValueTuple instanceof IBeanFieldTupleBased ?
+        _toPersistent(((IBeanFieldTupleBased<TYPE>) pColumnValueTuple).getFieldTuple()) :
         IValueSerializer.DEFAULT.toSerial(pColumnValueTuple);
   }
 
   @Override
   public <TYPE> @Nullable TYPE fromSerial(IColumnIdentification<TYPE> pColumnIdentification, String pSerialValue)
   {
-    return pColumnIdentification instanceof BeanColumnIdentification ?
-        _fromPersistent(((BeanColumnIdentification<TYPE>) pColumnIdentification).getBeanField(), pSerialValue) :
+    //noinspection unchecked
+    return pColumnIdentification instanceof IBeanFieldBased ?
+        _fromPersistent(((IBeanFieldBased<TYPE>) pColumnIdentification).getBeanField(), pSerialValue) :
         IValueSerializer.DEFAULT.fromSerial(pColumnIdentification, pSerialValue);
   }
 
@@ -180,6 +180,6 @@ public class BeanSQLSerializer implements IValueSerializer
   private <TYPE> String _notSerializableMessage(IField<TYPE> pField, boolean pToSerial)
   {
     return "Unable to " + (pToSerial ? "persist" : "read") + " the value of the bean field " + pField.getName() +
-        " with type " + pField.getType() + "! The field must either be a " + REF_FIELD + " or a " + SERIALIZABLE_FIELD + "!";
+        " with type " + pField.getType() + "! The field must either be a reference or serializable field!";
   }
 }

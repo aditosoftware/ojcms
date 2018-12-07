@@ -1,7 +1,7 @@
 package de.adito.beans.persistence.datastores.sql.util;
 
 import de.adito.beans.core.IBean;
-import de.adito.beans.core.fields.FieldTuple;
+import de.adito.beans.core.fields.util.*;
 import de.adito.beans.persistence.datastores.sql.builder.definition.*;
 
 import java.lang.reflect.Array;
@@ -14,7 +14,7 @@ import java.util.stream.Stream;
  * @param <TYPE> the data type of the tuple
  * @author Simon Danner, 07.05.2018
  */
-public class BeanColumnValueTuple<TYPE> implements IColumnValueTuple<TYPE>
+public class BeanColumnValueTuple<TYPE> implements IColumnValueTuple<TYPE>, IBeanFieldTupleBased<TYPE>
 {
   private final FieldTuple<TYPE> fieldTuple;
   private final IColumnIdentification<TYPE> column;
@@ -42,11 +42,7 @@ public class BeanColumnValueTuple<TYPE> implements IColumnValueTuple<TYPE>
     return fieldTuple.getValue();
   }
 
-  /**
-   * The bean field tuple for this column tuple.
-   *
-   * @return a bean tuple
-   */
+  @Override
   public FieldTuple<TYPE> getFieldTuple()
   {
     return fieldTuple;

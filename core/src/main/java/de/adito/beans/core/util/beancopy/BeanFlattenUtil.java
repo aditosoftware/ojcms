@@ -1,7 +1,7 @@
 package de.adito.beans.core.util.beancopy;
 
 import de.adito.beans.core.*;
-import de.adito.beans.core.fields.FieldTuple;
+import de.adito.beans.core.fields.util.FieldTuple;
 import de.adito.beans.core.mappers.IBeanFlatDataMapper;
 
 import java.util.stream.Stream;

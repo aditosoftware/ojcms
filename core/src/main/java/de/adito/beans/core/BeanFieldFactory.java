@@ -118,7 +118,6 @@ public final class BeanFieldFactory
    * @param <FIELD>      the generic field type
    * @return the newly created field
    */
-  @SuppressWarnings("JavaReflectionMemberAccess")
   static <TYPE, FIELD extends IField<TYPE>> FIELD createField(Class<FIELD> pFieldType, @Nullable Class pGenType, String pName,
                                                               Collection<Annotation> pAnnotations)
   {
@@ -174,8 +173,7 @@ public final class BeanFieldFactory
     if (!pField.isOptional())
       return;
 
-    OptionalField optional = pField.getAnnotation(OptionalField.class);
-    assert optional != null;
+    OptionalField optional = pField.getAnnotationOrThrow(OptionalField.class);
     Constructor<? extends OptionalField.IActiveCondition> constructor = optional.value().getDeclaredConstructor();
     if (!constructor.isAccessible())
       constructor.setAccessible(true);
