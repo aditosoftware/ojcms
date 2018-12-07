@@ -92,14 +92,14 @@ final class BeanCopyUtil
    */
   private static <BEAN extends IBean<BEAN>> BEAN _setValues(BEAN pOriginal, BEAN pCopy, ECopyMode pMode, CustomFieldCopy<?>[] pCustomCopies)
   {
-    Map<IField<?>, Function> customCopiesMap = ECopyMode.isDeep(pMode) ? _createCustomCopiesMap(pCustomCopies) : Collections.emptyMap();
+    Map<IField<?>, Function> customCopiesMap = pMode.shouldCopyDeep() ? _createCustomCopiesMap(pCustomCopies) : Collections.emptyMap();
     //noinspection unchecked,RedundantCast
     pCopy.streamFields()
-        .forEach(pField -> pCopy.setValue((IField) pField, !ECopyMode.isDeep(pMode) ? pOriginal.getValue(pField) :
+        .forEach(pField -> pCopy.setValue((IField) pField, !pMode.shouldCopyDeep() ? pOriginal.getValue(pField) :
             _copyFieldValue((IField) pField, pOriginal.getValue(pField), pMode,
                             Optional.ofNullable(customCopiesMap.get(pField)), pCustomCopies)));
     //If required, set non bean values as well
-    if (ECopyMode.allFields(pMode))
+    if (pMode.shouldCopyAllFields())
       BeanReflector.reflectDeclaredNonBeanFields(pOriginal.getClass()).stream()
           .peek(pField -> {
             if (!pField.isAccessible())
