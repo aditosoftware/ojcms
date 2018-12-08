@@ -3,7 +3,6 @@ package de.adito.beans.core;
 import de.adito.beans.core.exceptions.*;
 import de.adito.beans.core.fields.IField;
 import de.adito.beans.core.util.*;
-import de.adito.beans.core.util.beancopy.*;
 import org.objenesis.*;
 
 import java.lang.reflect.*;

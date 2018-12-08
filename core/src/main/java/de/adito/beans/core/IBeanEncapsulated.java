@@ -3,9 +3,7 @@ package de.adito.beans.core;
 import de.adito.beans.core.annotations.internal.Encapsulated;
 import de.adito.beans.core.fields.IField;
 import de.adito.beans.core.fields.util.FieldTuple;
-import de.adito.beans.core.mappers.*;
 import de.adito.beans.core.statistics.IStatisticData;
-import de.adito.beans.core.util.IBeanFieldPredicate;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -73,55 +71,6 @@ interface IBeanEncapsulated extends IEncapsulated<FieldTuple<?>>, IReferable
    * A stream of bean fields of this data core.
    */
   Stream<IField<?>> streamFields();
-
-  /**
-   * Adds a field filter to this data core.
-   * So fields with their associated values may be excluded for a certain time.
-   *
-   * @param pPredicate the predicate to define the excluded fields
-   */
-  void addFieldFilter(IBeanFieldPredicate pPredicate);
-
-  /**
-   * Removes a field filter from this data core.
-   *
-   * @param pPredicate the predicate/filter to remove
-   */
-  void removeFieldFilter(IBeanFieldPredicate pPredicate);
-
-  /**
-   * Clears all field filters.
-   */
-  void clearFieldFilters();
-
-  /**
-   * Adds a temporary data mapper to this data core.
-   *
-   * @param pDataMapper the data mapper
-   */
-  void addDataMapper(IBeanFlatDataMapper pDataMapper);
-
-  /**
-   * Adds a temporary data mapper, which only applies to a single field, to this data core.
-   *
-   * @param pDataMapper the data mapper
-   * @param <VALUE>     the data type of the field
-   */
-  <VALUE> void addDataMapperForField(IField<VALUE> pField, ISingleFieldFlatDataMapper<VALUE> pDataMapper);
-
-  /**
-   * Removes a specific data mappers from this data core.
-   * The method can be used for normal mappers and single field mappers.
-   *
-   * @param pDataMapper the data mapper to remove
-   * @return <tt>true</tt>, if the mapper has been removed successfully
-   */
-  boolean removeDataMapper(IBeanFlatDataMapper pDataMapper);
-
-  /**
-   * Clears all data mappers (normal and single) from this data core.
-   */
-  void clearDataMappers();
 
   /**
    * Determines if this core contains a certain bean field.

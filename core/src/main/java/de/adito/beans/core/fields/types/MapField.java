@@ -4,7 +4,7 @@ import de.adito.beans.core.*;
 import de.adito.beans.core.annotations.Detail;
 import de.adito.beans.core.fields.IField;
 import de.adito.beans.core.fields.util.FieldTuple;
-import de.adito.beans.core.util.beancopy.*;
+import de.adito.beans.core.util.*;
 import org.jetbrains.annotations.*;
 
 import java.lang.annotation.Annotation;

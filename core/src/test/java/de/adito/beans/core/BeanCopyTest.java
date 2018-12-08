@@ -1,7 +1,8 @@
-package de.adito.beans.core.util.beancopy;
+package de.adito.beans.core;
 
 import de.adito.beans.core.*;
 import de.adito.beans.core.fields.types.*;
+import de.adito.beans.core.util.ECopyMode;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;

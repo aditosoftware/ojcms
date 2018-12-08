@@ -2,20 +2,18 @@ package de.adito.beans.core;
 
 import de.adito.beans.core.annotations.Statistics;
 import de.adito.beans.core.annotations.internal.RequiresEncapsulatedAccess;
+import de.adito.beans.core.exceptions.BeanFieldDoesNotExistException;
 import de.adito.beans.core.fields.IField;
 import de.adito.beans.core.fields.util.FieldTuple;
-import de.adito.beans.core.mappers.IBeanFlatDataMapper;
 import de.adito.beans.core.reactive.IEvent;
 import de.adito.beans.core.statistics.*;
 import de.adito.beans.core.util.*;
-import de.adito.beans.core.exceptions.BeanFieldDoesNotExistException;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import org.jetbrains.annotations.*;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.*;
 import java.util.stream.*;
 
@@ -248,7 +246,7 @@ public final class EncapsulatedBuilder
    *
    * @param <BEAN> the type of the bean the core is for
    */
-  private static class _BeanEncapsulated<BEAN extends IBean<BEAN>> extends AbstractBeanEncapsulated
+  private static class _BeanEncapsulated<BEAN extends IBean<BEAN>> extends AbstractEncapsulated<FieldTuple<?>> implements IBeanEncapsulated
   {
     private final IBeanEncapsulatedBuilder builder;
     private final List<IField<?>> fieldOrder;
@@ -292,7 +290,7 @@ public final class EncapsulatedBuilder
     @Override
     public int getFieldCount()
     {
-      return getFieldFilters().size() > 0 ? (int) streamFields().count() : fieldOrder.size();
+      return fieldOrder.size();
     }
 
     @Override
@@ -304,16 +302,14 @@ public final class EncapsulatedBuilder
     @Override
     public Stream<IField<?>> streamFields()
     {
-      return fieldOrder.stream()
-          .filter(pField -> getFieldFilters().stream()
-              .allMatch(pFieldPredicate -> pFieldPredicate.test(pField, builder.getValue(pField))));
+      return fieldOrder.stream();
     }
 
     @NotNull
     @Override
     public Iterator<FieldTuple<?>> iterator()
     {
-      return _createFilteredTupleStream().iterator();
+      return builder.iterator();
     }
 
     /**
@@ -331,54 +327,6 @@ public final class EncapsulatedBuilder
             Statistics statistics = pEntry.getValue();
             return new StatisticData<>(statistics.capacity(), null);
           }));
-    }
-
-    /**
-     * Creates a stream of all tuples of this data core, that are currently active.
-     * Some may be filtered at a certain moment.
-     *
-     * @return a stream of field tuples
-     */
-    private Stream<FieldTuple<?>> _createFilteredTupleStream()
-    {
-      return _applyMappings()
-          .filter(pTuple -> getFieldFilters().stream()
-              .allMatch(pPredicate -> pPredicate.test(pTuple.getField(), pTuple.getValue())));
-    }
-
-    /**
-     * Applies all data mappers to the data stream of the builder.
-     * Effectively every data mapper leads to a flatMap()-operation
-     *
-     * @return a stream of field tuples
-     */
-    private Stream<FieldTuple<?>> _applyMappings()
-    {
-      Stream<FieldTuple<?>> stream = StreamSupport.stream(builder.spliterator(), false);
-      for (BeanDataMapper dataMapper : getDataMappers())
-      {
-        IBeanFlatDataMapper mapper = dataMapper.getDataMapper();
-        final AtomicInteger changes = new AtomicInteger(); //Changes for each mapping iteration
-        do
-        {
-          changes.set(0);
-          stream = stream.flatMap(pTuple -> {
-            Optional<IField<?>> beanField = dataMapper.getBeanField();
-            if ((!beanField.isPresent() || beanField.get() == pTuple.getField()) && mapper.affectsTuple(pTuple.getField(), pTuple.getValue()))
-            {
-              changes.getAndIncrement();
-              return mapper.flatMapTuple(pTuple.getField(), pTuple.getValue());
-            }
-            else
-              return Stream.of(pTuple);
-          })
-              .collect(Collectors.toList())
-              .stream();
-        }
-        while (!mapper.isCompleted(changes.get()));
-      }
-
-      return stream;
     }
 
     /**

@@ -1,4 +1,4 @@
-package de.adito.beans.core.util.beancopy;
+package de.adito.beans.core.util;
 
 import de.adito.beans.core.fields.IField;
 

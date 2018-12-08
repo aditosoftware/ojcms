@@ -1,7 +1,7 @@
 package de.adito.beans.core.fields.types;
 
 import de.adito.beans.core.fields.serialization.ISerializableField;
-import de.adito.beans.core.util.beancopy.*;
+import de.adito.beans.core.util.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;

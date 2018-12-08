@@ -2,7 +2,6 @@ package de.adito.beans.core.fields;
 
 import de.adito.beans.core.*;
 import de.adito.beans.core.fields.types.MapField;
-import de.adito.beans.core.util.beancopy.*;
 import org.junit.jupiter.api.*;
 
 import java.util.*;
@@ -71,16 +70,6 @@ class MapFieldTest
     map.entrySet().removeIf(pEntry -> pEntry.getKey() == 5);
     assertEquals(9, map.size());
     assertTrue(map.values().stream().noneMatch(pValue -> pValue.equals("value5")));
-  }
-
-  @Test
-  public void testFlatMapBean()
-  {
-    final SomeBean bean = new SomeBean();
-    bean.setValue(SomeBean.mapField, SomeBean.mapField.createBeanFromMap(data, String.class));
-    final SomeBean flatBean = BeanFlattenUtil.makeFlat(bean.createCopy(ECopyMode.DEEP_ONLY_BEAN_FIELDS), true);
-    assertEquals(10, flatBean.stream().count());
-    _testFieldTuples(flatBean);
   }
 
   /**

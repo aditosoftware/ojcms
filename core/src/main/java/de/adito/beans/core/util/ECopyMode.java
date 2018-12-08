@@ -1,4 +1,4 @@
-package de.adito.beans.core.util.beancopy;
+package de.adito.beans.core.util;
 
 /**
  * Enumerates all copy modes for the beans.

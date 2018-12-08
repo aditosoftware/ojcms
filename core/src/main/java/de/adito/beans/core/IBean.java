@@ -5,11 +5,9 @@ import de.adito.beans.core.annotations.internal.*;
 import de.adito.beans.core.exceptions.*;
 import de.adito.beans.core.fields.IField;
 import de.adito.beans.core.fields.util.FieldTuple;
-import de.adito.beans.core.mappers.*;
 import de.adito.beans.core.references.*;
 import de.adito.beans.core.statistics.IStatisticData;
 import de.adito.beans.core.util.*;
-import de.adito.beans.core.util.beancopy.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -293,98 +291,6 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IObservableBeanValues<B
     return streamFields()
         .filter(pField -> pField.getName().equals(pName))
         .findAny();
-  }
-
-  /**
-   * Adds a field filter to this data core.
-   * So fields with their associated values may be excluded for a certain time.
-   *
-   * If a field is excluded, the bean behaves like the field isn't present at all.
-   * Hence methods could throw runtime exceptions, when a field is inactive at a certain moment.
-   * This could be compared to optional field definitions ({@link de.adito.beans.core.annotations.OptionalField}.
-   * But in contrast to them field filters may be used temporary.
-   *
-   * @param pPredicate the predicate to define the excluded fields
-   */
-  @WriteOperation
-  default void addFieldFilter(IBeanFieldPredicate pPredicate)
-  {
-    assert getEncapsulated() != null;
-    getEncapsulated().addFieldFilter(pPredicate);
-  }
-
-  /**
-   * Removes a field filter from this data core.
-   *
-   * @param pPredicate the predicate/filter to remove
-   */
-  @WriteOperation
-  default void removeFieldFilter(IBeanFieldPredicate pPredicate)
-  {
-    assert getEncapsulated() != null;
-    getEncapsulated().removeFieldFilter(pPredicate);
-  }
-
-  /**
-   * Clears all field filters.
-   */
-  @WriteOperation
-  default void clearFieldFilters()
-  {
-    assert getEncapsulated() != null;
-    getEncapsulated().clearFieldFilters();
-  }
-
-  /**
-   * Adds a temporary data mapper to this data core.
-   * A data mapper applies to the tuple-stream of this bean.
-   * It may be used to present values in specific ways temporary.
-   *
-   * @param pDataMapper the data mapper
-   */
-  @WriteOperation
-  default void addDataMapper(IBeanFlatDataMapper pDataMapper)
-  {
-    assert getEncapsulated() != null;
-    getEncapsulated().addDataMapper(pDataMapper);
-  }
-
-  /**
-   * Adds a temporary data mapper, which only applies to a single field, to this data core.
-   * A data mapper applies to the tuple-stream of this bean.
-   * It may be used to present values in specific ways temporary.
-   *
-   * @param pDataMapper the data mapper
-   */
-  @WriteOperation
-  default <VALUE> void addDataMapperForField(IField<VALUE> pField, ISingleFieldFlatDataMapper<VALUE> pDataMapper)
-  {
-    assert getEncapsulated() != null;
-    getEncapsulated().addDataMapperForField(pField, pDataMapper);
-  }
-
-  /**
-   * Removes a specific data mappers from this data core.
-   * The method can be used for normal mappers and single field mappers.
-   *
-   * @param pDataMapper the data mapper to remove
-   * @return <tt>true</tt>, if the mapper has been removed successfully
-   */
-  @WriteOperation
-  default boolean removeDataMapper(IBeanFlatDataMapper pDataMapper)
-  {
-    assert getEncapsulated() != null;
-    return getEncapsulated().removeDataMapper(pDataMapper);
-  }
-
-  /**
-   * Clears all data mappers (normal and single) from this data core.
-   */
-  @WriteOperation
-  default void clearDataMappers()
-  {
-    assert getEncapsulated() != null;
-    getEncapsulated().clearDataMappers();
   }
 
   /**

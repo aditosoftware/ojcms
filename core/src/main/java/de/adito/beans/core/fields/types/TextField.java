@@ -2,8 +2,7 @@ package de.adito.beans.core.fields.types;
 
 import de.adito.beans.core.annotations.internal.TypeDefaultField;
 import de.adito.beans.core.fields.serialization.ISerializableFieldToString;
-import de.adito.beans.core.util.IClientInfo;
-import de.adito.beans.core.util.beancopy.*;
+import de.adito.beans.core.util.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;

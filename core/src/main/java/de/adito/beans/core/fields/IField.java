@@ -1,8 +1,7 @@
 package de.adito.beans.core.fields;
 
 import de.adito.beans.core.fields.util.*;
-import de.adito.beans.core.util.IClientInfo;
-import de.adito.beans.core.util.beancopy.*;
+import de.adito.beans.core.util.*;
 import de.adito.beans.core.exceptions.BeanCopyUnsupportedException;
 
 import java.lang.annotation.Annotation;
