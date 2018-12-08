@@ -1,8 +1,8 @@
 package de.adito.beans.core;
 
+import de.adito.beans.core.annotations.internal.WriteOperation;
 import de.adito.beans.core.reactive.events.*;
 import de.adito.beans.core.statistics.IStatisticData;
-import de.adito.beans.core.util.BeanContainerListProxy;
 import io.reactivex.Observable;
 import org.jetbrains.annotations.Nullable;
 
@@ -187,6 +187,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IObervableBean
    *
    * @param pBean the bean to add
    */
+  @WriteOperation
   default void addBean(BEAN pBean)
   {
     addBean(pBean, size());
@@ -198,6 +199,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IObervableBean
    * @param pBean  the bean to add
    * @param pIndex the index to add the bean
    */
+  @WriteOperation
   default void addBean(BEAN pBean, int pIndex)
   {
     assert getEncapsulated() != null;
@@ -210,6 +212,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IObervableBean
    *
    * @param pBeans iterable beans
    */
+  @WriteOperation
   default void addMultiple(Iterable<BEAN> pBeans)
   {
     addMultiple(StreamSupport.stream(pBeans.spliterator(), false));
@@ -220,6 +223,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IObervableBean
    *
    * @param pBeanStream a stream of beans
    */
+  @WriteOperation
   default void addMultiple(Stream<BEAN> pBeanStream)
   {
     pBeanStream.forEach(this::addBean);
@@ -230,6 +234,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IObervableBean
    *
    * @param pOtherContainer the container to merge
    */
+  @WriteOperation
   default void merge(IBeanContainer<? extends BEAN> pOtherContainer)
   {
     pOtherContainer.stream()
@@ -244,6 +249,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IObervableBean
    * @return the replaced bean
    * @throws IndexOutOfBoundsException if, the index is not within the range of the contained beans
    */
+  @WriteOperation
   default BEAN replaceBean(BEAN pBean, int pIndex)
   {
     if (pIndex < 0 || pIndex >= size())
@@ -263,6 +269,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IObervableBean
    * @param pBean the bean to remove
    * @return <tt>true</tt>, if the bean was removed successfully
    */
+  @WriteOperation
   default boolean removeBean(BEAN pBean)
   {
     Objects.requireNonNull(pBean);
@@ -276,6 +283,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IObervableBean
    * @return the removed bean
    * @throws IndexOutOfBoundsException if, the index is not within the range of the contained beans
    */
+  @WriteOperation
   default BEAN removeBean(int pIndex)
   {
     if (pIndex < 0 || pIndex >= size())
@@ -291,6 +299,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IObervableBean
    * @param pPredicate the predicate to determine which beans should be removed
    * @return <tt>true</tt>, if at least one bean has been removed
    */
+  @WriteOperation
   default boolean removeBeanIf(Predicate<BEAN> pPredicate)
   {
     return BeanEvents.removeBeanIf(this, pPredicate, false);
@@ -304,6 +313,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IObervableBean
    * @param pPredicate the predicate to determine which bean should be removed
    * @return <tt>true</tt>, if a bean has been removed
    */
+  @WriteOperation
   default boolean removeBeanIfAndBreak(Predicate<BEAN> pPredicate)
   {
     return BeanEvents.removeBeanIf(this, pPredicate, true);
@@ -361,6 +371,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IObervableBean
   /**
    * Clears this container.
    */
+  @WriteOperation
   default void clear()
   {
     assert getEncapsulated() != null;
@@ -384,6 +395,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IObervableBean
    *
    * @param pComparator the comparator
    */
+  @WriteOperation
   default void sort(Comparator<BEAN> pComparator)
   {
     assert getEncapsulated() != null;
@@ -397,6 +409,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IObervableBean
    * @param pMaxCount the limit (-1 for no limit)
    * @param pEvicting <tt>true</tt>, if the first beans should be removed, when the limit is reached
    */
+  @WriteOperation
   default IBeanContainer<BEAN> withLimit(int pMaxCount, boolean pEvicting)
   {
     assert getEncapsulated() != null;
@@ -495,7 +508,8 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IObervableBean
   default IBeanContainer<BEAN> asReadOnly()
   {
     assert getEncapsulated() != null;
-    return new ReadOnly<>(this);
+    //noinspection unchecked
+    return ReadOnlyInvocationHandler.createReadOnlyInstance(IBeanContainer.class, this);
   }
 
   /**
@@ -534,96 +548,52 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IObervableBean
   }
 
   /**
-   * Default read-only container implementation.
+   * A list proxy for a bean container to treat it as a {@link java.util.List}.
    *
-   * @param <BEAN> the type of beans in this container
+   * @param <BEAN> the type of the beans in the container
    */
-  class ReadOnly<BEAN extends IBean<BEAN>> implements IBeanContainer<BEAN>
+  final class BeanContainerListProxy<BEAN extends IBean<BEAN>> extends AbstractList<BEAN>
   {
-    private static final String ERROR = "This container is read-only! The content can not be modified!";
-    private final IBeanContainer<BEAN> originalContainer;
+    private final IBeanContainer<BEAN> container;
 
-    public ReadOnly(IBeanContainer<BEAN> pOriginalContainer)
+    /**
+     * Creates the list proxy based on an original bean container.
+     *
+     * @param pContainer the original bean container
+     */
+    private BeanContainerListProxy(IBeanContainer<BEAN> pContainer)
     {
-      originalContainer = pOriginalContainer;
+      container = pContainer;
     }
 
     @Override
-    public IBeanContainerEncapsulated<BEAN> getEncapsulated()
+    public BEAN get(int pIndex)
     {
-      return originalContainer.getEncapsulated();
+      return container.getBean(pIndex);
     }
 
     @Override
-    public void addBean(BEAN pBean) throws UnsupportedOperationException
+    public int size()
     {
-      throw new UnsupportedOperationException(ERROR);
+      return container.size();
     }
 
     @Override
-    public void addBean(BEAN pBean, int pIndex) throws UnsupportedOperationException
+    public BEAN set(int pIndex, BEAN pBean)
     {
-      throw new UnsupportedOperationException(ERROR);
+      return container.replaceBean(pBean, pIndex);
     }
 
     @Override
-    public BEAN replaceBean(BEAN pBean, int pIndex) throws UnsupportedOperationException
+    public void add(int pIndex, BEAN pBean)
     {
-      throw new UnsupportedOperationException(ERROR);
+      container.addBean(pBean, pIndex);
     }
 
     @Override
-    public boolean removeBean(BEAN pBean) throws UnsupportedOperationException
+    public BEAN remove(int pIndex)
     {
-      throw new UnsupportedOperationException(ERROR);
-    }
-
-    @Override
-    public BEAN removeBean(int pIndex)
-    {
-      throw new UnsupportedOperationException(ERROR);
-    }
-
-    @Override
-    public boolean removeBeanIf(Predicate<BEAN> pPredicate) throws UnsupportedOperationException
-    {
-      throw new UnsupportedOperationException(ERROR);
-    }
-
-    @Override
-    public boolean removeBeanIfAndBreak(Predicate<BEAN> pPredicate)
-    {
-      throw new UnsupportedOperationException(ERROR);
-    }
-
-    @Override
-    public void clear() throws UnsupportedOperationException
-    {
-      throw new UnsupportedOperationException(ERROR);
-    }
-
-    @Override
-    public IBeanContainer<BEAN> withLimit(int pMaxCount, boolean pEvicting)
-    {
-      throw new UnsupportedOperationException(ERROR);
-    }
-
-    @Override
-    public void sort(Comparator<BEAN> pComparator)
-    {
-      throw new UnsupportedOperationException(ERROR);
-    }
-
-    @Override
-    public void merge(IBeanContainer<? extends BEAN> pOtherContainer)
-    {
-      throw new UnsupportedOperationException(ERROR);
-    }
-
-    @Override
-    public List<BEAN> asList()
-    {
-      return Collections.unmodifiableList(originalContainer.asList());
+      return container.removeBean(pIndex);
     }
   }
 }

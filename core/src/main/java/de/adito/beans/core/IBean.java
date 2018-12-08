@@ -1,6 +1,7 @@
 package de.adito.beans.core;
 
 import de.adito.beans.core.annotations.Identifier;
+import de.adito.beans.core.annotations.internal.WriteOperation;
 import de.adito.beans.core.fields.util.FieldTuple;
 import de.adito.beans.core.mappers.*;
 import de.adito.beans.core.statistics.IStatisticData;
@@ -97,6 +98,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IObervableBeanValues<BE
    * @param pValue  the new value
    * @param <VALUE> the field's data type
    */
+  @WriteOperation
   default <VALUE> void setValue(IField<VALUE> pField, VALUE pValue)
   {
     assert getEncapsulated() != null;
@@ -121,6 +123,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IObervableBeanValues<BE
    * @param <VALUE>         he field's data type
    * @param <SOURCE>        the value's type before its conversion
    */
+  @WriteOperation
   @SuppressWarnings("unchecked")
   default <VALUE, SOURCE> void setValueConverted(IField<VALUE> pField, SOURCE pValueToConvert)
   {
@@ -140,6 +143,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IObervableBeanValues<BE
    * Clears the values of all public field's of this bean.
    * The values are 'null' afterwards.
    */
+  @WriteOperation
   default void clear()
   {
     streamFields()
@@ -299,6 +303,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IObervableBeanValues<BE
    *
    * @param pPredicate the predicate to define the excluded fields
    */
+  @WriteOperation
   default void addFieldFilter(IBeanFieldPredicate pPredicate)
   {
     assert getEncapsulated() != null;
@@ -310,6 +315,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IObervableBeanValues<BE
    *
    * @param pPredicate the predicate/filter to remove
    */
+  @WriteOperation
   default void removeFieldFilter(IBeanFieldPredicate pPredicate)
   {
     assert getEncapsulated() != null;
@@ -319,6 +325,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IObervableBeanValues<BE
   /**
    * Clears all field filters.
    */
+  @WriteOperation
   default void clearFieldFilters()
   {
     assert getEncapsulated() != null;
@@ -332,6 +339,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IObervableBeanValues<BE
    *
    * @param pDataMapper the data mapper
    */
+  @WriteOperation
   default void addDataMapper(IBeanFlatDataMapper pDataMapper)
   {
     assert getEncapsulated() != null;
@@ -345,6 +353,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IObervableBeanValues<BE
    *
    * @param pDataMapper the data mapper
    */
+  @WriteOperation
   default <VALUE> void addDataMapperForField(IField<VALUE> pField, ISingleFieldFlatDataMapper<VALUE> pDataMapper)
   {
     assert getEncapsulated() != null;
@@ -358,6 +367,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IObervableBeanValues<BE
    * @param pDataMapper the data mapper to remove
    * @return <tt>true</tt>, if the mapper has been removed successfully
    */
+  @WriteOperation
   default boolean removeDataMapper(IBeanFlatDataMapper pDataMapper)
   {
     assert getEncapsulated() != null;
@@ -367,10 +377,24 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IObervableBeanValues<BE
   /**
    * Clears all data mappers (normal and single) from this data core.
    */
+  @WriteOperation
   default void clearDataMappers()
   {
     assert getEncapsulated() != null;
     getEncapsulated().clearDataMappers();
+  }
+
+  /**
+   * This bean as read only version.
+   * This will be a new instance, but the data core stays the same.
+   *
+   * @return this bean as read only version
+   */
+  default IBean<BEAN> asReadOnly()
+  {
+    assert getEncapsulated() != null;
+    //noinspection unchecked
+    return ReadOnlyInvocationHandler.createReadOnlyInstance(IBean.class, this);
   }
 
   /**

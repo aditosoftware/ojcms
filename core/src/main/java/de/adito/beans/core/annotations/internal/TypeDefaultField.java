@@ -1,4 +1,4 @@
-package de.adito.beans.core.annotations;
+package de.adito.beans.core.annotations.internal;
 
 import de.adito.picoservice.PicoService;
 

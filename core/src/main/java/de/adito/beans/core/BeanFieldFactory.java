@@ -1,6 +1,7 @@
 package de.adito.beans.core;
 
 import de.adito.beans.core.annotations.*;
+import de.adito.beans.core.annotations.internal.TypeDefaultField;
 import de.adito.beans.core.util.BeanReflector;
 import de.adito.picoservice.IPicoRegistry;
 import org.jetbrains.annotations.Nullable;

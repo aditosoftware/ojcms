@@ -1,6 +1,7 @@
 package de.adito.beans.core;
 
 import de.adito.beans.core.annotations.*;
+import de.adito.beans.core.annotations.internal.ReferenceField;
 import de.adito.beans.core.reactive.events.*;
 import de.adito.beans.core.statistics.IStatisticData;
 import org.jetbrains.annotations.Nullable;

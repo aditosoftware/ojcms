@@ -227,26 +227,6 @@ class BeanContainerTest
     assertTrue(distinctValues.contains(2));
   }
 
-  @Test
-  public void testAsReadOnly()
-  {
-    final IBeanContainer<SomeBean> readOnly = container.asReadOnly();
-    assertThrows(UnsupportedOperationException.class, () -> readOnly.addBean(new SomeBean()));
-    assertThrows(UnsupportedOperationException.class, () -> readOnly.addBean(new SomeBean(), 0));
-    assertThrows(UnsupportedOperationException.class, () -> readOnly.addMultiple(Collections.singletonList(new SomeBean())));
-    assertThrows(UnsupportedOperationException.class, () -> readOnly.addMultiple(Stream.of(new SomeBean())));
-    assertThrows(UnsupportedOperationException.class, () -> readOnly.withLimit(1, false));
-    assertThrows(UnsupportedOperationException.class, () -> readOnly.sort(Comparator.reverseOrder()));
-    assertThrows(UnsupportedOperationException.class, readOnly::clear);
-    assertThrows(UnsupportedOperationException.class, () -> readOnly.removeBeanIf(pBean -> true));
-    assertThrows(UnsupportedOperationException.class, () -> readOnly.removeBeanIfAndBreak(pBean -> true));
-    assertThrows(UnsupportedOperationException.class, () -> readOnly.removeBean(new SomeBean()));
-    assertThrows(UnsupportedOperationException.class, () -> readOnly.removeBean(0));
-    assertThrows(UnsupportedOperationException.class, () -> readOnly.merge(IBeanContainer.empty(SomeBean.class)));
-    assertThrows(UnsupportedOperationException.class, () -> readOnly.replaceBean(new SomeBean(), 0));
-    assertThrows(UnsupportedOperationException.class, () -> readOnly.asList().clear());
-  }
-
   /**
    * Some bean for the container.
    */

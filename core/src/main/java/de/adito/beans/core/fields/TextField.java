@@ -1,6 +1,6 @@
 package de.adito.beans.core.fields;
 
-import de.adito.beans.core.annotations.TypeDefaultField;
+import de.adito.beans.core.annotations.internal.TypeDefaultField;
 import de.adito.beans.core.fields.serialization.ISerializableFieldToString;
 import de.adito.beans.core.util.IClientInfo;
 import de.adito.beans.core.util.beancopy.*;
