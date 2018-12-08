@@ -32,7 +32,7 @@ interface IBeanFieldActivePredicate<BEAN extends IBean<BEAN>>
       return true;
 
     //noinspection unchecked
-    OptionalField.IActiveCondition<BEAN> condition = pField.getAdditionalInformation(OptionalField.ACTIVE_CONDITION);
+    OptionalField.IActiveCondition<BEAN> condition = pField.getAdditionalInformationOrThrow(OptionalField.ACTIVE_CONDITION);
     assert condition != null;
     return condition.test(getBean());
   }

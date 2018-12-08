@@ -41,7 +41,7 @@ public class BeanCopyUnsupportedException extends Exception
   private static String _createErrorMessage(IField<?> pBeanField)
   {
     return "It is not possible to create a value copy of the following bean field: " + pBeanField.getClass().getName() + " value type: " +
-        pBeanField.getType().getName() + " There may be no copy mechanism provided by the field and no default constructor for " +
+        pBeanField.getDataType().getName() + " There may be no copy mechanism provided by the field and no default constructor for " +
         "the value type. As a workaround you may use custom field copy functions. For further information take a look at the bean interface.";
   }
 }

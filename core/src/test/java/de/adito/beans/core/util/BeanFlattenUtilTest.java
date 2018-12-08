@@ -51,7 +51,7 @@ class BeanFlattenUtilTest
     List<FieldTuple<?>> tuples = flatBean.stream().collect(Collectors.toList());
     assertEquals(tuples.size(), 6);
     tuples.stream()
-        .filter(pFieldTuple -> pFieldTuple.getField().getType() == String.class)
+        .filter(pFieldTuple -> pFieldTuple.getField().getDataType() == String.class)
         .map(pFieldTuple -> (String) pFieldTuple.getValue())
         .forEach(pValue -> assertNotEquals(pValue, newValue)); //The value change in the original bean should not affect the copy
   }

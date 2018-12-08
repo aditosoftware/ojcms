@@ -31,7 +31,7 @@ public class EnumField<ENUM extends Enum> extends AbstractField<ENUM> implements
   {
     try
     {
-      final Method valueOf = getType().getMethod("valueOf", String.class);
+      final Method valueOf = getDataType().getMethod("valueOf", String.class);
       if (!valueOf.isAccessible())
         valueOf.setAccessible(true);
       //noinspection unchecked

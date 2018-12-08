@@ -10,15 +10,15 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
- * Abstract base class for a bean field.
- * Handles data type, name and annotations.
+ * Abstract base class for bean fields.
+ * Handles basic and common data like name, data dataType, annotations etc.
  *
- * @param <TYPE> the data type that is wrapped by this field type (e.g. String, Integer etc)
+ * @param <TYPE> the data dataType that is wrapped by this field dataType (e.g. String, Integer etc)
  * @author Simon Danner, 23.08.2016
  */
 abstract class AbstractField<TYPE> implements IField<TYPE>
 {
-  private final Class<TYPE> type;
+  private final Class<TYPE> dataType;
   private final String name;
   private final Collection<Annotation> annotations;
   private final Map<Class, Function<?, TYPE>> toConverters = new HashMap<>();
@@ -29,21 +29,21 @@ abstract class AbstractField<TYPE> implements IField<TYPE>
    * Initialises the field with the base data mentioned above.
    * Important: This constructor is used by some reflection calls, which expects every specific field to have this parameters.
    *
-   * @param pType        the inner data type of this field
+   * @param pDataType    the inner data type of this field
    * @param pName        the name of this field
    * @param pAnnotations a collection of annotations of this field
    */
-  protected AbstractField(@NotNull Class<TYPE> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
+  protected AbstractField(@NotNull Class<TYPE> pDataType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {
-    type = pType;
+    dataType = pDataType;
     name = pName;
     annotations = pAnnotations;
   }
 
   @Override
-  public Class<TYPE> getType()
+  public Class<TYPE> getDataType()
   {
-    return type;
+    return dataType;
   }
 
   @Override
@@ -60,10 +60,10 @@ abstract class AbstractField<TYPE> implements IField<TYPE>
   }
 
   @Override
-  public <SOURCE> Optional<Function<TYPE, SOURCE>> getFromConverter(Class<SOURCE> pSourceType)
+  public <TARGET> Optional<Function<TYPE, TARGET>> getFromConverter(Class<TARGET> pTargetType)
   {
     //noinspection unchecked
-    return Optional.ofNullable((Function<TYPE, SOURCE>) fromConverters.get(pSourceType));
+    return Optional.ofNullable((Function<TYPE, TARGET>) fromConverters.get(pTargetType));
   }
 
   @Override
@@ -80,7 +80,7 @@ abstract class AbstractField<TYPE> implements IField<TYPE>
   @Override
   public boolean hasAnnotation(Class<? extends Annotation> pType)
   {
-    return annotations.stream().anyMatch(pAnno -> pAnno.annotationType().equals(pType));
+    return annotations.stream().anyMatch(pAnnotation -> pAnnotation.annotationType().equals(pType));
   }
 
   @Override
@@ -90,17 +90,17 @@ abstract class AbstractField<TYPE> implements IField<TYPE>
   }
 
   @Override
-  @Nullable
-  public <INFO> INFO getAdditionalInformation(IAdditionalFieldInfo<INFO> pIdentifier)
+  public <INFO> Optional<INFO> getAdditionalInformation(IAdditionalFieldInfo<INFO> pIdentifier)
   {
     //noinspection unchecked
-    return (INFO) additionalInformation.get(pIdentifier);
+    return Optional.ofNullable(additionalInformation.get(pIdentifier))
+        .map(pInfo -> (INFO) pInfo);
   }
 
   @Override
   public <INFO> void addAdditionalInformation(IAdditionalFieldInfo<INFO> pIdentifier, INFO pValue)
   {
-    assert pIdentifier.getType().isAssignableFrom(pValue.getClass());
+    assert pIdentifier.getDataType().isAssignableFrom(pValue.getClass());
     additionalInformation.put(pIdentifier, pValue);
   }
 
@@ -128,13 +128,24 @@ abstract class AbstractField<TYPE> implements IField<TYPE>
     return hasAnnotation(Detail.class);
   }
 
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "{" +
+        "dataType=" + dataType +
+        ", name='" + name + '\'' +
+        ", annotations=" + annotations +
+        ", additionalInformation=" + additionalInformation +
+        '}';
+  }
+
   /**
-   * Registers a converter for this field type.
+   * Registers a converter for this field's data type
    *
-   * @param pSourceType    the source type for this converter (the type that will be converted to this field's type)
-   * @param pToConverter   the converter that converts from source type to field type
-   * @param pFromConverter the converter that converts from field type to source type
-   * @param <SOURCE>       the generic source type
+   * @param pSourceType    the source data type for this converter (the data type that will be converted to this field's type)
+   * @param pToConverter   the converter that converts from the source's data type to field's data type
+   * @param pFromConverter the converter that converts from the field's data type to the source's data type
+   * @param <SOURCE>       the generic source data type
    */
   protected <SOURCE> void registerConverter(Class<SOURCE> pSourceType, Function<SOURCE, TYPE> pToConverter, Function<TYPE, SOURCE> pFromConverter)
   {

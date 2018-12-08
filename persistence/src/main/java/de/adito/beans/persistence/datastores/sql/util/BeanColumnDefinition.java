@@ -28,7 +28,7 @@ public class BeanColumnDefinition<TYPE> implements IColumnDefinition
   public BeanColumnDefinition(IField<TYPE> pBeanField)
   {
     beanField = pBeanField;
-    columnType = EColumnType.getByDataType(pBeanField.getType())
+    columnType = EColumnType.getByDataType(pBeanField.getDataType())
         .orElse(EColumnType.STRING.create());
     if (beanField.hasAnnotation(Identifier.class))
       columnType.primaryKey();
@@ -66,7 +66,7 @@ public class BeanColumnDefinition<TYPE> implements IColumnDefinition
       return;
 
     //noinspection unchecked
-    final Class<? extends IBean> beanType = (Class<? extends IBean>) beanField.getType();
+    final Class<? extends IBean> beanType = (Class<? extends IBean>) beanField.getDataType();
     if (!beanType.isAnnotationPresent(Persist.class))
       throw new RuntimeException("A persistent bean can only create a reference to another persistent bean! type: " + beanType.getName());
     final Persist annotation = beanType.getAnnotation(Persist.class);

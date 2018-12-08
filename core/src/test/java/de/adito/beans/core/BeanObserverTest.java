@@ -70,7 +70,7 @@ class BeanObserverTest extends AbstractOnNextCallCountTest
     final String fieldName = "fieldName";
     observeWithCallCheck(bean.observeFieldAdditions(), 1, pChange -> {
       assertEquals(fieldName, pChange.getField().getName());
-      assertEquals(String.class, pChange.getField().getType());
+      assertEquals(String.class, pChange.getField().getDataType());
       assertTrue(pChange.getField().hasAnnotation(Private.class));
     });
     bean.addField(TextField.class, fieldName, Collections.singleton(new Private()

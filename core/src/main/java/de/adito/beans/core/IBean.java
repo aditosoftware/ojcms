@@ -128,7 +128,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IObervableBeanValues<BE
     if (pValueToConvert != null)
     {
       Class<SOURCE> sourceType = (Class<SOURCE>) pValueToConvert.getClass();
-      convertedValue = pField.getType().isAssignableFrom(sourceType) ? (TYPE) pValueToConvert :
+      convertedValue = pField.getDataType().isAssignableFrom(sourceType) ? (TYPE) pValueToConvert :
           pField.getToConverter(sourceType)
               .orElseThrow(() -> new RuntimeException("The field " + pField.getName() + " cannot convert to " + sourceType.getSimpleName()))
               .apply(pValueToConvert);

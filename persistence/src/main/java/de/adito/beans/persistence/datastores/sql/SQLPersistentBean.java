@@ -232,7 +232,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
     @Override
     public Class<TYPE> getDataType()
     {
-      return beanField.getType();
+      return beanField.getDataType();
     }
 
     @Override
@@ -262,7 +262,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
     private _ColumnTuple(IField<TYPE> pBeanField, int pId, TYPE pValue)
     {
       super(pBeanField.newTuple(pValue));
-      column = IColumnIdentification.of(IDatabaseConstants.BEAN_TABLE_COLUMN_PREFIX + pId, pBeanField.getType(), (pName, pType) -> false);
+      column = IColumnIdentification.of(IDatabaseConstants.BEAN_TABLE_COLUMN_PREFIX + pId, pBeanField.getDataType(), (pName, pType) -> false);
     }
 
     @Override

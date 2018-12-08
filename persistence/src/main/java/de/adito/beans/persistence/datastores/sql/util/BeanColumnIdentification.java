@@ -43,7 +43,7 @@ public class BeanColumnIdentification<TYPE> implements IColumnIdentification<TYP
   @Override
   public Class<TYPE> getDataType()
   {
-    return field.getType();
+    return field.getDataType();
   }
 
   /**

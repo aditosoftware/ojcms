@@ -16,5 +16,5 @@ public interface IAdditionalFieldInfo<TYPE>
    *
    * @return the data type
    */
-  Class<TYPE> getType();
+  Class<TYPE> getDataType();
 }

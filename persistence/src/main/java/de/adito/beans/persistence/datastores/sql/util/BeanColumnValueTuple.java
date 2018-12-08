@@ -27,7 +27,7 @@ public class BeanColumnValueTuple<TYPE> implements IColumnValueTuple<TYPE>, IBea
   public BeanColumnValueTuple(FieldTuple<TYPE> pFieldTuple)
   {
     fieldTuple = pFieldTuple;
-    column = IColumnIdentification.of(fieldTuple.getField().getName(), fieldTuple.getField().getType());
+    column = IColumnIdentification.of(fieldTuple.getField().getName(), fieldTuple.getField().getDataType());
   }
 
   @Override

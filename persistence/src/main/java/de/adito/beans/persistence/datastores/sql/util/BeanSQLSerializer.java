@@ -88,7 +88,7 @@ public class BeanSQLSerializer implements IValueSerializer
 
     if (pField instanceof BeanField)
       //noinspection unchecked
-      return (TYPE) _dereferenceBean((Class<? extends IBean>) pField.getType(), pSerialString);
+      return (TYPE) _dereferenceBean((Class<? extends IBean>) pField.getDataType(), pSerialString);
 
     if (pField instanceof ContainerField)
       //noinspection unchecked
@@ -180,6 +180,6 @@ public class BeanSQLSerializer implements IValueSerializer
   private <TYPE> String _notSerializableMessage(IField<TYPE> pField, boolean pToSerial)
   {
     return "Unable to " + (pToSerial ? "persist" : "read") + " the value of the bean field " + pField.getName() +
-        " with type " + pField.getType() + "! The field must either be a reference or serializable field!";
+        " with type " + pField.getDataType() + "! The field must either be a reference or serializable field!";
   }
 }

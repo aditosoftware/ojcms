@@ -19,6 +19,6 @@ public interface ISerializableFieldJson<VALUE> extends ISerializableField<VALUE>
   @Override
   default VALUE fromPersistent(String pSerialString)
   {
-    return new Gson().fromJson(pSerialString, getType());
+    return new Gson().fromJson(pSerialString, getDataType());
   }
 }
