@@ -449,11 +449,11 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IObervableBean
    * In other words this method will take all values from the beans in this container associated with the field
    * and remove all duplicate values.
    *
-   * @param pField the bean field to retrieve the distinct values of
-   * @param <TYPE> the field's data type
+   * @param pField  the bean field to retrieve the distinct values of
+   * @param <VALUE> the field's data type
    * @return a Set with distinct values of this field
    */
-  default <TYPE> Set<TYPE> getDistinctValuesFromField(IField<TYPE> pField)
+  default <VALUE> Set<VALUE> getDistinctValuesFromField(IField<VALUE> pField)
   {
     return getDistinctValues(pBean -> pBean.getValue(Objects.requireNonNull(pField)));
   }
@@ -464,10 +464,10 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IObervableBean
    * Null-values are not collected.
    *
    * @param pValueResolver the resolverType to retrieve a value from a bean
-   * @param <TYPE>         the generic data type of the values
+   * @param <VALUE>        the generic data type of the values
    * @return a Set containing all distinct values based on the resolverType
    */
-  default <TYPE> Set<TYPE> getDistinctValues(Function<BEAN, TYPE> pValueResolver)
+  default <VALUE> Set<VALUE> getDistinctValues(Function<BEAN, VALUE> pValueResolver)
   {
     return stream()
         .map(pValueResolver)

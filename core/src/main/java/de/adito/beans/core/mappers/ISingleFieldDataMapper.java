@@ -11,10 +11,10 @@ import java.util.stream.Stream;
  * This may be used to present bean values in another format in certain situations.
  * This special mapper can be used to map a certain field only.
  *
- * @param <TYPE> the data type of the affected bean field
+ * @param <VALUE> the data type of the affected bean field
  * @author Simon Danner, 20.03.2018
  */
-public interface ISingleFieldDataMapper<TYPE> extends ISingleFieldFlatDataMapper<TYPE>
+public interface ISingleFieldDataMapper<VALUE> extends ISingleFieldFlatDataMapper<VALUE>
 {
   /**
    * The mapping operation.
@@ -24,10 +24,10 @@ public interface ISingleFieldDataMapper<TYPE> extends ISingleFieldFlatDataMapper
    * @param pValue the original value of the field
    * @return the mapped tuple
    */
-  FieldTuple<TYPE> mapForField(IField<TYPE> pField, TYPE pValue);
+  FieldTuple<VALUE> mapForField(IField<VALUE> pField, VALUE pValue);
 
   @Override
-  default Stream<FieldTuple<TYPE>> flatMapForField(IField<TYPE> pField, TYPE pValue)
+  default Stream<FieldTuple<VALUE>> flatMapForField(IField<VALUE> pField, VALUE pValue)
   {
     return Stream.of(mapForField(pField, pValue));
   }

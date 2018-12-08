@@ -11,25 +11,25 @@ import java.util.stream.Collectors;
 /**
  * A SQL column identification based on a bean field.
  *
- * @param <TYPE> the data type of the column and according bean field
+ * @param <VALUE> the data type of the column and according bean field
  * @author Simon Danner, 07.05.2018
  */
-public class BeanColumnIdentification<TYPE> implements IColumnIdentification<TYPE>, IBeanFieldBased<TYPE>
+public class BeanColumnIdentification<VALUE> implements IColumnIdentification<VALUE>, IBeanFieldBased<VALUE>
 {
-  private final IField<TYPE> field;
+  private final IField<VALUE> field;
 
   /**
    * Creates a new column identification.
    *
    * @param pField the bean field, that identifies the column
    */
-  public BeanColumnIdentification(IField<TYPE> pField)
+  public BeanColumnIdentification(IField<VALUE> pField)
   {
     field = pField;
   }
 
   @Override
-  public IField<TYPE> getBeanField()
+  public IField<VALUE> getBeanField()
   {
     return field;
   }
@@ -41,7 +41,7 @@ public class BeanColumnIdentification<TYPE> implements IColumnIdentification<TYP
   }
 
   @Override
-  public Class<TYPE> getDataType()
+  public Class<VALUE> getDataType()
   {
     return field.getDataType();
   }

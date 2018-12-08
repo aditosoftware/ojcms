@@ -29,34 +29,34 @@ public class BeanSQLSerializer implements IValueSerializer
   }
 
   @Override
-  public @Nullable <TYPE> String toSerial(IColumnValueTuple<TYPE> pColumnValueTuple)
+  public @Nullable <VALUE> String toSerial(IColumnValueTuple<VALUE> pColumnValueTuple)
   {
     //noinspection unchecked
     return pColumnValueTuple instanceof IBeanFieldTupleBased ?
-        _toPersistent(((IBeanFieldTupleBased<TYPE>) pColumnValueTuple).getFieldTuple()) :
+        _toPersistent(((IBeanFieldTupleBased<VALUE>) pColumnValueTuple).getFieldTuple()) :
         IValueSerializer.DEFAULT.toSerial(pColumnValueTuple);
   }
 
   @Override
-  public <TYPE> @Nullable TYPE fromSerial(IColumnIdentification<TYPE> pColumnIdentification, String pSerialValue)
+  public <VALUE> @Nullable VALUE fromSerial(IColumnIdentification<VALUE> pColumnIdentification, String pSerialValue)
   {
     //noinspection unchecked
     return pColumnIdentification instanceof IBeanFieldBased ?
-        _fromPersistent(((IBeanFieldBased<TYPE>) pColumnIdentification).getBeanField(), pSerialValue) :
+        _fromPersistent(((IBeanFieldBased<VALUE>) pColumnIdentification).getBeanField(), pSerialValue) :
         IValueSerializer.DEFAULT.fromSerial(pColumnIdentification, pSerialValue);
   }
 
   /**
    * Converts a bean data value to its serializable format.
    *
-   * @param pTuple a tuple of bean field and associated data value
-   * @param <TYPE> the data value's type
+   * @param pTuple  a tuple of bean field and associated data value
+   * @param <VALUE> the data value's type
    * @return the value in its serializable format
    */
-  private <TYPE> String _toPersistent(FieldTuple<TYPE> pTuple)
+  private <VALUE> String _toPersistent(FieldTuple<VALUE> pTuple)
   {
-    final IField<TYPE> field = pTuple.getField();
-    final TYPE value = pTuple.getValue();
+    final IField<VALUE> field = pTuple.getField();
+    final VALUE value = pTuple.getValue();
 
     if (value == null)
       return null;
@@ -68,7 +68,7 @@ public class BeanSQLSerializer implements IValueSerializer
       return _referenceContainer((IBeanContainer<?>) value);
 
     if (field instanceof ISerializableField)
-      return ((ISerializableField<TYPE>) field).toPersistent(value);
+      return ((ISerializableField<VALUE>) field).toPersistent(value);
 
     throw new BeanSerializationException(_notSerializableMessage(field, true));
   }
@@ -78,24 +78,24 @@ public class BeanSQLSerializer implements IValueSerializer
    *
    * @param pField        the bean field the value belongs to
    * @param pSerialString the persistent value
-   * @param <TYPE>        the data type
+   * @param <VALUE>       the data type
    * @return the converted data value
    */
-  private <TYPE> TYPE _fromPersistent(IField<TYPE> pField, String pSerialString)
+  private <VALUE> VALUE _fromPersistent(IField<VALUE> pField, String pSerialString)
   {
     if (pSerialString == null)
       return null;
 
     if (pField instanceof BeanField)
       //noinspection unchecked
-      return (TYPE) _dereferenceBean((Class<? extends IBean>) pField.getDataType(), pSerialString);
+      return (VALUE) _dereferenceBean((Class<? extends IBean>) pField.getDataType(), pSerialString);
 
     if (pField instanceof ContainerField)
       //noinspection unchecked
-      return (TYPE) _dereferenceBeanContainer(pSerialString);
+      return (VALUE) _dereferenceBeanContainer(pSerialString);
 
     if (pField instanceof ISerializableField)
-      return ((ISerializableField<TYPE>) pField).fromPersistent(pSerialString);
+      return ((ISerializableField<VALUE>) pField).fromPersistent(pSerialString);
 
     throw new BeanSerializationException(_notSerializableMessage(pField, false));
   }
@@ -174,10 +174,10 @@ public class BeanSQLSerializer implements IValueSerializer
    *
    * @param pField    the bean field the value belongs to
    * @param pToSerial <tt>true</tt>, if the conversion is from data value to persistent value
-   * @param <TYPE>    the generic data type
+   * @param <VALUE>   the generic data type
    * @return the error message
    */
-  private <TYPE> String _notSerializableMessage(IField<TYPE> pField, boolean pToSerial)
+  private <VALUE> String _notSerializableMessage(IField<VALUE> pField, boolean pToSerial)
   {
     return "Unable to " + (pToSerial ? "persist" : "read") + " the value of the bean field " + pField.getName() +
         " with type " + pField.getDataType() + "! The field must either be a reference or serializable field!";

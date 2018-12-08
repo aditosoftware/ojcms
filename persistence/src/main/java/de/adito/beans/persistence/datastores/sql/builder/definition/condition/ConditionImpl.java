@@ -5,13 +5,13 @@ import de.adito.beans.persistence.datastores.sql.builder.definition.IColumnIdent
 /**
  * Basic implementation of a where condition.
  *
- * @param <TYPE> the data type of the condition's value
+ * @param <VALUE> the data type of the condition's value
  * @author Simon Danner, 11.06.2018
  */
-class ConditionImpl<TYPE> extends AbstractNegatable<IWhereCondition<TYPE>> implements IWhereCondition<TYPE>
+class ConditionImpl<VALUE> extends AbstractNegatable<IWhereCondition<VALUE>> implements IWhereCondition<VALUE>
 {
-  private final IColumnIdentification<TYPE> column;
-  private final TYPE value;
+  private final IColumnIdentification<VALUE> column;
+  private final VALUE value;
   private final IWhereOperator operator;
 
   /**
@@ -21,7 +21,7 @@ class ConditionImpl<TYPE> extends AbstractNegatable<IWhereCondition<TYPE>> imple
    * @param pValue    the value it is based on
    * @param pOperator the operator to connect the column and the value
    */
-  ConditionImpl(IColumnIdentification<TYPE> pColumn, TYPE pValue, IWhereOperator pOperator)
+  ConditionImpl(IColumnIdentification<VALUE> pColumn, VALUE pValue, IWhereOperator pOperator)
   {
     column = pColumn;
     value = pValue;
@@ -29,13 +29,13 @@ class ConditionImpl<TYPE> extends AbstractNegatable<IWhereCondition<TYPE>> imple
   }
 
   @Override
-  public IColumnIdentification<TYPE> getColumn()
+  public IColumnIdentification<VALUE> getColumn()
   {
     return column;
   }
 
   @Override
-  public TYPE getValue()
+  public VALUE getValue()
   {
     return value;
   }

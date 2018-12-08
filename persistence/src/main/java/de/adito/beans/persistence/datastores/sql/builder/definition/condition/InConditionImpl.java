@@ -10,12 +10,12 @@ import java.util.stream.*;
 /**
  * Implementation of a "IN" where condition for database statements.
  *
- * @param <TYPE> the data type of the value of the condition
+ * @param <VALUE> the data type of the value of the condition
  * @author Simon Danner, 11.06.2018
  */
-class InConditionImpl<TYPE> extends ConditionImpl<TYPE>
+class InConditionImpl<VALUE> extends ConditionImpl<VALUE>
 {
-  private final List<IColumnValueTuple<TYPE>> values;
+  private final List<IColumnValueTuple<VALUE>> values;
 
   /**
    * Creates a new "IN" condition.
@@ -25,8 +25,8 @@ class InConditionImpl<TYPE> extends ConditionImpl<TYPE>
    *                      this is mainly used for serialization
    * @param pValues       a stream of values the requested value should be in
    */
-  InConditionImpl(IColumnIdentification<TYPE> pColumn, BiFunction<IColumnIdentification<TYPE>, TYPE, IColumnValueTuple<TYPE>> pTupleCreator,
-                  Stream<TYPE> pValues)
+  InConditionImpl(IColumnIdentification<VALUE> pColumn, BiFunction<IColumnIdentification<VALUE>, VALUE, IColumnValueTuple<VALUE>> pTupleCreator,
+                  Stream<VALUE> pValues)
   {
     super(pColumn, null, () -> ""); //value and operator do not matter
     values = pValues

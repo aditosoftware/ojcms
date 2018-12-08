@@ -9,22 +9,24 @@ import java.util.stream.Stream;
 /**
  * A tuple of a column identification and a data value for database statements.
  *
- * @param <TYPE> the data type of the column of this condition
+ * @param <VALUE> the data type of the column of this condition
  * @author Simon Danner, 28.04.2018
  */
-public interface IColumnValueTuple<TYPE> extends IPreparedStatementFormat
+public interface IColumnValueTuple<VALUE> extends IPreparedStatementFormat
 {
   /**
    * The column identification of this tuple.
    *
    * @return a database column identification
    */
-  IColumnIdentification<TYPE> getColumn();
+  IColumnIdentification<VALUE> getColumn();
 
   /**
    * The value for the column.
+   *
+   * @return the value
    */
-  TYPE getValue();
+  VALUE getValue();
 
   @Override
   default String toStatementFormat(EDatabaseType pDatabaseType, String pIdColumnName)
@@ -43,21 +45,21 @@ public interface IColumnValueTuple<TYPE> extends IPreparedStatementFormat
    *
    * @param pColumnIdentification the column identification
    * @param pValue                the value for the column
-   * @param <TYPE>                the data type of the value
+   * @param <VALUE>               the data type of the value
    * @return a column value tuple based on the given values
    */
-  static <TYPE> IColumnValueTuple<TYPE> of(IColumnIdentification<TYPE> pColumnIdentification, TYPE pValue)
+  static <VALUE> IColumnValueTuple<VALUE> of(IColumnIdentification<VALUE> pColumnIdentification, VALUE pValue)
   {
-    return new IColumnValueTuple<TYPE>()
+    return new IColumnValueTuple<VALUE>()
     {
       @Override
-      public IColumnIdentification<TYPE> getColumn()
+      public IColumnIdentification<VALUE> getColumn()
       {
         return pColumnIdentification;
       }
 
       @Override
-      public TYPE getValue()
+      public VALUE getValue()
       {
         return pValue;
       }

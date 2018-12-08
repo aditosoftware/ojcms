@@ -10,10 +10,10 @@ import java.util.stream.Stream;
 /**
  * An identifier for a database column.
  *
- * @param <TYPE> the data type of the column
+ * @param <VALUE> the data type of the column
  * @author Simon Danner, 05.05.2018
  */
-public interface IColumnIdentification<TYPE> extends IStatementFormat
+public interface IColumnIdentification<VALUE> extends IStatementFormat
 {
   /**
    * The name of the database column.
@@ -27,7 +27,7 @@ public interface IColumnIdentification<TYPE> extends IStatementFormat
    *
    * @return the data type for the database column
    */
-  Class<TYPE> getDataType();
+  Class<VALUE> getDataType();
 
   @Override
   default String toStatementFormat(EDatabaseType pDatabaseType, String pIdColumnName)
@@ -51,10 +51,10 @@ public interface IColumnIdentification<TYPE> extends IStatementFormat
    *
    * @param pName     the name of the column
    * @param pDataType the data type of the column
-   * @param <TYPE>    the generic data type of the column
+   * @param <VALUE>   the generic data type of the column
    * @return the created column identification
    */
-  static <TYPE> IColumnIdentification<TYPE> of(String pName, Class<TYPE> pDataType)
+  static <VALUE> IColumnIdentification<VALUE> of(String pName, Class<VALUE> pDataType)
   {
     return of(pName, pDataType, null);
   }
@@ -65,13 +65,13 @@ public interface IColumnIdentification<TYPE> extends IStatementFormat
    * @param pName            the name of the column
    * @param pDataType        the data type of the column
    * @param pNumericResolver an optional function to determine, if the column has a numeric value
-   * @param <TYPE>           the generic data type of the column
+   * @param <VALUE>          the generic data type of the column
    * @return the created column identification
    */
-  static <TYPE> IColumnIdentification<TYPE> of(String pName, Class<TYPE> pDataType,
-                                               @Nullable BiFunction<String, Class<TYPE>, Boolean> pNumericResolver)
+  static <VALUE> IColumnIdentification<VALUE> of(String pName, Class<VALUE> pDataType,
+                                                 @Nullable BiFunction<String, Class<VALUE>, Boolean> pNumericResolver)
   {
-    return new IColumnIdentification<TYPE>()
+    return new IColumnIdentification<VALUE>()
     {
       @Override
       public String getColumnName()
@@ -80,7 +80,7 @@ public interface IColumnIdentification<TYPE> extends IStatementFormat
       }
 
       @Override
-      public Class<TYPE> getDataType()
+      public Class<VALUE> getDataType()
       {
         return pDataType;
       }

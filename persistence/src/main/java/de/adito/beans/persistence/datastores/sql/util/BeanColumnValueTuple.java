@@ -11,39 +11,39 @@ import java.util.stream.Stream;
 /**
  * A SQL column value tuple based on a {@link FieldTuple}.
  *
- * @param <TYPE> the data type of the tuple
+ * @param <VALUE> the data type of the tuple
  * @author Simon Danner, 07.05.2018
  */
-public class BeanColumnValueTuple<TYPE> implements IColumnValueTuple<TYPE>, IBeanFieldTupleBased<TYPE>
+public class BeanColumnValueTuple<VALUE> implements IColumnValueTuple<VALUE>, IBeanFieldTupleBased<VALUE>
 {
-  private final FieldTuple<TYPE> fieldTuple;
-  private final IColumnIdentification<TYPE> column;
+  private final FieldTuple<VALUE> fieldTuple;
+  private final IColumnIdentification<VALUE> column;
 
   /**
    * Creates a new column value tuple.
    *
    * @param pFieldTuple the field value tuple its based on
    */
-  public BeanColumnValueTuple(FieldTuple<TYPE> pFieldTuple)
+  public BeanColumnValueTuple(FieldTuple<VALUE> pFieldTuple)
   {
     fieldTuple = pFieldTuple;
     column = IColumnIdentification.of(fieldTuple.getField().getName(), fieldTuple.getField().getDataType());
   }
 
   @Override
-  public IColumnIdentification<TYPE> getColumn()
+  public IColumnIdentification<VALUE> getColumn()
   {
     return column;
   }
 
   @Override
-  public TYPE getValue()
+  public VALUE getValue()
   {
     return fieldTuple.getValue();
   }
 
   @Override
-  public FieldTuple<TYPE> getFieldTuple()
+  public FieldTuple<VALUE> getFieldTuple()
   {
     return fieldTuple;
   }

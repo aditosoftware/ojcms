@@ -12,12 +12,12 @@ import java.util.Collection;
 /**
  * A bean column definition based on a bean field.
  *
- * @param <TYPE> the data type of the field
+ * @param <VALUE> the data type of the field
  * @author Simon Danner, 17.05.2018
  */
-public class BeanColumnDefinition<TYPE> implements IColumnDefinition
+public class BeanColumnDefinition<VALUE> implements IColumnDefinition
 {
-  private final IField<TYPE> beanField;
+  private final IField<VALUE> beanField;
   private final IColumnType columnType;
 
   /**
@@ -25,7 +25,7 @@ public class BeanColumnDefinition<TYPE> implements IColumnDefinition
    *
    * @param pBeanField the bean field the column is based on
    */
-  public BeanColumnDefinition(IField<TYPE> pBeanField)
+  public BeanColumnDefinition(IField<VALUE> pBeanField)
   {
     beanField = pBeanField;
     columnType = EColumnType.getByDataType(pBeanField.getDataType())
@@ -52,7 +52,7 @@ public class BeanColumnDefinition<TYPE> implements IColumnDefinition
    *
    * @return a bean field
    */
-  public IField<TYPE> getBeanField()
+  public IField<VALUE> getBeanField()
   {
     return beanField;
   }

@@ -304,7 +304,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
     }
 
     @Override
-    public <TYPE> TYPE getValue(IField<TYPE> pField)
+    public <VALUE> VALUE getValue(IField<VALUE> pField)
     {
       return builder.doSelectOne(new BeanColumnIdentification<>(pField), pSelect -> pSelect
           .whereId(index)
@@ -314,7 +314,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
     }
 
     @Override
-    public <TYPE> void setValue(IField<TYPE> pField, TYPE pValue, boolean pAllowNewField)
+    public <VALUE> void setValue(IField<VALUE> pField, VALUE pValue, boolean pAllowNewField)
     {
       builder.doUpdate(pUpdate -> pUpdate
           .set(new BeanColumnValueTuple<>(pField.newTuple(pValue)))
@@ -323,7 +323,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IPersis
     }
 
     @Override
-    public <TYPE> void removeField(IField<TYPE> pField)
+    public <VALUE> void removeField(IField<VALUE> pField)
     {
       throw new UnsupportedOperationException("It's not allowed to remove fields from a persistent bean!");
     }

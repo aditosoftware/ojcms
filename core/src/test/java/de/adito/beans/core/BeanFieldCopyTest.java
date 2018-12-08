@@ -58,14 +58,14 @@ public class BeanFieldCopyTest
 
   @ParameterizedTest
   @MethodSource("_fieldsToTest")
-  public <TYPE> void testFieldCopyMechanisms(_FieldValueWrapper<TYPE> pFieldValueWrapper)
+  public <VALUE> void testFieldCopyMechanisms(_FieldValueWrapper<VALUE> pFieldValueWrapper)
   {
     assertNotNull(pFieldValueWrapper.value);
-    IField<TYPE> field = BeanFieldFactory.createField(pFieldValueWrapper.fieldType, pFieldValueWrapper.getGenericFieldType(),
-                                                      "test", Collections.emptySet());
+    IField<VALUE> field = BeanFieldFactory.createField(pFieldValueWrapper.fieldType, pFieldValueWrapper.getGenericFieldType(),
+                                                       "test", Collections.emptySet());
     try
     {
-      TYPE copiedValue = field.copyValue(pFieldValueWrapper.value, ECopyMode.DEEP_ONLY_BEAN_FIELDS);
+      VALUE copiedValue = field.copyValue(pFieldValueWrapper.value, ECopyMode.DEEP_ONLY_BEAN_FIELDS);
       assertTrue(ClassUtils.isPrimitiveOrWrapper(copiedValue.getClass()) || copiedValue != pFieldValueWrapper.value);
       pFieldValueWrapper.getOptionalTest().ifPresent(pTest -> pTest.accept((copiedValue)));
     }
@@ -93,9 +93,9 @@ public class BeanFieldCopyTest
   /**
    * A field value wrapper for field types with a generic data value like {@link BeanField}.
    *
-   * @param <TYPE> the data type of the bean field
+   * @param <VALUE> the data type of the bean field
    */
-  private static class _GenericFieldValueWrapper<TYPE> extends _FieldValueWrapper<TYPE>
+  private static class _GenericFieldValueWrapper<VALUE> extends _FieldValueWrapper<VALUE>
   {
     /**
      * Creates a field value wrapper.
@@ -103,7 +103,7 @@ public class BeanFieldCopyTest
      * @param pFieldType the field's type
      * @param pValue     the data value for the field
      */
-    public _GenericFieldValueWrapper(Class<? extends IField> pFieldType, TYPE pValue)
+    public _GenericFieldValueWrapper(Class<? extends IField> pFieldType, VALUE pValue)
     {
       this(pFieldType, pValue, null);
     }
@@ -116,10 +116,10 @@ public class BeanFieldCopyTest
      * @param pValue        the data value for the field
      * @param pOptionalTest an optional test for the copied value afterwards
      */
-    public _GenericFieldValueWrapper(Class<? extends IField> pFieldType, TYPE pValue, @Nullable Consumer<TYPE> pOptionalTest)
+    public _GenericFieldValueWrapper(Class<? extends IField> pFieldType, VALUE pValue, @Nullable Consumer<VALUE> pOptionalTest)
     {
       //noinspection unchecked
-      super((Class<? extends IField<TYPE>>) pFieldType, pValue, pOptionalTest);
+      super((Class<? extends IField<VALUE>>) pFieldType, pValue, pOptionalTest);
     }
 
     @Nullable
@@ -134,14 +134,14 @@ public class BeanFieldCopyTest
    * A field value wrapper, which defines one test case.
    * Based on a field type an instance will be created, that will copy the value of this wrapper.
    *
-   * @param <TYPE> the data type of the bean field
+   * @param <VALUE> the data type of the bean field
    */
-  private static class _FieldValueWrapper<TYPE>
+  private static class _FieldValueWrapper<VALUE>
   {
-    protected final TYPE value;
-    private final Class<? extends IField<TYPE>> fieldType;
+    protected final VALUE value;
+    private final Class<? extends IField<VALUE>> fieldType;
     @Nullable
-    private final Consumer<TYPE> optionalTest;
+    private final Consumer<VALUE> optionalTest;
 
     /**
      * Creates a field value wrapper.
@@ -149,7 +149,7 @@ public class BeanFieldCopyTest
      * @param pFieldType the field's type
      * @param pValue     the data value for the field
      */
-    public _FieldValueWrapper(Class<? extends IField<TYPE>> pFieldType, TYPE pValue)
+    public _FieldValueWrapper(Class<? extends IField<VALUE>> pFieldType, VALUE pValue)
     {
       this(pFieldType, pValue, null);
     }
@@ -162,7 +162,7 @@ public class BeanFieldCopyTest
      * @param pValue        the data value for the field
      * @param pOptionalTest an optional test for the copied value afterwards
      */
-    public _FieldValueWrapper(Class<? extends IField<TYPE>> pFieldType, TYPE pValue, @Nullable Consumer<TYPE> pOptionalTest)
+    public _FieldValueWrapper(Class<? extends IField<VALUE>> pFieldType, VALUE pValue, @Nullable Consumer<VALUE> pOptionalTest)
     {
       fieldType = pFieldType;
       value = pValue;
@@ -186,7 +186,7 @@ public class BeanFieldCopyTest
      *
      * @return an optional test
      */
-    public Optional<Consumer<TYPE>> getOptionalTest()
+    public Optional<Consumer<VALUE>> getOptionalTest()
     {
       return Optional.ofNullable(optionalTest);
     }

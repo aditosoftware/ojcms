@@ -21,7 +21,7 @@ class ConditionsImpl extends AbstractStatementConcatenation<IWhereConditions, Co
   }
 
   @Override
-  public <TYPE> IWhereConditions and(IWhereCondition<TYPE> pCondition)
+  public <VALUE> IWhereConditions and(IWhereCondition<VALUE> pCondition)
   {
     return addConcatenation(pCondition, EConcatenationType.AND);
   }
@@ -33,7 +33,7 @@ class ConditionsImpl extends AbstractStatementConcatenation<IWhereConditions, Co
   }
 
   @Override
-  public <TYPE> IWhereConditions or(IWhereCondition<TYPE> pCondition)
+  public <VALUE> IWhereConditions or(IWhereCondition<VALUE> pCondition)
   {
     return addConcatenation(pCondition, EConcatenationType.OR);
   }

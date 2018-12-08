@@ -113,13 +113,13 @@ public abstract class AbstractSQLBuilder
    *
    * @param pColumn      the single column to select
    * @param pSelectQuery the select query to execute (defined in a pipelining mechanism)
-   * @param <TYPE>       the data type of the column
+   * @param <VALUE>      the data type of the column
    * @param <RESULT>     the type of the result
    * @return the result of the select statement
    */
-  public <TYPE, RESULT> RESULT doSelectOne(IColumnIdentification<TYPE> pColumn, Function<SingleSelect<TYPE>, RESULT> pSelectQuery)
+  public <VALUE, RESULT> RESULT doSelectOne(IColumnIdentification<VALUE> pColumn, Function<SingleSelect<VALUE>, RESULT> pSelectQuery)
   {
-    SingleSelect<TYPE> select = new SingleSelect<>(_createResultExecutor(), this, databaseType, serializer, idColumnName, pColumn);
+    SingleSelect<VALUE> select = new SingleSelect<>(_createResultExecutor(), this, databaseType, serializer, idColumnName, pColumn);
     return _query(configureStatementBeforeExecution(select), pSelectQuery);
   }
 

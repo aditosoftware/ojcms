@@ -45,10 +45,10 @@ class BeanFieldConverterTest
 
   @ParameterizedTest
   @MethodSource("_toTest")
-  public <SOURCE, TYPE> void testConverters(_TypeValueWrapper<SOURCE, TYPE> pWrapper)
+  public <SOURCE, VALUE> void testConverters(_TypeValueWrapper<SOURCE, VALUE> pWrapper)
   {
     bean.setValueConverted(pWrapper.beanField, pWrapper.originalValue);
-    TYPE convertedValue = bean.getValue(pWrapper.beanField);
+    VALUE convertedValue = bean.getValue(pWrapper.beanField);
     assertEquals(convertedValue, pWrapper.expectedConvertedValue);
     SOURCE originalValue = bean.getValueConverted(pWrapper.beanField, pWrapper.type);
     assertEquals(originalValue, pWrapper.originalValue);
@@ -67,16 +67,16 @@ class BeanFieldConverterTest
    * Both will be applied to a bean field with a converter.
    * Also an expected converted originalValue has to be defined (according to the bean fields type)
    *
-   * @param <TYPE> the generic data type
+   * @param <VALUE> the generic data type
    */
-  private static class _TypeValueWrapper<SOURCE, TYPE>
+  private static class _TypeValueWrapper<SOURCE, VALUE>
   {
-    private final IField<TYPE> beanField;
+    private final IField<VALUE> beanField;
     private final Class<SOURCE> type;
     private final SOURCE originalValue;
-    private final TYPE expectedConvertedValue;
+    private final VALUE expectedConvertedValue;
 
-    private _TypeValueWrapper(IField<TYPE> pBeanField, Class<SOURCE> pType, SOURCE pOriginalValue, TYPE pExpectedConvertedValue)
+    private _TypeValueWrapper(IField<VALUE> pBeanField, Class<SOURCE> pType, SOURCE pOriginalValue, VALUE pExpectedConvertedValue)
     {
       beanField = pBeanField;
       type = pType;

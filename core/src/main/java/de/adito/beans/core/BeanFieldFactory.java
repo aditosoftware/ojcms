@@ -66,11 +66,11 @@ public final class BeanFieldFactory
    * This depends on the field types annotated with {@link TypeDefaultField}.
    * They determine, what field type is the default for the searched data type.
    *
-   * @param pType  the inner data type of a field
-   * @param <TYPE> the generic data type
+   * @param pType   the inner data type of a field
+   * @param <VALUE> the generic data type
    * @return the default field type for this data type
    */
-  public static <TYPE> Class<IField<TYPE>> getFieldTypeFromType(Class<TYPE> pType)
+  public static <VALUE> Class<IField<VALUE>> getFieldTypeFromType(Class<VALUE> pType)
   {
     if (typeFieldMapping == null)
       typeFieldMapping = IPicoRegistry.INSTANCE.find(IField.class, TypeDefaultField.class).entrySet().stream()
@@ -86,7 +86,7 @@ public final class BeanFieldFactory
     if (!typeFieldMapping.containsKey(pType))
       throw new RuntimeException("There is no bean field for this data type: " + pType.getSimpleName());
     //noinspection unchecked
-    return (Class<IField<TYPE>>) typeFieldMapping.get(pType);
+    return (Class<IField<VALUE>>) typeFieldMapping.get(pType);
   }
 
   /**
@@ -96,11 +96,11 @@ public final class BeanFieldFactory
    * @param pFieldType   the fields's type
    * @param pName        the field's name
    * @param pAnnotations the field's annotations
-   * @param <TYPE>       the field's data type
+   * @param <VALUE>      the field's data type
    * @param <FIELD>      the generic field type
    * @return the newly created field
    */
-  static <TYPE, FIELD extends IField<TYPE>> FIELD createField(Class<FIELD> pFieldType, String pName, Collection<Annotation> pAnnotations)
+  static <VALUE, FIELD extends IField<VALUE>> FIELD createField(Class<FIELD> pFieldType, String pName, Collection<Annotation> pAnnotations)
   {
     return createField(pFieldType, null, pName, pAnnotations);
   }
@@ -114,12 +114,12 @@ public final class BeanFieldFactory
    * @param pGenType     the fields's generic type (NOT the same type of the field as generic)
    * @param pName        the fields's name
    * @param pAnnotations the fields's annotations
-   * @param <TYPE>       the field's data type
+   * @param <VALUE>      the field's data type
    * @param <FIELD>      the generic field type
    * @return the newly created field
    */
-  static <TYPE, FIELD extends IField<TYPE>> FIELD createField(Class<FIELD> pFieldType, @Nullable Class pGenType, String pName,
-                                                              Collection<Annotation> pAnnotations)
+  static <VALUE, FIELD extends IField<VALUE>> FIELD createField(Class<FIELD> pFieldType, @Nullable Class pGenType, String pName,
+                                                                Collection<Annotation> pAnnotations)
   {
     try
     {

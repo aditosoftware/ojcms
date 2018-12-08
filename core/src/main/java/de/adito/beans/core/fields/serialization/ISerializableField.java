@@ -5,9 +5,10 @@ import de.adito.beans.core.IField;
 /**
  * Extension for a {@link IField} to support serializable field values.
  *
+ * @param <VALUE> the data type of the bean field
  * @author Simon Danner, 19.02.2018
  */
-public interface ISerializableField<TYPE> extends IField<TYPE>
+public interface ISerializableField<VALUE> extends IField<VALUE>
 {
   /**
    * The value in a persistent string format.
@@ -15,7 +16,7 @@ public interface ISerializableField<TYPE> extends IField<TYPE>
    * @param pValue the field's current value
    * @return the value in serializable string format
    */
-  String toPersistent(TYPE pValue);
+  String toPersistent(VALUE pValue);
 
   /**
    * The original field's value from a persistent string format.
@@ -23,5 +24,5 @@ public interface ISerializableField<TYPE> extends IField<TYPE>
    * @param pSerialString the serialized string
    * @return the original field value
    */
-  TYPE fromPersistent(String pSerialString);
+  VALUE fromPersistent(String pSerialString);
 }

@@ -37,11 +37,11 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IObervableBeanValues<BE
    * The value for a bean field.
    * This method can only be called if the field has no private access modifier {@link de.adito.beans.core.annotations.Private}.
    *
-   * @param pField the bean field
-   * @param <TYPE> the field's data type
+   * @param pField  the bean field
+   * @param <VALUE> the field's data type
    * @return the value for the bean field
    */
-  default <TYPE> TYPE getValue(IField<TYPE> pField)
+  default <VALUE> VALUE getValue(IField<VALUE> pField)
   {
     assert getEncapsulated() != null;
     if (!getEncapsulated().containsField((Objects.requireNonNull(pField))))
@@ -56,11 +56,11 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IObervableBeanValues<BE
    * Otherwise the field's default value will be returned.
    * This method can only be called if the field has no private access modifier {@link de.adito.beans.core.annotations.Private}.
    *
-   * @param pField the bean field
-   * @param <TYPE> the field's data type
+   * @param pField  the bean field
+   * @param <VALUE> the field's data type
    * @return the value for the bean field or the field's default value if null
    */
-  default <TYPE> TYPE getValueOrDefault(IField<TYPE> pField)
+  default <VALUE> VALUE getValueOrDefault(IField<VALUE> pField)
   {
     return Optional.ofNullable(getValue(pField)).orElse(pField.getDefaultValue());
   }
@@ -72,17 +72,17 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IObervableBeanValues<BE
    * This method can only be called if the field has no private access modifier {@link de.adito.beans.core.annotations.Private}.
    *
    * @param pField       the bean field
-   * @param pConvertType the type to which the value should be transformed
-   * @param <TYPE>       the field's data type
-   * @param <SOURCE>     the generic type to which should be transformed
+   * @param pConvertType the type to which the value should be converted
+   * @param <VALUE>      the field's data type
+   * @param <TARGET>     the generic type to convert to
    * @return the converted value for the bean field
    */
-  default <TYPE, SOURCE> SOURCE getValueConverted(IField<TYPE> pField, Class<SOURCE> pConvertType)
+  default <VALUE, TARGET> TARGET getValueConverted(IField<VALUE> pField, Class<TARGET> pConvertType)
   {
-    TYPE actualValue = getValue(pField);
+    VALUE actualValue = getValue(pField);
     if (actualValue == null || pConvertType.isAssignableFrom(actualValue.getClass()))
       //noinspection unchecked
-      return (SOURCE) actualValue;
+      return (TARGET) actualValue;
     return pField.getFromConverter(pConvertType)
         .orElseThrow(() -> new RuntimeException("The field " + pField.getName() + " is not able to convert to " + pConvertType.getSimpleName()))
         .apply(actualValue);
@@ -93,11 +93,11 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IObervableBeanValues<BE
    * If the new value is different from the old value, all registered listeners will be informed.
    * This method can only be called if the field has no private access modifier {@link de.adito.beans.core.annotations.Private}.
    *
-   * @param pField the bean field for which the value should be set
-   * @param pValue the new value
-   * @param <TYPE> the field's data type
+   * @param pField  the bean field for which the value should be set
+   * @param pValue  the new value
+   * @param <VALUE> the field's data type
    */
-  default <TYPE> void setValue(IField<TYPE> pField, TYPE pValue)
+  default <VALUE> void setValue(IField<VALUE> pField, VALUE pValue)
   {
     assert getEncapsulated() != null;
     if (!getEncapsulated().containsField(Objects.requireNonNull(pField)))
@@ -118,17 +118,17 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IObervableBeanValues<BE
    *
    * @param pField          the bean field for which the value should be set
    * @param pValueToConvert the new value that possibly has to be transformed beforehand
-   * @param <TYPE>          he field's data type
+   * @param <VALUE>         he field's data type
    * @param <SOURCE>        the value's type before its conversion
    */
   @SuppressWarnings("unchecked")
-  default <TYPE, SOURCE> void setValueConverted(IField<TYPE> pField, SOURCE pValueToConvert)
+  default <VALUE, SOURCE> void setValueConverted(IField<VALUE> pField, SOURCE pValueToConvert)
   {
-    TYPE convertedValue = null;
+    VALUE convertedValue = null;
     if (pValueToConvert != null)
     {
       Class<SOURCE> sourceType = (Class<SOURCE>) pValueToConvert.getClass();
-      convertedValue = pField.getDataType().isAssignableFrom(sourceType) ? (TYPE) pValueToConvert :
+      convertedValue = pField.getDataType().isAssignableFrom(sourceType) ? (VALUE) pValueToConvert :
           pField.getToConverter(sourceType)
               .orElseThrow(() -> new RuntimeException("The field " + pField.getName() + " cannot convert to " + sourceType.getSimpleName()))
               .apply(pValueToConvert);
@@ -190,11 +190,11 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IObervableBeanValues<BE
    * Generally the index depends on the order of the defined fields.
    * Ignores private fields.
    *
-   * @param pField the bean field
-   * @param <TYPE> the field's data type
+   * @param pField  the bean field
+   * @param <VALUE> the field's data type
    * @return the index of the field, or -1 if not present
    */
-  default <TYPE> int getFieldIndex(IField<TYPE> pField)
+  default <VALUE> int getFieldIndex(IField<VALUE> pField)
   {
     if (pField.isPrivate())
       throw new BeanIllegalAccessException(this, pField);
@@ -248,12 +248,12 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IObervableBeanValues<BE
    * The statistic data for a certain bean field.
    * May be null if not present.
    *
-   * @param pField the bean field
-   * @param <TYPE> the data type of the field
+   * @param pField  the bean field
+   * @param <VALUE> the data type of the field
    * @return the statistic data, or null if not existing
    */
   @Nullable
-  default <TYPE> IStatisticData<TYPE> getStatisticData(IField<TYPE> pField)
+  default <VALUE> IStatisticData<VALUE> getStatisticData(IField<VALUE> pField)
   {
     if (!hasField(Objects.requireNonNull(pField)))
       throw new BeanFieldDoesNotExistException(this, pField);
@@ -345,7 +345,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IObervableBeanValues<BE
    *
    * @param pDataMapper the data mapper
    */
-  default <TYPE> void addDataMapperForField(IField<TYPE> pField, ISingleFieldFlatDataMapper<TYPE> pDataMapper)
+  default <VALUE> void addDataMapperForField(IField<VALUE> pField, ISingleFieldFlatDataMapper<VALUE> pDataMapper)
   {
     assert getEncapsulated() != null;
     getEncapsulated().addDataMapperForField(pField, pDataMapper);

@@ -1,7 +1,7 @@
 package de.adito.beans.persistence.datastores.sql.builder.result;
 
 import de.adito.beans.persistence.datastores.sql.builder.definition.IColumnIdentification;
-import de.adito.beans.persistence.datastores.sql.builder.util.*;
+import de.adito.beans.persistence.datastores.sql.builder.util.OptionalNullable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -9,12 +9,12 @@ import java.util.*;
 /**
  * The result of a select statement for a single column.
  *
- * @param <TYPE> the data type of the column
+ * @param <VALUE> the data type of the column
  * @author Simon Danner, 26.04.2018
  */
-public class SingleColumnResult<TYPE> implements Iterable<TYPE>
+public class SingleColumnResult<VALUE> implements Iterable<VALUE>
 {
-  private final IColumnIdentification<TYPE> column;
+  private final IColumnIdentification<VALUE> column;
   private final Result result;
 
   /**
@@ -23,7 +23,7 @@ public class SingleColumnResult<TYPE> implements Iterable<TYPE>
    * @param pColumn the column it is based on
    * @param pResult the full result of the query
    */
-  public SingleColumnResult(IColumnIdentification<TYPE> pColumn, Result pResult)
+  public SingleColumnResult(IColumnIdentification<VALUE> pColumn, Result pResult)
   {
     column = pColumn;
     result = pResult;
@@ -35,7 +35,7 @@ public class SingleColumnResult<TYPE> implements Iterable<TYPE>
    *
    * @return an optional result value of the first row
    */
-  public OptionalNullable<TYPE> getFirst()
+  public OptionalNullable<VALUE> getFirst()
   {
     return result.getFirst()
         .map(pResultRow -> OptionalNullable.of(pResultRow.get(column)))
@@ -44,9 +44,9 @@ public class SingleColumnResult<TYPE> implements Iterable<TYPE>
 
   @NotNull
   @Override
-  public Iterator<TYPE> iterator()
+  public Iterator<VALUE> iterator()
   {
-    return new Iterator<TYPE>()
+    return new Iterator<VALUE>()
     {
       private final Iterator<ResultRow> resultIterator = result.iterator();
 
@@ -57,7 +57,7 @@ public class SingleColumnResult<TYPE> implements Iterable<TYPE>
       }
 
       @Override
-      public TYPE next()
+      public VALUE next()
       {
         if (hasNext())
           return resultIterator.next().get(column);

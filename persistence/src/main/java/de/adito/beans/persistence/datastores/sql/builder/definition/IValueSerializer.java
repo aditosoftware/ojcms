@@ -20,7 +20,7 @@ public interface IValueSerializer
    * @param pColumnValueTuple the column value tuple
    * @return the value in a string format (null, if no value is present)
    */
-  @Nullable <TYPE> String toSerial(IColumnValueTuple<TYPE> pColumnValueTuple);
+  @Nullable <VALUE> String toSerial(IColumnValueTuple<VALUE> pColumnValueTuple);
 
   /**
    * Converts a serial value back to its original data value.
@@ -28,10 +28,10 @@ public interface IValueSerializer
    *
    * @param pColumnIdentification the column identification for the value
    * @param pSerialValue          the serial value in a string format
-   * @param <TYPE>                the generic type of the original data value
+   * @param <VALUE>               the generic type of the original data value
    * @return the original data value
    */
-  @Nullable <TYPE> TYPE fromSerial(IColumnIdentification<TYPE> pColumnIdentification, String pSerialValue);
+  @Nullable <VALUE> VALUE fromSerial(IColumnIdentification<VALUE> pColumnIdentification, String pSerialValue);
 
   /**
    * The value as string to use for database statements.
@@ -42,7 +42,7 @@ public interface IValueSerializer
    * @return the value in a string format for SQL statements (with quotes for non-numbers)
    */
   @Nullable
-  default <TYPE> String serialValueToStatementString(IColumnValueTuple<TYPE> pColumnValueTuple)
+  default <VALUE> String serialValueToStatementString(IColumnValueTuple<VALUE> pColumnValueTuple)
   {
     String serialValue = toSerial(pColumnValueTuple);
     if (serialValue == null)

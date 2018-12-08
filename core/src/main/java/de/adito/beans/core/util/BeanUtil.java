@@ -162,11 +162,11 @@ public final class BeanUtil
    * @param pParentBean the parent bean
    * @param pDeepField  the deep field to resolve the value to
    * @param pChain      the chain of bean fields that describes the way to the deep bean
-   * @param <TYPE>      the data type of the deep field
+   * @param <VALUE>     the data type of the deep field
    * @return the value of the deep field
    */
   @Nullable
-  public static <TYPE> TYPE resolveDeepValue(IBean<?> pParentBean, IField<TYPE> pDeepField, List<IField<?>> pChain)
+  public static <VALUE> VALUE resolveDeepValue(IBean<?> pParentBean, IField<VALUE> pDeepField, List<IField<?>> pChain)
   {
     IBean<?> deepBean = resolveDeepBean(pParentBean, pChain);
 

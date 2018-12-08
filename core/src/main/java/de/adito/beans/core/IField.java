@@ -13,17 +13,17 @@ import java.util.function.Function;
  * A field of a bean that is based on an inner data type.
  * It's just a wrapper for the actual data that holds additional meta information for the field.
  *
- * @param <TYPE> the inner data type of this bean field
+ * @param <VALUE> the inner data type of this bean field
  * @author Simon Danner, 23.08.2016
  */
-public interface IField<TYPE>
+public interface IField<VALUE>
 {
   /**
    * The inner data type of this field.
    *
    * @return the data type of this field
    */
-  Class<TYPE> getDataType();
+  Class<VALUE> getDataType();
 
   /**
    * The declared name of this field.
@@ -40,7 +40,7 @@ public interface IField<TYPE>
    *
    * @return the default value for this field
    */
-  default TYPE getDefaultValue()
+  default VALUE getDefaultValue()
   {
     return null;
   }
@@ -51,7 +51,7 @@ public interface IField<TYPE>
    *
    * @return the initial value for this field
    */
-  default TYPE getInitialValue()
+  default VALUE getInitialValue()
   {
     return null;
   }
@@ -64,7 +64,7 @@ public interface IField<TYPE>
    * @param pClientSessionInfo information of a client (time zone etc.)
    * @return the string representation of this field
    */
-  default String display(TYPE pValue, IClientInfo pClientSessionInfo)
+  default String display(VALUE pValue, IClientInfo pClientSessionInfo)
   {
     return Objects.toString(pValue);
   }
@@ -79,7 +79,7 @@ public interface IField<TYPE>
    * @return a copy of the field value
    * @throws UnsupportedOperationException if, it is not possible to create a copy of the specified data type
    */
-  default TYPE copyValue(TYPE pValue, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies) throws BeanCopyUnsupportedException
+  default VALUE copyValue(VALUE pValue, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies) throws BeanCopyUnsupportedException
   {
     throw new BeanCopyUnsupportedException(this);
   }
@@ -93,7 +93,7 @@ public interface IField<TYPE>
    * @param <SOURCE>    the generic source type of the value to convert
    * @return an optional converter (may not be registered)
    */
-  <SOURCE> Optional<Function<SOURCE, TYPE>> getToConverter(Class<SOURCE> pSourceType);
+  <SOURCE> Optional<Function<SOURCE, VALUE>> getToConverter(Class<SOURCE> pSourceType);
 
   /**
    * A converter to convert the value of this bean field to a specific target data type.
@@ -103,7 +103,7 @@ public interface IField<TYPE>
    * @param pTargetType the type of the value that will be converted from the field's data type value
    * @return an optional converter (may not be registered)
    */
-  <TARGET> Optional<Function<TYPE, TARGET>> getFromConverter(Class<TARGET> pTargetType);
+  <TARGET> Optional<Function<VALUE, TARGET>> getFromConverter(Class<TARGET> pTargetType);
 
   /**
    * An optional annotation instance of this field for a certain annotation type.
@@ -209,7 +209,7 @@ public interface IField<TYPE>
    *
    * @return an empty field tuple
    */
-  default FieldTuple<TYPE> emptyTuple()
+  default FieldTuple<VALUE> emptyTuple()
   {
     return newTuple(null);
   }
@@ -220,7 +220,7 @@ public interface IField<TYPE>
    * @param pValue the value for the tuple
    * @return a new field tuple
    */
-  default FieldTuple<TYPE> newTuple(TYPE pValue)
+  default FieldTuple<VALUE> newTuple(VALUE pValue)
   {
     return new FieldTuple<>(this, pValue);
   }
@@ -258,7 +258,7 @@ public interface IField<TYPE>
    * @return the copy creator wrapper
    * @see CustomFieldCopy
    */
-  default CustomFieldCopy<TYPE> customFieldCopy(Function<TYPE, TYPE> pCopyCreator)
+  default CustomFieldCopy<VALUE> customFieldCopy(Function<VALUE, VALUE> pCopyCreator)
   {
     return new CustomFieldCopy<>(this, pCopyCreator);
   }

@@ -9,12 +9,13 @@ import java.util.stream.LongStream;
  * The entries will be added from the first change timestamp of the statistics until the last for every interval.
  * For further changes a listener will add interval based entries until the timestamp of the new change.
  *
+ * @param <ENTRY> the data type of the statistic entry values
  * @author Simon Danner, 28.07.2018
  */
-class IntervalStatisticsMap<TYPE> extends LinkedHashMap<Long, TYPE>
+class IntervalStatisticsMap<ENTRY> extends LinkedHashMap<Long, ENTRY>
 {
   private final int interval;
-  private Function<Long, TYPE> valueResolver;
+  private Function<Long, ENTRY> valueResolver;
   private long firstTimestamp;
   private long lastTimestamp;
 
@@ -28,8 +29,8 @@ class IntervalStatisticsMap<TYPE> extends LinkedHashMap<Long, TYPE>
    * @param pLastTimestamp  the last timestamp of the value changes
    * @param pStatisticData  the statistic data itself to register the listener
    */
-  IntervalStatisticsMap(int pInterval, Function<Long, TYPE> pValueResolver, long pFirstTimestamp, long pLastTimestamp,
-                        IStatisticData<TYPE> pStatisticData)
+  IntervalStatisticsMap(int pInterval, Function<Long, ENTRY> pValueResolver, long pFirstTimestamp, long pLastTimestamp,
+                        IStatisticData<ENTRY> pStatisticData)
   {
     interval = pInterval;
     valueResolver = pValueResolver;
@@ -39,7 +40,7 @@ class IntervalStatisticsMap<TYPE> extends LinkedHashMap<Long, TYPE>
     _addEntries();
     pStatisticData.observeStatistics()
         .subscribe(pEvent -> {
-          final TYPE lastValue = valueResolver.apply(lastTimestamp);
+          final ENTRY lastValue = valueResolver.apply(lastTimestamp);
           firstTimestamp = lastTimestamp + interval;
           lastTimestamp = pEvent.getTimestamp();
           //The last value before or the new value, when the time is reached

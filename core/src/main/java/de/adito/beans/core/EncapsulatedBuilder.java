@@ -155,11 +155,11 @@ public final class EncapsulatedBuilder
     /**
      * The value for a bean field.
      *
-     * @param pField the bean field
-     * @param <TYPE> the data type of the field
+     * @param pField  the bean field
+     * @param <VALUE> the data type of the field
      * @return the value for the field
      */
-    <TYPE> TYPE getValue(IField<TYPE> pField);
+    <VALUE> VALUE getValue(IField<VALUE> pField);
 
     /**
      * Sets a value for a bean field.
@@ -167,17 +167,17 @@ public final class EncapsulatedBuilder
      * @param pField         the bean field
      * @param pValue         the new value
      * @param pAllowNewField <tt>true</tt>, if a new field should be created, if it isn't existing
-     * @param <TYPE>         the data type of the field
+     * @param <VALUE>        the data type of the field
      */
-    <TYPE> void setValue(IField<TYPE> pField, TYPE pValue, boolean pAllowNewField);
+    <VALUE> void setValue(IField<VALUE> pField, VALUE pValue, boolean pAllowNewField);
 
     /**
      * Removes a bean field.
      *
-     * @param pField the bean field to remove
-     * @param <TYPE> the data type of the field
+     * @param pField  the bean field to remove
+     * @param <VALUE> the data type of the field
      */
-    <TYPE> void removeField(IField<TYPE> pField);
+    <VALUE> void removeField(IField<VALUE> pField);
   }
 
   /**
@@ -259,26 +259,26 @@ public final class EncapsulatedBuilder
     }
 
     @Override
-    public <TYPE> TYPE getValue(IField<TYPE> pField)
+    public <VALUE> VALUE getValue(IField<VALUE> pField)
     {
       return _ifFieldExistsWithResult(pField, builder::getValue);
     }
 
     @Override
-    public <TYPE> void setValue(IField<TYPE> pField, TYPE pValue)
+    public <VALUE> void setValue(IField<VALUE> pField, VALUE pValue)
     {
       _ifFieldExists(pField, pCheckedField -> builder.setValue(pCheckedField, pValue, false));
     }
 
     @Override
-    public <TYPE> void addField(IField<TYPE> pField, int pIndex)
+    public <VALUE> void addField(IField<VALUE> pField, int pIndex)
     {
       builder.setValue(pField, null, true);
       fieldOrder.add(pIndex, pField);
     }
 
     @Override
-    public <TYPE> void removeField(IField<TYPE> pField)
+    public <VALUE> void removeField(IField<VALUE> pField)
     {
       _ifFieldExists(pField, pCheckedField -> {
         builder.removeField(pCheckedField);
@@ -385,11 +385,11 @@ public final class EncapsulatedBuilder
      *
      * @param pField   the field to check
      * @param pAction  the on the field based action to get the result from
-     * @param <TYPE>   the field's data type
+     * @param <VALUE>  the field's data type
      * @param <RETURN> the result type
      * @return the result of the field based action
      */
-    private <TYPE, RETURN> RETURN _ifFieldExistsWithResult(IField<TYPE> pField, Function<IField<TYPE>, RETURN> pAction)
+    private <VALUE, RETURN> RETURN _ifFieldExistsWithResult(IField<VALUE> pField, Function<IField<VALUE>, RETURN> pAction)
     {
       if (!containsField(pField))
         throw new BeanFieldDoesNotExistException(pField);
@@ -403,9 +403,9 @@ public final class EncapsulatedBuilder
      *
      * @param pField  the field to check
      * @param pAction the on the field based action to perform
-     * @param <TYPE>  the field's data type
+     * @param <VALUE> the field's data type
      */
-    private <TYPE> void _ifFieldExists(IField<TYPE> pField, Consumer<IField<TYPE>> pAction)
+    private <VALUE> void _ifFieldExists(IField<VALUE> pField, Consumer<IField<VALUE>> pAction)
     {
       if (!containsField(pField))
         throw new BeanFieldDoesNotExistException(pField);

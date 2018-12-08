@@ -110,10 +110,10 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
   }
 
   @Override
-  public <TYPE> TYPE getValue(IField<TYPE> pField)
+  public <VALUE> VALUE getValue(IField<VALUE> pField)
   {
     //noinspection unchecked
-    return builder.doSelectOne((IColumnIdentification<TYPE>) columns.get(pField), pSelect -> pSelect
+    return builder.doSelectOne((IColumnIdentification<VALUE>) columns.get(pField), pSelect -> pSelect
         .where(beanIdCondition)
         .firstResult()
         .map(pValue -> pValue == null ? pField.getInitialValue() : pValue)
@@ -121,7 +121,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
   }
 
   @Override
-  public <TYPE> void setValue(IField<TYPE> pField, TYPE pValue, boolean pAllowNewField)
+  public <VALUE> void setValue(IField<VALUE> pField, VALUE pValue, boolean pAllowNewField)
   {
     builder.doUpdate(pUpdate -> pUpdate
         .set(new _ColumnTuple<>(pField, columns.get(pField).id, pValue))
@@ -130,7 +130,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
   }
 
   @Override
-  public <TYPE> void removeField(IField<TYPE> pField)
+  public <VALUE> void removeField(IField<VALUE> pField)
   {
     throw new UnsupportedOperationException("It's not allowed to remove fields from a persistent bean!");
   }
@@ -204,11 +204,11 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
    * Column identification for this special bean field columns.
    * The column name is built from a prefix and the index of the column.
    *
-   * @param <TYPE> the data type of the associated bean field
+   * @param <VALUE> the data type of the associated bean field
    */
-  private class _ColumnIdentification<TYPE> implements IColumnIdentification<TYPE>, IBeanFieldBased<TYPE>
+  private class _ColumnIdentification<VALUE> implements IColumnIdentification<VALUE>, IBeanFieldBased<VALUE>
   {
-    private final IField<TYPE> beanField;
+    private final IField<VALUE> beanField;
     private final int id;
 
     /**
@@ -217,7 +217,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
      * @param pBeanField the bean field associated with the column
      * @param pId        the index of the column
      */
-    private _ColumnIdentification(IField<TYPE> pBeanField, int pId)
+    private _ColumnIdentification(IField<VALUE> pBeanField, int pId)
     {
       beanField = pBeanField;
       id = pId;
@@ -230,13 +230,13 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
     }
 
     @Override
-    public Class<TYPE> getDataType()
+    public Class<VALUE> getDataType()
     {
       return beanField.getDataType();
     }
 
     @Override
-    public IField<TYPE> getBeanField()
+    public IField<VALUE> getBeanField()
     {
       return beanField;
     }
@@ -246,11 +246,11 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
    * A column value tuple for this special database table.
    * The column name is built from a prefix and the index of the column.
    *
-   * @param <TYPE> the data type of the associated bean tuple
+   * @param <VALUE> the data type of the associated bean tuple
    */
-  private class _ColumnTuple<TYPE> extends BeanColumnValueTuple<TYPE>
+  private class _ColumnTuple<VALUE> extends BeanColumnValueTuple<VALUE>
   {
-    private final IColumnIdentification<TYPE> column;
+    private final IColumnIdentification<VALUE> column;
 
     /**
      * Creates a new column value tuple.
@@ -259,14 +259,14 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IPersistentB
      * @param pId        the index of the column
      * @param pValue     the data value for the column
      */
-    private _ColumnTuple(IField<TYPE> pBeanField, int pId, TYPE pValue)
+    private _ColumnTuple(IField<VALUE> pBeanField, int pId, VALUE pValue)
     {
       super(pBeanField.newTuple(pValue));
       column = IColumnIdentification.of(IDatabaseConstants.BEAN_TABLE_COLUMN_PREFIX + pId, pBeanField.getDataType(), (pName, pType) -> false);
     }
 
     @Override
-    public IColumnIdentification<TYPE> getColumn()
+    public IColumnIdentification<VALUE> getColumn()
     {
       return column;
     }

@@ -37,23 +37,23 @@ class DefaultValueSerializer implements IValueSerializer
   }
 
   @Override
-  public @Nullable <TYPE> String toSerial(IColumnValueTuple<TYPE> pColumnValueTuple)
+  public @Nullable <VALUE> String toSerial(IColumnValueTuple<VALUE> pColumnValueTuple)
   {
-    Class<TYPE> dataType = pColumnValueTuple.getColumn().getDataType();
+    Class<VALUE> dataType = pColumnValueTuple.getColumn().getDataType();
     if (!supportedTypesToSerial.containsKey(dataType))
       throw new RuntimeException(dataType.getName() + " is not a supported value type for this serializer!");
-    TYPE value = pColumnValueTuple.getValue();
+    VALUE value = pColumnValueTuple.getValue();
     return value == null ? null : supportedTypesToSerial.get(dataType).apply(value);
   }
 
   @Override
-  public <TYPE> @Nullable TYPE fromSerial(IColumnIdentification<TYPE> pColumnIdentification, String pSerialValue)
+  public <VALUE> @Nullable VALUE fromSerial(IColumnIdentification<VALUE> pColumnIdentification, String pSerialValue)
   {
-    Class<TYPE> dataType = pColumnIdentification.getDataType();
+    Class<VALUE> dataType = pColumnIdentification.getDataType();
     if (!supportedTypesFromSerial.containsKey(dataType))
       throw new RuntimeException(dataType.getName() + " is not a supported value type for this deserializer!");
     //noinspection unchecked
-    return pSerialValue == null ? null : (TYPE) supportedTypesFromSerial.get(dataType).apply(pSerialValue);
+    return pSerialValue == null ? null : (VALUE) supportedTypesFromSerial.get(dataType).apply(pSerialValue);
   }
 
   /**
@@ -62,9 +62,9 @@ class DefaultValueSerializer implements IValueSerializer
    * @param pType         the data type
    * @param pSerializer   a function to get a serial string value from an actual value
    * @param pDeserializer a function to get the actual value from the serial value
-   * @param <TYPE>        the generic data type
+   * @param <VALUE>       the generic data type
    */
-  private static <TYPE> void _put(Class<TYPE> pType, Function<TYPE, String> pSerializer, Function<String, TYPE> pDeserializer)
+  private static <VALUE> void _put(Class<VALUE> pType, Function<VALUE, String> pSerializer, Function<String, VALUE> pDeserializer)
   {
     //noinspection unchecked
     supportedTypesToSerial.put(pType, (Function<Object, String>) pSerializer);

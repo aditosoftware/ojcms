@@ -11,10 +11,10 @@ import java.util.function.Function;
  * Statistic data of bean elements.
  * It could be the data behind bean fields or the amount of beans in a container at certain timestamps.
  *
- * @param <TYPE> the data type of the statistic entries
+ * @param <ENTRY> the data type of the statistic entries
  * @author Simon Danner, 14.02.2017
  */
-public interface IStatisticData<TYPE>
+public interface IStatisticData<ENTRY>
 {
   /**
    * The maximum number of statistic entries.
@@ -42,7 +42,7 @@ public interface IStatisticData<TYPE>
    *
    * @return a map that holds a timestamp as key and an associated value as value
    */
-  Map<Long, TYPE> getChangedDataStatistics();
+  Map<Long, ENTRY> getChangedDataStatistics();
 
   /**
    * The statistic data in an interval based timestamp structure.
@@ -54,17 +54,17 @@ public interface IStatisticData<TYPE>
    *
    * @return a map that holds a timestamp as key and an associated value as value (interval based)
    */
-  default Map<Long, TYPE> getIntervalStatistics(int pInterval)
+  default Map<Long, ENTRY> getIntervalStatistics(int pInterval)
   {
     if (size() == 0)
       return Collections.emptyMap();
 
-    final Map<Long, TYPE> changes = getChangedDataStatistics();
+    final Map<Long, ENTRY> changes = getChangedDataStatistics();
     final LinkedList<Long> timestamps = new LinkedList<>(changes.keySet());
     final long firstTimestamp = timestamps.getFirst();
     final long lastTimestamp = timestamps.getLast();
     //Resolves the value for a timestamp (removes all outdated timestamps from the list -> the first entry will be current timestamp)
-    final Function<Long, TYPE> valueResolver = pTimestamp -> {
+    final Function<Long, ENTRY> valueResolver = pTimestamp -> {
       while (timestamps.size() > 1 && timestamps.get(1) <= pTimestamp)
         timestamps.removeFirst();
       return changes.get(timestamps.getFirst());
@@ -78,7 +78,7 @@ public interface IStatisticData<TYPE>
    *
    * @param pEntry the new entry
    */
-  void addEntry(@NotNull TYPE pEntry);
+  void addEntry(@NotNull ENTRY pEntry);
 
   /**
    * Deletes this statistic data.
@@ -90,5 +90,5 @@ public interface IStatisticData<TYPE>
    *
    * @return a observable which publishes new statistic entries
    */
-  Observable<NewStatisticEntry<TYPE>> observeStatistics();
+  Observable<NewStatisticEntry<ENTRY>> observeStatistics();
 }

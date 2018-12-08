@@ -10,12 +10,12 @@ import java.sql.ResultSet;
 /**
  * A single column select statement.
  *
- * @param <TYPE> the type of the result
+ * @param <VALUE> the type of the result
  * @author Simon Danner, 26.04.2018
  */
-public class SingleSelect<TYPE> extends AbstractSelect<SingleSelect<TYPE>>
+public class SingleSelect<VALUE> extends AbstractSelect<SingleSelect<VALUE>>
 {
-  private final IColumnIdentification<TYPE> column;
+  private final IColumnIdentification<VALUE> column;
 
   /**
    * Creates a new select statement based on single column.
@@ -28,7 +28,7 @@ public class SingleSelect<TYPE> extends AbstractSelect<SingleSelect<TYPE>>
    * @param pColumn            the single column to select
    */
   public SingleSelect(IStatementExecutor<ResultSet> pStatementExecutor, AbstractSQLBuilder pBuilder, EDatabaseType pDatabaseType,
-                      IValueSerializer pSerializer, String pIdColumnName, IColumnIdentification<TYPE> pColumn)
+                      IValueSerializer pSerializer, String pIdColumnName, IColumnIdentification<VALUE> pColumn)
   {
     super(pStatementExecutor, pBuilder, pDatabaseType, pSerializer, pIdColumnName, pColumn);
     column = pColumn;
@@ -40,7 +40,7 @@ public class SingleSelect<TYPE> extends AbstractSelect<SingleSelect<TYPE>>
    *
    * @return a optional result of the query (first row)
    */
-  public OptionalNullable<TYPE> firstResult()
+  public OptionalNullable<VALUE> firstResult()
   {
     return fullResult().getFirst();
   }
@@ -51,7 +51,7 @@ public class SingleSelect<TYPE> extends AbstractSelect<SingleSelect<TYPE>>
    *
    * @return the result of the query
    */
-  public SingleColumnResult<TYPE> fullResult()
+  public SingleColumnResult<VALUE> fullResult()
   {
     return new SingleColumnResult<>(column, doQuery());
   }

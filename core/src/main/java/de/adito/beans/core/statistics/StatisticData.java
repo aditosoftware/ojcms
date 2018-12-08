@@ -10,14 +10,14 @@ import java.util.*;
 /**
  * Implementation of the statistic data with an evicting map to remove entries, which exceed the limit of the data.
  *
- * @param <TYPE> the data type of the statistic entries
+ * @param <ENTRY> the data type of the statistic entries
  * @author Simon Danner, 14.02.2017
  */
-public class StatisticData<TYPE> implements IStatisticData<TYPE>
+public class StatisticData<ENTRY> implements IStatisticData<ENTRY>
 {
   private final int maxEntrySize;
-  private final Map<Long, TYPE> statistics;
-  private final PublishSubject<NewStatisticEntry<TYPE>> newEntryPublisher = PublishSubject.create();
+  private final Map<Long, ENTRY> statistics;
+  private final PublishSubject<NewStatisticEntry<ENTRY>> newEntryPublisher = PublishSubject.create();
 
   /**
    * Creates new statistic data.
@@ -25,7 +25,7 @@ public class StatisticData<TYPE> implements IStatisticData<TYPE>
    * @param pCapacity   the maximum number of entries, or -1 for no limit
    * @param pFirstValue an optional first value for the data
    */
-  public StatisticData(int pCapacity, @Nullable TYPE pFirstValue)
+  public StatisticData(int pCapacity, @Nullable ENTRY pFirstValue)
   {
     maxEntrySize = pCapacity;
     statistics = Collections.synchronizedMap(maxEntrySize == -1 ? new LinkedHashMap<>() : new _LimitedMap(maxEntrySize));
@@ -40,13 +40,13 @@ public class StatisticData<TYPE> implements IStatisticData<TYPE>
   }
 
   @Override
-  public Map<Long, TYPE> getChangedDataStatistics()
+  public Map<Long, ENTRY> getChangedDataStatistics()
   {
     return Collections.unmodifiableMap(statistics);
   }
 
   @Override
-  public void addEntry(@NotNull TYPE pEntry)
+  public void addEntry(@NotNull ENTRY pEntry)
   {
     long timeStamp = System.currentTimeMillis();
     statistics.put(timeStamp, pEntry);
@@ -61,7 +61,7 @@ public class StatisticData<TYPE> implements IStatisticData<TYPE>
   }
 
   @Override
-  public Observable<NewStatisticEntry<TYPE>> observeStatistics()
+  public Observable<NewStatisticEntry<ENTRY>> observeStatistics()
   {
     return newEntryPublisher;
   }
@@ -69,7 +69,7 @@ public class StatisticData<TYPE> implements IStatisticData<TYPE>
   /**
    * A limited evicting map that only allows a certain number of entries.
    */
-  private class _LimitedMap extends LinkedHashMap<Long, TYPE>
+  private class _LimitedMap extends LinkedHashMap<Long, ENTRY>
   {
     private final int limit;
 
@@ -80,7 +80,7 @@ public class StatisticData<TYPE> implements IStatisticData<TYPE>
     }
 
     @Override
-    protected boolean removeEldestEntry(Map.Entry<Long, TYPE> pEldest)
+    protected boolean removeEldestEntry(Map.Entry<Long, ENTRY> pEldest)
     {
       return size() > limit;
     }

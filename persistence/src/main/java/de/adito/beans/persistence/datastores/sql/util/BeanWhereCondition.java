@@ -13,7 +13,7 @@ import java.util.function.Function;
  *
  * @author Simon Danner, 06.06.2018
  */
-public class BeanWhereCondition<TYPE> extends BeanColumnValueTuple<TYPE> implements IWhereCondition<TYPE>
+public class BeanWhereCondition<VALUE> extends BeanColumnValueTuple<VALUE> implements IWhereCondition<VALUE>
 {
   private final IWhereOperator operator;
   private boolean negated = false;
@@ -24,7 +24,7 @@ public class BeanWhereCondition<TYPE> extends BeanColumnValueTuple<TYPE> impleme
    * @param pFieldTuple the bean field value tuple its based on
    * @param pOperator   the operator for the condition
    */
-  public BeanWhereCondition(FieldTuple<TYPE> pFieldTuple, IWhereOperator pOperator)
+  public BeanWhereCondition(FieldTuple<VALUE> pFieldTuple, IWhereOperator pOperator)
   {
     super(pFieldTuple);
     operator = Objects.requireNonNull(pOperator);
@@ -37,7 +37,7 @@ public class BeanWhereCondition<TYPE> extends BeanColumnValueTuple<TYPE> impleme
   }
 
   @Override
-  public BeanWhereCondition<TYPE> not()
+  public BeanWhereCondition<VALUE> not()
   {
     negated = true;
     return this;

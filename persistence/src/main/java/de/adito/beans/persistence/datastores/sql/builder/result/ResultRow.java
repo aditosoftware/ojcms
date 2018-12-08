@@ -47,11 +47,11 @@ public class ResultRow
    * The value of this row for a certain column.
    *
    * @param pColumn the column identification
-   * @param <TYPE>  the column's data type
+   * @param <VALUE> the column's data type
    * @return the value
    * @throws OJDatabaseException if the column is not present within the result row
    */
-  public <TYPE> TYPE get(IColumnIdentification<TYPE> pColumn)
+  public <VALUE> VALUE get(IColumnIdentification<VALUE> pColumn)
   {
     if (!hasColumn(pColumn))
       throw new OJDatabaseException("The column '" + pColumn.getColumnName() + "' is not present within the result row!");

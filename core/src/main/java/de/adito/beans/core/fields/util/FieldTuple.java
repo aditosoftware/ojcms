@@ -7,15 +7,15 @@ import java.util.Objects;
 /**
  * Combination of a bean field and its data value.
  *
- * @param <TYPE> the field's data type
+ * @param <VALUE> the field's data type
  * @author Simon Danner, 25.02.2018
  */
-public class FieldTuple<TYPE>
+public class FieldTuple<VALUE>
 {
-  private final IField<TYPE> field;
-  private final TYPE value;
+  private final IField<VALUE> field;
+  private final VALUE value;
 
-  public FieldTuple(IField<TYPE> pField, TYPE pValue)
+  public FieldTuple(IField<VALUE> pField, VALUE pValue)
   {
     field = pField;
     value = pValue;
@@ -23,16 +23,20 @@ public class FieldTuple<TYPE>
 
   /**
    * The bean field.
+   *
+   * @return the bean field
    */
-  public IField<TYPE> getField()
+  public IField<VALUE> getField()
   {
     return field;
   }
 
   /**
    * The associated data value.
+   *
+   * @return the value
    */
-  public TYPE getValue()
+  public VALUE getValue()
   {
     return value;
   }

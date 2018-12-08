@@ -77,11 +77,11 @@ public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
   /**
    * Returns the value of a private bean field.
    *
-   * @param pField the field to which the value should be returned
-   * @param <TYPE> the data type of the field
+   * @param pField  the field to which the value should be returned
+   * @param <VALUE> the data type of the field
    * @return the field's value
    */
-  protected <TYPE> TYPE getPrivateValue(IField<TYPE> pField)
+  protected <VALUE> VALUE getPrivateValue(IField<VALUE> pField)
   {
     assert getEncapsulated() != null;
     if (!getEncapsulated().containsField(pField))
@@ -93,11 +93,11 @@ public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
   /**
    * Sets the value of a private bean field.
    *
-   * @param pField the field to which the value should be set
-   * @param pValue the new value
-   * @param <TYPE> the data type of the field
+   * @param pField  the field to which the value should be set
+   * @param pValue  the new value
+   * @param <VALUE> the data type of the field
    */
-  protected <TYPE> void setPrivateValue(IField<TYPE> pField, TYPE pValue)
+  protected <VALUE> void setPrivateValue(IField<VALUE> pField, VALUE pValue)
   {
     assert getEncapsulated() != null;
     if (!getEncapsulated().containsField(pField))
@@ -151,10 +151,10 @@ public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
    * Otherwise the public methods of {@link IBean} should be used.
    * A misconfiguration will only result in a logger warning.
    *
-   * @param pField the field to check
-   * @param <TYPE> the generic data type of the field
+   * @param pField  the field to check
+   * @param <VALUE> the generic data type of the field
    */
-  private <TYPE> void _checkNotPrivateAndWarn(IField<TYPE> pField)
+  private <VALUE> void _checkNotPrivateAndWarn(IField<VALUE> pField)
   {
     if (!pField.isPrivate())
       LOGGER.log(Level.WARNING, "The field '" + pField.getName() + "' is not private. Use the public method to get/set the value instead!");
@@ -234,14 +234,14 @@ public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
     }
 
     @Override
-    public <TYPE> TYPE getValue(IField<TYPE> pField)
+    public <VALUE> VALUE getValue(IField<VALUE> pField)
     {
       //noinspection unchecked
-      return (TYPE) values.get(pField);
+      return (VALUE) values.get(pField);
     }
 
     @Override
-    public <TYPE> void setValue(IField<TYPE> pField, TYPE pValue, boolean pAllowNewField)
+    public <VALUE> void setValue(IField<VALUE> pField, VALUE pValue, boolean pAllowNewField)
     {
       boolean existing = values.containsKey(pField);
       if (!pAllowNewField && !existing)
@@ -250,7 +250,7 @@ public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
     }
 
     @Override
-    public <TYPE> void removeField(IField<TYPE> pField)
+    public <VALUE> void removeField(IField<VALUE> pField)
     {
       values.remove(pField);
     }

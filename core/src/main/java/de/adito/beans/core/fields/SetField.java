@@ -9,11 +9,12 @@ import java.util.*;
 /**
  * A bean field for a {@link Set}.
  *
+ * @param <ELEMENT> the type of the elements in the set
  * @author Simon Danner, 01.08.2018
  */
-public class SetField<TYPE> extends AbstractField<Set<TYPE>> implements ISerializableFieldJson<Set<TYPE>>
+public class SetField<ELEMENT> extends AbstractField<Set<ELEMENT>> implements ISerializableFieldJson<Set<ELEMENT>>
 {
-  public SetField(@NotNull Class<Set<TYPE>> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
+  public SetField(@NotNull Class<Set<ELEMENT>> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {
     super(pType, pName, pAnnotations);
   }

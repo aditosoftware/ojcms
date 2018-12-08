@@ -24,10 +24,10 @@ public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
    * @param pFieldType   the new field's data type
    * @param pName        the new field's name
    * @param pAnnotations the new field's annotations
-   * @param <TYPE>       the generic data type of the new field
+   * @param <VALUE>      the generic data type of the new field
    * @return the created field instance
    */
-  default <TYPE, FIELD extends IField<TYPE>> FIELD addField(Class<FIELD> pFieldType, String pName, Collection<Annotation> pAnnotations)
+  default <VALUE, FIELD extends IField<VALUE>> FIELD addField(Class<FIELD> pFieldType, String pName, Collection<Annotation> pAnnotations)
   {
     return addField(pFieldType, pName, pAnnotations, -1);
   }
@@ -40,11 +40,11 @@ public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
    * @param pName        the new field's name
    * @param pAnnotations the new field's annotations
    * @param pIndex       the index to add the field, or -1 to put the field at the end (includes private fields)
-   * @param <TYPE>       the generic data type of the new field
+   * @param <VALUE>      the generic data type of the new field
    * @return the created field instance
    */
-  default <TYPE, FIELD extends IField<TYPE>> FIELD addField(Class<FIELD> pFieldType, String pName,
-                                                            Collection<Annotation> pAnnotations, int pIndex)
+  default <VALUE, FIELD extends IField<VALUE>> FIELD addField(Class<FIELD> pFieldType, String pName,
+                                                              Collection<Annotation> pAnnotations, int pIndex)
   {
     IBeanEncapsulated encapsulated = getEncapsulated();
     assert encapsulated != null;
@@ -61,10 +61,10 @@ public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
   /**
    * Extends this bean by a already existing field instance.
    *
-   * @param pField the field to add
-   * @param <TYPE> the field's data type
+   * @param pField  the field to add
+   * @param <VALUE> the field's data type
    */
-  default <TYPE> void addField(IField<TYPE> pField)
+  default <VALUE> void addField(IField<VALUE> pField)
   {
     addField(pField, getEncapsulated().getFieldCount());
   }
@@ -72,11 +72,11 @@ public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
   /**
    * Extends this bean by a already existing field instance at a certain index.
    *
-   * @param pField the field to add
-   * @param pIndex the index of the field (includes private fields)
-   * @param <TYPE> the field's data type
+   * @param pField  the field to add
+   * @param pIndex  the index of the field (includes private fields)
+   * @param <VALUE> the field's data type
    */
-  default <TYPE> void addField(IField<TYPE> pField, int pIndex)
+  default <VALUE> void addField(IField<VALUE> pField, int pIndex)
   {
     IBeanEncapsulated encapsulated = getEncapsulated();
     assert encapsulated != null;
@@ -91,14 +91,14 @@ public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
   /**
    * Removes a field from this bean.
    *
-   * @param pField the field to remove
-   * @param <TYPE> the field's data type
+   * @param pField  the field to remove
+   * @param <VALUE> the field's data type
    */
-  default <TYPE> void removeField(IField<TYPE> pField)
+  default <VALUE> void removeField(IField<VALUE> pField)
   {
     IBeanEncapsulated encapsulated = getEncapsulated();
     assert encapsulated != null;
-    TYPE oldValue = encapsulated.getValue(pField);
+    VALUE oldValue = encapsulated.getValue(pField);
     encapsulated.removeField(pField);
     //noinspection unchecked
     BeanEvents.propagate(new BeanFieldRemoval<>((BEAN) this, pField, oldValue));

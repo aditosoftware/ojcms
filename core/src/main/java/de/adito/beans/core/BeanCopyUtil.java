@@ -126,12 +126,12 @@ final class BeanCopyUtil
    * @param pMode                the copy mode
    * @param pOptionalCopyCreator a optional function to create the copy {@link CustomFieldCopy}
    * @param pCustomCopies        a collection of custom copy mechanisms for specific bean fields
-   * @param <TYPE>               the generic type of the field value
+   * @param <VALUE>              the generic type of the field value
    * @return the copied value
    */
   @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-  private static <TYPE> TYPE _copyFieldValue(IField<TYPE> pField, TYPE pValue, ECopyMode pMode,
-                                             Optional<Function<TYPE, TYPE>> pOptionalCopyCreator, CustomFieldCopy<?>[] pCustomCopies)
+  private static <VALUE> VALUE _copyFieldValue(IField<VALUE> pField, VALUE pValue, ECopyMode pMode,
+                                               Optional<Function<VALUE, VALUE>> pOptionalCopyCreator, CustomFieldCopy<?>[] pCustomCopies)
   {
     try
     {

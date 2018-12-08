@@ -44,7 +44,7 @@ abstract class AbstractBeanEncapsulated extends AbstractEncapsulated<FieldTuple<
   }
 
   @Override
-  public <TYPE> void addDataMapperForField(IField<TYPE> pField, ISingleFieldFlatDataMapper<TYPE> pDataMapper)
+  public <VALUE> void addDataMapperForField(IField<VALUE> pField, ISingleFieldFlatDataMapper<VALUE> pDataMapper)
   {
     dataMappers.add(new BeanDataMapper(pDataMapper, pField));
   }

@@ -5,7 +5,7 @@ import de.adito.beans.core.mappers.*;
 import de.adito.beans.core.statistics.IStatisticData;
 import de.adito.beans.core.util.IBeanFieldPredicate;
 
-import java.util.*;
+import java.util.Map;
 import java.util.stream.Stream;
 
 /**
@@ -19,37 +19,37 @@ interface IBeanEncapsulated extends IEncapsulated<FieldTuple<?>>, IReferable
   /**
    * The value for a bean field.
    *
-   * @param pField the bean field
-   * @param <TYPE> the data type of the field
+   * @param pField  the bean field
+   * @param <VALUE> the data type of the field
    * @return the value for the field
    */
-  <TYPE> TYPE getValue(IField<TYPE> pField);
+  <VALUE> VALUE getValue(IField<VALUE> pField);
 
   /**
    * Sets a value for a bean field.
    *
-   * @param pField the bean field
-   * @param pValue the new value
-   * @param <TYPE> the data type of the field
+   * @param pField  the bean field
+   * @param pValue  the new value
+   * @param <VALUE> the data type of the field
    */
-  <TYPE> void setValue(IField<TYPE> pField, TYPE pValue);
+  <VALUE> void setValue(IField<VALUE> pField, VALUE pValue);
 
   /**
    * Adds a bean field to the data core.
    *
-   * @param pField the bean field to add
-   * @param pIndex the index at which the field should be added (the index includes private fields)
-   * @param <TYPE> the data type of the field
+   * @param pField  the bean field to add
+   * @param pIndex  the index at which the field should be added (the index includes private fields)
+   * @param <VALUE> the data type of the field
    */
-  <TYPE> void addField(IField<TYPE> pField, int pIndex);
+  <VALUE> void addField(IField<VALUE> pField, int pIndex);
 
   /**
    * Removes a bean field from the data core.
    *
-   * @param pField the bean field to remove
-   * @param <TYPE> the data type of the field
+   * @param pField  the bean field to remove
+   * @param <VALUE> the data type of the field
    */
-  <TYPE> void removeField(IField<TYPE> pField);
+  <VALUE> void removeField(IField<VALUE> pField);
 
   /**
    * The amount of bean fields of this data core.
@@ -102,8 +102,9 @@ interface IBeanEncapsulated extends IEncapsulated<FieldTuple<?>>, IReferable
    * Adds a temporary data mapper, which only applies to a single field, to this data core.
    *
    * @param pDataMapper the data mapper
+   * @param <VALUE>     the data type of the field
    */
-  <TYPE> void addDataMapperForField(IField<TYPE> pField, ISingleFieldFlatDataMapper<TYPE> pDataMapper);
+  <VALUE> void addDataMapperForField(IField<VALUE> pField, ISingleFieldFlatDataMapper<VALUE> pDataMapper);
 
   /**
    * Removes a specific data mappers from this data core.
@@ -122,11 +123,11 @@ interface IBeanEncapsulated extends IEncapsulated<FieldTuple<?>>, IReferable
   /**
    * Determines if this core contains a certain bean field.
    *
-   * @param pField the bean field
-   * @param <TYPE> the data type of the field
+   * @param pField  the bean field
+   * @param <VALUE> the data type of the field
    * @return <tt>true</tt>, if the field is present
    */
-  default <TYPE> boolean containsField(IField<TYPE> pField)
+  default <VALUE> boolean containsField(IField<VALUE> pField)
   {
     return streamFields()
         .anyMatch(pExistingBean -> pExistingBean == pField); //Compare references because of the static definition of bean fields

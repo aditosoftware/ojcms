@@ -12,15 +12,15 @@ import java.util.function.*;
  * Furthermore there are several other methods, which allow a comfortable usage in a functional way.
  * This implementation is based on the concept {@link java.util.Optional}.
  *
- * @param <TYPE> the data type of the value of this optional
+ * @param <VALUE> the data type of the value of this optional
  * @author Simon Danner, 21.05.2018
  */
-public final class OptionalNullable<TYPE>
+public final class OptionalNullable<VALUE>
 {
   private static final OptionalNullable<?> NOT_PRESENT = new OptionalNullable();
 
   private final boolean present;
-  private final TYPE value;
+  private final VALUE value;
 
   /**
    * Creates the optional with a not present value.
@@ -36,7 +36,7 @@ public final class OptionalNullable<TYPE>
    *
    * @param pValue the value of the optional (may be null)
    */
-  private OptionalNullable(@Nullable TYPE pValue)
+  private OptionalNullable(@Nullable VALUE pValue)
   {
     present = true;
     value = pValue;
@@ -46,23 +46,23 @@ public final class OptionalNullable<TYPE>
    * Creates an optional with a not present value.
    * This means the optional condition is negative.
    *
-   * @param <TYPE> the generic data type of the optional value
+   * @param <VALUE> the generic data type of the optional value
    * @return an optional with a not present value
    */
-  public static <TYPE> OptionalNullable<TYPE> notPresent()
+  public static <VALUE> OptionalNullable<VALUE> notPresent()
   {
     //noinspection unchecked
-    return (OptionalNullable<TYPE>) NOT_PRESENT;
+    return (OptionalNullable<VALUE>) NOT_PRESENT;
   }
 
   /**
    * Creates an optional with a present value.
    *
-   * @param pValue the nullable value
-   * @param <TYPE> the type of the value
+   * @param pValue  the nullable value
+   * @param <VALUE> the type of the value
    * @return an optional with a present value
    */
-  public static <TYPE> OptionalNullable<TYPE> of(@Nullable TYPE pValue)
+  public static <VALUE> OptionalNullable<VALUE> of(@Nullable VALUE pValue)
   {
     return new OptionalNullable<>(pValue);
   }
@@ -82,7 +82,7 @@ public final class OptionalNullable<TYPE>
    *
    * @param pAction the action to perform
    */
-  public void ifPresent(Consumer<? super TYPE> pAction)
+  public void ifPresent(Consumer<? super VALUE> pAction)
   {
     if (present)
       pAction.accept(value);
@@ -95,7 +95,7 @@ public final class OptionalNullable<TYPE>
    * @param <NEW>   the type of the new value
    * @return the new optional based on the mapped value
    */
-  public <NEW> OptionalNullable<NEW> map(Function<? super TYPE, ? extends NEW> pMapper)
+  public <NEW> OptionalNullable<NEW> map(Function<? super VALUE, ? extends NEW> pMapper)
   {
     return present ? of(pMapper.apply(value)) : notPresent();
   }
@@ -106,7 +106,7 @@ public final class OptionalNullable<TYPE>
    * @param pReplacement the replacement value (if the actual value is not present)
    * @return a guaranteed value from this optional
    */
-  public TYPE orIfNotPresent(TYPE pReplacement)
+  public VALUE orIfNotPresent(VALUE pReplacement)
   {
     return present ? value : pReplacement;
   }
@@ -117,7 +117,7 @@ public final class OptionalNullable<TYPE>
    * @param pReplacementSupplier the supplier for the replacement
    * @return a guaranteed value from this optional
    */
-  public TYPE orIfNotPresentGet(Supplier<? extends TYPE> pReplacementSupplier)
+  public VALUE orIfNotPresentGet(Supplier<? extends VALUE> pReplacementSupplier)
   {
     return present ? value : pReplacementSupplier.get();
   }
@@ -130,7 +130,7 @@ public final class OptionalNullable<TYPE>
    * @return the value from this optional
    * @throws EXCEPTION if the value of this optional is not present
    */
-  public <EXCEPTION extends Throwable> TYPE orIfNotPresentThrow(Supplier<? extends EXCEPTION> pExceptionSupplier) throws EXCEPTION
+  public <EXCEPTION extends Throwable> VALUE orIfNotPresentThrow(Supplier<? extends EXCEPTION> pExceptionSupplier) throws EXCEPTION
   {
     if (present)
       return value;

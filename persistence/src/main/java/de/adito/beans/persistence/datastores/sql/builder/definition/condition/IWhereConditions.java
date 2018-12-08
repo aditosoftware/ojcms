@@ -16,10 +16,10 @@ public interface IWhereConditions extends IMultipleCondition<IWhereConditions>
    * Creates the multiple condition holder starting with a single condition.
    *
    * @param pCondition the where condition to start from
-   * @param <TYPE>     the data type of the condition
+   * @param <VALUE>    the data type of the condition
    * @return the multiple condition holder
    */
-  static <TYPE> IWhereConditions create(IWhereCondition<TYPE> pCondition)
+  static <VALUE> IWhereConditions create(IWhereCondition<VALUE> pCondition)
   {
     return new ConditionsImpl(pCondition);
   }
@@ -60,19 +60,19 @@ public interface IWhereConditions extends IMultipleCondition<IWhereConditions>
    * Adds a single where condition with a "AND" concatenation type for the last entry.
    *
    * @param pCondition the single where condition to add
-   * @param <TYPE>     the data type of the condition
+   * @param <VALUE>    the data type of the condition
    * @return the concatenated condition itself for a pipelining mechanism
    */
-  <TYPE> IWhereConditions and(IWhereCondition<TYPE> pCondition);
+  <VALUE> IWhereConditions and(IWhereCondition<VALUE> pCondition);
 
   /**
    * Adds a single where condition with a "AND NOT" concatenation type for the last entry.
    *
    * @param pCondition the single where condition to add
-   * @param <TYPE>     the data type of the condition
+   * @param <VALUE>    the data type of the condition
    * @return the concatenated condition itself for a pipelining mechanism
    */
-  default <TYPE> IWhereConditions andNot(IWhereCondition<TYPE> pCondition)
+  default <VALUE> IWhereConditions andNot(IWhereCondition<VALUE> pCondition)
   {
     return and(pCondition.not());
   }
@@ -100,19 +100,19 @@ public interface IWhereConditions extends IMultipleCondition<IWhereConditions>
    * Adds a single where condition with a "OR" concatenation type for the last entry.
    *
    * @param pCondition the single where condition to add
-   * @param <TYPE>     the data type of the condition
+   * @param <VALUE>    the data type of the condition
    * @return the concatenated condition itself for a pipelining mechanism
    */
-  <TYPE> IWhereConditions or(IWhereCondition<TYPE> pCondition);
+  <VALUE> IWhereConditions or(IWhereCondition<VALUE> pCondition);
 
   /**
    * Adds a single where condition with a "OR NOT" concatenation type for the last entry.
    *
    * @param pCondition the single where condition to add
-   * @param <TYPE>     the data type of the condition
+   * @param <VALUE>    the data type of the condition
    * @return the concatenated condition itself for a pipelining mechanism
    */
-  default <TYPE> IWhereConditions orNot(IWhereCondition<TYPE> pCondition)
+  default <VALUE> IWhereConditions orNot(IWhereCondition<VALUE> pCondition)
   {
     return or(pCondition.not());
   }

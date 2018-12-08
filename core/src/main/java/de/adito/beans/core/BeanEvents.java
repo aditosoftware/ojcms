@@ -40,14 +40,14 @@ final class BeanEvents
    * @param pField    the bean field from which the value has been changed
    * @param pNewValue the new value to set
    * @param <BEAN>    the generic bean type
-   * @param <TYPE>    the data type of the bean field
+   * @param <VALUE>   the data type of the bean field
    */
-  static <BEAN extends IBean<BEAN>, TYPE> void setValueAndPropagate(BEAN pBean, IField<TYPE> pField, TYPE pNewValue)
+  static <BEAN extends IBean<BEAN>, VALUE> void setValueAndPropagate(BEAN pBean, IField<VALUE> pField, VALUE pNewValue)
   {
     IBeanEncapsulated encapsulated = pBean.getEncapsulated();
     assert encapsulated != null;
     assert encapsulated.containsField(pField);
-    TYPE oldValue = encapsulated.getValue(pField);
+    VALUE oldValue = encapsulated.getValue(pField);
     if (!Objects.equals(oldValue, pNewValue))
     {
       IBeanFieldActivePredicate<BEAN> fieldActiveSupplier = pBean.getFieldActiveSupplier();
@@ -84,7 +84,7 @@ final class BeanEvents
       //Add a statistic entry, if the annotation is present
       if (pField.hasAnnotation(Statistics.class))
       {
-        IStatisticData<TYPE> statisticData = pBean.getStatisticData(pField);
+        IStatisticData<VALUE> statisticData = pBean.getStatisticData(pField);
         assert statisticData != null;
         statisticData.addEntry(pNewValue);
       }
