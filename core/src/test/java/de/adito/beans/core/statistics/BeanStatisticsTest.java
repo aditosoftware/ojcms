@@ -3,7 +3,7 @@ package de.adito.beans.core.statistics;
 import de.adito.beans.core.*;
 import de.adito.beans.core.annotations.Statistics;
 import de.adito.beans.core.base.AbstractOnNextCallCountTest;
-import de.adito.beans.core.fields.TextField;
+import de.adito.beans.core.fields.types.TextField;
 import org.junit.jupiter.api.*;
 
 import java.util.*;

@@ -2,6 +2,7 @@ package de.adito.beans.core.util;
 
 import de.adito.beans.core.*;
 import de.adito.beans.core.annotations.Statistics;
+import de.adito.beans.core.fields.IField;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.*;

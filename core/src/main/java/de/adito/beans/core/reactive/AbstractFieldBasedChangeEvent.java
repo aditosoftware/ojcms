@@ -1,6 +1,7 @@
 package de.adito.beans.core.reactive;
 
 import de.adito.beans.core.*;
+import de.adito.beans.core.fields.IField;
 
 /**
  * An abstract change event that is based on a bean and an associated field.

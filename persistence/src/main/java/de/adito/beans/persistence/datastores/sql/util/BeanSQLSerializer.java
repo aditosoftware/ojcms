@@ -3,6 +3,7 @@ package de.adito.beans.persistence.datastores.sql.util;
 import de.adito.beans.core.*;
 import de.adito.beans.core.fields.*;
 import de.adito.beans.core.fields.serialization.ISerializableField;
+import de.adito.beans.core.fields.types.*;
 import de.adito.beans.core.fields.util.*;
 import de.adito.beans.persistence.*;
 import de.adito.beans.persistence.datastores.sql.builder.definition.*;

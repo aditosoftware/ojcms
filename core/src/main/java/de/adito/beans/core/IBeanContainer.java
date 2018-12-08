@@ -1,8 +1,11 @@
 package de.adito.beans.core;
 
-import de.adito.beans.core.annotations.internal.WriteOperation;
+import de.adito.beans.core.annotations.internal.*;
+import de.adito.beans.core.fields.IField;
 import de.adito.beans.core.reactive.events.*;
+import de.adito.beans.core.references.*;
 import de.adito.beans.core.statistics.IStatisticData;
+import de.adito.beans.core.util.ReadOnlyInvocationHandler;
 import io.reactivex.Observable;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,7 +38,8 @@ import java.util.stream.*;
  * @param <BEAN> the type of beans in this container
  * @author Simon Danner, 23.08.2016
  */
-public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IObervableBeanValues<BEAN, IBeanContainerEncapsulated<BEAN>>,
+@RequiresEncapsulatedAccess
+public interface IBeanContainer<BEAN extends IBean<BEAN>> extends IObservableBeanValues<BEAN, IBeanContainerEncapsulated<BEAN>>,
     IReferenceProvider
 {
   /**

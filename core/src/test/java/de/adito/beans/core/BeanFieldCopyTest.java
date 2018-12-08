@@ -1,8 +1,9 @@
 package de.adito.beans.core;
 
 import de.adito.beans.core.fields.*;
+import de.adito.beans.core.fields.types.*;
 import de.adito.beans.core.util.beancopy.*;
-import de.adito.beans.core.util.exceptions.BeanCopyUnsupportedException;
+import de.adito.beans.core.exceptions.BeanCopyUnsupportedException;
 import org.apache.commons.lang3.ClassUtils;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.params.ParameterizedTest;

@@ -1,10 +1,15 @@
 package de.adito.beans.core;
 
+import de.adito.beans.core.annotations.internal.Encapsulated;
+import de.adito.beans.core.fields.IField;
+import de.adito.beans.core.references.IReferenceProvider;
+
 /**
  * Holds references to itself. A 'referable' could be considered as the target of a reference within a bean structure.
  *
  * @author Simon Danner, 29.08.2017
  */
+@Encapsulated
 interface IReferable extends IReferenceProvider
 {
   /**
@@ -22,9 +27,4 @@ interface IReferable extends IReferenceProvider
    * @param pField the bean field that held the reference
    */
   void removeReference(IBean<?> pBean, IField<?> pField);
-
-  /**
-   * Clears all registered references.
-   */
-  void clearReferences();
 }

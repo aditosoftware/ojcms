@@ -1,6 +1,6 @@
 package de.adito.beans.core.fields.serialization;
 
-import de.adito.beans.core.IField;
+import de.adito.beans.core.fields.IField;
 
 /**
  * Extension for a {@link IField} to support serializable field values.

@@ -1,6 +1,7 @@
 package de.adito.beans.persistence.datastores.sql;
 
 import de.adito.beans.core.*;
+import de.adito.beans.core.fields.IField;
 import de.adito.beans.core.fields.util.*;
 import de.adito.beans.core.util.BeanReflector;
 import de.adito.beans.persistence.*;

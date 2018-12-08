@@ -1,6 +1,6 @@
 package de.adito.beans.core;
 
-import de.adito.beans.core.fields.IntegerField;
+import de.adito.beans.core.fields.types.IntegerField;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 

@@ -1,8 +1,8 @@
 package de.adito.beans.core;
 
-import de.adito.beans.core.fields.TextField;
+import de.adito.beans.core.fields.types.TextField;
 import de.adito.beans.core.util.IBeanFieldPredicate;
-import de.adito.beans.core.util.exceptions.BeanFieldDoesNotExistException;
+import de.adito.beans.core.exceptions.BeanFieldDoesNotExistException;
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;

@@ -1,6 +1,7 @@
 package de.adito.beans.core;
 
 import de.adito.beans.core.annotations.OptionalField;
+import de.adito.beans.core.fields.IField;
 
 /**
  * Determines, if an optional bean field is active at a certain time.

@@ -11,7 +11,7 @@ import java.util.function.*;
  * @param <ELEMENT> the elements provided by the iterator
  * @author Simon Danner, 28.02.2018
  */
-public class IndexBasedIterator<ELEMENT> implements Iterator<ELEMENT>
+public final class IndexBasedIterator<ELEMENT> implements Iterator<ELEMENT>
 {
   private int index;
   private int lastIndex = -1;

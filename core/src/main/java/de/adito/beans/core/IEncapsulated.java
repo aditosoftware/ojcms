@@ -1,5 +1,8 @@
 package de.adito.beans.core;
 
+import de.adito.beans.core.annotations.internal.Encapsulated;
+import de.adito.beans.core.reactive.*;
+
 import java.util.stream.*;
 
 /**
@@ -11,6 +14,7 @@ import java.util.stream.*;
  * @param <CORE> the type of the elements in the core
  * @author Simon Danner, 25.01.2017
  */
+@Encapsulated
 interface IEncapsulated<CORE> extends Iterable<CORE>, ILinkable, IReferable, IEventReceiver, IEventPublisher
 {
   /**

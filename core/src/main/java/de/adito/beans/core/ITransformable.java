@@ -1,6 +1,8 @@
 package de.adito.beans.core;
 
-import de.adito.beans.core.util.exceptions.*;
+import de.adito.beans.core.annotations.internal.RequiresEncapsulatedAccess;
+import de.adito.beans.core.exceptions.*;
+import de.adito.beans.core.fields.IField;
 
 import java.util.function.Supplier;
 
@@ -30,6 +32,7 @@ import java.util.function.Supplier;
  * @param <SOURCE>       the type of the source (bean element) that will be used for the transformation
  * @author Simon Danner, 27.01.2017
  */
+@RequiresEncapsulatedAccess
 interface ITransformable<LOGIC, VISUAL, ENCAPSULATED extends IEncapsulated, SOURCE extends IEncapsulatedHolder<ENCAPSULATED>>
     extends IEncapsulatedHolder<ENCAPSULATED>
 {

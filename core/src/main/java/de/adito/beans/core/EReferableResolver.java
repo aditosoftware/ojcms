@@ -1,5 +1,7 @@
 package de.adito.beans.core;
 
+import de.adito.beans.core.annotations.internal.RequiresEncapsulatedAccess;
+
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -9,6 +11,7 @@ import java.util.stream.Stream;
  *
  * @author Simon Danner, 24.11.2018
  */
+@RequiresEncapsulatedAccess
 public enum EReferableResolver
 {
   /**

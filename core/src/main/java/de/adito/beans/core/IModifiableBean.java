@@ -1,5 +1,7 @@
 package de.adito.beans.core;
 
+import de.adito.beans.core.annotations.internal.RequiresEncapsulatedAccess;
+import de.adito.beans.core.fields.*;
 import de.adito.beans.core.reactive.events.*;
 import de.adito.beans.core.util.BeanUtil;
 
@@ -15,6 +17,7 @@ import java.util.stream.Collectors;
  * @param <BEAN> the generic type of the concrete bean that implements this interface
  * @author Simon Danner, 01.02.2017
  */
+@RequiresEncapsulatedAccess
 public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
 {
   /**

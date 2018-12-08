@@ -1,6 +1,8 @@
 package de.adito.beans.core;
 
 import de.adito.beans.core.annotations.Detail;
+import de.adito.beans.core.annotations.internal.RequiresEncapsulatedAccess;
+import de.adito.beans.core.fields.IField;
 import de.adito.beans.core.fields.util.FieldTuple;
 import de.adito.beans.core.util.BeanUtil;
 import org.jetbrains.annotations.NotNull;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
  * @param <VALUE> the map's value type
  * @author Simon Danner, 07.02.2017
  */
+@RequiresEncapsulatedAccess
 public class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IModifiableBean<MapBean<KEY, VALUE>>
 {
   private final IBeanEncapsulated encapsulated;
@@ -28,7 +31,7 @@ public class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMod
   private final Map<IField<?>, KEY> fieldKeyMapping;
   private final Function<KEY, Optional<IField<?>>> fieldCache;
   private final BiConsumer<KEY, IField<?>> fieldCacheCallback;
-  private _EntrySet entrySet;
+  private final _EntrySet entrySet = new _EntrySet();
 
   /**
    * Creates a map representation as a bean.
@@ -90,7 +93,6 @@ public class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMod
     fieldKeyMapping = new HashMap<>(pExistingMapBean.fieldKeyMapping);
     fieldCache = pExistingMapBean.fieldCache;
     fieldCacheCallback = pExistingMapBean.fieldCacheCallback;
-    entrySet = pExistingMapBean.entrySet;
     final List<IField<?>> fields = pExistingMapBean.streamFields().collect(Collectors.toList());
     //noinspection unchecked
     encapsulated = EncapsulatedBuilder.createBeanEncapsulated(new Bean.DefaultEncapsulatedBuilder(fields), getClass(), fields);
@@ -106,7 +108,7 @@ public class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMod
   @Override
   public Set<Entry<KEY, VALUE>> entrySet()
   {
-    return entrySet == null ? (entrySet = new _EntrySet()) : entrySet;
+    return entrySet;
   }
 
   @Override

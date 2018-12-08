@@ -1,7 +1,7 @@
 package de.adito.beans.core;
 
-import de.adito.beans.core.fields.TextField;
-import de.adito.beans.core.util.exceptions.*;
+import de.adito.beans.core.exceptions.*;
+import de.adito.beans.core.fields.types.TextField;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;

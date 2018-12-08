@@ -1,6 +1,7 @@
 package de.adito.beans.core;
 
-import de.adito.beans.core.fields.DateField;
+import de.adito.beans.core.fields.*;
+import de.adito.beans.core.fields.types.DateField;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;

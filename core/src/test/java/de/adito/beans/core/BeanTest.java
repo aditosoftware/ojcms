@@ -2,8 +2,9 @@ package de.adito.beans.core;
 
 import de.adito.beans.core.annotations.*;
 import de.adito.beans.core.fields.*;
+import de.adito.beans.core.fields.types.*;
 import de.adito.beans.core.fields.util.FieldTuple;
-import de.adito.beans.core.util.exceptions.*;
+import de.adito.beans.core.exceptions.*;
 import org.junit.jupiter.api.*;
 
 import java.util.*;

@@ -1,5 +1,7 @@
 package de.adito.beans.core;
 
+import de.adito.beans.core.annotations.internal.Encapsulated;
+import de.adito.beans.core.fields.IField;
 import de.adito.beans.core.fields.util.FieldTuple;
 import de.adito.beans.core.mappers.*;
 import de.adito.beans.core.util.IBeanFieldPredicate;
@@ -14,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Simon Danner, 24.11.2018
  */
+@Encapsulated
 abstract class AbstractBeanEncapsulated extends AbstractEncapsulated<FieldTuple<?>> implements IBeanEncapsulated
 {
   private final Set<IBeanFieldPredicate> fieldFilters = Collections.newSetFromMap(new ConcurrentHashMap<>());

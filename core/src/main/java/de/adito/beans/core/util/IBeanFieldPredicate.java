@@ -1,6 +1,6 @@
 package de.adito.beans.core.util;
 
-import de.adito.beans.core.IField;
+import de.adito.beans.core.fields.IField;
 
 import java.util.Objects;
 import java.util.function.BiPredicate;

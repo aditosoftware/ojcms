@@ -1,6 +1,6 @@
 package de.adito.beans.persistence.datastores.sql.util;
 
-import de.adito.beans.core.IField;
+import de.adito.beans.core.fields.IField;
 import de.adito.beans.core.fields.util.IBeanFieldBased;
 import de.adito.beans.persistence.datastores.sql.builder.definition.IColumnIdentification;
 

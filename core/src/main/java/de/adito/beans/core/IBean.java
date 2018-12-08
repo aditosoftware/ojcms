@@ -1,13 +1,15 @@
 package de.adito.beans.core;
 
 import de.adito.beans.core.annotations.Identifier;
-import de.adito.beans.core.annotations.internal.WriteOperation;
+import de.adito.beans.core.annotations.internal.*;
+import de.adito.beans.core.exceptions.*;
+import de.adito.beans.core.fields.IField;
 import de.adito.beans.core.fields.util.FieldTuple;
 import de.adito.beans.core.mappers.*;
+import de.adito.beans.core.references.*;
 import de.adito.beans.core.statistics.IStatisticData;
-import de.adito.beans.core.util.IBeanFieldPredicate;
+import de.adito.beans.core.util.*;
 import de.adito.beans.core.util.beancopy.*;
-import de.adito.beans.core.util.exceptions.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -32,7 +34,8 @@ import java.util.stream.*;
  * @param <BEAN> the concrete type of the bean that is implementing the interface
  * @author Simon Danner, 23.08.2016
  */
-public interface IBean<BEAN extends IBean<BEAN>> extends IObervableBeanValues<BEAN, IBeanEncapsulated>, IReferenceProvider
+@RequiresEncapsulatedAccess
+public interface IBean<BEAN extends IBean<BEAN>> extends IObservableBeanValues<BEAN, IBeanEncapsulated>, IReferenceProvider
 {
   /**
    * The value for a bean field.
@@ -227,7 +230,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IObervableBeanValues<BE
   {
     assert getEncapsulated() != null;
     //noinspection unchecked
-    return BeanCopyUtil.createCopy((BEAN) this, pMode, pCustomFieldCopies);
+    return BeanCopies.createCopy((BEAN) this, pMode, pCustomFieldCopies);
   }
 
   /**
@@ -245,7 +248,7 @@ public interface IBean<BEAN extends IBean<BEAN>> extends IObervableBeanValues<BE
   {
     assert getEncapsulated() != null;
     //noinspection unchecked
-    return BeanCopyUtil.createCopy((BEAN) this, pMode, pCustomConstructorCall, pCustomFieldCopies);
+    return BeanCopies.createCopy((BEAN) this, pMode, pCustomConstructorCall, pCustomFieldCopies);
   }
 
   /**

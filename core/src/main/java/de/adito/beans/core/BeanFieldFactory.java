@@ -1,7 +1,8 @@
 package de.adito.beans.core;
 
-import de.adito.beans.core.annotations.*;
+import de.adito.beans.core.annotations.OptionalField;
 import de.adito.beans.core.annotations.internal.TypeDefaultField;
+import de.adito.beans.core.fields.IField;
 import de.adito.beans.core.util.BeanReflector;
 import de.adito.picoservice.IPicoRegistry;
 import org.jetbrains.annotations.Nullable;
@@ -56,7 +57,7 @@ public final class BeanFieldFactory
           }
         })
         .findAny()
-        .orElseThrow(() -> new RuntimeException("Unable to create field. There are no static fields or all of them are initialized already." +
+        .orElseThrow(() -> new RuntimeException("Unable to create field. There are no static fields or all of them are initialized already. " +
                                                     "bean-type: " + pBeanType.getName()));
     Class<FIELD> fieldType = (Class<FIELD>) toCreate.getType();
     return (FIELD) createField(fieldType, _getGenType(toCreate, fieldType), toCreate.getName(), Arrays.asList(toCreate.getAnnotations()));
@@ -71,7 +72,7 @@ public final class BeanFieldFactory
    * @param <VALUE> the generic data type
    * @return the default field type for this data type
    */
-  public static <VALUE> Class<IField<VALUE>> getFieldTypeFromType(Class<VALUE> pType)
+  static <VALUE> Class<IField<VALUE>> getFieldTypeFromType(Class<VALUE> pType)
   {
     if (typeFieldMapping == null)
       typeFieldMapping = IPicoRegistry.INSTANCE.find(IField.class, TypeDefaultField.class).entrySet().stream()

@@ -1,6 +1,9 @@
 package de.adito.beans.core;
 
+import de.adito.beans.core.annotations.internal.Encapsulated;
+import de.adito.beans.core.fields.IField;
 import de.adito.beans.core.reactive.IEvent;
+import de.adito.beans.core.references.BeanReference;
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.subjects.PublishSubject;
@@ -16,6 +19,7 @@ import java.util.stream.Collectors;
  * @param <CORE> the type of the elements in the data core
  * @author Simon Danner, 24.11.2018
  */
+@Encapsulated
 abstract class AbstractEncapsulated<CORE> implements IEncapsulated<CORE>
 {
   private final Set<ITransformable> weakTransformationLinks = Collections.newSetFromMap(new WeakHashMap<>());
@@ -72,15 +76,6 @@ abstract class AbstractEncapsulated<CORE> implements IEncapsulated<CORE>
       fields.remove(pField);
       if (fields.isEmpty())
         weakReferencesMapping.remove(pBean);
-    }
-  }
-
-  @Override
-  public void clearReferences()
-  {
-    synchronized (weakReferencesMapping)
-    {
-      weakReferencesMapping.clear();
     }
   }
 

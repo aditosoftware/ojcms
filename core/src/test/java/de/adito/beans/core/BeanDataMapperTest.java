@@ -1,6 +1,6 @@
 package de.adito.beans.core;
 
-import de.adito.beans.core.fields.TextField;
+import de.adito.beans.core.fields.types.TextField;
 import de.adito.beans.core.mappers.*;
 import org.junit.jupiter.api.Test;
 

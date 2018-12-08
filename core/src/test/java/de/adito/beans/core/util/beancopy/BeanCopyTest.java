@@ -1,7 +1,7 @@
 package de.adito.beans.core.util.beancopy;
 
 import de.adito.beans.core.*;
-import de.adito.beans.core.fields.*;
+import de.adito.beans.core.fields.types.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;

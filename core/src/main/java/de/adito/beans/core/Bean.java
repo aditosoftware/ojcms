@@ -1,8 +1,10 @@
 package de.adito.beans.core;
 
+import de.adito.beans.core.annotations.internal.RequiresEncapsulatedAccess;
+import de.adito.beans.core.exceptions.BeanFieldDoesNotExistException;
+import de.adito.beans.core.fields.*;
 import de.adito.beans.core.fields.util.FieldTuple;
 import de.adito.beans.core.util.*;
-import de.adito.beans.core.util.exceptions.BeanFieldDoesNotExistException;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -35,6 +37,7 @@ import java.util.stream.Collectors;
  * @author Simon Danner, 23.08.2016
  * @see BeanFieldFactory
  */
+@RequiresEncapsulatedAccess
 public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
 {
   private static final Logger LOGGER = Logger.getLogger(Bean.class.getName());

@@ -2,7 +2,8 @@ package de.adito.beans.persistence.datastores.sql.util;
 
 import de.adito.beans.core.*;
 import de.adito.beans.core.annotations.Identifier;
-import de.adito.beans.core.fields.BeanField;
+import de.adito.beans.core.fields.*;
+import de.adito.beans.core.fields.types.BeanField;
 import de.adito.beans.persistence.*;
 import de.adito.beans.persistence.datastores.sql.*;
 import de.adito.beans.persistence.datastores.sql.builder.definition.column.*;

@@ -1,5 +1,7 @@
 package de.adito.beans.core;
 
+import de.adito.beans.core.annotations.internal.RequiresEncapsulatedAccess;
+
 /**
  * An extension for a component that holds a bean data core.
  *
@@ -7,6 +9,7 @@ package de.adito.beans.core;
  * @author Simon Danner, 20.01.2017
  * @see IEncapsulated
  */
+@RequiresEncapsulatedAccess
 interface IEncapsulatedHolder<ENCAPSULATED extends IEncapsulated>
 {
   /**

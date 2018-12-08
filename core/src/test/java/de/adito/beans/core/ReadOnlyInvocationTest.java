@@ -1,6 +1,7 @@
 package de.adito.beans.core;
 
 import de.adito.beans.core.annotations.internal.WriteOperation;
+import de.adito.beans.core.util.ReadOnlyInvocationHandler;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -31,7 +32,7 @@ public class ReadOnlyInvocationTest
   /**
    * Interface to test read only operations.
    */
-  private interface _TestInterface
+  public interface _TestInterface
   {
     @WriteOperation
     void changeData();
@@ -51,7 +52,7 @@ public class ReadOnlyInvocationTest
   /**
    * Example implementation of the test interface.
    */
-  private class _Impl implements _TestInterface
+  public class _Impl implements _TestInterface
   {
     private int data = 0;
 

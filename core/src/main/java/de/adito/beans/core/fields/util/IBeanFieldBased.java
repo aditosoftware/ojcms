@@ -1,6 +1,6 @@
 package de.adito.beans.core.fields.util;
 
-import de.adito.beans.core.IField;
+import de.adito.beans.core.fields.IField;
 
 /**
  * Any type that is based or holds a bean field.

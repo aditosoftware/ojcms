@@ -1,6 +1,7 @@
 package de.adito.beans.core.reactive.events;
 
 import de.adito.beans.core.*;
+import de.adito.beans.core.fields.IField;
 import de.adito.beans.core.reactive.AbstractFieldBasedChangeEvent;
 
 /**

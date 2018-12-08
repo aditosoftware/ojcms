@@ -1,7 +1,8 @@
 package de.adito.beans.core;
 
-import de.adito.beans.core.annotations.*;
-import de.adito.beans.core.annotations.internal.ReferenceField;
+import de.adito.beans.core.annotations.Statistics;
+import de.adito.beans.core.annotations.internal.*;
+import de.adito.beans.core.fields.IField;
 import de.adito.beans.core.reactive.events.*;
 import de.adito.beans.core.statistics.IStatisticData;
 import org.jetbrains.annotations.Nullable;
@@ -16,6 +17,7 @@ import java.util.stream.*;
  *
  * @author Simon Danner, 31.01.2017
  */
+@RequiresEncapsulatedAccess
 final class BeanEvents
 {
   private BeanEvents()

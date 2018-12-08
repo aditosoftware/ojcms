@@ -1,12 +1,14 @@
 package de.adito.beans.core;
 
 import de.adito.beans.core.annotations.Statistics;
+import de.adito.beans.core.annotations.internal.RequiresEncapsulatedAccess;
+import de.adito.beans.core.fields.IField;
 import de.adito.beans.core.fields.util.FieldTuple;
 import de.adito.beans.core.mappers.IBeanFlatDataMapper;
 import de.adito.beans.core.reactive.IEvent;
 import de.adito.beans.core.statistics.*;
 import de.adito.beans.core.util.*;
-import de.adito.beans.core.util.exceptions.BeanFieldDoesNotExistException;
+import de.adito.beans.core.exceptions.BeanFieldDoesNotExistException;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import org.jetbrains.annotations.*;
@@ -38,6 +40,7 @@ import java.util.stream.*;
  *
  * @author Simon Danner, 11.02.2018
  */
+@RequiresEncapsulatedAccess
 public final class EncapsulatedBuilder
 {
   private EncapsulatedBuilder()

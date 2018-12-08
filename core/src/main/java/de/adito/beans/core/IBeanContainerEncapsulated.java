@@ -1,5 +1,6 @@
 package de.adito.beans.core;
 
+import de.adito.beans.core.annotations.internal.Encapsulated;
 import de.adito.beans.core.statistics.IStatisticData;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,6 +13,7 @@ import java.util.Comparator;
  * @param <BEAN> the type of the beans in this container
  * @author Simon Danner, 25.01.2017
  */
+@Encapsulated
 interface IBeanContainerEncapsulated<BEAN extends IBean<BEAN>> extends IEncapsulated<BEAN>
 {
   /**

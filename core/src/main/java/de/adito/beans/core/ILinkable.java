@@ -1,5 +1,7 @@
 package de.adito.beans.core;
 
+import de.adito.beans.core.annotations.internal.Encapsulated;
+
 /**
  * Describes any component that is able to register links to itself.
  * Links are based on the {@link ITransformable} bean components.
@@ -7,6 +9,7 @@ package de.adito.beans.core;
  *
  * @author Simon Danner, 18.07.2017
  */
+@Encapsulated
 interface ILinkable
 {
   /**

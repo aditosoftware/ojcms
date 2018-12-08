@@ -1,5 +1,7 @@
 package de.adito.beans.core;
 
+import de.adito.beans.core.annotations.internal.Encapsulated;
+import de.adito.beans.core.fields.IField;
 import de.adito.beans.core.fields.util.FieldTuple;
 import de.adito.beans.core.mappers.*;
 import de.adito.beans.core.statistics.IStatisticData;
@@ -14,6 +16,7 @@ import java.util.stream.Stream;
  *
  * @author Simon Danner, 20.01.2017
  */
+@Encapsulated
 interface IBeanEncapsulated extends IEncapsulated<FieldTuple<?>>, IReferable
 {
   /**

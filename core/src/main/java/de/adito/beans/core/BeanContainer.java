@@ -1,5 +1,6 @@
 package de.adito.beans.core;
 
+import de.adito.beans.core.annotations.internal.RequiresEncapsulatedAccess;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -13,6 +14,7 @@ import java.util.stream.*;
  * @param <BEAN> the type of the beans in the container
  * @author Simon Danner, 23.08.2016
  */
+@RequiresEncapsulatedAccess
 public class BeanContainer<BEAN extends IBean<BEAN>> implements IBeanContainer<BEAN>
 {
   private final Class<BEAN> beanType;
