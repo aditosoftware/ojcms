@@ -1,6 +1,6 @@
-# OJbeans
+# OJCMS
 
-[![Build Status](https://travis-ci.org/aditosoftware/beans.svg?branch=master)](https://travis-ci.org/aditosoftware/beans)
+[![Build Status](https://travis-ci.org/aditosoftware/ojcms.svg?branch=master)](https://travis-ci.org/aditosoftware/ojcms)
 
 This is a framework for defining Java data models in a more comfortable way, with extended information.
 It will also enable a new way of thinking in an "OnlyJava" (OJ) - world.
