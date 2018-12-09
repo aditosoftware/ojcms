@@ -295,7 +295,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IBeanCo
   }
 
   /**
-   * The persistentDataSource bean implementation of this container.
+   * The persistent data source bean implementation of this container.
    * The queries within this bean core are based on the index of the bean.
    */
   private class _BeanDataSource implements IBeanDataSource

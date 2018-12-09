@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 /**
  * A default implementation of the bean container interface.
- * It stores the encapsulated data core.
+ * It stores the encapsulatedData data core.
  * Instances can be created via static methods in {@link IBeanContainer}.
  *
  * @param <BEAN> the type of the beans in the container
@@ -17,8 +17,7 @@ import java.util.stream.Collectors;
 @RequiresEncapsulatedAccess
 public class BeanContainer<BEAN extends IBean<BEAN>> implements IBeanContainer<BEAN>
 {
-  private final Class<BEAN> beanType;
-  private IEncapsulatedBeanContainerData<BEAN> encapsulated;
+  private final IEncapsulatedBeanContainerData<BEAN> encapsulatedData;
 
   /**
    * Creates an empty bean container.
@@ -49,20 +48,13 @@ public class BeanContainer<BEAN extends IBean<BEAN>> implements IBeanContainer<B
    */
   protected BeanContainer(Class<BEAN> pBeanType, IBeanContainerDataSource<BEAN> pDataSource)
   {
-    beanType = Objects.requireNonNull(pBeanType);
-    setEncapsulatedDataSource(Objects.requireNonNull(pDataSource));
+    encapsulatedData = new EncapsulatedBeanContainerData<>(Objects.requireNonNull(pDataSource), Objects.requireNonNull(pBeanType));
   }
 
   @Override
   public IEncapsulatedBeanContainerData<BEAN> getEncapsulatedData()
   {
-    return encapsulated;
-  }
-
-  @Override
-  public void setEncapsulatedDataSource(IBeanContainerDataSource<BEAN> pDataSource)
-  {
-    encapsulated = new EncapsulatedBeanContainerData<>(pDataSource, beanType);
+    return encapsulatedData;
   }
 
   @Override
