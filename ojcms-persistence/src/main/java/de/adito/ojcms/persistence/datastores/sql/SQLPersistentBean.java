@@ -68,7 +68,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IBeanDataSou
    */
   private static boolean _doesRowForBeanExist(OJSQLBuilderForTable pBuilder, String pBeanId)
   {
-    return pBuilder.doSelect(pSelect -> pSelect
+    return pBuilder.hasTable() && pBuilder.doSelect(pSelect -> pSelect
         .where(isEqual(BEAN_ID_COLUMN_IDENTIFICATION, pBeanId))
         .countRows() == 0);
   }
