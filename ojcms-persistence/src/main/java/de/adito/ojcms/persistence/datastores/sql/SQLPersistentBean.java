@@ -5,7 +5,7 @@ import de.adito.ojcms.beans.datasource.IBeanDataSource;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.fields.util.IBeanFieldBased;
 import de.adito.ojcms.beans.util.BeanReflector;
-import de.adito.ojcms.persistence.BeanDataStore;
+import de.adito.ojcms.persistence.*;
 import de.adito.ojcms.persistence.datastores.sql.definition.BeanColumnValueTuple;
 import de.adito.ojcms.persistence.datastores.sql.util.*;
 import de.adito.ojcms.sqlbuilder.*;
@@ -75,18 +75,29 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IBeanDataSou
   /**
    * Removes all obsolete single bean data sources from the database table and removes columns, if necessary.
    *
-   * @param pConnectionInfo       the database connection information
-   * @param pStillExistingBeanIds a collection of still existing single bean ids
+   * @param pConnectionInfo           the database connection information
+   * @param pStillExistingSingleBeans a collection of still existing single beans
    */
-  public static void removeObsoletes(DBConnectionInfo pConnectionInfo, Collection<String> pStillExistingBeanIds)
+  public static void removeObsoletes(DBConnectionInfo pConnectionInfo, Collection<IBean<?>> pStillExistingSingleBeans)
   {
     final OJSQLBuilderForTable builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionInfo.getDatabaseType(), IDatabaseConstants.ID_COLUMN)
         .forSingleTable(IDatabaseConstants.BEAN_TABLE_NAME)
         .withClosingAndRenewingConnection(pConnectionInfo)
         .create();
     builder.doDelete(pDelete -> pDelete
-        .where(not(in(BEAN_ID_COLUMN_IDENTIFICATION, pStillExistingBeanIds.stream())))
+        .where(not(in(BEAN_ID_COLUMN_IDENTIFICATION, pStillExistingSingleBeans.stream()
+            .map(pStillExistingBean -> pStillExistingBean.getClass().getAnnotation(Persist.class).containerId()))))
         .delete());
+
+    //Remove columns if there are too much now (the bean with the maximal amount of fields might have been removed)
+    final int maxStillExistingColumnCount = pStillExistingSingleBeans.stream()
+        .mapToInt(IBean::getFieldCount)
+        .max()
+        .orElse(0);
+    final int actualColumnCount = builder.getColumnCount() - 1; //-1 for id column
+    IntStream.range(maxStillExistingColumnCount, actualColumnCount) //If there is no difference, nothing happens
+        .mapToObj(pIndex -> IColumnIdentification.of(IDatabaseConstants.BEAN_TABLE_COLUMN_PREFIX + pIndex, String.class))
+        .forEach(builder::removeColumn);
   }
 
   /**
@@ -185,8 +196,8 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IBeanDataSou
   private void _checkColumnSize()
   {
     IntStream.range(builder.getColumnCount() - 1, columns.size())
-        .mapToObj(pIndex -> IDatabaseConstants.BEAN_TABLE_COLUMN_PREFIX + pIndex)
-        .forEach(pColumnName -> builder.addColumn(IColumnDefinition.of(pColumnName, EColumnType.STRING.create())));
+        .mapToObj(pIndex -> IColumnDefinition.of(IDatabaseConstants.BEAN_TABLE_COLUMN_PREFIX + pIndex, EColumnType.STRING.create()))
+        .forEach(builder::addColumn);
   }
 
   /**
@@ -196,7 +207,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IBeanDataSou
   {
     if (_doesRowForBeanExist(builder, beanIdCondition.getValue()))
       builder.doInsert(pInsert -> pInsert
-          .values(beanIdCondition)
+          .values(beanIdCondition) //the condition is also a column value tuple and can be used here for the row insertion
           .insert());
   }
 

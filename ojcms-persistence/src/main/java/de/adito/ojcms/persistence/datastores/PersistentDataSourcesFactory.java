@@ -58,7 +58,7 @@ public final class PersistentDataSourcesFactory
     return new CachingPersistentDataSources((pID, pBeanType) -> new SQLPersistentBean(pID, pBeanType, dbConnectionInfo, dataStoreSupplier),
                                             pId -> SQLPersistentBean.isDataSourceExisting(dbConnectionInfo, pId),
                                             (pId, pBeanType) -> new SQLPersistentContainer(pBeanType, dbConnectionInfo, pId, dataStoreSupplier),
-                                            pExistingIds -> SQLPersistentBean.removeObsoletes(dbConnectionInfo, pExistingIds),
-                                            pExistingIds -> SQLPersistentContainer.removeObsoletes(dbConnectionInfo, pExistingIds));
+                                            pExistingSingleBeans -> SQLPersistentBean.removeObsoletes(dbConnectionInfo, pExistingSingleBeans),
+                                            pExistingContainerIds -> SQLPersistentContainer.removeObsoletes(dbConnectionInfo, pExistingContainerIds));
   }
 }

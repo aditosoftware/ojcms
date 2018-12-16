@@ -22,7 +22,7 @@ final class CachingPersistentDataSources implements IPersistentSourcesStore
   private final BiFunction<String, Class<? extends IBean<?>>, IBeanDataSource> beanResolver;
   private final Function<String, Boolean> beanExistingDeterminer;
   private final BiFunction<String, Class<? extends IBean<?>>, IBeanContainerDataSource<?>> containerResolver;
-  private final Consumer<Collection<String>> singleBeanObsoleteRemover;
+  private final Consumer<Collection<IBean<?>>> singleBeanObsoleteRemover;
   private final Consumer<Collection<String>> containerObsoleteRemover;
 
   /**
@@ -32,14 +32,14 @@ final class CachingPersistentDataSources implements IPersistentSourcesStore
    * @param pBeanExistingDeterminer    a function that determines if a single bean data source is existing by its persistence id
    * @param pContainerResolver         a function to get a persistent bean container data source from a container id and a certain bean type
    * @param pSingleBeanObsoleteRemover a function to clean up obsolete single bean sources in the persistent data store,
-   *                                   takes a collection of all still existing single bean persistent ids
+   *                                   takes a collection of all still existing single beans
    * @param pContainerObsoleteRemover  a function to clean up all obsolete container data sources in the persistent data store,
    *                                   takes a collection of all still existing container persistent ids
    */
   CachingPersistentDataSources(BiFunction<String, Class<? extends IBean<?>>, IBeanDataSource> pBeanResolver,
                                Function<String, Boolean> pBeanExistingDeterminer,
                                BiFunction<String, Class<? extends IBean<?>>, IBeanContainerDataSource<?>> pContainerResolver,
-                               Consumer<Collection<String>> pSingleBeanObsoleteRemover,
+                               Consumer<Collection<IBean<?>>> pSingleBeanObsoleteRemover,
                                Consumer<Collection<String>> pContainerObsoleteRemover)
   {
     beanResolver = Objects.requireNonNull(pBeanResolver);
@@ -70,7 +70,7 @@ final class CachingPersistentDataSources implements IPersistentSourcesStore
   }
 
   @Override
-  public void removeObsoleteSingleBeans(Collection<String> pStillExistingSingleBeans)
+  public void removeObsoleteSingleBeans(Collection<IBean<?>> pStillExistingSingleBeans)
   {
     singleBeanObsoleteRemover.accept(pStillExistingSingleBeans);
   }

@@ -16,7 +16,7 @@ import java.util.function.Consumer;
  *
  * @author Simon Danner, 15.05.2018
  */
-public class OJSQLBuilder extends AbstractSQLBuilder
+public final class OJSQLBuilder extends AbstractSQLBuilder
 {
   /**
    * Creates a new builder.
@@ -43,6 +43,12 @@ public class OJSQLBuilder extends AbstractSQLBuilder
   public void addColumn(String pTableName, IColumnDefinition pColumnDefinition)
   {
     super.addColumn(pTableName, pColumnDefinition);
+  }
+
+  @Override
+  public void removeColumn(String pTableName, IColumnIdentification<?> pColumn)
+  {
+    super.removeColumn(pTableName, pColumn);
   }
 
   @Override

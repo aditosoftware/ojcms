@@ -52,9 +52,9 @@ public interface IPersistentSourcesStore
   /**
    * Removes all obsolete persistent single bean data sources from this store.
    *
-   * @param pStillExistingSingleBeanIds all remaining single bean ids (to find the obsoletes)
+   * @param pStillExistingSingleBeans all remaining single beans (to find the obsoletes)
    */
-  void removeObsoleteSingleBeans(Collection<String> pStillExistingSingleBeanIds);
+  void removeObsoleteSingleBeans(Collection<IBean<?>> pStillExistingSingleBeans);
 
   /**
    * Removes all obsolete persistent bean container data sources from this data store.

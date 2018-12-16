@@ -62,7 +62,7 @@ public final class OJPersistence
    */
   static void removeObsoleteSingleBeans(Collection<IBean<?>> pStillExistingBeans)
   {
-    beanDataStore.removeObsoleteSingleBeans(_getPersistentContainerIds(pStillExistingBeans.stream().map(Object::getClass)));
+    beanDataStore.removeObsoleteSingleBeans(pStillExistingBeans);
   }
 
   /**

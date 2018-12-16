@@ -101,11 +101,11 @@ public final class BeanDataStore
   /**
    * Removes all obsolete persistent single bean data sources.
    *
-   * @param pStillExistingSingleBeanIds all remaining single bean ids (to find the obsoletes)
+   * @param pStillExistingSingleBeans all remaining single beans (to find the obsoletes)
    */
-  void removeObsoleteSingleBeans(Collection<String> pStillExistingSingleBeanIds)
+  void removeObsoleteSingleBeans(Collection<IBean<?>> pStillExistingSingleBeans)
   {
-    dataSources.removeObsoleteSingleBeans(pStillExistingSingleBeanIds);
+    dataSources.removeObsoleteSingleBeans(pStillExistingSingleBeans);
   }
 
   /**

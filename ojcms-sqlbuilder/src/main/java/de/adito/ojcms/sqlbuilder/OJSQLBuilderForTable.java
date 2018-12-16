@@ -14,7 +14,7 @@ import java.util.function.Consumer;
  *
  * @author Simon Danner, 15.05.2018
  */
-public class OJSQLBuilderForTable extends AbstractSQLBuilder
+public final class OJSQLBuilderForTable extends AbstractSQLBuilder
 {
   private final String tableName;
 
@@ -55,6 +55,16 @@ public class OJSQLBuilderForTable extends AbstractSQLBuilder
   public void addColumn(IColumnDefinition pColumnDefinition)
   {
     super.addColumn(tableName, pColumnDefinition);
+  }
+
+  /**
+   * Removes a column from the database table of this builder.
+   *
+   * @param pColumn the column to remove
+   */
+  public void removeColumn(IColumnIdentification<?> pColumn)
+  {
+    super.removeColumn(tableName, pColumn);
   }
 
   /**

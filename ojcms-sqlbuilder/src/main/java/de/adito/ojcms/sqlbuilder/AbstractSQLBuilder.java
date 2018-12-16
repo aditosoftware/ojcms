@@ -160,6 +160,17 @@ public abstract class AbstractSQLBuilder
   }
 
   /**
+   * Removes a column from a database table.
+   *
+   * @param pTableName the name of the table to remove the column from
+   * @param pColumn    the column to remove
+   */
+  protected void removeColumn(String pTableName, IColumnIdentification<?> pColumn)
+  {
+    _executeNoResultStatement("ALTER TABLE " + pTableName + " DROP COLUMN " + pColumn.toStatementFormat(databaseType, idColumnName));
+  }
+
+  /**
    * Checks, if a certain table exists in the database.
    *
    * @param pTableName the name of the table to check
