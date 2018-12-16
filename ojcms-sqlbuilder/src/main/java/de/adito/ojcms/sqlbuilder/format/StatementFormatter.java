@@ -25,7 +25,7 @@ import java.util.stream.*;
 public final class StatementFormatter
 {
   //These strings will not be followed by a whitespace
-  private static final Set<String> noWhitespace = new HashSet<>(Arrays.asList("(", System.lineSeparator()));
+  private static final Set<String> NO_WHITESPACE = new HashSet<>(Arrays.asList("(", System.lineSeparator()));
 
   private final EDatabaseType databaseType;
   private final String idColumnName;
@@ -65,7 +65,7 @@ public final class StatementFormatter
   }
 
   /**
-   * A static helper method to join multiple string with several {@link ESeparator}.
+   * A static helper method to join multiple strings with several {@link ESeparator}.
    *
    * @param pMultipleStrings a stream of strings to concatenate
    * @param pSeparators      the separators for the single elements
@@ -180,7 +180,7 @@ public final class StatementFormatter
    */
   public StatementFormatter appendPreparedStatement(IPreparedStatementFormat pFormat)
   {
-    arguments.addAll(pFormat.getArguments(databaseType, idColumnName));
+    arguments.addAll(pFormat.getArguments(idColumnName));
     return _appendFormat(pFormat);
   }
 
@@ -207,7 +207,7 @@ public final class StatementFormatter
   public StatementFormatter appendMultiplePrepared(Stream<? extends IPreparedStatementFormat> pFormatStream, ESeparator... pSeparators)
   {
     return _appendMultiple(pFormatStream
-                               .peek(pFormat -> arguments.addAll(pFormat.getArguments(databaseType, idColumnName)))
+                               .peek(pFormat -> arguments.addAll(pFormat.getArguments(idColumnName)))
                                .map(pFormat -> toFormat(pFormat, databaseType, idColumnName)), pSeparators);
   }
 
@@ -355,7 +355,7 @@ public final class StatementFormatter
      */
     public StatementFormatter appendWithWhitespace(String pFormat)
     {
-      if (noWhitespace.stream().noneMatch(pForbiddenLastEntry -> lastAddition.endsWith(pForbiddenLastEntry)))
+      if (NO_WHITESPACE.stream().noneMatch(pForbiddenLastEntry -> lastAddition.endsWith(pForbiddenLastEntry)))
         stringBuilder.append(' ');
       return appendDirectly(pFormat);
     }

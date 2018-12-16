@@ -7,7 +7,7 @@ import java.util.*;
 
 /**
  * Wrapper class for a condition operator and an id value for a where condition for id columns.
- * It can be presented on a condition statement format.
+ * It can be presented in a condition statement format.
  * Because the format depends on the global id column name, the operator and the value have to be stored here
  * until the format will be build finally, where the id column name is available.
  *
@@ -38,7 +38,7 @@ class OperatorWithId extends AbstractNegatable<OperatorWithId> implements IPrepa
   }
 
   @Override
-  public List<IColumnValueTuple<?>> getArguments(EDatabaseType pDatabaseType, String pIdColumnName)
+  public List<IColumnValueTuple<?>> getArguments(String pIdColumnName)
   {
     return Collections.singletonList(IColumnValueTuple.of(_getIdentification(pIdColumnName), id));
   }

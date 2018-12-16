@@ -9,8 +9,8 @@ import java.util.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Abstract base class for every test class, that has to check how often a 'onNext()' method of an {@link io.reactivex.Observer} has
- * been called.
+ * Abstract base class for every test class, that has to check how often an 'onNext()' method
+ * of an {@link io.reactivex.Observer} has been called.
  *
  * @author Simon Danner, 15.07.2018
  */
@@ -47,8 +47,7 @@ public abstract class AbstractOnNextCallCountTest
    */
   protected <OBSERVED> void justCallCheck(Observable<OBSERVED> pObservable, int pExpectedCallCount)
   {
-    observeWithCallCheck(pObservable, pExpectedCallCount, pValue -> {
-    });
+    observeWithCallCheck(pObservable, pExpectedCallCount, pValue -> {});
   }
 
   /**

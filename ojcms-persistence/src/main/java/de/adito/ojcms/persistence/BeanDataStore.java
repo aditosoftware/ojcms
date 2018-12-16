@@ -12,9 +12,9 @@ import java.util.stream.Collectors;
 
 /**
  * A bean data store for persistent beans or bean containers.
- * Persistent bean elements are annotated with {@link Persist}.
- * This data store uses the persistent data store interface {@link IPersistentSourcesStore},
- * which will be provided by the user of this persistence framework.
+ * Persistent bean types are annotated with {@link Persist}.
+ * The store uses a {@link IPersistentSourcesStore} to retrieve data sources for certain {@link Persist#containerId()}.
+ * This class is mainly responsible for creating real bean instances with the persistent data sources from the store mentioned above.
  * All once created beans and containers will be cached for better performance.
  *
  * @author Simon Danner, 17.02.2018
@@ -26,9 +26,9 @@ public final class BeanDataStore
   private final Map<String, IBeanContainer<?>> containerCache = new ConcurrentHashMap<>();
 
   /**
-   * Creates a new data store based on a persistent data store interface provided by the user of this persistence framework.
+   * Creates a new data store based on a {@link IPersistentSourcesStore} provided by the user of this persistence framework.
    *
-   * @param pDataSources the persistent data store interface (may be external)
+   * @param pDataSources a store for persistent data sources for beans and containers
    */
   BeanDataStore(IPersistentSourcesStore pDataSources)
   {
@@ -83,7 +83,7 @@ public final class BeanDataStore
   }
 
   /**
-   * Determines the persistence container id from a bean container.
+   * Determines the persistence container id of a bean container.
    * The container has to be created automatically by this framework to be found.
    *
    * @param pContainer the container to search the container id for
@@ -95,11 +95,11 @@ public final class BeanDataStore
         .filter(pEntry -> pEntry.getValue() == pContainer)
         .findAny()
         .map(Map.Entry::getKey)
-        .orElseThrow(() -> new RuntimeException("The bean container '" + pContainer + "' is not a persistent container!"));
+        .orElseThrow(() -> new RuntimeException("The container '" + pContainer + "' is not registered within the persistence framework!"));
   }
 
   /**
-   * Removes all obsolete persistent single beans.
+   * Removes all obsolete persistent single bean data sources.
    *
    * @param pStillExistingSingleBeanIds all remaining single bean ids (to find the obsoletes)
    */
@@ -109,7 +109,7 @@ public final class BeanDataStore
   }
 
   /**
-   * Removes all obsolete persistent containers.
+   * Removes all obsolete persistent container data sources.
    *
    * @param pStillExistingContainerIds all remaining container ids (to find the obsoletes)
    */
@@ -125,6 +125,7 @@ public final class BeanDataStore
    * @param pBeanType the bean type to instantiate
    * @param <BEAN>    the generic bean type
    * @return the create bean instance.
+   * @throws RuntimeException if the persistence annotation is missing
    */
   public static <BEAN extends IBean<BEAN>> BEAN newPersistentBeanInstance(Class<BEAN> pBeanType)
   {

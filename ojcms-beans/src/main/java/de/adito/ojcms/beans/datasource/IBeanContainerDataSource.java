@@ -17,7 +17,7 @@ public interface IBeanContainerDataSource<BEAN extends IBean<BEAN>> extends IDat
    * Adds a bean at a certain index.
    *
    * @param pBean  the bean to add
-   * @param pIndex the index
+   * @param pIndex the index to add the bean
    */
   void addBean(BEAN pBean, int pIndex);
 
@@ -30,7 +30,7 @@ public interface IBeanContainerDataSource<BEAN extends IBean<BEAN>> extends IDat
   boolean removeBean(BEAN pBean);
 
   /**
-   * Removes a bean by index.
+   * Removes a bean by its index.
    *
    * @param pIndex the index to remove
    * @return the removed bean
@@ -41,7 +41,7 @@ public interface IBeanContainerDataSource<BEAN extends IBean<BEAN>> extends IDat
    * Returns a bean by its index.
    *
    * @param pIndex the index of the bean
-   * @return the bean at the certain index
+   * @return the bean at the specific index
    */
   BEAN getBean(int pIndex);
 

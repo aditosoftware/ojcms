@@ -102,13 +102,14 @@ public abstract class AbstractSQLBuilder
    */
   public <RESULT> RESULT doSelect(Function<Select, RESULT> pSelectQuery, IColumnIdentification... pColumns)
   {
-    Select select = pColumns == null || pColumns.length == 0 ? new Select(_createResultExecutor(), this, databaseType, serializer, idColumnName) :
+    final Select select = pColumns == null || pColumns.length == 0 ?
+        new Select(_createResultExecutor(), this, databaseType, serializer, idColumnName) :
         new Select(_createResultExecutor(), this, databaseType, serializer, idColumnName, pColumns);
     return _query(configureStatementBeforeExecution(select), pSelectQuery);
   }
 
   /**
-   * Create a new single select statement.
+   * Creates a new single select statement.
    * This query will select one certain column only.
    *
    * @param pColumn      the single column to select
@@ -119,7 +120,7 @@ public abstract class AbstractSQLBuilder
    */
   public <VALUE, RESULT> RESULT doSelectOne(IColumnIdentification<VALUE> pColumn, Function<SingleSelect<VALUE>, RESULT> pSelectQuery)
   {
-    SingleSelect<VALUE> select = new SingleSelect<>(_createResultExecutor(), this, databaseType, serializer, idColumnName, pColumn);
+    final SingleSelect<VALUE> select = new SingleSelect<>(_createResultExecutor(), this, databaseType, serializer, idColumnName, pColumn);
     return _query(configureStatementBeforeExecution(select), pSelectQuery);
   }
 
@@ -129,7 +130,7 @@ public abstract class AbstractSQLBuilder
    *
    * @param pStatement  the statement to configure
    * @param <RESULT>    the generic type of the result of the statement
-   * @param <STATEMENT> the concrete type of the statement
+   * @param <STATEMENT> the runtime type of the statement
    */
   protected <RESULT, STATEMENT extends AbstractBaseStatement<RESULT, STATEMENT>> STATEMENT configureStatementBeforeExecution(STATEMENT pStatement)
   {
@@ -188,14 +189,14 @@ public abstract class AbstractSQLBuilder
    */
   protected List<String> getAllTableNames()
   {
-    List<String> names = new ArrayList<>();
-    Connection connection = connectionSupplier.get();
+    final List<String> names = new ArrayList<>();
+    final Connection connection = connectionSupplier.get();
     try
     {
-      ResultSet tables = connection.getMetaData().getTables(null, null, "%", null);
+      final ResultSet tables = connection.getMetaData().getTables(null, null, "%", null);
       while (tables.next())
       {
-        String name = tables.getString(3);
+        final String name = tables.getString(3);
         if (!name.startsWith(databaseType.getSystemTablesPrefix())) //Exclude system tables
           names.add(tables.getString(3));
       }
@@ -342,7 +343,7 @@ public abstract class AbstractSQLBuilder
    */
   private void _executeNoResultStatement(String pSQLStatement, List<String> pArgs)
   {
-    IStatementExecutor<Void> executor = _createNoResultExecutor();
+    final IStatementExecutor<Void> executor = _createNoResultExecutor();
     executor.executeStatement(pSQLStatement, pArgs);
     _tryCloseConnection(executor);
   }

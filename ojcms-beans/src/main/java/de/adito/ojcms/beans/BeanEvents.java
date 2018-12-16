@@ -47,21 +47,21 @@ final class BeanEvents
    */
   static <BEAN extends IBean<BEAN>, VALUE> void setValueAndPropagate(BEAN pBean, IField<VALUE> pField, VALUE pNewValue)
   {
-    IEncapsulatedBeanData encapsulated = pBean.getEncapsulatedData();
-    assert encapsulated != null;
-    assert encapsulated.containsField(pField);
-    VALUE oldValue = encapsulated.getValue(pField);
+    final IEncapsulatedBeanData encapsulatedData = pBean.getEncapsulatedData();
+    assert encapsulatedData != null;
+    assert encapsulatedData.containsField(pField);
+    VALUE oldValue = encapsulatedData.getValue(pField);
     if (!Objects.equals(oldValue, pNewValue))
     {
-      IBeanFieldActivePredicate<BEAN> fieldActiveSupplier = pBean.getFieldActiveSupplier();
+      final IBeanFieldActivePredicate<BEAN> fieldActiveSupplier = pBean.getFieldActivePredicate();
       //Store before active optional fields to detect differences later on
-      List<IField<?>> optionalActiveFields = encapsulated.streamFields()
+      final List<IField<?>> optionalActiveFields = encapsulatedData.streamFields()
           .filter(pBeanField -> pBeanField.isOptional() && fieldActiveSupplier.isOptionalActive(pBeanField))
           .collect(Collectors.toList());
       //Set the new value in the data core
-      encapsulated.setValue(pField, pNewValue);
+      encapsulatedData.setValue(pField, pNewValue);
       //Find newly activated optional fields and fire them as added fields
-      encapsulated.streamFields()
+      encapsulatedData.streamFields()
           .filter(pBeanField -> pBeanField.isOptional() && fieldActiveSupplier.isOptionalActive(pBeanField))
           .filter(pActiveField -> !optionalActiveFields.remove(pActiveField))
           .forEach(pNewActiveField -> propagate(new BeanFieldAddition<>(pBean, pNewActiveField)));
@@ -69,7 +69,7 @@ final class BeanEvents
       //noinspection unchecked
       optionalActiveFields.stream()
           .map(pBeforeActiveField -> (IField) pBeforeActiveField)
-          .forEach(pRemovedField -> propagate(new BeanFieldRemoval<>(pBean, pRemovedField, encapsulated.getValue(pRemovedField))));
+          .forEach(pRemovedField -> propagate(new BeanFieldRemoval<>(pBean, pRemovedField, encapsulatedData.getValue(pRemovedField))));
       //IMPORTANT: The value change itself must be fired after all optional fields have their correct active state
       propagate(new BeanValueChange<>(pBean, pField, oldValue, pNewValue));
       //Finally adjust the references if necessary
@@ -96,10 +96,10 @@ final class BeanEvents
 
   /**
    * A bean has been added to a container.
-   * Adds a listener to the added bean and fires an addition event to the container listeners.
-   * Furthermore registers the container references at the bean.
+   * Fires an addition event and registers the container references at the bean.
+   * May also add a statistic entry.
    *
-   * @param pContainer the container, where the bean has been added
+   * @param pContainer the container to which the bean has been added
    * @param pBean      the added bean
    * @param <BEAN>     the generic type of the bean
    */
@@ -114,8 +114,8 @@ final class BeanEvents
 
   /**
    * A bean has been removed from a container.
-   * Removes the listener from the bean and fires an removal event to the container listeners.
-   * Furthermore removes the container references from the bean.
+   * Fires an removal event and registers the container references at the bean.
+   * May also add a statistic entry.
    *
    * @param pContainer the container, where the bean has been removed
    * @param pBean      the removed bean
@@ -133,7 +133,7 @@ final class BeanEvents
 
   /**
    * Removes a bean from a bean container based on a given delete function.
-   * The listeners will be informed about the removal.
+   * An removal event will be propagated.
    *
    * @param pContainer      the container to remove the bean from
    * @param pDeleteFunction the function to perform the removal based on the data core of the container.
@@ -145,9 +145,9 @@ final class BeanEvents
   static <BEAN extends IBean<BEAN>> BEAN removeFromContainer(IBeanContainer<BEAN> pContainer,
                                                              Function<IEncapsulatedBeanContainerData<BEAN>, BEAN> pDeleteFunction)
   {
-    IEncapsulatedBeanContainerData<BEAN> enc = pContainer.getEncapsulatedData();
+    final IEncapsulatedBeanContainerData<BEAN> enc = pContainer.getEncapsulatedData();
     assert enc != null;
-    BEAN removedBean = pDeleteFunction.apply(enc);
+    final BEAN removedBean = pDeleteFunction.apply(enc);
     if (removedBean != null)
       beanRemoved(pContainer, removedBean);
     return removedBean;
@@ -156,22 +156,22 @@ final class BeanEvents
   /**
    * Removes beans which apply to a given predicate successfully.
    * It's possible to break after one removal, if you know the predicate should apply to one bean only.
-   * The registered listeners will be informed.
+   * Events will be propagated.
    *
    * @param pContainer the bean container to remove from
    * @param pPredicate the predicate to determine which beans should be removed
-   * @param pBreak     <tt>true</tt>, if the iteration should break after one removal
+   * @param pBreak     <tt>true</tt> if the iteration should break after one removal
    * @param <BEAN>     the type of the beans in the container
-   * @return <tt>true</tt>, if at least one bean has been removed
+   * @return <tt>true</tt> if at least one bean has been removed
    */
   static <BEAN extends IBean<BEAN>> boolean removeBeanIf(IBeanContainer<BEAN> pContainer, Predicate<BEAN> pPredicate, boolean pBreak)
   {
     assert pContainer.getEncapsulatedData() != null;
-    Iterator<BEAN> it = pContainer.getEncapsulatedData().iterator();
+    final Iterator<BEAN> it = pContainer.getEncapsulatedData().iterator();
     boolean removed = false;
     while (it.hasNext())
     {
-      BEAN bean = it.next();
+      final BEAN bean = it.next();
       if (pPredicate.test(bean))
       {
         it.remove();
@@ -186,7 +186,7 @@ final class BeanEvents
 
   /**
    * Tries to add a statistic entry for a bean container.
-   * This method should be called, if a bean was added or removed.
+   * This method should be called, if a bean has been added or removed.
    *
    * @param pContainer the container, for which an entry may be added
    * @param <BEAN>     the type of the beans in the container
@@ -195,7 +195,7 @@ final class BeanEvents
   {
     if (!pContainer.getBeanType().isAnnotationPresent(Statistics.class))
       return;
-    IStatisticData<Integer> statisticData = pContainer.getStatisticData();
+    final IStatisticData<Integer> statisticData = pContainer.getStatisticData();
     assert statisticData != null;
     statisticData.addEntry(pContainer.size());
   }

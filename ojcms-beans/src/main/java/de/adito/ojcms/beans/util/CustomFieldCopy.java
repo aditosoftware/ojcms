@@ -5,7 +5,7 @@ import de.adito.ojcms.beans.fields.IField;
 import java.util.function.Function;
 
 /**
- * A wrapper class for creating custom bean field value copies.
+ * Information for creating custom bean field value copies.
  *
  * @param <VALUE> the data type of the bean field to copy values from
  * @author Simon Danner, 14.04.2018

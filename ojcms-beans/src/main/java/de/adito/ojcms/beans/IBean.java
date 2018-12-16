@@ -27,11 +27,12 @@ import java.util.stream.*;
  * This interface is implemented by the default abstract bean class {@link Bean}, which is used to create the application's beans.
  * But it may also be used for any other class that should be treated as bean.
  * Furthermore you are able to extend this interface through special methods for your use case.
+ *
  * Through the use of an interface it is possible to extend the bean type to a class that already extends another class.
  * This might seem like a solution to the not available multi inheritance in Java, but only the base interface type
  * is transferred to the extending class. Methods and static field definitions stay at the concrete bean type.
  *
- * @param <BEAN> the concrete type of the bean that is implementing the interface
+ * @param <BEAN> the concrete runtime type of the bean
  * @author Simon Danner, 23.08.2016
  */
 @RequiresEncapsulatedAccess
@@ -57,8 +58,8 @@ public interface IBean<BEAN extends IBean<BEAN>>
   }
 
   /**
-   * The value for a bean field if not null.
-   * Otherwise the field's default value will be returned.
+   * The value for a bean field.
+   * If null, the field's default value will be returned.
    * This method can only be called if the field has no private access modifier {@link de.adito.ojcms.beans.annotations.Private}.
    *
    * @param pField  the bean field
@@ -84,7 +85,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
    */
   default <VALUE, TARGET> TARGET getValueConverted(IField<VALUE> pField, Class<TARGET> pConvertType)
   {
-    VALUE actualValue = getValue(pField);
+    final VALUE actualValue = getValue(pField);
     if (actualValue == null || pConvertType.isAssignableFrom(actualValue.getClass()))
       //noinspection unchecked
       return (TARGET) actualValue;
@@ -95,7 +96,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
 
   /**
    * Sets a value for a bean field.
-   * If the new value is different from the old value, all registered listeners will be informed.
+   * If the new value is different from the old value, events will be propagated.
    * This method can only be called if the field has no private access modifier {@link de.adito.ojcms.beans.annotations.Private}.
    *
    * @param pField  the bean field for which the value should be set
@@ -119,7 +120,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
    * Here the value may differ from the field's data type.
    * In this case, a converter, provided by the field, will be used to convert the value beforehand.
    * If there is no matching converter, a runtime exception will be thrown.
-   * If the new value is different from the old value, all registered listeners will be informed.
+   * If the new value is different from the old value, events will be propagated.
    * This method can only be called if the field has no private access modifier {@link de.adito.ojcms.beans.annotations.Private}.
    *
    * @param pField          the bean field for which the value should be set
@@ -134,7 +135,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
     VALUE convertedValue = null;
     if (pValueToConvert != null)
     {
-      Class<SOURCE> sourceType = (Class<SOURCE>) pValueToConvert.getClass();
+      final Class<SOURCE> sourceType = (Class<SOURCE>) pValueToConvert.getClass();
       convertedValue = pField.getDataType().isAssignableFrom(sourceType) ? (VALUE) pValueToConvert :
           pField.getToConverter(sourceType)
               .orElseThrow(() -> new RuntimeException("The field " + pField.getName() + " cannot convert to " + sourceType.getSimpleName()))
@@ -144,23 +145,23 @@ public interface IBean<BEAN extends IBean<BEAN>>
   }
 
   /**
-   * Clears the values of all public field's of this bean.
-   * The values are 'null' afterwards.
+   * Clears the values of all public field's of this bean back to the initial values of every field.
    */
   @WriteOperation
   default void clear()
   {
+    //noinspection unchecked
     streamFields()
         .filter(pField -> !pField.isPrivate())
-        .forEach(pField -> setValue(pField, null));
+        .forEach(pField -> setValue((IField) pField, pField.getInitialValue()));
   }
 
   /**
-   * An interface to determine, if an optional bean field is active at a certain time.
+   * A predicate to determine, if an optional bean field is active at a certain time.
    *
    * @see IBeanFieldActivePredicate
    */
-  default IBeanFieldActivePredicate<BEAN> getFieldActiveSupplier()
+  default IBeanFieldActivePredicate<BEAN> getFieldActivePredicate()
   {
     //noinspection unchecked
     return () -> (BEAN) this;
@@ -215,8 +216,8 @@ public interface IBean<BEAN extends IBean<BEAN>>
    * Creates a copy of this bean.
    * This method expects an existing default constructor for this concrete bean type.
    * If the copy should include deep fields, all deep beans are supposed to have default constructors as well.
-   * If it is not possible to provide a default constructor, you may use the other method to create bean copies.
-   * It allows you to define a custom constructor call to create the new instance.
+   * If it is not possible to provide a default constructor, you may use {@link IBean#createCopy(ECopyMode, Function, CustomFieldCopy[])}
+   * to create bean copies. It allows you to define a custom constructor call to create the new instance.
    *
    * A copy will always be created with the default {@link IBeanDataSource}.
    * If a custom source should be injected use {@link IEncapsulatedDataHolder#setEncapsulatedDataSource(IDataSource)}.
@@ -235,8 +236,8 @@ public interface IBean<BEAN extends IBean<BEAN>>
   /**
    * Creates a copy of this bean.
    * This method should be used, if there's no default constructor to create a new instance automatically.
-   * Otherwise use the other method to create the copy, where you are not supposed to define a custom constructor call.
-   * If the copy should be deep, all deep bean values are supposed to have a default constructors.
+   * Otherwise use {@link IBean#createCopy(ECopyMode, CustomFieldCopy[])} to create the copy, where you are not supposed to define
+   * a custom constructor call. If the copy should be deep, all deep bean values are supposed to have a default constructors.
    *
    * @param pMode                  the copy mode
    * @param pCustomConstructorCall a custom constructor call defined as function (the input is the existing bean, the function should create the copy)
@@ -251,8 +252,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
   }
 
   /**
-   * The statistic data for a certain bean field.
-   * May be null if not present.
+   * The statistic data for a certain bean field. May be null if not present.
    *
    * @param pField  the bean field
    * @param <VALUE> the data type of the field
@@ -318,12 +318,11 @@ public interface IBean<BEAN extends IBean<BEAN>>
     assert getEncapsulatedData() != null;
     return getEncapsulatedData().streamFields()
         .filter(pField -> !pField.isPrivate())
-        .filter(pField -> getFieldActiveSupplier().isOptionalActive(pField));
+        .filter(pField -> getFieldActivePredicate().isOptionalActive(pField));
   }
 
   /**
-   * This bean as stream.
-   * It contains all field value tuples.
+   * This bean as stream. It contains all field value tuples.
    * Ignores private fields.
    *
    * @return a stream of field tuples
@@ -333,7 +332,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
     assert getEncapsulatedData() != null;
     return getEncapsulatedData().stream()
         .filter(pFieldTuple -> !pFieldTuple.getField().isPrivate())
-        .filter(pFieldTuple -> getFieldActiveSupplier().isOptionalActive(pFieldTuple.getField()));
+        .filter(pFieldTuple -> getFieldActivePredicate().isOptionalActive(pFieldTuple.getField()));
   }
 
   /**

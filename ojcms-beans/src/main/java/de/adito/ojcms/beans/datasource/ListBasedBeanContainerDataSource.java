@@ -7,7 +7,7 @@ import java.util.*;
 import java.util.stream.*;
 
 /**
- * A list based implementation of a {@link IBeanContainerDataSource}.
+ * A list based implementation of {@link IBeanContainerDataSource}.
  * Used as default data source for bean containers.
  *
  * @param <BEAN> the type of the beans in the data source
@@ -18,7 +18,7 @@ public final class ListBasedBeanContainerDataSource<BEAN extends IBean<BEAN>> im
   private final List<BEAN> beanList;
 
   /**
-   * Creates the list base data source.
+   * Creates the list based data source.
    *
    * @param pBeans an initial amount of beans for the data source
    */

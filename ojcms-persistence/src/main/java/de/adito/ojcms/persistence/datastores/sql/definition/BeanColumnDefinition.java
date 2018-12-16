@@ -4,6 +4,7 @@ import de.adito.ojcms.beans.IBean;
 import de.adito.ojcms.beans.annotations.Identifier;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.fields.types.BeanField;
+import de.adito.ojcms.beans.fields.util.IBeanFieldBased;
 import de.adito.ojcms.persistence.*;
 import de.adito.ojcms.persistence.datastores.sql.*;
 import de.adito.ojcms.persistence.datastores.sql.util.IDatabaseConstants;
@@ -12,12 +13,12 @@ import de.adito.ojcms.sqlbuilder.definition.column.*;
 import java.util.Collection;
 
 /**
- * A bean column definition based on a bean field.
+ * A database column definition based on a bean field.
  *
  * @param <VALUE> the data type of the field
  * @author Simon Danner, 17.05.2018
  */
-public class BeanColumnDefinition<VALUE> implements IColumnDefinition
+public class BeanColumnDefinition<VALUE> implements IColumnDefinition, IBeanFieldBased<VALUE>
 {
   private final IField<VALUE> beanField;
   private final IColumnType columnType;
@@ -54,6 +55,7 @@ public class BeanColumnDefinition<VALUE> implements IColumnDefinition
    *
    * @return a bean field
    */
+  @Override
   public IField<VALUE> getBeanField()
   {
     return beanField;
@@ -72,8 +74,9 @@ public class BeanColumnDefinition<VALUE> implements IColumnDefinition
     if (!beanType.isAnnotationPresent(Persist.class))
       throw new RuntimeException("A persistent bean can only create a reference to another persistent bean! type: " + beanType.getName());
     final Persist annotation = beanType.getAnnotation(Persist.class);
-    String tableName = annotation.mode() == EPersistenceMode.SINGLE ? IDatabaseConstants.BEAN_TABLE_NAME : annotation.containerId();
-    String columnName = annotation.mode() == EPersistenceMode.SINGLE ? IDatabaseConstants.BEAN_TABLE_BEAN_ID : IDatabaseConstants.ID_COLUMN;
+    final String tableName = annotation.mode() == EPersistenceMode.SINGLE ? IDatabaseConstants.BEAN_TABLE_NAME : annotation.containerId();
+    final String columnName = annotation.mode() == EPersistenceMode.SINGLE ? IDatabaseConstants.BEAN_TABLE_BEAN_ID :
+        IDatabaseConstants.ID_COLUMN;
     columnType.foreignKey(IForeignKey.of(tableName, columnName, pConnectionInfo -> {
       if (annotation.mode() == EPersistenceMode.SINGLE)
         SQLPersistentBean.createBeanTable(pConnectionInfo);
@@ -89,11 +92,11 @@ public class BeanColumnDefinition<VALUE> implements IColumnDefinition
    * @param pColumnIdentifications the column identifications to create the array from
    * @return an array of columns definitions
    */
-  public static BeanColumnDefinition[] ofMultiple(Collection<BeanColumnIdentification<?>> pColumnIdentifications)
+  public static BeanColumnDefinition<?>[] ofMultiple(Collection<BeanColumnIdentification<?>> pColumnIdentifications)
   {
     return pColumnIdentifications.stream()
         .map(BeanColumnIdentification::getBeanField)
         .map(BeanColumnDefinition::new)
-        .toArray(BeanColumnDefinition[]::new);
+        .toArray(BeanColumnDefinition<?>[]::new);
   }
 }

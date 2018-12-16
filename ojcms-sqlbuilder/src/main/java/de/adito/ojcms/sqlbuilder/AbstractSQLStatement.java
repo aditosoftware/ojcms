@@ -66,7 +66,7 @@ public abstract class AbstractSQLStatement<MODIFIERS extends WhereModifiers, RES
       //noinspection unchecked
       return (STATEMENT) this;
 
-    IWhereConditions conditions = IWhereConditions.create(pConditions[0]);
+    final IWhereConditions conditions = IWhereConditions.create(pConditions[0]);
     Stream.of(pConditions)
         .skip(1)
         .forEach(conditions::and);

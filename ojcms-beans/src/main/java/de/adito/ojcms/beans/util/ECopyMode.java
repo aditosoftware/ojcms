@@ -1,7 +1,7 @@
 package de.adito.ojcms.beans.util;
 
 /**
- * Enumerates all copy modes for the beans.
+ * Enumerates all copy modes for bean values.
  *
  * @author Simon Danner, 09.08.2018
  */

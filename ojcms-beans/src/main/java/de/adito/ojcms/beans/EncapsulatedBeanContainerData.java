@@ -39,6 +39,7 @@ class EncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends AbstractEn
     super(pDataSource);
     beanType = pBeanType;
     statisticData = _createStatisticData();
+    //Observe all initial beans in the container
     StreamSupport.stream(pDataSource.spliterator(), false).forEach(this::_observeBean);
   }
 
@@ -72,7 +73,7 @@ class EncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends AbstractEn
     if (pIndex < 0 || pIndex >= size())
       throw new IndexOutOfBoundsException("index: " + pIndex);
 
-    BEAN removed = removeBean(pIndex);
+    final BEAN removed = removeBean(pIndex);
     addBean(pReplacement, pIndex);
     return removed;
   }
@@ -124,8 +125,7 @@ class EncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends AbstractEn
     {
       int diffToMany = size() - pMaxCount;
       if (diffToMany > 0)
-        IntStream.range(0, diffToMany)
-            .forEach(pIndex -> removeBean(0));
+        IntStream.range(0, diffToMany).forEach(pIndex -> removeBean(0));
     }
     limitInfo = pMaxCount < 0 ? null : new _LimitInfo(pMaxCount, pEvicting);
   }
@@ -145,7 +145,7 @@ class EncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends AbstractEn
   }
 
   /**
-   * Creates the statistic data for this encapsulated core.
+   * Creates the statistic data for this encapsulated data core.
    * This data is an amount of timestamps with an associated number,
    * which stands for the amount of beans in this container at the timestamp.
    *
@@ -154,12 +154,12 @@ class EncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends AbstractEn
   @Nullable
   private IStatisticData<Integer> _createStatisticData()
   {
-    Statistics statistics = beanType.getAnnotation(Statistics.class);
+    final Statistics statistics = beanType.getAnnotation(Statistics.class);
     return statistics != null ? new StatisticData<>(statistics.capacity(), size()) : null;
   }
 
   /**
-   * Observers value and field changes of a bean within this container.
+   * Observes value and field changes of a bean within this container.
    *
    * @param pBean the bean to observe
    * @return the observed bean
@@ -179,7 +179,7 @@ class EncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends AbstractEn
    * Information about the limit of this container core.
    * Contains the limit itself and the information if old entries should be evicted.
    */
-  private class _LimitInfo
+  private static class _LimitInfo
   {
     private final int limit;
     private final boolean evicting;

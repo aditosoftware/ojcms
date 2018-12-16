@@ -9,7 +9,7 @@ import java.util.stream.*;
 
 /**
  * Entry-Point for the bean persistence framework.
- * The user of the framework has to provide a {@link IPersistentSourcesStore}, from which the persistent elements can be retrieved.
+ * The user of the framework has to provide a {@link IPersistentSourcesStore} from which the persistent data sources can be retrieved.
  *
  * @author Simon Danner, 16.02.2018
  */
@@ -45,7 +45,9 @@ public final class OJPersistence
   }
 
   /**
-   * The bean data store to access the persistent data.
+   * The bean data store to access the persistent data sources.
+   *
+   * @return a data store for persistent data sources
    */
   static BeanDataStore dataStore()
   {
@@ -53,10 +55,10 @@ public final class OJPersistence
   }
 
   /**
-   * Removes all obsolete persistent single beans.
+   * Removes all obsolete persistent single bean data sources.
    * Has to be package protected to ensure this method cannot be accessed by the users of the framework.
    *
-   * @param pStillExistingBeans all remaining single beans(to find the obsoletes)
+   * @param pStillExistingBeans all remaining single bean data sources (to find the obsoletes)
    */
   static void removeObsoleteSingleBeans(Collection<IBean<?>> pStillExistingBeans)
   {
@@ -64,10 +66,10 @@ public final class OJPersistence
   }
 
   /**
-   * Removes all obsolete persistent containers.
+   * Removes all obsolete persistent container data sources.
    * Has to be package protected to ensure this method cannot be accessed by the users of the framework.
    *
-   * @param pStillExistingContainers all remaining containers (to find the obsoletes)
+   * @param pStillExistingContainers all remaining container data sources (to find the obsoletes)
    */
   static void removeObsoleteBeanContainers(Collection<IBeanContainer<?>> pStillExistingContainers)
   {
@@ -75,7 +77,7 @@ public final class OJPersistence
   }
 
   /**
-   * All persistent container ids of a stream of annotated elements.
+   * All persistent container ids of a stream of annotated elements. Refers to {@link Persist#containerId()}.
    *
    * @param pAnnotatedElements the stream of annotated elements
    * @return the collection of persistent container ids
@@ -89,8 +91,9 @@ public final class OJPersistence
 
   /**
    * Listener for created persistent beans.
-   * A persistent bean has to be annotated with {@link Persist}.
-   * The listener adds a newly created bean (anywhere in the code) to the according persistent bean container.
+   * A persistent bean data source has to be annotated with {@link Persist}.
+   * The listener adds a newly created bean (anywhere in the code) to the according persistent bean container
+   * if the storage mode is {@link EStorageMode#AUTOMATIC}.
    */
   private static class _BeanCreationListener implements BiConsumer<IBean<?>, Persist>
   {
@@ -100,7 +103,7 @@ public final class OJPersistence
     {
       if (pAnnotation.mode() == EPersistenceMode.SINGLE || pAnnotation.storageMode() == EStorageMode.MANUAL)
         return;
-      IBeanContainer container = beanDataStore.getContainerByPersistenceId(pAnnotation.containerId(), pCreatedBean.getClass());
+      final IBeanContainer container = beanDataStore.getContainerByPersistenceId(pAnnotation.containerId(), pCreatedBean.getClass());
       container.addBean(pCreatedBean);
     }
   }

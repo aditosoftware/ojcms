@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.function.BiPredicate;
 
 /**
- * Describes a predicate belonging to a certain bean field and its associated value.
+ * A predicate belonging to a certain bean field and its associated value.
  * The predicate may be used in any use case, which requires some filtering of bean fields.
  * This interface is provided with some default predicates. They might be extended.
  *

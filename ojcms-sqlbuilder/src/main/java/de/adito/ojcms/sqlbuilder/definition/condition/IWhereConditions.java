@@ -37,7 +37,7 @@ public interface IWhereConditions extends IMultipleCondition<IWhereConditions>
 
   /**
    * Creates the multiple condition from a stream of conditions.
-   * It it only possible to combine all conditions per "AND" or "OR".
+   * It is only possible to combine all conditions per "AND" or "OR".
    *
    * @param pConditions        the stream of conditions to concatenate
    * @param pConcatenationType the concatenation type
@@ -45,10 +45,11 @@ public interface IWhereConditions extends IMultipleCondition<IWhereConditions>
    */
   static IWhereConditions createFromMultiple(Stream<IWhereCondition<?>> pConditions, EConcatenationType pConcatenationType)
   {
-    List<IWhereCondition<?>> conditionList = pConditions.collect(Collectors.toList());
-    IWhereConditions conditions = IWhereConditions.create(conditionList.remove(0));
+    final List<IWhereCondition<?>> conditionList = pConditions.collect(Collectors.toList());
+    final IWhereConditions conditions = IWhereConditions.create(conditionList.remove(0));
+    final boolean and = pConcatenationType == EConcatenationType.AND;
     conditionList.forEach(pCondition -> {
-      if (pConcatenationType == EConcatenationType.AND)
+      if (and)
         conditions.and(pCondition);
       else
         conditions.or(pCondition);
@@ -57,7 +58,7 @@ public interface IWhereConditions extends IMultipleCondition<IWhereConditions>
   }
 
   /**
-   * Adds a single where condition with a "AND" concatenation type for the last entry.
+   * Adds a single where condition with an "AND" concatenation type for the last entry.
    *
    * @param pCondition the single where condition to add
    * @param <VALUE>    the data type of the condition
@@ -66,7 +67,7 @@ public interface IWhereConditions extends IMultipleCondition<IWhereConditions>
   <VALUE> IWhereConditions and(IWhereCondition<VALUE> pCondition);
 
   /**
-   * Adds a single where condition with a "AND NOT" concatenation type for the last entry.
+   * Adds a single where condition with an "AND NOT" concatenation type for the last entry.
    *
    * @param pCondition the single where condition to add
    * @param <VALUE>    the data type of the condition
@@ -78,7 +79,7 @@ public interface IWhereConditions extends IMultipleCondition<IWhereConditions>
   }
 
   /**
-   * Adds another concatenated condition with a "AND" concatenation type for the last entry.
+   * Adds another concatenated condition with an "AND" concatenation type for the last entry.
    *
    * @param pMultipleConditions the concatenated condition to add
    * @return the concatenated condition itself for a pipelining mechanism
@@ -86,7 +87,7 @@ public interface IWhereConditions extends IMultipleCondition<IWhereConditions>
   IWhereConditions and(IWhereConditions pMultipleConditions);
 
   /**
-   * Adds another concatenated condition with a "AND NOT" concatenation type for the last entry.
+   * Adds another concatenated condition with an "AND NOT" concatenation type for the last entry.
    *
    * @param pMultipleConditions the concatenated condition to add
    * @return the concatenated condition itself for a pipelining mechanism
@@ -97,7 +98,7 @@ public interface IWhereConditions extends IMultipleCondition<IWhereConditions>
   }
 
   /**
-   * Adds a single where condition with a "OR" concatenation type for the last entry.
+   * Adds a single where condition with an "OR" concatenation type for the last entry.
    *
    * @param pCondition the single where condition to add
    * @param <VALUE>    the data type of the condition
@@ -106,7 +107,7 @@ public interface IWhereConditions extends IMultipleCondition<IWhereConditions>
   <VALUE> IWhereConditions or(IWhereCondition<VALUE> pCondition);
 
   /**
-   * Adds a single where condition with a "OR NOT" concatenation type for the last entry.
+   * Adds a single where condition with an "OR NOT" concatenation type for the last entry.
    *
    * @param pCondition the single where condition to add
    * @param <VALUE>    the data type of the condition
@@ -118,7 +119,7 @@ public interface IWhereConditions extends IMultipleCondition<IWhereConditions>
   }
 
   /**
-   * Adds another concatenated condition with a "OR" concatenation type for the last entry.
+   * Adds another concatenated condition with an "OR" concatenation type for the last entry.
    *
    * @param pMultipleConditions the concatenated condition to add
    * @return the concatenated condition itself for a pipelining mechanism
@@ -126,7 +127,7 @@ public interface IWhereConditions extends IMultipleCondition<IWhereConditions>
   IWhereConditions or(IWhereConditions pMultipleConditions);
 
   /**
-   * Adds another concatenated condition with a "OR NOT" concatenation type for the last entry.
+   * Adds another concatenated condition with an "OR NOT" concatenation type for the last entry.
    *
    * @param pMultipleConditions the concatenated condition to add
    * @return the concatenated condition itself for a pipelining mechanism

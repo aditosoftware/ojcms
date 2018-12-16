@@ -1,9 +1,9 @@
 package de.adito.ojcms.sqlbuilder.definition.condition;
 
 /**
- * Describes a negatable condition.
+ * A negatable condition.
  *
- * @param <NEGATABLE> the concrete generic type of this negatable
+ * @param <NEGATABLE> the runtime type of this negatable
  * @author Simon Danner, 10.06.2018
  */
 public interface INegatable<NEGATABLE extends INegatable<NEGATABLE>>

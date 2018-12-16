@@ -1,7 +1,7 @@
 package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
-import de.adito.ojcms.beans.datasource.IBeanContainerDataSource;
+import de.adito.ojcms.beans.datasource.*;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.reactive.events.*;
 import de.adito.ojcms.beans.references.*;
@@ -18,7 +18,7 @@ import java.util.stream.*;
  * The functional wrapper interface of a bean container.
  * A bean container is separated in this wrapper and an encapsulated data core.
  * This interface provides the whole functionality via default methods.
- * The default methods use the only non-default method {@link IEncapsulatedDataHolder#getEncapsulatedData()} to get access to the data core.
+ * The default methods use the non-default method {@link IEncapsulatedDataHolder#getEncapsulatedData()} to get access to the data core.
  * This method may be called 'virtual field', because it gives access to an imaginary field that holds the data core.
  * This means you only have to give a reference to any bean container core to get a completed container, when this interface is used.
  *
@@ -26,15 +26,16 @@ import java.util.stream.*;
  * Via static methods of this interface it is possible to create container instances.
  * But it may also be used for any other class that should be treated as a bean container.
  * Furthermore you are able to extend this interface through special methods for your use case.
+ *
  * Through the use of an interface it is possible to extend the container type to a class that already extends another class.
  * This might seem like a solution to the not available multi inheritance in Java, but here only the base interface type
  * is transferred to the extending class.
  *
  * This interface is very similar to {@link List}.
  * There are two reasons why it is not used as an extension of this interface:
- * - Some methods of {@link List} are not necessary and would increase to complexity, which would be contrary to concept of the bean modell
- * - It would not be possible to use this interface for a class, that implements {@link Iterable} trough its abstract base class, for example
- * (A class cannot be iterable for multiple types - this would limit the ability to transform any type to a bean type)
+ * - Some methods of {@link List} are not necessary and would increase to complexity, which would be contrary to concept of the bean model
+ * - It would not be possible to use this interface for a class, that implements {@link Iterable} trough its abstract base class for example
+ * (A class cannot be iterable for multiple types - this would limit the ability to treat any type as bean type)
  *
  * @param <BEAN> the type of beans in this container
  * @author Simon Danner, 23.08.2016
@@ -241,8 +242,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
   @WriteOperation
   default void merge(IBeanContainer<? extends BEAN> pOtherContainer)
   {
-    pOtherContainer.stream()
-        .forEach(this::addBean);
+    pOtherContainer.forEachBean(this::addBean);
   }
 
   /**
@@ -260,7 +260,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
       throw new IndexOutOfBoundsException("index: " + pIndex);
 
     assert getEncapsulatedData() != null;
-    BEAN removed = getEncapsulatedData().replaceBean(Objects.requireNonNull(pBean), pIndex);
+    final BEAN removed = getEncapsulatedData().replaceBean(Objects.requireNonNull(pBean), pIndex);
     if (removed != null)
       BeanEvents.beanRemoved(this, removed);
     BeanEvents.beanAdded(this, pBean);
@@ -297,8 +297,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
   }
 
   /**
-   * Removes all beans, that apply to a given predicate successfully.
-   * The registered listeners will be informed.
+   * Removes all beans that apply to a given predicate successfully.
    *
    * @param pPredicate the predicate to determine which beans should be removed
    * @return <tt>true</tt>, if at least one bean has been removed
@@ -312,7 +311,6 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
   /**
    * Removes one bean which applies to a given predicate successfully and then stops the iteration.
    * This method should be used, if exactly one bean should be removed.
-   * The registered listeners will be informed.
    *
    * @param pPredicate the predicate to determine which bean should be removed
    * @return <tt>true</tt>, if a bean has been removed
@@ -343,7 +341,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    * -1, if the bean is not present within the container.
    *
    * @param pBean the bean to determine the index
-   * @return the index of the bean within the container
+   * @return the index of the bean within the container, or -1 if not present
    */
   default int indexOf(BEAN pBean)
   {
@@ -379,7 +377,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
   default void clear()
   {
     assert getEncapsulatedData() != null;
-    removeBeanIf(pBean -> true); //Do not just simply clear the data core, else the listeners won't be informed
+    removeBeanIf(pBean -> true); //Do not just simply clear the data core, else events won't be propagated
   }
 
   /**
@@ -403,7 +401,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
   default void sort(Comparator<BEAN> pComparator)
   {
     assert getEncapsulatedData() != null;
-    getEncapsulatedData().sort(pComparator);
+    getEncapsulatedData().sort(Objects.requireNonNull(pComparator));
   }
 
   /**
@@ -422,7 +420,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
   }
 
   /**
-   * Creates an {@link Observable} to observe bean addition events.
+   * An {@link Observable} to observe bean addition events.
    *
    * @return an observable that publishes {@link BeanContainerAddition} events
    */
@@ -435,7 +433,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
   }
 
   /**
-   * Creates an {@link Observable} to observe bean removal events.
+   * An {@link Observable} to observe bean removal events.
    *
    * @return an observable that publishes {@link BeanContainerRemoval} events
    */
@@ -472,12 +470,13 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    */
   default <VALUE> Set<VALUE> getDistinctValuesFromField(IField<VALUE> pField)
   {
-    return getDistinctValues(pBean -> pBean.getValue(Objects.requireNonNull(pField)));
+    Objects.requireNonNull(pField);
+    return getDistinctValues(pBean -> pBean.getValue(pField));
   }
 
   /**
-   * Evaluates all distinct values of beans that are determined by a certain value-resolverType.
-   * The resolverType will be applied to all beans of the container and the unique resulting values will be returned as a Set.
+   * Evaluates all distinct values of beans that are determined by a certain value resolver.
+   * The resolver will be applied to all beans of the container and the unique resulting values will be returned as a {@link Set}.
    * Null-values are not collected.
    *
    * @param pValueResolver the resolverType to retrieve a value from a bean
@@ -518,6 +517,8 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
 
   /**
    * A stream of beans contained in this container.
+   *
+   * @return a stream of beans
    */
   default Stream<BEAN> stream()
   {
@@ -527,6 +528,8 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
 
   /**
    * A parallel stream of beans contained in this container.
+   *
+   * @return a parallel stream of beans
    */
   default Stream<BEAN> parallelStream()
   {
@@ -544,6 +547,17 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
     stream().forEach(pAction);
   }
 
+  /**
+   * Sets the default (list based) data source for this bean container.
+   * The current beans in the container will be retained in the new data source.
+   * May be used to decouple a container instance from a data source that is based on a database connection for example.
+   */
+  @WriteOperation
+  default void useDefaultEncapsulatedDataSource()
+  {
+    setEncapsulatedDataSource(new ListBasedBeanContainerDataSource<>(asList()));
+  }
+
   @Override
   default Set<BeanReference> getDirectReferences()
   {
@@ -552,7 +566,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
   }
 
   /**
-   * A list proxy for a bean container to treat it as a {@link java.util.List}.
+   * A list proxy for a bean container to treat it as a {@link List}.
    *
    * @param <BEAN> the type of the beans in the container
    */

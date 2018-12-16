@@ -4,7 +4,7 @@ import de.adito.ojcms.beans.IBean;
 import de.adito.ojcms.beans.fields.IField;
 
 /**
- * Thrown, when a bean field is not existing on a certain bean.
+ * Thrown, when a bean field is not existing at a certain bean.
  *
  * @author Simon Danner, 17.08.2017
  */

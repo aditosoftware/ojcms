@@ -8,18 +8,19 @@ import java.util.stream.*;
 
 /**
  * A multiple condition.
+ * This interface helps combine the arguments for a prepared statement.
  *
- * @param <CONDITION> the concrete type of the multiple condition
+ * @param <CONDITION> the runtime type of the multiple condition
  * @author Simon Danner, 21.07.2018
  */
 interface IMultipleCondition<CONDITION extends IMultipleCondition<CONDITION>>
     extends IPreparedStatementFormat, INegatable<CONDITION>, Iterable<IPreparedStatementFormat>
 {
   @Override
-  default List<IColumnValueTuple<?>> getArguments(EDatabaseType pDatabaseType, String pIdColumnName)
+  default List<IColumnValueTuple<?>> getArguments(String pIdColumnName)
   {
     return stream()
-        .flatMap(pCondition -> pCondition.getArguments(pDatabaseType, pIdColumnName).stream())
+        .flatMap(pCondition -> pCondition.getArguments(pIdColumnName).stream())
         .collect(Collectors.toList());
   }
 

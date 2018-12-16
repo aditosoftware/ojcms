@@ -18,7 +18,7 @@ import java.util.stream.*;
  * They take care of some initialization work.
  *
  * All specific beans of the application should use this class to create their fields.
- * For an example, take a look at the {@link Bean}.
+ * For an example take a look at {@link Bean}.
  *
  * @author Simon Danner, 23.08.2016
  */
@@ -45,7 +45,7 @@ public final class BeanFieldFactory
   @SuppressWarnings("unchecked")
   public static <BEAN extends Bean<BEAN>, FIELD extends IField> FIELD create(Class<BEAN> pBeanType)
   {
-    Field toCreate = BeanReflector.reflectDeclaredBeanFields(pBeanType).stream()
+    final Field toCreate = BeanReflector.reflectDeclaredBeanFields(pBeanType).stream()
         .filter(pField -> {
           try
           {
@@ -59,14 +59,14 @@ public final class BeanFieldFactory
         .findAny()
         .orElseThrow(() -> new RuntimeException("Unable to create field. There are no static fields or all of them are initialized already. " +
                                                     "bean-type: " + pBeanType.getName()));
-    Class<FIELD> fieldType = (Class<FIELD>) toCreate.getType();
+    final Class<FIELD> fieldType = (Class<FIELD>) toCreate.getType();
     return (FIELD) createField(fieldType, _getGenType(toCreate, fieldType), toCreate.getName(), Arrays.asList(toCreate.getAnnotations()));
   }
 
   /**
    * Provides the bean field type for a certain inner data type.
    * This depends on the field types annotated with {@link TypeDefaultField}.
-   * They determine, what field type is the default for the searched data type.
+   * They determine what field type is the default for the searched data type.
    *
    * @param pType   the inner data type of a field
    * @param <VALUE> the generic data type
@@ -125,10 +125,10 @@ public final class BeanFieldFactory
   {
     try
     {
-      boolean withGenType = pGenType != null;
-      Constructor<FIELD> constructor = withGenType ? pFieldType.getDeclaredConstructor(Class.class, String.class, Collection.class) :
+      final boolean withGenType = pGenType != null;
+      final Constructor<FIELD> constructor = withGenType ? pFieldType.getDeclaredConstructor(Class.class, String.class, Collection.class) :
           pFieldType.getDeclaredConstructor(String.class, Collection.class);
-      FIELD field = constructor.newInstance(withGenType ? new Object[]{pGenType, pName, pAnnotations} : new Object[]{pName, pAnnotations});
+      final FIELD field = constructor.newInstance(withGenType ? new Object[]{pGenType, pName, pAnnotations} : new Object[]{pName, pAnnotations});
       _checkOptionalField(field);
       return field;
     }
@@ -149,22 +149,22 @@ public final class BeanFieldFactory
   @Nullable
   private static <FIELD extends IField> Class _getGenType(Field pField, Class<FIELD> pFieldType)
   {
-    Type genericType = pField.getGenericType();
+    final Type genericType = pField.getGenericType();
     if (!(genericType instanceof ParameterizedType))
       return null;
 
-    Type fieldSuperType = pFieldType.getGenericSuperclass();
+    final Type fieldSuperType = pFieldType.getGenericSuperclass();
     if (!(fieldSuperType instanceof ParameterizedType))
       return null;
 
-    Type fieldSuperGenType = ((ParameterizedType) fieldSuperType).getActualTypeArguments()[0];
+    final Type fieldSuperGenType = ((ParameterizedType) fieldSuperType).getActualTypeArguments()[0];
     return (Class) (fieldSuperGenType instanceof ParameterizedType ? ((ParameterizedType) fieldSuperGenType).getRawType() :
         ((ParameterizedType) genericType).getActualTypeArguments()[0]);
   }
 
   /**
    * Checks, if a bean field is marked (via {@link OptionalField}) as optional field.
-   * In this case the condition, which is defined through the annotation, will be stored as an additional information in the field.
+   * In this case the condition, which is defined through the annotation, will be stored as an additional information at the field.
    * So this information can be used later to determine if the field is active at any moment.
    *
    * @param pField the bean field to check
@@ -175,11 +175,11 @@ public final class BeanFieldFactory
     if (!pField.isOptional())
       return;
 
-    OptionalField optional = pField.getAnnotationOrThrow(OptionalField.class);
-    Constructor<? extends OptionalField.IActiveCondition> constructor = optional.value().getDeclaredConstructor();
+    final OptionalField optional = pField.getAnnotationOrThrow(OptionalField.class);
+    final Constructor<? extends OptionalField.IActiveCondition> constructor = optional.value().getDeclaredConstructor();
     if (!constructor.isAccessible())
       constructor.setAccessible(true);
-    OptionalField.IActiveCondition<?> activeCondition = constructor.newInstance();
+    final OptionalField.IActiveCondition<?> activeCondition = constructor.newInstance();
     pField.addAdditionalInformation(OptionalField.ACTIVE_CONDITION, activeCondition);
   }
 }

@@ -21,7 +21,7 @@ public enum EFormatConstant
   DISTINCT,
   SET,
   COUNT(pParams -> "COUNT (" + pParams[0] + ") AS " + StaticConstants.COUNT_AS),
-  IN(pParmas -> "IN (" + pParmas[0] + ")"),
+  IN(pParams -> "IN (" + pParams[0] + ")"),
   STAR(pParams -> "*");
 
   private final Function<String[], String> format;

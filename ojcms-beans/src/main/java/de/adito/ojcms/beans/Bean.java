@@ -12,13 +12,13 @@ import java.util.logging.*;
 import java.util.stream.Collectors;
 
 /**
- * The default implementing class of the bean interface.
- * It holds the encapsulatedData data core, which is the only state of the bean.
+ * The default implementing abstract class of the bean interface.
+ * It holds the encapsulated data core, which is the only state of the bean.
  *
  * This class should be extended by any bean type of the application.
  * It may also be extended by another base class, if more base data is necessary.
  *
- * It also provides the possibility to read and change private data.
+ * It also provides the possibility to read and change private data via protected methods.
  * This can be used to enable the typical behaviour of any Java POJO.
  *
  * A specific bean of the application defines its fields static to allow access without reflection.
@@ -28,12 +28,12 @@ import java.util.stream.Collectors;
  * }"
  *
  * It's important to use the static field factory to create the fields.
- * So all initial data is automatically stored in the field instance.
+ * So all initial data is stored in the field instance automatically.
  *
  * This bean has implementations for {@link #equals(Object)} and {@link #hashCode()}.
  * They include all fields marked as {@link de.adito.ojcms.beans.annotations.Identifier}.
  *
- * @param <BEAN> the specific type of this bean, especially if it is used as base class
+ * @param <BEAN> the runtime type of this bean
  * @author Simon Danner, 23.08.2016
  * @see BeanFieldFactory
  */
@@ -44,10 +44,24 @@ public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
   private static final Logger LOGGER = Logger.getLogger(Bean.class.getName());
   private final IEncapsulatedBeanData encapsulatedData;
 
+  //Initial check for the constant value that is holding the encapsulated data field name
+  static
+  {
+    try
+    {
+      Bean.class.getDeclaredField(ENCAPSULATED_DATA_FIELD_NAME);
+    }
+    catch (NoSuchFieldException pE)
+    {
+      throw new AssertionError("The encapsulated data holder field has been renamed! Check the constant!");
+    }
+  }
+
   /**
    * Creates the bean with the default map based data source.
+   * The fields will be reflect from the static definitions (see the example above).
    */
-  public Bean()
+  protected Bean()
   {
     final List<IField<?>> fieldOrder = BeanReflector.reflectBeanFields(getClass());
     //noinspection unchecked
@@ -60,7 +74,7 @@ public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
    *
    * @param pCustomDataSource the custom data source
    */
-  public Bean(IBeanDataSource pCustomDataSource)
+  protected Bean(IBeanDataSource pCustomDataSource)
   {
     //noinspection unchecked
     encapsulatedData = new EncapsulatedBeanData<>(pCustomDataSource, (Class<BEAN>) getClass(), BeanReflector.reflectBeanFields(getClass()));
@@ -92,7 +106,7 @@ public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
   /**
    * Sets the value of a private bean field.
    *
-   * @param pField  the field to which the value should be set
+   * @param pField  the field for which the value should be set
    * @param pValue  the new value
    * @param <VALUE> the data type of the field
    */
@@ -116,7 +130,7 @@ public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
   }
 
   /**
-   * Checks, if the bean has duplicate fields, which is not allowed.
+   * Checks if the bean has duplicate fields, which is not allowed.
    */
   private void _checkForDuplicateFields()
   {
@@ -131,7 +145,7 @@ public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
   }
 
   /**
-   * Checks, if the field the value should be set or retrieved for, is really private.
+   * Checks if the field the value should be set or retrieved for is really private.
    * Otherwise the public methods of {@link IBean} should be used.
    * A misconfiguration will only result in a logger warning.
    *

@@ -33,7 +33,7 @@ public interface IWhereConditionsForId extends IMultipleCondition<IWhereConditio
   }
 
   /**
-   * Adds a single id condition with a "AND" concatenation type for the last entry.
+   * Adds a single id condition with an "AND" concatenation type for the last entry.
    *
    * @param pOperator the operator for the id condition
    * @param pId       the id value for the condition
@@ -42,7 +42,7 @@ public interface IWhereConditionsForId extends IMultipleCondition<IWhereConditio
   IWhereConditionsForId and(IWhereOperator pOperator, int pId);
 
   /**
-   * Adds a single id condition with a "AND NOT" concatenation type for the last entry.
+   * Adds a single id condition with an "AND NOT" concatenation type for the last entry.
    *
    * @param pOperator the operator for the id condition
    * @param pId       the id value for the condition
@@ -51,7 +51,7 @@ public interface IWhereConditionsForId extends IMultipleCondition<IWhereConditio
   IWhereConditionsForId andNot(IWhereOperator pOperator, int pId);
 
   /**
-   * Adds another concatenated condition with a "AND" concatenation type for the last entry.
+   * Adds another concatenated condition with an "AND" concatenation type for the last entry.
    *
    * @param pMultipleConditions the concatenated condition to add
    * @return the concatenated condition itself for a pipelining mechanism
@@ -59,7 +59,7 @@ public interface IWhereConditionsForId extends IMultipleCondition<IWhereConditio
   IWhereConditionsForId and(IWhereConditionsForId pMultipleConditions);
 
   /**
-   * Adds another concatenated condition with a "AND NOT" concatenation type for the last entry.
+   * Adds another concatenated condition with an "AND NOT" concatenation type for the last entry.
    *
    * @param pMultipleConditions the concatenated condition to add
    * @return the concatenated condition itself for a pipelining mechanism
@@ -70,7 +70,7 @@ public interface IWhereConditionsForId extends IMultipleCondition<IWhereConditio
   }
 
   /**
-   * Adds a single id condition with a "OR" concatenation type for the last entry.
+   * Adds a single id condition with an "OR" concatenation type for the last entry.
    *
    * @param pOperator the operator for the id condition
    * @param pId       the id value for the condition
@@ -79,7 +79,7 @@ public interface IWhereConditionsForId extends IMultipleCondition<IWhereConditio
   IWhereConditionsForId or(IWhereOperator pOperator, int pId);
 
   /**
-   * Adds a single where condition with a "OR NOT" concatenation type for the last entry.
+   * Adds a single where condition with an "OR NOT" concatenation type for the last entry.
    *
    * @param pOperator the operator for the id condition
    * @param pId       the id value for the condition
@@ -88,7 +88,7 @@ public interface IWhereConditionsForId extends IMultipleCondition<IWhereConditio
   IWhereConditionsForId orNot(IWhereOperator pOperator, int pId);
 
   /**
-   * Adds another concatenated condition with a "OR" concatenation type for the last entry.
+   * Adds another concatenated condition with an "OR" concatenation type for the last entry.
    *
    * @param pMultipleConditions the concatenated condition to add
    * @return the concatenated condition itself for a pipelining mechanism
@@ -96,7 +96,7 @@ public interface IWhereConditionsForId extends IMultipleCondition<IWhereConditio
   IWhereConditionsForId or(IWhereConditionsForId pMultipleConditions);
 
   /**
-   * Adds another concatenated condition with a "OR NOT" concatenation type for the last entry.
+   * Adds another concatenated condition with an "OR NOT" concatenation type for the last entry.
    *
    * @param pMultipleConditions the concatenated condition to add
    * @return the concatenated condition itself for a pipelining mechanism

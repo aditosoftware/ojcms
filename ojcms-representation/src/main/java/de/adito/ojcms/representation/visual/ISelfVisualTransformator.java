@@ -1,8 +1,8 @@
 package de.adito.ojcms.representation.visual;
 
 /**
- * An analog {@link IVisualTransformator} for {@link ISelfTransformable} components.
- * Self-transformable components represent a bean or bean container directly.
+ * An analog {@link IVisualTransformator} for {@link ISelfTransformable} instances.
+ * Self-transformable instances represent a source directly.
  * This interface provides a default implementation for the methods that return a graphical component for a logical component.
  * The visual component always has to be the component itself, because it is a direct representation of the logical counterpart.
  *

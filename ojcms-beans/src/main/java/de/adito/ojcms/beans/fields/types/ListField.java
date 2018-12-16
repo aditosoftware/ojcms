@@ -18,4 +18,10 @@ public class ListField<ELEMENT> extends AbstractField<List<ELEMENT>> implements 
   {
     super(pType, pName, pAnnotations);
   }
+
+  @Override
+  public List<ELEMENT> getInitialValue()
+  {
+    return Collections.emptyList();
+  }
 }

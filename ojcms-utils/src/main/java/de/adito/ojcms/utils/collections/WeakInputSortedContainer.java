@@ -1,5 +1,7 @@
 package de.adito.ojcms.utils.collections;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.*;
 
 /**
@@ -33,16 +35,16 @@ public class WeakInputSortedContainer<ELEMENT> implements IInputSortedElements<E
   @Override
   public boolean add(ELEMENT pElement)
   {
-    if (content.containsKey(pElement))
+    if (content.containsKey(Objects.requireNonNull(pElement)))
       return false;
-    content.put(_requireNonNull(pElement), currentIndex++);
+    content.put(pElement, currentIndex++);
     return true;
   }
 
   @Override
   public boolean remove(ELEMENT pElement)
   {
-    return content.remove(_requireNonNull(pElement)) != null;
+    return content.remove(Objects.requireNonNull(pElement)) != null;
   }
 
   @Override
@@ -58,6 +60,7 @@ public class WeakInputSortedContainer<ELEMENT> implements IInputSortedElements<E
     return content.size();
   }
 
+  @NotNull
   @Override
   public Iterator<ELEMENT> iterator()
   {
@@ -65,19 +68,5 @@ public class WeakInputSortedContainer<ELEMENT> implements IInputSortedElements<E
         .sorted(Map.Entry.comparingByValue())
         .map(Map.Entry::getKey)
         .iterator();
-  }
-
-  /**
-   * Checks, if a element is null.
-   * A runtime exception will be thrown in this case.
-   *
-   * @param pElement the element to check
-   * @return the non null element
-   */
-  private ELEMENT _requireNonNull(ELEMENT pElement)
-  {
-    if (pElement == null)
-      throw new IllegalArgumentException("Null elements are not allowed!");
-    return pElement;
   }
 }

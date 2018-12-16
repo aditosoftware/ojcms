@@ -48,7 +48,7 @@ abstract class AbstractStatementConcatenation<NEGATE extends IMultipleCondition<
   }
 
   /**
-   * Adds an statement format to the concatenation.
+   * Adds a statement format to the concatenation.
    * The new element will be the last entry.
    * The old last entry will be stored in the map with the according concatenation type.
    *

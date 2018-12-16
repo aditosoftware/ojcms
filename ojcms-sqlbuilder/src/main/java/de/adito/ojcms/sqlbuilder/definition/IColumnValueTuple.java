@@ -35,7 +35,7 @@ public interface IColumnValueTuple<VALUE> extends IPreparedStatementFormat
   }
 
   @Override
-  default List<IColumnValueTuple<?>> getArguments(EDatabaseType pDatabaseType, String pIdColumnName)
+  default List<IColumnValueTuple<?>> getArguments(String pIdColumnName)
   {
     return Collections.singletonList(this);
   }

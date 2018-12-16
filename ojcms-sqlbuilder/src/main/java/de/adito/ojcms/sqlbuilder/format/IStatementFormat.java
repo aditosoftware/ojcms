@@ -3,7 +3,7 @@ package de.adito.ojcms.sqlbuilder.format;
 import de.adito.ojcms.sqlbuilder.definition.EDatabaseType;
 
 /**
- * This definition can be presented in a database statement format.
+ * This type can be presented in a database statement format.
  *
  * @author Simon Danner, 03.07.2018
  */

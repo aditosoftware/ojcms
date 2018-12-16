@@ -69,6 +69,15 @@ public final class BeanReference implements Iterable<BeanReference>
   }
 
   @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "{" +
+        "bean=" + bean +
+        ", field=" + field +
+        '}';
+  }
+
+  @Override
   public boolean equals(Object pObject)
   {
     if (this == pObject) return true;

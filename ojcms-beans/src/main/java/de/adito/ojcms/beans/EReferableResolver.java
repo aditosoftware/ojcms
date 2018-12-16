@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 public enum EReferableResolver
 {
   /**
-   * Resolver for single referable values. (example: single bean)
+   * Resolver for single referable values. (example: single beans of a bean field)
    */
   SINGLE(EReferableResolver::_single),
 
@@ -46,6 +46,12 @@ public enum EReferableResolver
     return resolver;
   }
 
+  /**
+   * An either one element or empty {@link IReferable} stream for a single bean value.
+   *
+   * @param pValue the value of the field to resolve referables from
+   * @return an either one element or empty stream of referables
+   */
   private static Stream<IReferable> _single(Object pValue)
   {
     return _tryGetEncapsulated(pValue)
@@ -55,9 +61,9 @@ public enum EReferableResolver
 
   /**
    * Takes the encapsulated data core from a bean field's value as {@link IReferable}
-   * and tries to add more referables to a stream from the data core's elements, if they contain encapsulated cores as well.
+   * and tries to add more referables to a stream from the data core's elements, if they contain encapsulated data cores as well.
    *
-   * @param pValue the value of the field
+   * @param pValue the value of the field to resolve referables from
    * @return a stream of referables retrieved from the field's value
    */
   private static Stream<IReferable> _withMulti(Object pValue)
@@ -75,7 +81,7 @@ public enum EReferableResolver
    * Retrieves an encapsulated data core from a bean field's value that is an {@link IEncapsulatedDataHolder}.
    *
    * @param pValue the value of the field
-   * @return the retrieved encapsulated data core
+   * @return an optional retrieved encapsulated data core (empty if the value is null or wrong type)
    * @throws RuntimeException if the value is no {@link IEncapsulatedDataHolder}
    */
   private static Optional<IEncapsulatedData<?, ?>> _tryGetEncapsulated(Object pValue)
@@ -84,6 +90,12 @@ public enum EReferableResolver
         .map(pHolder -> _toEncapsulated(pValue));
   }
 
+  /**
+   * Retrieves an encapsulated data core from a bean value that is expected to be a {@link IEncapsulatedDataHolder}.
+   *
+   * @param pValue the value to retrieve the data core from
+   * @return the encapsulated data core
+   */
   private static IEncapsulatedData<?, ?> _toEncapsulated(Object pValue)
   {
     try
@@ -92,7 +104,7 @@ public enum EReferableResolver
     }
     catch (ClassCastException pE)
     {
-      throw new RuntimeException("The field's value should hold an encapsulated! type " + pValue.getClass().getName());
+      throw new RuntimeException("The field's value should hold an encapsulated data core! type " + pValue.getClass().getName());
     }
   }
 }

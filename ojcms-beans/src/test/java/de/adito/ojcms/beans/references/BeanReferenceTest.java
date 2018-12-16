@@ -12,20 +12,19 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for bean reference utility methods.
- * It covers all types of references (all or direct). See the bean interface for the associated methods.
+ * It covers all types of references (all and direct). See {@link IBean} for the associated methods.
  *
  * @author Simon Danner, 15.03.2018
- * @see de.adito.ojcms.beans.IBean
  */
 class BeanReferenceTest
 {
   @Test
   public void testDirectParentsBean()
   {
-    Person person = new Person();
-    Set<BeanReference> directReferences = person.getValue(Person.address).getDirectReferences();
+    final Person person = new Person();
+    final Set<BeanReference> directReferences = person.getValue(Person.address).getDirectReferences();
     assertEquals(1, directReferences.size());
-    BeanReference reference = directReferences.iterator().next();
+    final BeanReference reference = directReferences.iterator().next();
     assertSame(reference.getBean(), person);
     assertSame(reference.getField(), Person.address);
   }
@@ -34,7 +33,7 @@ class BeanReferenceTest
   public void testDirectParentsContainer()
   {
     final PersonRegistry registry = new PersonRegistry();
-    List<BeanReference> directReferences = registry.getValue(PersonRegistry.persons).stream()
+    final List<BeanReference> directReferences = registry.getValue(PersonRegistry.persons).stream()
         .flatMap(pPerson -> pPerson.getDirectReferences().stream())
         .collect(Collectors.toList());
     assertEquals(3, directReferences.size());
@@ -47,9 +46,9 @@ class BeanReferenceTest
   @Test
   public void testAllParentReferencesByBean()
   {
-    Data data = new Data();
-    Address deepAddress = data.getValue(Data.registry).getValue(PersonRegistry.persons).getBean(0).getValue(Person.address);
-    Set<IField<?>> referencesByBean = deepAddress.getAllReferencesByBean(data);
+    final Data data = new Data();
+    final Address deepAddress = data.getValue(Data.registry).getValue(PersonRegistry.persons).getBean(0).getValue(Person.address);
+    final Set<IField<?>> referencesByBean = deepAddress.getAllReferencesByBean(data);
     assertEquals(1, referencesByBean.size());
     assertTrue(referencesByBean.contains(Data.registry));
   }
@@ -57,9 +56,9 @@ class BeanReferenceTest
   @Test
   public void testAllParentReferencesByField()
   {
-    Data data = new Data();
-    Address deepAddress = data.getValue(Data.registry).getValue(PersonRegistry.persons).getBean(0).getValue(Person.address);
-    Set<IBean<?>> referencesByField = deepAddress.getAllReferencesByField(Data.registry);
+    final Data data = new Data();
+    final Address deepAddress = data.getValue(Data.registry).getValue(PersonRegistry.persons).getBean(0).getValue(Person.address);
+    final Set<IBean<?>> referencesByField = deepAddress.getAllReferencesByField(Data.registry);
     assertEquals(1, referencesByField.size());
     assertTrue(referencesByField.contains(data));
   }

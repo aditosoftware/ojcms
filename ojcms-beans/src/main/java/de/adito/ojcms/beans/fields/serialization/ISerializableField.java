@@ -21,7 +21,7 @@ public interface ISerializableField<VALUE> extends IField<VALUE>
   /**
    * The original field's value from a persistent string format.
    *
-   * @param pSerialString the serialized string
+   * @param pSerialString the serialized string format
    * @return the original field value
    */
   VALUE fromPersistent(String pSerialString);

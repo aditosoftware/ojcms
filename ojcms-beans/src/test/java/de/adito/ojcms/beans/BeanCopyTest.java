@@ -18,8 +18,8 @@ class BeanCopyTest
   @Test
   public void testShallowCopy()
   {
-    Data original = new Data(new Person(), new Person());
-    Data copy = original.createCopy(ECopyMode.SHALLOW_ONLY_BEAN_FIELDS);
+    final Data original = new Data(new Person(), new Person());
+    final Data copy = original.createCopy(ECopyMode.SHALLOW_ONLY_BEAN_FIELDS);
     assertNotSame(original, copy);
     final String newName = "newName";
     original.getValue(Data.person1).setValue(Person.name, newName);
@@ -29,8 +29,8 @@ class BeanCopyTest
   @Test
   public void testShallowCopyWithCustomConstructor()
   {
-    Data original = new Data(new Person(), new Person());
-    Data copy = original.createCopy(ECopyMode.SHALLOW_ONLY_BEAN_FIELDS, pData -> new Data(new Person(), new Person()));
+    final Data original = new Data(new Person(), new Person());
+    final Data copy = original.createCopy(ECopyMode.SHALLOW_ONLY_BEAN_FIELDS, pData -> new Data(new Person(), new Person()));
     assertNotSame(original, copy);
     assertSame(original.getValue(Data.person1), copy.getValue(Data.person1));
   }
@@ -38,8 +38,8 @@ class BeanCopyTest
   @Test
   public void testDeepCopy()
   {
-    Data original = new Data(new Person(), new Person());
-    Data copy = original.createCopy(ECopyMode.DEEP_ONLY_BEAN_FIELDS);
+    final Data original = new Data(new Person(), new Person());
+    final Data copy = original.createCopy(ECopyMode.DEEP_ONLY_BEAN_FIELDS);
     original.getValue(Data.person1).getValue(Person.address).setValue(Address.city, null);
     assertNotNull(copy.getValue(Data.person1).getValue(Person.address).getValue(Address.city));
   }
@@ -48,16 +48,16 @@ class BeanCopyTest
   public void testDeepCopyWithCustomCopy()
   {
     final String copyValue = "copy";
-    Data original = new Data(new Person(), new Person());
-    Data copy = original.createCopy(ECopyMode.DEEP_ONLY_BEAN_FIELDS, Address.city.customFieldCopy(pValue -> copyValue));
+    final Data original = new Data(new Person(), new Person());
+    final Data copy = original.createCopy(ECopyMode.DEEP_ONLY_BEAN_FIELDS, Address.city.customFieldCopy(pValue -> copyValue));
     assertEquals(copy.getValue(Data.person1).getValue(Person.address).getValue(Address.city), copyValue);
   }
 
   @Test
   public void testAllFieldCopy()
   {
-    Data original = new Data(new Person(), new Person());
-    Data copy = original.createCopy(ECopyMode.DEEP_ALL_FIELDS);
+    final Data original = new Data(new Person(), new Person());
+    final Data copy = original.createCopy(ECopyMode.DEEP_ALL_FIELDS);
     assertEquals(original.someNormalList, copy.someNormalList);
     assertEquals(original.getValue(Data.person1).getValue(Person.address).someNormalField,
                  copy.getValue(Data.person1).getValue(Person.address).someNormalField);

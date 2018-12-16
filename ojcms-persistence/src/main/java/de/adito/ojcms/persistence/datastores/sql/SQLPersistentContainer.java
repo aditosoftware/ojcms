@@ -22,12 +22,11 @@ import java.util.function.Supplier;
 import java.util.stream.*;
 
 /**
- * Implementation of a persistentDataSource bean container based on a SQL database system.
- * It defines a builder for the data core of a bean container.
- * This means the data comes from the database directly,
- * but the bean container interface ({@link de.adito.ojcms.beans.IBeanContainer}) is used like with normal data cores.
+ * Implementation of a persistent bean container data source that is used to create a container instance later on.
+ * A database table stands for one data source. This means the data comes from the database directly,
+ * but the bean container interface ({@link de.adito.ojcms.beans.IBeanContainer}) is used like with normal data sources.
  *
- * @param <BEAN> the type of the beans in the container
+ * @param <BEAN> the type of the beans in the container source
  * @author Simon Danner, 18.02.2018
  */
 public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IBeanContainerDataSource<BEAN>
@@ -50,13 +49,13 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IBeanCo
     final OJSQLBuilder builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionInfo.getDatabaseType(), IDatabaseConstants.ID_COLUMN)
         .withClosingAndRenewingConnection(pConnectionInfo)
         .create();
-    List<String> allTables = builder.getAllTableNames();
+    final List<String> allTables = builder.getAllTableNames();
     allTables.removeAll(pStillExistingContainerIds);
     allTables.forEach(builder::dropTable);
   }
 
   /**
-   * Creates a persistentDataSource container database table, if it is not existing yet.
+   * Creates a container database table, if it is not existing yet.
    * This static entry point is necessary, because the table may have to be present before the usage of this container. (e.g. for foreign keys)
    *
    * @param pConnectionInfo the database connection information
@@ -89,12 +88,12 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IBeanCo
   }
 
   /**
-   * Creates a new persistentDataSource bean container.
+   * Creates a new data source for a bean container.
    *
    * @param pBeanType          the type of the beans in the container
    * @param pConnectionInfo    the database connection information
-   * @param pTableName         the name of the database table that represents this container core
-   * @param pDataStoreSupplier the data store for persistentDataSource bean elements
+   * @param pTableName         the name of the database table that represents this container source
+   * @param pDataStoreSupplier a supplier for persistent beans and containers
    */
   public SQLPersistentContainer(Class<BEAN> pBeanType, DBConnectionInfo pConnectionInfo, String pTableName,
                                 Supplier<BeanDataStore> pDataStoreSupplier)
@@ -128,13 +127,13 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IBeanCo
         .atIndex(pIndex)
         .values(BeanColumnValueTuple.ofBean(pBean))
         .insert());
-    beanCache.put(pIndex, _injectPersistentCore(pBean, pIndex));
+    beanCache.put(pIndex, _injectPersistentSource(pBean, pIndex));
   }
 
   @Override
   public boolean removeBean(BEAN pBean)
   {
-    int index = indexOfBean(pBean);
+    final int index = indexOfBean(pBean);
     if (index == -1)
       return false;
     _removeByIndex(index);
@@ -155,7 +154,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IBeanCo
   public BEAN getBean(int pIndex)
   {
     return beanCache.computeIfAbsent(_requireInRange(pIndex), pCreationIndex ->
-        _injectPersistentCore(_createBeanInstance(), pCreationIndex)).instance;
+        _injectPersistentSource(_createBeanInstance(), pCreationIndex)).instance;
   }
 
   @Override
@@ -166,7 +165,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IBeanCo
         .findFirst()
         .map(Map.Entry::getKey)
         .orElseGet(() -> {
-          IWhereCondition<?>[] conditions = BeanWhereCondition.ofBeanIdentifiers(pBean);
+          final IWhereCondition<?>[] conditions = BeanWhereCondition.ofBeanIdentifiers(pBean);
           if (conditions.length == 0)
             throw new OJDatabaseException("A bean instance not created by this container can only be used for a index-of or contains search," +
                                               " if there are bean fields marked as @Identifier!");
@@ -235,13 +234,13 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IBeanCo
   }
 
   /**
-   * Injects a database based data core into a bean instance.
+   * Injects a database based data source into a bean instance.
    *
-   * @param pInstance the bean instance to inject to data core
+   * @param pInstance the bean instance to inject to data source
    * @param pIndex    the index of the bean within the container
    * @return the bean instance
    */
-  private _BeanData _injectPersistentCore(BEAN pInstance, int pIndex)
+  private _BeanData _injectPersistentSource(BEAN pInstance, int pIndex)
   {
     final _BeanDataSource beanDataSource = new _BeanDataSource(pIndex);
     pInstance.setEncapsulatedDataSource(beanDataSource);
@@ -250,7 +249,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IBeanCo
 
   /**
    * Creates a new instance of a bean of this container's bean type.
-   * If the type of the persistentDataSource bean is {@link EStorageMode#AUTOMATIC}, additions will be disabled for this short period of time.
+   * If the storage mode of the source is {@link EStorageMode#AUTOMATIC}, additions will be disabled for this short period of time.
    * All additions happening in the mean time, will be stored in a queue, which will be executed afterwards.
    * It is necessary to queue the additions in the automatic mode to avoid copies while creating a new instance from this class.
    *
@@ -261,7 +260,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IBeanCo
     if (!isAutomaticAdditionMode)
       return BeanDataStore.newPersistentBeanInstance(beanType);
     shouldQueueAdditions = true;
-    BEAN instance = BeanDataStore.newPersistentBeanInstance(beanType);
+    final BEAN instance = BeanDataStore.newPersistentBeanInstance(beanType);
     synchronized (additionQueue)
     {
       additionQueue.remove(instance);
@@ -283,7 +282,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IBeanCo
     if (pIndex < 0 || pIndex >= size())
       throw new IndexOutOfBoundsException("index: " + pIndex);
 
-    boolean deleted = builder.doDelete(pDelete -> pDelete
+    final boolean deleted = builder.doDelete(pDelete -> pDelete
         .whereId(pIndex)
         .delete());
 
@@ -302,6 +301,11 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IBeanCo
   {
     private int index;
 
+    /**
+     * Creates the bean data source.
+     *
+     * @param pIndex the index of the bean in the database table
+     */
     private _BeanDataSource(int pIndex)
     {
       index = pIndex;
@@ -334,7 +338,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IBeanCo
   }
 
   /**
-   * Wraps a bean instance and its persistentDataSource data core.
+   * Wraps a bean instance and its associated data source.
    */
   private class _BeanData
   {
@@ -348,7 +352,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IBeanCo
     }
 
     /**
-     * Decrements the index of the persistentDataSource bean by one.
+     * Decrements the index of the data source within the database table by one.
      *
      * @return the bean data itself
      */
@@ -361,7 +365,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IBeanCo
     }
 
     /**
-     * Sets the index of a persistentDataSource bean.
+     * Sets the index of the data source within the database table.
      *
      * @param pIndex the new index
      * @return the bean data itself

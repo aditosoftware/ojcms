@@ -13,7 +13,7 @@ import java.util.stream.IntStream;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for the bean observers.
+ * Tests for bean observers.
  *
  * @author Simon Danner, 12.07.2018
  */
@@ -112,7 +112,7 @@ class BeanObserverTest extends AbstractOnNextCallCountTest
   @Test
   public void testDuplicateFieldFails()
   {
-    IntegerField addedField = bean.addField(IntegerField.class, "testField", Collections.emptySet());
+    final IntegerField addedField = bean.addField(IntegerField.class, "testField", Collections.emptySet());
     assertThrows(RuntimeException.class, () -> bean.addField(addedField));
   }
 

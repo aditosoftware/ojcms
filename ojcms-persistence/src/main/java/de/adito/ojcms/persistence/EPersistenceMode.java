@@ -13,7 +13,7 @@ public enum EPersistenceMode
   CONTAINER,
 
   /**
-   * Persist the annotated bean type as singleton.
+   * Persist the annotated bean type as singleton in a common table for such.
    */
   SINGLE
 }

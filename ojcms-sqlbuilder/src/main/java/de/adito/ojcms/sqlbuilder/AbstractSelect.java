@@ -13,7 +13,7 @@ import java.util.function.Supplier;
  * An abstract base class for select statements.
  * The statement will return a {@link Result}.
  *
- * @param <SELECT> the concrete type of the final select statement
+ * @param <SELECT> the runtime type of the final select statement
  * @author Simon Danner, 26.04.2018
  */
 public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>> extends AbstractSQLStatement<SelectModifiers, Result, ResultSet, SELECT>
@@ -49,7 +49,7 @@ public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>> exte
     modifiers.setCount(true);
     try
     {
-      ResultSet resultSet = _query();
+      final ResultSet resultSet = _query();
       return resultSet.next() ? resultSet.getInt(EFormatConstant.StaticConstants.COUNT_AS) : 0;
     }
     catch (SQLException pE)

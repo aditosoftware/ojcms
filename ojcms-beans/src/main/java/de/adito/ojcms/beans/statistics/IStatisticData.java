@@ -36,9 +36,10 @@ public interface IStatisticData<ENTRY>
 
   /**
    * The changes of the bean element.
-   * A collection of timestamps with an associated value for each change.
+   * A mapping of timestamps with an associated value for each change.
    * The entries are ordered by their timestamps.
-   * This map is a read only view of the original changes. Future changes will be updated.
+   * This map is a read only view of the original changes.
+   * Future changes will be updated automatically.
    *
    * @return a map that holds a timestamp as key and an associated value as value
    */
@@ -50,7 +51,7 @@ public interface IStatisticData<ENTRY>
    * This creates time based entries from the first entry of changed statistic data until the very last.
    * Be aware that this could result in a large set of data and may reach memory limits, if the interval is not chosen properly.
    *
-   * The entries of the resulting map will be extended, if a change of an according value happens.
+   * The entries of the resulting map will be updated automatically, if a change of an according value happens.
    *
    * @return a map that holds a timestamp as key and an associated value as value (interval based)
    */

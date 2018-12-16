@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 /**
  * A default implementation of the bean container interface.
- * It stores the encapsulatedData data core.
+ * It stores the encapsulated data core.
  * Instances can be created via static methods in {@link IBeanContainer}.
  *
  * @param <BEAN> the type of the beans in the container
@@ -41,7 +41,7 @@ public class BeanContainer<BEAN extends IBean<BEAN>> implements IBeanContainer<B
   }
 
   /**
-   * Creates a new bean container based on a data source.
+   * Creates a new bean container based on a custom data source.
    *
    * @param pBeanType   the type of the beans in the container
    * @param pDataSource the data source of the container

@@ -25,7 +25,8 @@ public final class PersistentDataSourcesFactory
   }
 
   /**
-   * Creates a SQL persistent bean data store.
+   * Creates a SQL persistent bean data sources store.
+   * This method uses no username and password for the database connection.
    *
    * @param pDatabaseType the database type
    * @param pHost         the host to connect to
@@ -39,7 +40,7 @@ public final class PersistentDataSourcesFactory
   }
 
   /**
-   * Creates a SQL persistent bean data store.
+   * Creates a SQL persistent bean data sources store.
    *
    * @param pDatabaseType the database type
    * @param pHost         the host to connect to

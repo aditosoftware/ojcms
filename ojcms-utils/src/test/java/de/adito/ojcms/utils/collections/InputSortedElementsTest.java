@@ -35,14 +35,14 @@ class InputSortedElementsTest
   @MethodSource("_toTest")
   void testAddNullFail(IInputSortedElements<_Person> pElementContainer)
   {
-    assertThrows(IllegalArgumentException.class, () -> pElementContainer.add(null));
+    assertThrows(NullPointerException.class, () -> pElementContainer.add(null));
   }
 
   @ParameterizedTest
   @MethodSource("_toTest")
   void testAddDuplicateFail(IInputSortedElements<_Person> pElementContainer)
   {
-    _Person somePerson = new _Person("Some", "Name");
+    final _Person somePerson = new _Person("Some", "Name");
     pElementContainer.add(somePerson);
     assertFalse(pElementContainer.add(somePerson));
   }
@@ -51,7 +51,7 @@ class InputSortedElementsTest
   @MethodSource("_toTest")
   void testAddOneElement(IInputSortedElements<_Person> pElementContainer)
   {
-    _Person addedPerson = _addOne(pElementContainer);
+    final _Person addedPerson = _addOne(pElementContainer);
     assertFalse(pElementContainer.isEmpty());
     assertEquals(pElementContainer.iterator().next(), addedPerson);
   }
@@ -61,7 +61,7 @@ class InputSortedElementsTest
   void testAddMultipleElementsOrdered(IInputSortedElements<_Person> pElementContainer)
   {
     final int amount = 10;
-    List<_Person> addedPersons = _addMultiple(pElementContainer, amount);
+    final List<_Person> addedPersons = _addMultiple(pElementContainer, amount);
     assertEquals(amount, pElementContainer.size());
     assertThat(addedPersons, Matchers.contains(pElementContainer.stream().toArray(_Person[]::new)));
   }
@@ -70,14 +70,14 @@ class InputSortedElementsTest
   @MethodSource("_toTest")
   void testRemoveNull(IInputSortedElements<_Person> pElementContainer)
   {
-    assertThrows(IllegalArgumentException.class, () -> pElementContainer.add(null));
+    assertThrows(NullPointerException.class, () -> pElementContainer.add(null));
   }
 
   @ParameterizedTest
   @MethodSource("_toTest")
   void testRemoveElement(IInputSortedElements<_Person> pElementContainer)
   {
-    _Person addedPerson = _addOne(pElementContainer);
+    final _Person addedPerson = _addOne(pElementContainer);
     assertTrue(pElementContainer.remove(addedPerson));
     assertTrue(pElementContainer.isEmpty());
   }
@@ -115,7 +115,7 @@ class InputSortedElementsTest
   @MethodSource("_toTest")
   void testContainsNull(IInputSortedElements<_Person> pElementContainer)
   {
-    assertThrows(IllegalArgumentException.class, () -> pElementContainer.contains(null));
+    assertThrows(NullPointerException.class, () -> pElementContainer.contains(null));
   }
 
   @ParameterizedTest
@@ -132,17 +132,17 @@ class InputSortedElementsTest
   @MethodSource("_toTest")
   void testContainsEqualsBased(IInputSortedElements<_Person> pElementContainer)
   {
-    _Person testPerson1 = new _Person("Some", "Name");
-    _Person testPerson2 = new _Person("Some", "Name");
+    final _Person testPerson1 = new _Person("Some", "Name");
+    final _Person testPerson2 = new _Person("Some", "Name");
     pElementContainer.add(testPerson1);
     assertTrue(pElementContainer.contains(testPerson2));
   }
 
   @ParameterizedTest
   @MethodSource("_toTest")
-  void stream(IInputSortedElements<_Person> pElementContainer)
+  void testStream(IInputSortedElements<_Person> pElementContainer)
   {
-    Iterator<_Person> addedIterator = _addMultiple(pElementContainer, 10).iterator();
+    final Iterator<_Person> addedIterator = _addMultiple(pElementContainer, 10).iterator();
     //Check, if all elements are obtainable via the stream and the order of the elements in the stream
     pElementContainer.forEach(pElement -> assertEquals(pElement, addedIterator.next()));
   }

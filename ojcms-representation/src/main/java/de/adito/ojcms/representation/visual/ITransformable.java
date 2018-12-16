@@ -5,35 +5,28 @@ import de.adito.ojcms.representation.visual.exceptions.*;
 import java.util.function.Supplier;
 
 /**
- * Basic interface for a graphical representation of a bean element.
- * A visual component will be transformed to the bean element. The original bean or bean container still exists afterwards.
- * The graphical component can be treated as the original bean element.
- * To achieve this, the bean interfaces, which are functional wrappers {@link IBean} {@link IBeanContainer},
- * will be extended to the transformable component.
- * Through providing a reference to the bean core {@link IEncapsulatedData} the transformation can be executed.
+ * Basic interface for a graphical representation of a specific source instance.
+ * A visual instance will be transformed to the source type. The original source exists afterwards.
+ * The graphical instance can be treated as the source type through an interface.
+ *
+ * Through providing a reference to the data core the transformation can be executed.
  * For detailed information of the separation of functional wrapper and bean cores, take a look at the interfaces above.
  *
  * A transformation can be performed on different levels. (That means, wich bean element will be transformed to what graphical part)
  * These are these reasonable possibilities:
  *
- * - {@link IField} -> sub component of a graphical parent component. (e.g. login form)
- * - {@link IBean} -> graphical component that represents the bean directly
- * - {@link IBean} (within a container) -> sub component for one bean within a graphical container component (e.g. table)
- * - {@link IBeanContainer} -> graphical component that represents the bean directly
- *
  * The transformation level will be defined trough the first two generic types.
  * The transformator, which will be used for the transformation {@link IVisualTransformator}, must be based on the same generic types.
  *
- * @param <LOGIC>        the logical level of the transformation (field, bean or container)
- * @param <VISUAL>       the type of the graphical components to which the logical components will be transformed to
- * @param <ENCAPSULATED> the type of the data core of the transformation source
- * @param <SOURCE>       the type of the source (bean element) that will be used for the transformation
+ * @param <LOGIC>  the logical level of the transformation
+ * @param <VISUAL> the type of the graphical components to which the logical components will be transformed to
+ * @param <SOURCE> the type of the source that will be used for the transformation
  * @author Simon Danner, 27.01.2017
  */
 interface ITransformable<LOGIC, VISUAL, SOURCE extends ILinkable>
 {
   /**
-   * The transformator, that performs the transformation of the single components.
+   * The transformator, that performs the transformation of the single instances.
    * Must be based on the same generic types, which define the transformation level.
    *
    * @return a visual transformator
@@ -69,9 +62,9 @@ interface ITransformable<LOGIC, VISUAL, SOURCE extends ILinkable>
   }
 
   /**
-   * Determines, if this component has already been transformed.
+   * Determines, if this instance has already been transformed.
    *
-   * @return <tt>true</tt>, if the component is transformed
+   * @return <tt>true</tt>, if the instance is transformed
    */
   default boolean isTransformed()
   {
@@ -126,7 +119,7 @@ interface ITransformable<LOGIC, VISUAL, SOURCE extends ILinkable>
   }
 
   /**
-   * The original bean element. (source of the transformation)
+   * The original source of the transformation.
    * Will be used to provide the data core's reference for the functional wrapper interfaces.
    * Important: can only be used if the transformation has been completed
    */

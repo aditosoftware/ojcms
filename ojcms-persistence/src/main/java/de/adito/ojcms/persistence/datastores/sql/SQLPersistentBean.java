@@ -22,11 +22,10 @@ import java.util.stream.IntStream;
 import static de.adito.ojcms.sqlbuilder.definition.condition.IWhereCondition.*;
 
 /**
- * Implementation of a persistent bean.
- * This to create a bean later on.
- * Single persistent beans are stored in one database table.
+ * Implementation of a persistent bean data source that is used to create a bean instance later on.
+ * Single bean data sources are stored in one database table.
  * Each row represents a bean. It will be identified by a unique id. (according to {@link de.adito.ojcms.persistence.Persist#containerId()})
- * If a bean is added, that has more columns than all existing ones, the missing columns will be added.
+ * If a bean is added, which has more columns than all existing ones, the missing columns will be added.
  * Also, columns will be removed, when the 'largest' bean is removed.
  * The values of the fields are stored in a general serial string format, because columns types may be different.
  *
@@ -44,7 +43,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IBeanDataSou
   private final OJSQLBuilderForTable builder;
 
   /**
-   * Determines, if the data source for a single bean is already existing in the database.
+   * Determines, if the data source for a single bean is existing in the database.
    *
    * @param pConnectionInfo the database connection information
    * @param pBeanId         the persistence id of the bean data source to check
@@ -74,7 +73,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IBeanDataSou
   }
 
   /**
-   * Removes all obsolete single beans from the database table and removes columns, if necessary.
+   * Removes all obsolete single bean data sources from the database table and removes columns, if necessary.
    *
    * @param pConnectionInfo       the database connection information
    * @param pStillExistingBeanIds a collection of still existing single bean ids
@@ -91,7 +90,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IBeanDataSou
   }
 
   /**
-   * Creates the single bean database table, if it is not existing yet.
+   * Creates the single bean data source database table, if it is not existing yet.
    * This static entry point is necessary, because the table may have to be present before the usage of a single bean. (e.g. for foreign keys)
    *
    * @param pConnectionInfo the database connection information
@@ -106,7 +105,7 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IBeanDataSou
   }
 
   /**
-   * Creates the single bean database table, if it is not existing yet.
+   * Creates the single bean data source database table, if it is not existing yet.
    * The creation is based on an existing builder.
    *
    * @param pBuilder the builder to create the table with
@@ -119,12 +118,12 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IBeanDataSou
   }
 
   /**
-   * Creates a persistent bean.
+   * Creates a persistent bean data source.
    *
-   * @param pBeanId            the id of the bean
-   * @param pBeanType          the final bean type, which will be created by this persistent bean
+   * @param pBeanId            the persistence id of the bean
+   * @param pBeanType          the runtime bean type for which this source is for
    * @param pConnectionInfo    the database connection information
-   * @param pDataStoreSupplier the data store for persistent bean elements
+   * @param pDataStoreSupplier a supplier for persistent beans and containers
    */
   public SQLPersistentBean(String pBeanId, Class<BEAN> pBeanType, DBConnectionInfo pConnectionInfo, Supplier<BeanDataStore> pDataStoreSupplier)
   {

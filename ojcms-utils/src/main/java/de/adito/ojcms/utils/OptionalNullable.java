@@ -10,7 +10,7 @@ import java.util.function.*;
  * The presence of this value is optional.
  * If the value isn't available, it is possible to provide a default value or throw a exception.
  * Furthermore there are several other methods, which allow a comfortable usage in a functional way.
- * This implementation is based on the concept {@link java.util.Optional}.
+ * This implementation is based on the concept of {@link java.util.Optional}.
  *
  * @param <VALUE> the data type of the value of this optional
  * @author Simon Danner, 21.05.2018
@@ -21,26 +21,6 @@ public final class OptionalNullable<VALUE>
 
   private final boolean present;
   private final VALUE value;
-
-  /**
-   * Creates the optional with a not present value.
-   */
-  private OptionalNullable()
-  {
-    present = false;
-    value = null;
-  }
-
-  /**
-   * Creates the optional with a present value.
-   *
-   * @param pValue the value of the optional (may be null)
-   */
-  private OptionalNullable(@Nullable VALUE pValue)
-  {
-    present = true;
-    value = pValue;
-  }
 
   /**
    * Creates an optional with a not present value.
@@ -65,6 +45,26 @@ public final class OptionalNullable<VALUE>
   public static <VALUE> OptionalNullable<VALUE> of(@Nullable VALUE pValue)
   {
     return new OptionalNullable<>(pValue);
+  }
+
+  /**
+   * Creates the optional with a not present value.
+   */
+  private OptionalNullable()
+  {
+    present = false;
+    value = null;
+  }
+
+  /**
+   * Creates the optional with a present value.
+   *
+   * @param pValue the value of the optional (may be null)
+   */
+  private OptionalNullable(@Nullable VALUE pValue)
+  {
+    present = true;
+    value = pValue;
   }
 
   /**

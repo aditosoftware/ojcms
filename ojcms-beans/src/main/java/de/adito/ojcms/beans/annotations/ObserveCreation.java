@@ -4,7 +4,7 @@ import java.lang.annotation.*;
 
 /**
  * Marks a bean to inform about its creation.
- * Use {@link de.adito.ojcms.beans.BeanCreationRegistry} to listen to any creation event.
+ * Use {@link de.adito.ojcms.beans.BeanCreationRegistry} to observe any creation event.
  *
  * @author Simon Danner, 09.02.2018
  */

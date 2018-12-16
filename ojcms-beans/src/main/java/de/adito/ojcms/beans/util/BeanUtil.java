@@ -10,7 +10,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 /**
- * General utility class for the bean modell.
+ * General utility class for the bean model.
  *
  * @author Simon Danner, 29.06.2017
  */
@@ -35,7 +35,7 @@ public final class BeanUtil
       throw new RuntimeException(pBeanType.getName() + " is not a valid bean type! It has to be declared public to create fields!");
 
     if (!Bean.class.isAssignableFrom(pBeanType) && !MapBean.class.isAssignableFrom(pBeanType)) //To make sure it isn't a transformed type
-      throw new RuntimeException(pBeanType.getName() + " is not a valid bean type to reflect fields from. Do not use transformed bean types!");
+      throw new RuntimeException(pBeanType.getName() + " is not a valid bean type! Do not use transformed bean types!");
     return pBeanType;
   }
 
@@ -77,8 +77,9 @@ public final class BeanUtil
    * @param pFieldsToCheck a stream of fields, which should be used for the comparison
    * @return an Optional that may contain the field with a different value (it is empty if all values are equal)
    */
-  public static Optional<IField> compareBeanValues(IBean pBean1, IBean pBean2, Stream<IField<?>> pFieldsToCheck)
+  public static Optional<IField> compareBeanValues(IBean<?> pBean1, IBean<?> pBean2, Stream<IField<?>> pFieldsToCheck)
   {
+    //noinspection unchecked
     return pFieldsToCheck
         .map(pField -> (IField) pField)
         .filter(pField -> !Objects.equals(pBean1.getValue(pField), pBean2.getValue(pField)))
@@ -93,15 +94,15 @@ public final class BeanUtil
    *
    * @param pBean      the bean for which the equivalent should be found
    * @param pToCompare the collection of beans to compare
-   * @return the equivalent bean that was removed (optional, because it may have not been found)
+   * @return the equivalent bean that was removed (optional, because it may not have been found)
    */
   public static <BEAN extends IBean<BEAN>> Optional<BEAN> findRelatedBeanAndRemove(BEAN pBean, Collection<BEAN> pToCompare)
   {
-    Iterator<BEAN> it = pToCompare.iterator();
-    Set<FieldValueTuple<?>> identifiers = pBean.getIdentifiers();
+    final Iterator<BEAN> it = pToCompare.iterator();
+    final Set<FieldValueTuple<?>> identifiers = pBean.getIdentifiers();
     while (it.hasNext())
     {
-      BEAN oldBean = it.next();
+      final BEAN oldBean = it.next();
       if (pBean.getClass() == oldBean.getClass() && //same types
           ((identifiers.isEmpty() && Objects.equals(oldBean, pBean)) || //no identifiers -> use default equals()
               (identifiers.equals(oldBean.getIdentifiers()) && //else use identifiers
@@ -133,7 +134,7 @@ public final class BeanUtil
         throw new RuntimeException("The chain is invalid. The parent bean '" + pParentBean + "'" +
                                        " does not contain a field " + field.getName() + ".");
 
-      Object value = pParentBean.getValue(field);
+      final Object value = pParentBean.getValue(field);
       assert value instanceof IBean;
       pParentBean = (IBean<?>) value;
     }
@@ -154,7 +155,7 @@ public final class BeanUtil
   @Nullable
   public static <VALUE> VALUE resolveDeepValue(IBean<?> pParentBean, IField<VALUE> pDeepField, List<IField<?>> pChain)
   {
-    IBean<?> deepBean = resolveDeepBean(pParentBean, pChain);
+    final IBean<?> deepBean = resolveDeepBean(pParentBean, pChain);
 
     if (!deepBean.hasField(pDeepField))
       throw new RuntimeException("The resolved deep bean '" + deepBean + "' does not contain the field '" + pDeepField.getName() +

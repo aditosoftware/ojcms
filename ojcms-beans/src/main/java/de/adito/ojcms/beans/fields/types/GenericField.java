@@ -1,7 +1,7 @@
 package de.adito.ojcms.beans.fields.types;
 
 import de.adito.ojcms.beans.*;
-import de.adito.ojcms.beans.exceptions.BeanCopyUnsupportedException;
+import de.adito.ojcms.beans.exceptions.BeanCopyNotSupportedException;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.util.*;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +23,7 @@ public class GenericField<TYPE> extends AbstractField<TYPE>
   }
 
   @Override
-  public TYPE copyValue(TYPE pValue, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies) throws BeanCopyUnsupportedException
+  public TYPE copyValue(TYPE pValue, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies) throws BeanCopyNotSupportedException
   {
     try
     {
@@ -32,7 +32,7 @@ public class GenericField<TYPE> extends AbstractField<TYPE>
     }
     catch (IllegalAccessException | InstantiationException pE)
     {
-      throw new BeanCopyUnsupportedException(this, pE);
+      throw new BeanCopyNotSupportedException(this, pE);
     }
   }
 
@@ -52,7 +52,7 @@ public class GenericField<TYPE> extends AbstractField<TYPE>
   }
 
   /**
-   * Throws a runtime exception that indicates this field can be replaced by another bean field.
+   * Throws a runtime exception that indicates that this field can be replaced by another bean field.
    *
    * @param pGenericType     the generic type of this field
    * @param pReplacementType the type of the replacement field

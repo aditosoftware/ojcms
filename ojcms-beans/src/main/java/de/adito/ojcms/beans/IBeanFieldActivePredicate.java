@@ -17,6 +17,8 @@ interface IBeanFieldActivePredicate<BEAN extends IBean<BEAN>>
 {
   /**
    * The bean for which the active status of a certain field should be checked.
+   *
+   * @return the bean to check
    */
   BEAN getBean();
 
@@ -33,7 +35,7 @@ interface IBeanFieldActivePredicate<BEAN extends IBean<BEAN>>
       return true;
 
     //noinspection unchecked
-    OptionalField.IActiveCondition<BEAN> condition = pField.getAdditionalInformationOrThrow(OptionalField.ACTIVE_CONDITION);
+    final OptionalField.IActiveCondition<BEAN> condition = pField.getAdditionalInformationOrThrow(OptionalField.ACTIVE_CONDITION);
     assert condition != null;
     return condition.test(getBean());
   }

@@ -14,12 +14,12 @@ import java.util.stream.*;
 public interface IInputSortedElements<ELEMENT> extends Iterable<ELEMENT>
 {
   /**
-   * Adds a element.
+   * Adds an element.
    * It is not allowed to add null elements or duplicates.
    *
    * @param pElement the element to add
    * @return <tt>true</tt>, if the element has been added successfully
-   * @throws IllegalArgumentException if, the element is null
+   * @throws NullPointerException if the element is null
    */
   boolean add(ELEMENT pElement);
 
@@ -28,7 +28,7 @@ public interface IInputSortedElements<ELEMENT> extends Iterable<ELEMENT>
    *
    * @param pElement the element to remove
    * @return <tt>true</tt>, if the element has been removed successfully
-   * @throws IllegalArgumentException if, the element to remove is null
+   * @throws NullPointerException if the element to remove is null
    */
   boolean remove(ELEMENT pElement);
 
@@ -64,8 +64,7 @@ public interface IInputSortedElements<ELEMENT> extends Iterable<ELEMENT>
    */
   default boolean contains(ELEMENT pElement)
   {
-    if (pElement == null)
-      throw new IllegalArgumentException("null elements are not allowed!");
+    Objects.requireNonNull(pElement);
     return stream().anyMatch(pContainedElement -> Objects.equals(pElement, pContainedElement));
   }
 

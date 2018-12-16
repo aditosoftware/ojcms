@@ -18,4 +18,10 @@ public class SetField<ELEMENT> extends AbstractField<Set<ELEMENT>> implements IS
   {
     super(pType, pName, pAnnotations);
   }
+
+  @Override
+  public Set<ELEMENT> getInitialValue()
+  {
+    return Collections.emptySet();
+  }
 }

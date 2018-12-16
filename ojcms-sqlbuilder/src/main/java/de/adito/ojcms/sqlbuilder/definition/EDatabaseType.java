@@ -90,7 +90,7 @@ public enum EDatabaseType
    */
   public String columnTypeToStatementFormat(IColumnType pColumnType)
   {
-    EColumnType type = pColumnType.getType();
+    final EColumnType type = pColumnType.getType();
     if (!columnDefinitions.containsKey(type))
       throw new OJDatabaseException("No column definition given for " + type.name() + ". (database type: " + name() + ")");
     return columnDefinitions.get(type).apply(pColumnType);
@@ -127,7 +127,7 @@ public enum EDatabaseType
   private static Map<EColumnType, Function<IColumnType, String>> _createColumnMapping(Consumer<Map<EColumnType,
       Function<IColumnType, String>>> pMapConsumer)
   {
-    Map<EColumnType, Function<IColumnType, String>> map = new HashMap<>();
+    final Map<EColumnType, Function<IColumnType, String>> map = new HashMap<>();
     pMapConsumer.accept(map);
     return map;
   }

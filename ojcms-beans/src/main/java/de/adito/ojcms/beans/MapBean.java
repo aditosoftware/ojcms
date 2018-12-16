@@ -26,7 +26,7 @@ public class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMod
 {
   private final IEncapsulatedBeanData encapsulated;
   private final boolean isDetail;
-  private final Class<? extends IField<?>> fieldType; //the field type may differ from the generic type due to converters
+  private final Class<? extends IField<?>> fieldType; //the field type may differ from the generic type due to value converters
   private final Class<VALUE> valueType;
   private final Map<KEY, IField<?>> keyFieldMapping;
   private final Map<IField<?>, KEY> fieldKeyMapping;
@@ -35,22 +35,23 @@ public class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMod
   private final _EntrySet entrySet = new _EntrySet();
 
   /**
-   * Creates a map representation as a bean.
+   * Creates a map representation as bean.
    *
-   * @param pMap       the source from which the bean will be created
+   * @param pMap       the source map from which the bean will be created
    * @param pValueType the map's value type
    * @param pIsDetail  <tt>true</tt>, if this map bean is considered as detail
    */
   public MapBean(Map<KEY, VALUE> pMap, Class<VALUE> pValueType, boolean pIsDetail)
   {
-    this(pMap, pValueType, (pKey, pField) -> {}, pHashCode -> Optional.empty(), pIsDetail);
+    this(pMap, pValueType, (pKey, pField) -> {}, pKey -> Optional.empty(), pIsDetail);
   }
 
   /**
-   * Creates a map representation.
-   * This constructor allows you to provide a field cache.
-   * The cache stores field instances and supplies them for the same hashcode.
-   * A cache may be useful when map beans are compared to each other, because bean fields are mostly compared by reference.
+   * Creates a map representation as bean.
+   * This constructor allows to provide a field cache.
+   * The cache stores field instances and supplies them for the same map key.
+   * A cache may be useful when map beans are compared to each other, because bean fields are mostly compared by reference
+   * and wouldn't be considered as equal if the field instances are different.
    * It may also be a slight performance improvement.
    * If a field is not in the cache yet, it will be created by the field factory and be given to the cache via a callback.
    *
@@ -70,10 +71,10 @@ public class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMod
     fieldKeyMapping = new HashMap<>();
     fieldCache = pFieldCache;
     fieldCacheCallback = pFieldCacheCallback;
-    BiConsumer<LinkedHashMap<IField<?>, VALUE>, Map.Entry<KEY, VALUE>> accumulator =
+    final BiConsumer<LinkedHashMap<IField<?>, VALUE>, Map.Entry<KEY, VALUE>> accumulator =
         (pSorted, pEntry) -> pSorted.put(_createField(pEntry.getKey()), pEntry.getValue());
     final Map<IField<?>, VALUE> fieldValueMapping = pMap.entrySet().stream()
-        .collect(LinkedHashMap::new, accumulator, LinkedHashMap::putAll);
+        .collect(LinkedHashMap::new, accumulator, Map::putAll);
     final List<IField<?>> fields = new ArrayList<>(fieldValueMapping.keySet());
     //noinspection unchecked
     encapsulated = new EncapsulatedBeanData<>(new MapBasedBeanDataSource(fields), getClass(), fields);
@@ -115,7 +116,7 @@ public class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMod
   @Override
   public VALUE put(KEY pKey, VALUE pValue)
   {
-    IField<?> field;
+    final IField<?> field;
     VALUE oldValue = null;
     if (keyFieldMapping.containsKey(pKey))
     {
@@ -148,7 +149,7 @@ public class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMod
 
   /**
    * Creates a bean field for an associated map entry.
-   * Fields may come from a given cache.
+   * Fields may come from a given cache. The field's name depends on the toString-representation of the map key.
    *
    * @param pKey the key of the entry
    * @return the bean field for the map entry
@@ -159,8 +160,8 @@ public class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMod
         .orElseGet(() ->
                    {
                      //noinspection unchecked
-                     IField<?> field = BeanFieldFactory.createField((Class<? extends IField>) fieldType, Objects.toString(pKey),
-                                                                    Collections.singleton(Detail.INSTANCE));
+                     final IField<?> field = BeanFieldFactory.createField((Class<? extends IField>) fieldType, Objects.toString(pKey),
+                                                                          Collections.singleton(Detail.INSTANCE));
                      fieldCacheCallback.accept(pKey, field);
                      return field;
                    });

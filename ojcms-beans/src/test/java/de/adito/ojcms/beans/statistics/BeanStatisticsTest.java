@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for bean and bean container statistics.
- * It also includes the related listeners for the statistic data.
+ * It also includes the related observers for the statistic data.
  *
  * @author Simon Danner, 16.07.2018
  */
@@ -33,7 +33,7 @@ class BeanStatisticsTest extends AbstractOnNextCallCountTest
   public void testEntryAdditionForBean()
   {
     final String value = "value";
-    IStatisticData<String> statisticData = bean.getStatisticData(SomeBean.field);
+    final IStatisticData<String> statisticData = bean.getStatisticData(SomeBean.field);
     assertNotNull(statisticData);
     bean.setValue(SomeBean.field, value);
     assertEquals(1, statisticData.size());
@@ -44,12 +44,12 @@ class BeanStatisticsTest extends AbstractOnNextCallCountTest
   public void testEntryAdditionForContainer() throws InterruptedException
   {
     final IBeanContainer<SomeBean> container = IBeanContainer.empty(SomeBean.class);
-    IStatisticData<Integer> statisticData = container.getStatisticData();
+    final IStatisticData<Integer> statisticData = container.getStatisticData();
     assertNotNull(statisticData);
     Thread.sleep(5); //Avoid overriding the initial entry
     container.addBean(bean);
     assertEquals(2, statisticData.size());
-    Iterator<Integer> it = statisticData.getChangedDataStatistics().values().iterator();
+    final Iterator<Integer> it = statisticData.getChangedDataStatistics().values().iterator();
     //Initial size
     assertTrue(it.hasNext());
     assertEquals(0, (int) it.next());
@@ -61,7 +61,7 @@ class BeanStatisticsTest extends AbstractOnNextCallCountTest
   @Test
   public void testEntryObserver()
   {
-    IStatisticData<String> statisticData = bean.getStatisticData(SomeBean.field);
+    final IStatisticData<String> statisticData = bean.getStatisticData(SomeBean.field);
     assertNotNull(statisticData);
     final AtomicInteger index = new AtomicInteger();
     observeWithCallCheck(statisticData.observeStatistics(), 10, pEntry -> assertEquals("value" + index.getAndIncrement(), pEntry.getValue()));
@@ -75,7 +75,7 @@ class BeanStatisticsTest extends AbstractOnNextCallCountTest
     final IStatisticData<String> beanStatistics = bean.getStatisticData(SomeBean.field);
     final int interval = 5;
     assertNotNull(beanStatistics);
-    LinkedList<Long> timestamps = new LinkedList<>(beanStatistics.getChangedDataStatistics().keySet());
+    final LinkedList<Long> timestamps = new LinkedList<>(beanStatistics.getChangedDataStatistics().keySet());
     final long totalTimestampDiff = timestamps.getLast() - timestamps.getFirst();
     final int expectedEntryCount = (int) totalTimestampDiff / interval + (totalTimestampDiff % interval == 0 ? 1 : 2);
     final Map<Long, String> intervalStatistics = beanStatistics.getIntervalStatistics(interval);

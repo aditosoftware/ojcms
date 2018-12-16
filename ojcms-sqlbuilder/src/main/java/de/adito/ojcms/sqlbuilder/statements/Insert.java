@@ -55,7 +55,7 @@ public class Insert extends AbstractBaseStatement<Void, Insert>
   public Insert values(IColumnValueTuple<?>... pTuples)
   {
     if (pTuples == null || pTuples.length == 0)
-      throw new OJDatabaseException("The tupels to insert cannot be empty!");
+      throw new OJDatabaseException("The tuples to insert cannot be empty!");
     values.addAll(Arrays.asList(pTuples));
     return this;
   }

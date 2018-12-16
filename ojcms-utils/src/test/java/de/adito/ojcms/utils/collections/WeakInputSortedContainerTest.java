@@ -13,7 +13,7 @@ class WeakInputSortedContainerTest
   @Test
   public void testWeakReferences()
   {
-    WeakInputSortedContainer<Object> container = new WeakInputSortedContainer<>();
+    final WeakInputSortedContainer<Object> container = new WeakInputSortedContainer<>();
     container.add(new Object());
     System.gc();
     try

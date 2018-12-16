@@ -3,34 +3,36 @@ package de.adito.ojcms.representation.visual;
 import java.util.Queue;
 
 /**
- * Describes the tool to perform a transformation of a {@link ITransformable} component.
+ * The tool to perform a transformation of a {@link ITransformable} instance.
  * It mainly creates the visual components for the logical counterparts and links them.
  * It also holds several data, containers etc. (replacement for an abstract class).
  *
- * @param <LOGIC>        the logical level of the transformation (field, bean or container)
- * @param <VISUAL>       the type of the graphical components to which the logical components will be transformed to
- * @param <SOURCE>       the type of the source (bean element) that will be used for the transformation
+ * @param <LOGIC>  the logical level of the transformation
+ * @param <VISUAL> the type of the graphical components to which the logical components will be transformed to
+ * @param <SOURCE> the type of the source that will be used for the transformation
  * @author Simon Danner, 27.01.2017
  * @see ITransformable
  */
 interface IVisualTransformator<LOGIC, VISUAL, SOURCE extends ILinkable>
 {
   /**
-   * Transfers the reference to the data core of the original bean element to the transferable component.
+   * Transfers the reference to the data core of the original source to the transferable instance.
    *
-   * @param pSourceToTransform the source/original bean element
+   * @param pSourceToTransform the source to transform
    */
   void initTransformation(SOURCE pSourceToTransform);
 
   /**
    * The original source of the transformation.
+   *
+   * @return the source the transformation is based on
    */
   SOURCE getOriginalSource();
 
   /**
    * Creates a new graphical presentation for a logical counterpart.
    *
-   * @param pLogicComponent the logical bean element
+   * @param pLogicComponent the logical counterpart
    * @return a graphical component that represents the logical part
    */
   VISUAL createVisualComponent(LOGIC pLogicComponent);
@@ -39,7 +41,7 @@ interface IVisualTransformator<LOGIC, VISUAL, SOURCE extends ILinkable>
    * Links the logical and graphical component based on the data model.
    * For example: When a user types a text into a visual textfield, the value will also be stored within the bean data core.
    *
-   * @param pLogicComponent  the logical component (field, bean or container)
+   * @param pLogicComponent  the logical component
    * @param pVisualComponent the graphical component that represents the logical counterpart
    */
   void link(LOGIC pLogicComponent, VISUAL pVisualComponent);
@@ -48,7 +50,7 @@ interface IVisualTransformator<LOGIC, VISUAL, SOURCE extends ILinkable>
    * A linked graphical component for a logical counterpart.
    * Combines {@link IVisualTransformator#createVisualComponent(LOGIC)} and {@link IVisualTransformator#link(LOGIC, VISUAL)}
    *
-   * @param pLogicComponent the logical component (field, bean or container)
+   * @param pLogicComponent the logical component
    * @return a graphical component that represents the logical part
    */
   default VISUAL createLinkedVisualComponent(LOGIC pLogicComponent)

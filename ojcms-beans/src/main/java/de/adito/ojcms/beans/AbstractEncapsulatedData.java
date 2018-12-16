@@ -16,10 +16,10 @@ import java.util.stream.Collectors;
 
 /**
  * Abstract implementation of an encapsulated data core.
- * Handles transformation links, weak references and change events.
+ * Handles weak references and change events.
  *
  * @param <ELEMENT>    the type of the elements in the data core
- * @param <DATASOURCE> the type of the data source
+ * @param <DATASOURCE> the type of the data source of the data core
  * @author Simon Danner, 24.11.2018
  */
 @EncapsulatedData
@@ -30,7 +30,7 @@ abstract class AbstractEncapsulatedData<ELEMENT, DATASOURCE extends IDataSource>
   private DATASOURCE datasource;
 
   /**
-   * Create the encapsulated data core with an initial data source.
+   * Creates the encapsulated data core with an initial data source.
    *
    * @param pDataSource the initial data source
    */

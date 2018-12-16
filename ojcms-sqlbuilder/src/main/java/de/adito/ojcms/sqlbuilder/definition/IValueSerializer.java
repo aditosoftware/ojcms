@@ -44,7 +44,7 @@ public interface IValueSerializer
   @Nullable
   default <VALUE> String serialValueToStatementString(IColumnValueTuple<VALUE> pColumnValueTuple)
   {
-    String serialValue = toSerial(pColumnValueTuple);
+    final String serialValue = toSerial(pColumnValueTuple);
     if (serialValue == null)
       return null;
     return pColumnValueTuple.getColumn().isNumeric() ? serialValue : "'" + serialValue + "'";

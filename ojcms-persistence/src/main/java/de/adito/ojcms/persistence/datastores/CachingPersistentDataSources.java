@@ -8,10 +8,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.*;
 
 /**
- * A caching persistent data store implementation for {@link IPersistentSourcesStore}.
+ * A caching implementation for {@link IPersistentSourcesStore}.
  * The cache maps by the persistence id, defined in {@link de.adito.ojcms.persistence.Persist#containerId()}.
- * The cache stores once created beans, that were injected with the persistent data cores.
- * This data store has to be provided with functions to retrieve the persistent data cores for a certain container id.
+ * The cache stores once created data sources.
+ * This data sources store has to be provided with functions to retrieve the persistent sources for a certain container id.
  *
  * @author Simon Danner, 18.02.2018
  */
@@ -26,14 +26,15 @@ final class CachingPersistentDataSources implements IPersistentSourcesStore
   private final Consumer<Collection<String>> containerObsoleteRemover;
 
   /**
-   * Creates the caching persistent data store.
+   * Creates the caching persistent data sources store.
    *
-   * @param pBeanResolver              a function to get a persistent bean (data core) from a container id and a certain bean type
+   * @param pBeanResolver              a function to get a persistent bean data source from a container id and a certain bean type
    * @param pBeanExistingDeterminer    a function that determines if a single bean data source is existing by its persistence id
-   * @param pContainerResolver         a function to get a persistent bean container (data core) from a container id and a certain bean type
-   * @param pSingleBeanObsoleteRemover a function to clean up obsolete single beans in the persistent data store,
+   * @param pContainerResolver         a function to get a persistent bean container data source from a container id and a certain bean type
+   * @param pSingleBeanObsoleteRemover a function to clean up obsolete single bean sources in the persistent data store,
    *                                   takes a collection of all still existing single bean persistent ids
-   * @param pContainerObsoleteRemover  a function to clean up all obsolete containers in the persistent data store,
+   * @param pContainerObsoleteRemover  a function to clean up all obsolete container data sources in the persistent data store,
+   *                                   takes a collection of all still existing container persistent ids
    */
   CachingPersistentDataSources(BiFunction<String, Class<? extends IBean<?>>, IBeanDataSource> pBeanResolver,
                                Function<String, Boolean> pBeanExistingDeterminer,

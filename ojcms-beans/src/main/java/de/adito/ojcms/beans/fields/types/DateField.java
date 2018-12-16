@@ -29,7 +29,7 @@ public class DateField extends AbstractField<Instant> implements ISerializableFi
   @Override
   public String display(Instant pValue, IClientInfo pClientInfo)
   {
-    ZonedDateTime date = ZonedDateTime.ofInstant(pValue, pClientInfo.getZoneId());
+    final ZonedDateTime date = ZonedDateTime.ofInstant(pValue, pClientInfo.getZoneId());
     return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.MEDIUM)
         .withLocale(pClientInfo.getLocale())
         .format(date);

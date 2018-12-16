@@ -64,7 +64,7 @@ public class Delete extends AbstractSQLStatement<WhereModifiers, Boolean, Boolea
     final StatementFormatter statement = EFormatter.DELETE.create(databaseType, idColumnName)
         .appendTableName(getTableName())
         .appendWhereCondition(modifiers);
-    Boolean result = executeStatement(statement);
+    final Boolean result = executeStatement(statement);
     //update row ids
     if (!idsToDelete.isEmpty())
     {
@@ -95,12 +95,12 @@ public class Delete extends AbstractSQLStatement<WhereModifiers, Boolean, Boolea
    */
   private List<Integer> _getIdsToDelete()
   {
-    List<Integer> idsToDelete = new ArrayList<>();
+    final List<Integer> idsToDelete = new ArrayList<>();
     final StatementFormatter formatter = EFormatter.SELECT.create(databaseType, idColumnName)
         .appendConstant(EFormatConstant.STAR)
         .appendTableName(getTableName())
         .appendWhereCondition(modifiers);
-    ResultSet result = idUpdater.executeStatement(formatter.getStatement(), formatter.getSerialArguments(serializer));
+    final ResultSet result = idUpdater.executeStatement(formatter.getStatement(), formatter.getSerialArguments(serializer));
     try
     {
       int idColumnIndex = _idColumnIndex(result);
@@ -124,7 +124,7 @@ public class Delete extends AbstractSQLStatement<WhereModifiers, Boolean, Boolea
    */
   private Integer _idColumnIndex(ResultSet pResult) throws SQLException
   {
-    ResultSetMetaData metaData = pResult.getMetaData();
+    final ResultSetMetaData metaData = pResult.getMetaData();
     for (int i = 1; i <= metaData.getColumnCount(); i++)
       if (metaData.getColumnName(i).equals(idColumnName))
         return i;

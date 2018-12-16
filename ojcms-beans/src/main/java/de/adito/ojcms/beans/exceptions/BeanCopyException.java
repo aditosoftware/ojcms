@@ -25,11 +25,11 @@ public class BeanCopyException extends RuntimeException
   }
 
   /**
-   * Creates a copy exception based on an unsupported exception relating to a bean field, that is not able to copy its value.
+   * Creates a copy exception based on a copy unsupported exception relating to a bean field, that is not able to copy its value.
    *
    * @param pUnsupportedException the unsupported exception
    */
-  public BeanCopyException(BeanCopyUnsupportedException pUnsupportedException)
+  public BeanCopyException(BeanCopyNotSupportedException pUnsupportedException)
   {
     super(pUnsupportedException);
   }

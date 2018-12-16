@@ -3,11 +3,11 @@ package de.adito.ojcms.beans.util;
 import de.adito.ojcms.beans.*;
 import de.adito.ojcms.beans.annotations.Statistics;
 import de.adito.ojcms.beans.fields.IField;
-import org.jetbrains.annotations.NotNull;
+import de.adito.ojcms.beans.statistics.*;
 
 import java.lang.reflect.*;
 import java.util.*;
-import java.util.function.Predicate;
+import java.util.function.*;
 import java.util.stream.*;
 
 /**
@@ -59,17 +59,18 @@ public final class BeanReflector
   }
 
   /**
-   * Reflects all field statistic annotations of a bean type.
+   * Reflects all bean fields annotated with {@link Statistics} of a bean type.
+   * Then creates a mapping for the statistic data for instances of the bean type.
    *
    * @param pBeanType the bean's type
-   * @return a map with the field names as keys and the annotations as values
+   * @return a map with the field as key and initial statistic data as value
    */
-  @NotNull
-  public static Map<String, Statistics> getBeanStatisticAnnotations(Class<? extends IBean> pBeanType)
+  public static Map<IField<?>, IStatisticData<?>> createBeanStatisticMappingForBeanType(Class<? extends IBean> pBeanType)
   {
-    return Stream.of(pBeanType.getDeclaredFields())
-        .filter(pField -> pField.getAnnotation(Statistics.class) != null)
-        .collect(Collectors.toMap(Field::getName, pField -> pField.getAnnotation(Statistics.class)));
+    return reflectBeanFields(pBeanType).stream()
+        .filter(pField -> pField.hasAnnotation(Statistics.class))
+        .collect(Collectors.toMap(Function.identity(),
+                                  pField -> new StatisticData<>(pField.getAnnotationOrThrow(Statistics.class).capacity(), null)));
   }
 
   /**
@@ -132,11 +133,10 @@ public final class BeanReflector
   @SafeVarargs
   private static List<Field> _getDeclaredFields(Class<? extends IBean> pBeanType, Predicate<Field>... pFieldPredicates)
   {
-    BeanUtil.requiresDeclaredBeanType(pBeanType);
+    Class current = BeanUtil.requiresDeclaredBeanType(pBeanType);
     final List<Field> declaredFields = new ArrayList<>();
     final Predicate<Field> combinedPredicate = pField -> Stream.of(pFieldPredicates)
         .allMatch(pPredicate -> pPredicate.test(pField));
-    Class current = pBeanType;
     do
     {
       Stream.of(current.getDeclaredFields())

@@ -7,7 +7,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
- * Describes an adaption for an numeric database value based on the current value.
+ * An adaption for a numeric database value based on the current value.
  * A mathematical operation will be applied to the current value.
  *
  * @param <NUMBER> the number type of the column

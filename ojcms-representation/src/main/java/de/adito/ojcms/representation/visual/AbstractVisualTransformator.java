@@ -4,7 +4,7 @@ import java.util.*;
 
 /**
  * Abstract base class for a visual transformator.
- * Stores the reference to the original bean source and provides a queue to store operations to perform after the transformation.
+ * Stores the reference to the original source and provides a queue to store operations to perform after the transformation.
  *
  * @param <LOGIC>        the logic bean type to transform
  * @param <VISUAL>       the visual counter type to which the logic part will be transformed

@@ -9,7 +9,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
- * A SQL column value tuple based on a {@link FieldValueTuple}.
+ * A database column value tuple based on a {@link FieldValueTuple}.
  *
  * @param <VALUE> the data type of the tuple
  * @author Simon Danner, 07.05.2018

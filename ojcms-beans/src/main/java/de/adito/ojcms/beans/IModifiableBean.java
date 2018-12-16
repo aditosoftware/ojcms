@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  * A modifiable bean with dynamical fields.
  * Allows the extension and removal of bean fields.
  *
- * @param <BEAN> the generic type of the concrete bean that implements this interface
+ * @param <BEAN> the runtime type of the concrete bean
  * @author Simon Danner, 01.02.2017
  */
 @RequiresEncapsulatedAccess
@@ -49,11 +49,11 @@ public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
   default <VALUE, FIELD extends IField<VALUE>> FIELD addField(Class<FIELD> pFieldType, String pName,
                                                               Collection<Annotation> pAnnotations, int pIndex)
   {
-    IEncapsulatedBeanData encapsulated = getEncapsulatedData();
+    final IEncapsulatedBeanData encapsulated = getEncapsulatedData();
     assert encapsulated != null;
     if (encapsulated.streamFields().anyMatch(pField -> pField.getName().equals(pName)))
       throw new RuntimeException("A field with the name '" + pName + "' is already existing at this bean!");
-    FIELD newField = BeanFieldFactory.createField(pFieldType, pName, pAnnotations);
+    final FIELD newField = BeanFieldFactory.createField(pFieldType, pName, pAnnotations);
     if (pIndex == -1)
       addField(newField);
     else
@@ -81,12 +81,12 @@ public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
    */
   default <VALUE> void addField(IField<VALUE> pField, int pIndex)
   {
-    IEncapsulatedBeanData encapsulated = getEncapsulatedData();
+    final IEncapsulatedBeanData encapsulated = getEncapsulatedData();
     assert encapsulated != null;
     if (encapsulated.containsField(pField))
       throw new RuntimeException("A bean cannot have the same field twice! field: " + pField.getName());
     encapsulated.addField(pField, pIndex);
-    if (getFieldActiveSupplier().isOptionalActive(pField))
+    if (getFieldActivePredicate().isOptionalActive(pField))
       //noinspection unchecked
       BeanEvents.propagate(new BeanFieldAddition<>((BEAN) this, pField));
   }
@@ -96,25 +96,28 @@ public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
    *
    * @param pField  the field to remove
    * @param <VALUE> the field's data type
+   * @return the value of the field before its removal
    */
-  default <VALUE> void removeField(IField<VALUE> pField)
+  default <VALUE> VALUE removeField(IField<VALUE> pField)
   {
-    IEncapsulatedBeanData encapsulated = getEncapsulatedData();
+    final IEncapsulatedBeanData encapsulated = getEncapsulatedData();
     assert encapsulated != null;
-    VALUE oldValue = encapsulated.getValue(pField);
+    final VALUE oldValue = encapsulated.getValue(pField);
     encapsulated.removeField(pField);
     //noinspection unchecked
     BeanEvents.propagate(new BeanFieldRemoval<>((BEAN) this, pField, oldValue));
+    return oldValue;
   }
 
   /**
    * Removes a field by its name.
    *
    * @param pFieldName the name of the field to remove
+   * @return the value of the field before its removal
    */
-  default void removeFieldByName(String pFieldName)
+  default Object removeFieldByName(String pFieldName)
   {
-    removeField(BeanUtil.findFieldByName(this, pFieldName));
+    return removeField(BeanUtil.findFieldByName(this, pFieldName));
   }
 
   /**
@@ -124,7 +127,7 @@ public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
    */
   default void removeFieldIf(Predicate<IField<?>> pFieldPredicate)
   {
-    List<IField<?>> toRemove = streamFields()
+    final List<IField<?>> toRemove = streamFields()
         .filter(pFieldPredicate)
         .collect(Collectors.toList());
     toRemove.forEach(this::removeField);

@@ -8,9 +8,10 @@ import java.util.Objects;
 import java.util.function.Function;
 
 /**
- * A where condition for database SQL statements based on a bean {@link FieldValueTuple}.
+ * A where condition for database statements based on a {@link FieldValueTuple}.
  * This class extends the {@link BeanColumnValueTuple} by the operator for a condition.
  *
+ * @param <VALUE> the data type of the value of the tuple
  * @author Simon Danner, 06.06.2018
  */
 public class BeanWhereCondition<VALUE> extends BeanColumnValueTuple<VALUE> implements IWhereCondition<VALUE>

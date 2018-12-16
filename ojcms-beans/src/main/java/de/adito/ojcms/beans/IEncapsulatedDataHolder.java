@@ -4,9 +4,11 @@ import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
 import de.adito.ojcms.beans.datasource.IDataSource;
 
 /**
- * An extension for a type that holds an encapsulated data core.
+ * An extension for a type that holds {@link IEncapsulatedData}.
+ * The data source of an encapsulated data core might be exchanged via this interface as well.
  *
  * @param <ENCAPSULATED> the encapsulated data core's runtime type
+ * @param <DATASOURCE>   the type of the data source of the data core
  * @author Simon Danner, 20.01.2017
  * @see IEncapsulatedData
  */

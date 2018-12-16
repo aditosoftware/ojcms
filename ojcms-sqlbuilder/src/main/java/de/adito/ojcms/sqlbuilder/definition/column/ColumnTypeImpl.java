@@ -5,7 +5,7 @@ import org.jetbrains.annotations.*;
 import java.util.*;
 
 /**
- * Basic implementation for a database column type.
+ * Basic implementation for a database column type instance.
  *
  * @author Simon Danner, 02.07.2018
  */
@@ -17,6 +17,11 @@ class ColumnTypeImpl implements IColumnType
   private IForeignKey foreignKey;
   private List<EColumnModifier> modifiers;
 
+  /**
+   * Creates the type instance based on a basic column type.
+   *
+   * @param pColumnType the basic column type it is based on
+   */
   ColumnTypeImpl(EColumnType pColumnType)
   {
     columnType = pColumnType;

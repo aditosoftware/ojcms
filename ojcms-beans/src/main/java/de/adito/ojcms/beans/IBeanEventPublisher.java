@@ -20,7 +20,7 @@ interface IBeanEventPublisher<ELEMENT, BEAN extends IBean<BEAN>, DATASOURCE exte
     ENCAPSULATED extends IEncapsulatedData<ELEMENT, DATASOURCE>> extends IEncapsulatedDataHolder<ELEMENT, DATASOURCE, ENCAPSULATED>
 {
   /**
-   * Creates an {@link Observable} to observe value changes of bean values.
+   * An {@link Observable} to observe value changes of bean values.
    *
    * @return an observable that publishes {@link BeanValueChange} events
    */
@@ -33,7 +33,7 @@ interface IBeanEventPublisher<ELEMENT, BEAN extends IBean<BEAN>, DATASOURCE exte
   }
 
   /**
-   * Creates an {@link Observable} to observe value changes of bean values from a certain field.
+   * An {@link Observable} to observe value changes of bean values from a certain field.
    *
    * @return an observable that publishes {@link BeanValueChange} events of the specific field
    */
@@ -46,7 +46,7 @@ interface IBeanEventPublisher<ELEMENT, BEAN extends IBean<BEAN>, DATASOURCE exte
   }
 
   /**
-   * Creates an {@link Observable} to observe field addition events.
+   * An {@link Observable} to observe field addition events.
    *
    * @return an observable that publishes {@link BeanFieldAddition} events
    */
@@ -59,7 +59,7 @@ interface IBeanEventPublisher<ELEMENT, BEAN extends IBean<BEAN>, DATASOURCE exte
   }
 
   /**
-   * Creates an {@link Observable} to observe field removal events.
+   * An {@link Observable} to observe field removal events.
    *
    * @return an observable that publishes {@link BeanFieldRemoval} events
    */

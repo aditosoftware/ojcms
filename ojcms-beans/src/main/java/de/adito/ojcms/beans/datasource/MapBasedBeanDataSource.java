@@ -9,7 +9,7 @@ import java.util.*;
 import static java.util.stream.Collectors.toMap;
 
 /**
- * A hash map based implementation of a {@link IBeanDataSource}.
+ * A hash map based implementation of {@link IBeanDataSource}.
  * Used as default data source for beans.
  *
  * @author Simon Danner, 08.12.2018
@@ -21,7 +21,7 @@ public final class MapBasedBeanDataSource implements IBeanDataSource
   /**
    * Creates the map based data source.
    *
-   * @param pFields a list of fields for this source
+   * @param pFields a list of fields for this data source
    */
   public MapBasedBeanDataSource(List<IField<?>> pFields)
   {
@@ -32,7 +32,7 @@ public final class MapBasedBeanDataSource implements IBeanDataSource
   /**
    * Creates the data source based on an existing bean.
    *
-   * @param pBean the bean to take the initial values from
+   * @param pBean the bean to take the initial fields and values from
    */
   public MapBasedBeanDataSource(IBean<?> pBean)
   {

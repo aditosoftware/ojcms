@@ -76,7 +76,7 @@ interface IEncapsulatedBeanData extends IEncapsulatedData<FieldValueTuple<?>, IB
   Stream<IField<?>> streamFields();
 
   /**
-   * Determines if this data core contains a certain bean field.
+   * Determines, if this data core contains a certain bean field.
    *
    * @param pField  the bean field
    * @param <VALUE> the data type of the field

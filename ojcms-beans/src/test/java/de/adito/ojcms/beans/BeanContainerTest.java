@@ -10,7 +10,7 @@ import java.util.stream.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test class for {@link IBeanContainer}
+ * Tests for {@link IBeanContainer}
  *
  * @author Simon Danner, 28.07.2018
  */
@@ -70,8 +70,8 @@ class BeanContainerTest
   @Test
   public void testMerge()
   {
-    IBeanContainer<SomeBean> container1 = IBeanContainer.ofIterableNotEmpty(Arrays.asList(new SomeBean(), new SomeBean(), new SomeBean()));
-    IBeanContainer<SomeBean> container2 = IBeanContainer.ofVariableNotEmpty(new SomeBean(), new SomeBean());
+    final IBeanContainer<SomeBean> container1 = IBeanContainer.ofIterableNotEmpty(Arrays.asList(new SomeBean(), new SomeBean(), new SomeBean()));
+    final IBeanContainer<SomeBean> container2 = IBeanContainer.ofVariableNotEmpty(new SomeBean(), new SomeBean());
     container1.merge(container2);
     assertEquals(5, container1.size());
   }
@@ -176,9 +176,9 @@ class BeanContainerTest
   @Test
   public void testSort()
   {
-    Stream<SomeBean> stream = IntStream.range(0, 5)
+    final Stream<SomeBean> stream = IntStream.range(0, 5)
         .mapToObj(SomeBean::new);
-    IBeanContainer<SomeBean> container = IBeanContainer.ofStreamNotEmpty(stream);
+    final IBeanContainer<SomeBean> container = IBeanContainer.ofStreamNotEmpty(stream);
     container.sort(Comparator.reverseOrder());
     IntStream.range(0, 5)
         .forEach(pIndex -> assertSame(4 - pIndex, container.getBean(pIndex).getValue(SomeBean.someField)));

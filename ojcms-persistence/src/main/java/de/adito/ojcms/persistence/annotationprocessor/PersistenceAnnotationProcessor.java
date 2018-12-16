@@ -54,7 +54,7 @@ public class PersistenceAnnotationProcessor extends AbstractProcessor
         throw new RuntimeException("A persistence annotation can only be used with bean classes!");
 
       //Single bean or container?
-      Map<String, Element> mapping = annotation.mode() == EPersistenceMode.CONTAINER ? containers : beans;
+      final Map<String, Element> mapping = annotation.mode() == EPersistenceMode.CONTAINER ? containers : beans;
 
       final String containerId = annotation.containerId();
       if (mapping.containsKey(containerId))
@@ -81,7 +81,7 @@ public class PersistenceAnnotationProcessor extends AbstractProcessor
   private void _createClass(String pClassName, Map<String, Element> pMapping, boolean pIsContainer)
   {
     //Create static fields
-    Set<FieldSpec> fieldSpecs = pMapping.entrySet().stream()
+    final Set<FieldSpec> fieldSpecs = pMapping.entrySet().stream()
         .map(pEntry -> FieldSpec.builder(_getFieldType(pEntry.getValue(), pIsContainer), pEntry.getKey())
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
             .initializer("$T.$N.$N($S, $T.class)", RETRIEVER_CLASS, RETRIEVER_METHOD, DATA_STORE_METHOD.apply(pIsContainer),
@@ -90,7 +90,7 @@ public class PersistenceAnnotationProcessor extends AbstractProcessor
         .collect(Collectors.toSet());
 
     final String allFields = String.join(", ", pMapping.keySet());
-    TypeSpec.Builder classBuilder = TypeSpec.classBuilder(pClassName)
+    final TypeSpec.Builder classBuilder = TypeSpec.classBuilder(pClassName)
         .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
         .addFields(fieldSpecs)
         .addStaticBlock(CodeBlock.builder()
@@ -119,7 +119,7 @@ public class PersistenceAnnotationProcessor extends AbstractProcessor
    */
   private TypeName _getFieldType(Element pElement, boolean pIsContainer)
   {
-    TypeName beanType = TypeName.get(pElement.asType());
+    final TypeName beanType = TypeName.get(pElement.asType());
     return pIsContainer ? ParameterizedTypeName.get(ClassName.get(IBeanContainer.class), beanType) : beanType;
   }
 }

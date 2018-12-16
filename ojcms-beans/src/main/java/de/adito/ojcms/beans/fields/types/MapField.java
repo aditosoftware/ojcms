@@ -9,6 +9,7 @@ import org.jetbrains.annotations.*;
 
 import java.lang.annotation.Annotation;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
 /**
@@ -21,7 +22,7 @@ import java.util.function.Predicate;
  */
 public class MapField<KEY, VALUE> extends AbstractField<MapBean<KEY, VALUE>>
 {
-  private final Map<KEY, IField<?>> fieldCache = new HashMap<>();
+  private final Map<KEY, IField<?>> fieldCache = new ConcurrentHashMap<>();
 
   public MapField(@NotNull Class<MapBean<KEY, VALUE>> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {
@@ -30,12 +31,12 @@ public class MapField<KEY, VALUE> extends AbstractField<MapBean<KEY, VALUE>>
 
   /**
    * Creates a bean from a map.
-   * The key's hashcode defines the bean field's name.
+   * The key's toString representation defines the bean field's name.
    * Each entry in the map will result in one bean field with the associated value.
    *
    * @param pMap       the map that will be transformed
    * @param pValueType the value type of the map
-   * @return a (modifiable) bean, that represents the original map
+   * @return a (modifiable) bean that represents the original map
    */
   public MapBean<KEY, VALUE> createBeanFromMap(Map<KEY, VALUE> pMap, Class<VALUE> pValueType)
   {
@@ -44,6 +45,7 @@ public class MapField<KEY, VALUE> extends AbstractField<MapBean<KEY, VALUE>>
 
   /**
    * Creates a bean from a map.
+   * he key's toString representation defines the bean field's name.
    * Each entry in the map will result in one bean field with the associated value.
    * This method is also able to define a field predicate, which excludes certain bean fields / map values.
    *
@@ -67,7 +69,7 @@ public class MapField<KEY, VALUE> extends AbstractField<MapBean<KEY, VALUE>>
    * The map will be a {@link LinkedHashMap}.
    *
    * @param pBean the bean that this field belongs to
-   * @return the original map, which was represented by the bean (new instance of the map)
+   * @return the original map that was represented by the bean (new instance of the map)
    */
   public Map<KEY, VALUE> createMapFromBean(IBean<?> pBean)
   {

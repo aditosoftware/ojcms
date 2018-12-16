@@ -1,5 +1,6 @@
 package de.adito.ojcms.beans;
 
+import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
 import de.adito.ojcms.beans.datasource.*;
 import de.adito.ojcms.beans.exceptions.*;
 import de.adito.ojcms.beans.fields.IField;
@@ -12,10 +13,12 @@ import java.util.function.Function;
 import java.util.stream.*;
 
 /**
- * Utility class for copying beans.
+ * Utility class for bean copies.
+ * A copy can be created from every bean. The API user has to define what {@link ECopyMode} should be used for the copy.
  *
  * @author Simon Danner, 12.04.2018
  */
+@RequiresEncapsulatedAccess
 final class BeanCopies
 {
   private static final Objenesis COPY_CREATOR = new ObjenesisStd();
@@ -34,8 +37,7 @@ final class BeanCopies
   static <BEAN extends IBean<BEAN>> BEAN createCopy(BEAN pOriginal, ECopyMode pMode, CustomFieldCopy<?>... pCustomCopies)
   {
     //noinspection unchecked
-    final Class<BEAN> beanType = (Class<BEAN>) pOriginal.getClass();
-    BeanUtil.requiresDeclaredBeanType(beanType);
+    final Class<BEAN> beanType = (Class<BEAN>) BeanUtil.requiresDeclaredBeanType(pOriginal.getClass());
     final List<IField<?>> fieldOrder = pOriginal.streamFields().collect(Collectors.toList());
     final BEAN copyInstance = _createBeanPerDefaultConstructorAndSetDataSource(beanType, fieldOrder)
         .orElse(_createBeanSneakyAndInjectEncapsulatedData(beanType, fieldOrder));
@@ -108,7 +110,7 @@ final class BeanCopies
     }
     catch (NoSuchFieldException | IllegalAccessException pE)
     {
-      throw new RuntimeException("Critical: Unable to set encapsulated data core for bean type " + pBeanType.getName(), pE);
+      throw new RuntimeException("Unable to set encapsulated data core for bean type " + pBeanType.getName(), pE);
     }
   }
 
@@ -125,7 +127,7 @@ final class BeanCopies
    */
   private static <BEAN extends IBean<BEAN>> BEAN _setValues(BEAN pOriginal, BEAN pCopy, ECopyMode pMode, CustomFieldCopy<?>[] pCustomCopies)
   {
-    Map<IField<?>, Function> customCopiesMap = pMode.shouldCopyDeep() ? _createCustomCopiesMap(pCustomCopies) : Collections.emptyMap();
+    final Map<IField<?>, Function> customCopiesMap = pMode.shouldCopyDeep() ? _createCustomCopiesMap(pCustomCopies) : Collections.emptyMap();
     //noinspection unchecked,RedundantCast
     pCopy.streamFields()
         .forEach(pField -> pCopy.setValue((IField) pField, !pMode.shouldCopyDeep() ? pOriginal.getValue(pField) :
@@ -171,7 +173,7 @@ final class BeanCopies
           .map(pCreator -> pCreator.apply(pValue))
           .orElse(pField.copyValue(pValue, pMode, pCustomCopies));
     }
-    catch (BeanCopyUnsupportedException pE)
+    catch (BeanCopyNotSupportedException pE)
     {
       throw new BeanCopyException(pE);
     }

@@ -7,6 +7,7 @@ import org.jetbrains.annotations.*;
 
 import java.lang.annotation.Annotation;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 /**
@@ -21,9 +22,9 @@ abstract class AbstractField<VALUE> implements IField<VALUE>
   private final Class<VALUE> dataType;
   private final String name;
   private final Collection<Annotation> annotations;
-  private final Map<Class, Function<?, VALUE>> toConverters = new HashMap<>();
+  private final Map<Class, Function<?, VALUE>> toConverters = new HashMap<>(); //Access should only be read wise after the field's creation
   private final Map<Class, Function<VALUE, ?>> fromConverters = new HashMap<>();
-  private final Map<IAdditionalFieldInfo, Object> additionalInformation = new HashMap<>();
+  private final Map<IAdditionalFieldInfo, Object> additionalInformation = new ConcurrentHashMap<>();
 
   /**
    * Initialises the field with the base data mentioned above.
@@ -140,7 +141,7 @@ abstract class AbstractField<VALUE> implements IField<VALUE>
   }
 
   /**
-   * Registers a converter for this field's data type
+   * Registers a converter for this field's data type.
    *
    * @param pSourceType    the source data type for this converter (the data type that will be converted to this field's type)
    * @param pToConverter   the converter that converts from the source's data type to field's data type

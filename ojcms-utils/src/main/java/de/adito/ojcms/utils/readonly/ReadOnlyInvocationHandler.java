@@ -4,7 +4,7 @@ import java.lang.reflect.*;
 import java.util.*;
 
 /**
- * A read only invocation handler wrapping around a source instance and block all methods annotated with {@link WriteOperation}.
+ * A read only invocation handler wrapping around a source instance and blocking all methods annotated with {@link WriteOperation}.
  * Also provides read only support for collection and map return types.
  *
  * @param <SOURCE> the type of the source instance to make read only

@@ -7,7 +7,7 @@ import java.util.stream.LongStream;
 /**
  * Linked map implementation for interval based statistic data.
  * The entries will be added from the first change timestamp of the statistics until the last for every interval.
- * For further changes a listener will add interval based entries until the timestamp of the new change.
+ * For further changes a observer will add interval based entries until the timestamp of the new change.
  *
  * @param <ENTRY> the data type of the statistic entry values
  * @author Simon Danner, 28.07.2018
@@ -21,13 +21,13 @@ class IntervalStatisticsMap<ENTRY> extends LinkedHashMap<Long, ENTRY>
 
   /**
    * Creates a new interval based statistic map.
-   * Adds the initial entries and registers a weak listener at the statistic data.
+   * Adds the initial entries and registers an observer for new statistic entries to update automatically.
    *
    * @param pInterval       the interval for the statistics
-   * @param pValueResolver  a function to resolve the according value from a timestamp
+   * @param pValueResolver  a function to resolve the according value for a timestamp
    * @param pFirstTimestamp the first timestamp of the value changes
    * @param pLastTimestamp  the last timestamp of the value changes
-   * @param pStatisticData  the statistic data itself to register the listener
+   * @param pStatisticData  the statistic data itself to register the observer
    */
   IntervalStatisticsMap(int pInterval, Function<Long, ENTRY> pValueResolver, long pFirstTimestamp, long pLastTimestamp,
                         IStatisticData<ENTRY> pStatisticData)
@@ -56,7 +56,7 @@ class IntervalStatisticsMap<ENTRY> extends LinkedHashMap<Long, ENTRY>
    */
   private void _addEntries()
   {
-    long totalDiff = lastTimestamp - firstTimestamp;
+    final long totalDiff = lastTimestamp - firstTimestamp;
     LongStream.iterate(firstTimestamp, pTimeStamp -> pTimeStamp + interval)
         //Add two entries, if the last entry surpasses the last entry of the changes
         .limit(totalDiff / interval + (totalDiff % interval == 0 ? 1 : 2))

@@ -84,13 +84,13 @@ public class Create extends AbstractBaseStatement<Void, Create>
   }
 
   /**
-   * Adds a primary key to the statement format, if there are columns markes as primary keys.
+   * Adds a primary key to the statement format, if there are columns marked as primary keys.
    *
    * @param pFormatter the formatter for the statement
    */
   private void _primaryKeys(StatementFormatter pFormatter)
   {
-    List<String> primaryKeyColumnNames = columns.stream()
+    final List<String> primaryKeyColumnNames = columns.stream()
         .filter(pColumn -> pColumn.getColumnType().isPrimaryKey())
         .map(pColumnDefinition -> pColumnDefinition.getColumnName().toUpperCase())
         .collect(Collectors.toList());
@@ -108,13 +108,12 @@ public class Create extends AbstractBaseStatement<Void, Create>
    */
   private void _foreignKeys(StatementFormatter pFormatter)
   {
-    Map<String, IForeignKey> foreignKeyMapping = columns.stream()
+    final Map<String, IForeignKey> foreignKeyMapping = columns.stream()
         .filter(pColumn -> pColumn.getColumnType().getForeignKey() != null)
         .collect(Collectors.toMap(IColumnDefinition::getColumnName, pColumn -> pColumn.getColumnType().getForeignKey()));
     if (foreignKeyMapping.isEmpty())
       return;
-    final OJSQLBuilder tableChecker = OJSQLBuilderFactory.newSQLBuilder(builder)
-        .create();
+    final OJSQLBuilder tableChecker = OJSQLBuilderFactory.newSQLBuilder(builder).create();
     foreignKeyMapping.forEach((pColumn, pReference) -> {
       if (!tableChecker.hasTable(pReference.getTableName()))
         pReference.createReferencedTable(tableChecker.getConnectionInfo()); //Create referenced table, if necessary

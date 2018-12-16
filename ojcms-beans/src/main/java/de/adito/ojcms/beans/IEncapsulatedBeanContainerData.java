@@ -60,7 +60,7 @@ interface IEncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends IEnca
   BEAN removeBean(int pIndex);
 
   /**
-   * Gets a bean by its index.
+   * Returns a bean by its index.
    *
    * @param pIndex the index of the bean
    * @return the bean at the certain index
@@ -72,12 +72,14 @@ interface IEncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends IEnca
    * -1, if the bean is not present within the data core.
    *
    * @param pBean the bean
-   * @return the index of the bean
+   * @return the index of the bean (or -1 if not present)
    */
   int indexOfBean(BEAN pBean);
 
   /**
    * The amount of beans.
+   *
+   * @return the number of beans in the data core
    */
   int size();
 
@@ -93,7 +95,7 @@ interface IEncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends IEnca
    * If the number of beans exceeds the limit, beans will be removed from the beginning of this container until the limit is reached.
    *
    * @param pMaxCount the maximum amount of beans in this core
-   * @param pEvicting <tt>true</tt>, if the first beans should be removed, when the limit is reached
+   * @param pEvicting <tt>true</tt>, if the eldest beans should be removed, when the limit is reached
    */
   void setLimit(int pMaxCount, boolean pEvicting);
 

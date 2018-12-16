@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 
 /**
  * Marks a bean field as an optional field.
- * This annotation also provides a predicate, which determines when this field is active.
+ * This annotation also provides a predicate to determine when this field is active.
  * If this field isn't active according to the predicate, the bean behaves like this field isn't existing at all.
  * But it is still allowed to change the value of a non active bean field, because the condition may be based on the value.
  *
@@ -20,7 +20,7 @@ import java.util.function.Predicate;
 public @interface OptionalField
 {
   /**
-   * Identifier for the predicate that will be stored at the field as additional information.
+   * Identifier for the predicate that will be stored at the field as an additional information.
    */
   IAdditionalFieldInfo<IActiveCondition> ACTIVE_CONDITION = () -> IActiveCondition.class;
 

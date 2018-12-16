@@ -45,9 +45,9 @@ public interface IColumnDefinition extends IStatementFormat
    * @param pModifier   an optional function to modify the column type
    * @return the created column definition
    */
-  static IColumnDefinition forType(Class pType, String pColumnName, @Nullable Function<IColumnType, IColumnType> pModifier)
+  static IColumnDefinition forType(Class<?> pType, String pColumnName, @Nullable Function<IColumnType, IColumnType> pModifier)
   {
-    IColumnType columnType = EColumnType.getByDataType(pType)
+    final IColumnType columnType = EColumnType.getByDataType(pType)
         .orElseThrow(() -> new OJDatabaseException("No column type found for data type " + pType.getName()));
     return of(pColumnName, pModifier == null ? columnType : pModifier.apply(columnType));
   }

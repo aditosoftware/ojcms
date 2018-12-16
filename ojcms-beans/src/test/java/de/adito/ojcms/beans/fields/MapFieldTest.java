@@ -34,7 +34,7 @@ class MapFieldTest
     bean.setValue(SomeBean.mapField, SomeBean.mapField.createBeanFromMap(data, String.class));
     _testFieldTuples(bean.getValue(SomeBean.mapField));
     //Test backwards transformation to map
-    Map<Integer, String> backToMap = SomeBean.mapField.createMapFromBean(bean);
+    final Map<Integer, String> backToMap = SomeBean.mapField.createMapFromBean(bean);
     assertEquals(data, backToMap);
   }
 
@@ -42,7 +42,7 @@ class MapFieldTest
   public void testToBeanTransformationWithPredicate()
   {
     //Allow only odd numbers
-    MapBean<Integer, String> mapBean = SomeBean.mapField.createBeanFromMap(data, String.class,
+    final MapBean<Integer, String> mapBean = SomeBean.mapField.createBeanFromMap(data, String.class,
                                                                            pTuple -> Integer.parseInt(pTuple.getValue().substring(5)) % 2 == 0);
     final AtomicInteger index = new AtomicInteger(1);
     mapBean.stream()

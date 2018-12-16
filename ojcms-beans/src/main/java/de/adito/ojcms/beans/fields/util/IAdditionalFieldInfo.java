@@ -10,7 +10,7 @@ package de.adito.ojcms.beans.fields.util;
 public interface IAdditionalFieldInfo<INFO>
 {
   /**
-   * The data type of this additional information.
+   * The data type of the additional information.
    *
    * @return the data type
    */

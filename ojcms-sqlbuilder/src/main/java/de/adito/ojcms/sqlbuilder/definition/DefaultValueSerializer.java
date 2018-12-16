@@ -39,17 +39,17 @@ class DefaultValueSerializer implements IValueSerializer
   @Override
   public @Nullable <VALUE> String toSerial(IColumnValueTuple<VALUE> pColumnValueTuple)
   {
-    Class<VALUE> dataType = pColumnValueTuple.getColumn().getDataType();
+    final Class<VALUE> dataType = pColumnValueTuple.getColumn().getDataType();
     if (!supportedTypesToSerial.containsKey(dataType))
       throw new RuntimeException(dataType.getName() + " is not a supported value type for this serializer!");
-    VALUE value = pColumnValueTuple.getValue();
+    final VALUE value = pColumnValueTuple.getValue();
     return value == null ? null : supportedTypesToSerial.get(dataType).apply(value);
   }
 
   @Override
   public <VALUE> @Nullable VALUE fromSerial(IColumnIdentification<VALUE> pColumnIdentification, String pSerialValue)
   {
-    Class<VALUE> dataType = pColumnIdentification.getDataType();
+    final Class<VALUE> dataType = pColumnIdentification.getDataType();
     if (!supportedTypesFromSerial.containsKey(dataType))
       throw new RuntimeException(dataType.getName() + " is not a supported value type for this deserializer!");
     //noinspection unchecked

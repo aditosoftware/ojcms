@@ -9,9 +9,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * A SQL column identification based on a bean field.
+ * A database column identification based on a bean field.
  *
- * @param <VALUE> the data type of the column and according bean field
+ * @param <VALUE> the data type of the column and associated bean field
  * @author Simon Danner, 07.05.2018
  */
 public class BeanColumnIdentification<VALUE> implements IColumnIdentification<VALUE>, IBeanFieldBased<VALUE>
@@ -55,7 +55,7 @@ public class BeanColumnIdentification<VALUE> implements IColumnIdentification<VA
   public static List<BeanColumnIdentification<?>> ofMultiple(Collection<IField<?>> pFields)
   {
     return pFields.stream()
-        .map((Function<IField<?>, ? extends BeanColumnIdentification<?>>) BeanColumnIdentification::new)
+        .map((Function<IField<?>, BeanColumnIdentification<?>>) BeanColumnIdentification::new)
         .collect(Collectors.toList());
   }
 }

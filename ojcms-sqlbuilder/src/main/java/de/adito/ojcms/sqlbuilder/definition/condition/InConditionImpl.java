@@ -8,7 +8,7 @@ import java.util.function.BiFunction;
 import java.util.stream.*;
 
 /**
- * Implementation of a "IN" where condition for database statements.
+ * Implementation of an "IN" where condition for database statements.
  *
  * @param <VALUE> the data type of the value of the condition
  * @author Simon Danner, 11.06.2018
@@ -44,7 +44,7 @@ class InConditionImpl<VALUE> extends ConditionImpl<VALUE>
   }
 
   @Override
-  public List<IColumnValueTuple<?>> getArguments(EDatabaseType pDatabaseType, String pIdColumnName)
+  public List<IColumnValueTuple<?>> getArguments(String pIdColumnName)
   {
     return Collections.unmodifiableList(values);
   }

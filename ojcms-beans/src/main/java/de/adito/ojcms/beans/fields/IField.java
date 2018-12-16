@@ -1,6 +1,6 @@
 package de.adito.ojcms.beans.fields;
 
-import de.adito.ojcms.beans.exceptions.BeanCopyUnsupportedException;
+import de.adito.ojcms.beans.exceptions.BeanCopyNotSupportedException;
 import de.adito.ojcms.beans.fields.util.*;
 import de.adito.ojcms.beans.util.*;
 
@@ -10,7 +10,7 @@ import java.util.function.Function;
 
 /**
  * A field of a bean that is based on an inner data type.
- * It's just a wrapper for the actual data that holds additional meta information for the field.
+ * It's just a wrapper for the actual data that holds additional meta information of the field.
  *
  * @param <VALUE> the inner data type of this bean field
  * @author Simon Danner, 23.08.2016
@@ -56,7 +56,7 @@ public interface IField<VALUE>
   }
 
   /**
-   * A string representation of the value of this bean field.
+   * A string representation of the data value of this bean field.
    * By default it is the result of {@link Object#toString()} of the value.
    *
    * @param pValue             the field's actual data value
@@ -78,9 +78,9 @@ public interface IField<VALUE>
    * @return a copy of the field value
    * @throws UnsupportedOperationException if, it is not possible to create a copy of the specified data type
    */
-  default VALUE copyValue(VALUE pValue, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies) throws BeanCopyUnsupportedException
+  default VALUE copyValue(VALUE pValue, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies) throws BeanCopyNotSupportedException
   {
-    throw new BeanCopyUnsupportedException(this);
+    throw new BeanCopyNotSupportedException(this);
   }
 
   /**
@@ -131,7 +131,7 @@ public interface IField<VALUE>
    * Determines, if this field is annotated by a specific annotation type.
    *
    * @param pType the annotation's type
-   * @return <tt>true</tt>, if the annotation is presetn
+   * @return <tt>true</tt>, if the annotation is present
    */
   boolean hasAnnotation(Class<? extends Annotation> pType);
 
@@ -162,14 +162,14 @@ public interface IField<VALUE>
   {
     return getAdditionalInformation(pIdentifier)
         .orElseThrow(() -> new RuntimeException("Additional information of type " + pIdentifier.getDataType().getName()
-                                                    + " is not present at field " + this));
+                                                    + " is not present at this field!"));
   }
 
   /**
    * Adds any additional information to this field.
    *
    * @param pIdentifier the identifier of the information
-   * @param pValue      any information
+   * @param pValue      the information
    * @see IAdditionalFieldInfo
    */
   <INFO> void addAdditionalInformation(IAdditionalFieldInfo<INFO> pIdentifier, INFO pValue);
@@ -177,7 +177,7 @@ public interface IField<VALUE>
   /**
    * Determines, if this field has private access only.
    *
-   * <tt>true</tt>, if the access modifier private is set
+   * @return <tt>true</tt>, if the access modifier private is set
    */
   boolean isPrivate();
 

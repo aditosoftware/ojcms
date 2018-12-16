@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Tests for the originalValue converters of bean fields.
+ * Tests for the original value converters of bean fields.
  * More precisely the methods {@link IBean#getValueConverted(IField, Class)} and {@link IBean#setValueConverted(IField, Object)}
  * will be tested with all available converters.
  *
@@ -49,9 +49,9 @@ class BeanFieldConverterTest
   public <SOURCE, VALUE> void testConverters(_TypeValueWrapper<SOURCE, VALUE> pWrapper)
   {
     bean.setValueConverted(pWrapper.beanField, pWrapper.originalValue);
-    VALUE convertedValue = bean.getValue(pWrapper.beanField);
+    final VALUE convertedValue = bean.getValue(pWrapper.beanField);
     assertEquals(convertedValue, pWrapper.expectedConvertedValue);
-    SOURCE originalValue = bean.getValueConverted(pWrapper.beanField, pWrapper.type);
+    final SOURCE originalValue = bean.getValueConverted(pWrapper.beanField, pWrapper.type);
     assertEquals(originalValue, pWrapper.originalValue);
   }
 
@@ -64,11 +64,12 @@ class BeanFieldConverterTest
   }
 
   /**
-   * Wrapper for a data type and a originalValue of this type.
+   * Wrapper for a data type and a original value of this type.
    * Both will be applied to a bean field with a converter.
-   * Also an expected converted originalValue has to be defined (according to the bean fields type)
+   * Also an expected converted value has to be defined (according to the bean fields type)
    *
-   * @param <VALUE> the generic data type
+   * @param <SOURCE> the generic source data type
+   * @param <VALUE>  the generic data type
    */
   private static class _TypeValueWrapper<SOURCE, VALUE>
   {
