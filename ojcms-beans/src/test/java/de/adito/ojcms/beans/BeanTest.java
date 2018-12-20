@@ -100,7 +100,7 @@ class BeanTest
   @Test
   public void testFieldCount()
   {
-    assertEquals(2, bean.getFieldCount());
+    assertEquals(3, bean.getFieldCount());
   }
 
   @Test
@@ -134,16 +134,28 @@ class BeanTest
   @Test
   public void testFindFieldByNameFail()
   {
-    final Optional<IField<?>> result = bean.findFieldByName("notExisting");
-    assertFalse(result.isPresent());
+    assertThrows(BeanFieldDoesNotExistException.class, () -> bean.getFieldByName("notExisting"));
   }
 
   @Test
   public void testFindFieldByNameSuccess()
   {
-    final Optional<IField<?>> result = bean.findFieldByName("someField");
-    assertTrue(result.isPresent());
-    assertSame(SomeBean.someField, result.get());
+    final IField<?> field = bean.getFieldByName("someField");
+    assertSame(SomeBean.someField, field);
+  }
+
+  @Test
+  public void testResolveDeepBean()
+  {
+    final IBean<?> deepBean = bean.resolveDeepBean(SomeBean.deepField, DeepBean.deeperField);
+    assertSame(DeepBean.DEEPER_BEAN, deepBean);
+  }
+
+  @Test
+  public void testResolveDeepValue()
+  {
+    final Integer deepValue = bean.resolveDeepValue(DeeperBean.deepValue, SomeBean.deepField, DeepBean.deeperField);
+    assertSame(DeeperBean.DEEP_VALUE, deepValue);
   }
 
   /**
@@ -156,12 +168,14 @@ class BeanTest
     public static final IntegerField numberField = BeanFieldFactory.create(SomeBean.class);
     @Private
     public static final TextField somePrivateField = BeanFieldFactory.create(SomeBean.class);
+    public static final BeanField<DeepBean> deepField = BeanFieldFactory.create(SomeBean.class);
 
     public SomeBean()
     {
       setValue(someField, VALUE);
       setValue(numberField, 42);
       setPrivateValue(somePrivateField, PRIVATE_VALUE);
+      setValue(deepField, new DeepBean());
     }
 
     /**
@@ -172,6 +186,34 @@ class BeanTest
     public String getSomePrivateValue()
     {
       return getPrivateValue(somePrivateField);
+    }
+  }
+
+  /**
+   * A deep bean that holds a reference to another bean.
+   */
+  public static class DeepBean extends Bean<DeepBean>
+  {
+    public static final DeeperBean DEEPER_BEAN = new DeeperBean();
+    public static final BeanField<DeeperBean> deeperField = BeanFieldFactory.create(DeepBean.class);
+
+    public DeepBean()
+    {
+      setValue(deeperField, DEEPER_BEAN);
+    }
+  }
+
+  /**
+   * An even deeper bean that holds a very deep value.
+   */
+  public static class DeeperBean extends Bean<DeeperBean>
+  {
+    public static final int DEEP_VALUE = 42;
+    public static final IntegerField deepValue = BeanFieldFactory.create(DeeperBean.class);
+
+    public DeeperBean()
+    {
+      setValue(deepValue, DEEP_VALUE);
     }
   }
 }

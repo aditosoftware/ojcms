@@ -5,7 +5,6 @@ import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
 import de.adito.ojcms.beans.datasource.MapBasedBeanDataSource;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.fields.util.FieldValueTuple;
-import de.adito.ojcms.beans.util.BeanUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -22,7 +21,7 @@ import java.util.stream.Collectors;
  * @author Simon Danner, 07.02.2017
  */
 @RequiresEncapsulatedAccess
-public class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IModifiableBean<MapBean<KEY, VALUE>>
+public final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IModifiableBean<MapBean<KEY, VALUE>>
 {
   private final IEncapsulatedBeanData encapsulated;
   private final boolean isDetail;
@@ -179,10 +178,12 @@ public class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMod
     if (pObject == null || getClass() != pObject.getClass())
       return false;
 
-    MapBean other = (MapBean) pObject;
+    final MapBean other = (MapBean) pObject;
     //MapBeans are the same, if all fields and associated values are equal
     //noinspection unchecked
-    return streamFields().allMatch(other::hasField) && !BeanUtil.compareBeanValues(this, other, streamFields()).isPresent();
+    return streamFields().allMatch(other::hasField) && streamFields()
+        .map(pIdentifierField -> (IField) pIdentifierField)
+        .allMatch(pIdentifierField -> Objects.equals(getValue(pIdentifierField), other.getValue(pIdentifierField)));
   }
 
   @Override

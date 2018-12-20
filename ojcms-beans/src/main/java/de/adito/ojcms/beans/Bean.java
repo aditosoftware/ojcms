@@ -5,7 +5,7 @@ import de.adito.ojcms.beans.datasource.*;
 import de.adito.ojcms.beans.exceptions.BeanFieldDoesNotExistException;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.fields.util.FieldValueTuple;
-import de.adito.ojcms.beans.util.*;
+import de.adito.ojcms.beans.util.BeanReflector;
 
 import java.util.*;
 import java.util.logging.*;
@@ -152,7 +152,7 @@ public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
    * @param pField  the field to check
    * @param <VALUE> the generic data type of the field
    */
-  private <VALUE> void _checkNotPrivateAndWarn(IField<VALUE> pField)
+  private static <VALUE> void _checkNotPrivateAndWarn(IField<VALUE> pField)
   {
     if (!pField.isPrivate())
       LOGGER.log(Level.WARNING, "The field '" + pField.getName() + "' is not private. Use the public method to get/set the value instead!");
@@ -166,6 +166,7 @@ public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
         .collect(Collectors.joining(", ")) + "}";
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public boolean equals(Object pOther)
   {
@@ -173,18 +174,19 @@ public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
       return true;
     if (pOther == null || getClass() != pOther.getClass())
       return false;
-    Set<FieldValueTuple<?>> identifiers = getIdentifiers();
+    final Set<FieldValueTuple<?>> identifiers = getIdentifiers();
     if (identifiers.isEmpty())
       return false;
-    return !BeanUtil.compareBeanValues(this, (IBean) pOther, identifiers.stream()
-        .map(FieldValueTuple::getField))
-        .isPresent();
+    final Bean<BEAN> other = (Bean<BEAN>) pOther;
+    return identifiers.stream()
+        .map(pIdentifierField -> (IField) pIdentifierField)
+        .allMatch(pIdentifierField -> Objects.equals(getValue(pIdentifierField), other.getValue(pIdentifierField)));
   }
 
   @Override
   public int hashCode()
   {
-    Set<FieldValueTuple<?>> identifiers = getIdentifiers();
+    final Set<FieldValueTuple<?>> identifiers = getIdentifiers();
     return identifiers.isEmpty() ? super.hashCode() : Objects.hash(identifiers.stream()
                                                                        .map(FieldValueTuple::getValue)
                                                                        .toArray(Object[]::new));

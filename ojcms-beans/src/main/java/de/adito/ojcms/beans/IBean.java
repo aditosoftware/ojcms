@@ -10,7 +10,7 @@ import de.adito.ojcms.beans.references.*;
 import de.adito.ojcms.beans.statistics.IStatisticData;
 import de.adito.ojcms.beans.util.*;
 import de.adito.ojcms.utils.readonly.*;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.*;
 
 import java.util.*;
 import java.util.function.Function;
@@ -213,6 +213,21 @@ public interface IBean<BEAN extends IBean<BEAN>>
   }
 
   /**
+   * A field of this bean by its name.
+   * This method will lead to a runtime exception, if such a field isn't existing.
+   *
+   * @param pFieldName the name of the field
+   * @return the bean field with the name to search for
+   */
+  default IField<?> getFieldByName(String pFieldName)
+  {
+    return streamFields()
+        .filter(pField -> pField.getName().equals(pFieldName))
+        .findAny()
+        .orElseThrow(() -> new BeanFieldDoesNotExistException(this, pFieldName));
+  }
+
+  /**
    * Creates a copy of this bean.
    * This method expects an existing default constructor for this concrete bean type.
    * If the copy should include deep fields, all deep beans are supposed to have default constructors as well.
@@ -282,16 +297,76 @@ public interface IBean<BEAN extends IBean<BEAN>>
   }
 
   /**
-   * Searches a bean field by its name.
+   * Resolves a deep bean within this bean's children. (references created via {@link de.adito.ojcms.beans.fields.types.BeanField}
+   * The bean will be resolved based on a chain of bean fields, which lead the way to the deep bean.
    *
-   * @param pName the name to search for
-   * @return a Optional that may contain the bean field
+   * @param pChain the chain of bean fields that leads the way to the deep bean value
+   * @return the deep bean within this bean's children
    */
-  default Optional<IField<?>> findFieldByName(String pName)
+  @NotNull
+  default IBean<?> resolveDeepBean(IField<?>... pChain)
   {
-    return streamFields()
-        .filter(pField -> pField.getName().equals(pName))
-        .findAny();
+    return resolveDeepBean(Arrays.asList(pChain));
+  }
+
+  /**
+   * Resolves a deep bean within this bean's children. (references created via {@link de.adito.ojcms.beans.fields.types.BeanField}
+   * The bean will be resolved based on a chain of bean fields, which lead the way to the deep bean.
+   *
+   * @param pChain the chain of bean fields that leads the way to the deep bean value
+   * @return the deep bean within this bean's children
+   */
+  @NotNull
+  default IBean<?> resolveDeepBean(List<IField<?>> pChain)
+  {
+    IBean<?> current = this;
+    for (IField<?> field : pChain)
+    {
+      if (!current.hasField(field))
+        throw new RuntimeException("Invalid chain. The parent bean '" + current + "'" +
+                                       " does not contain a field " + field.getName() + ".");
+      final Object value = current.getValue(field);
+      if (!(value instanceof IBean))
+        throw new RuntimeException("Invalid chain. It can only contain bean reference fields. " + field.getName() + " is of data type " +
+                                       field.getDataType().getName());
+      current = (IBean<?>) value;
+    }
+
+    return current;
+  }
+
+  /**
+   * Resolves a deep value within this bean's children. (references created via {@link de.adito.ojcms.beans.fields.types.BeanField}
+   * The starting point is this bean, from which a chain of bean fields lead to the certain field to retrieve the deep value from.
+   *
+   * @param pDeepField the deep field to resolve the value to
+   * @param pChain     the chain of bean fields that describes the way to the deep bean
+   * @param <VALUE>    the data type of the deep field
+   * @return the value of the deep field
+   */
+  @Nullable
+  default <VALUE> VALUE resolveDeepValue(IField<VALUE> pDeepField, IField<?>... pChain)
+  {
+    return resolveDeepValue(pDeepField, Arrays.asList(pChain));
+  }
+
+  /**
+   * Resolves a deep value within this bean's children. (references created via {@link de.adito.ojcms.beans.fields.types.BeanField}
+   * The starting point is this bean, from which a chain of bean fields lead to the certain field to retrieve the deep value from.
+   *
+   * @param pDeepField the deep field to resolve the value to
+   * @param pChain     the chain of bean fields that describes the way to the deep bean
+   * @param <VALUE>    the data type of the deep field
+   * @return the value of the deep field
+   */
+  @Nullable
+  default <VALUE> VALUE resolveDeepValue(IField<VALUE> pDeepField, List<IField<?>> pChain)
+  {
+    final IBean<?> deepBean = resolveDeepBean(pChain);
+    if (!deepBean.hasField(pDeepField))
+      throw new RuntimeException("The resolved deep bean '" + deepBean + "' does not contain the field '" + pDeepField.getName() +
+                                     "' to evaluate the value for.");
+    return deepBean.getValue(pDeepField);
   }
 
   /**

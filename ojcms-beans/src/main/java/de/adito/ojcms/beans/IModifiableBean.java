@@ -3,7 +3,6 @@ package de.adito.ojcms.beans;
 import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.reactive.events.*;
-import de.adito.ojcms.beans.util.BeanUtil;
 
 import java.lang.annotation.Annotation;
 import java.util.*;
@@ -117,7 +116,7 @@ public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
    */
   default Object removeFieldByName(String pFieldName)
   {
-    return removeField(BeanUtil.findFieldByName(this, pFieldName));
+    return removeField(getFieldByName(pFieldName));
   }
 
   /**

@@ -37,7 +37,7 @@ final class BeanCopies
   static <BEAN extends IBean<BEAN>> BEAN createCopy(BEAN pOriginal, ECopyMode pMode, CustomFieldCopy<?>... pCustomCopies)
   {
     //noinspection unchecked
-    final Class<BEAN> beanType = (Class<BEAN>) BeanUtil.requiresDeclaredBeanType(pOriginal.getClass());
+    final Class<BEAN> beanType = (Class<BEAN>) BeanReflector.requiresDeclaredBeanType(pOriginal.getClass());
     final List<IField<?>> fieldOrder = pOriginal.streamFields().collect(Collectors.toList());
     final BEAN copyInstance = _createBeanPerDefaultConstructorAndSetDataSource(beanType, fieldOrder)
         .orElse(_createBeanSneakyAndInjectEncapsulatedData(beanType, fieldOrder));

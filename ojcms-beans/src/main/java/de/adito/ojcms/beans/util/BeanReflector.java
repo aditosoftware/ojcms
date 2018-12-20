@@ -74,6 +74,25 @@ public final class BeanReflector
   }
 
   /**
+   * Checks, if a bean type is a valid declared type.
+   * It has to be public and an extension of {@link Bean}.
+   * Throws a runtime exception, if the type is invalid.
+   * This check can be used in any cases, where especially transformed types are not allowed.
+   *
+   * @param pBeanType the bean type to check
+   * @return the valid bean type
+   */
+  public static Class<? extends IBean> requiresDeclaredBeanType(Class<? extends IBean> pBeanType)
+  {
+    if (!Modifier.isPublic(pBeanType.getModifiers()))
+      throw new RuntimeException(pBeanType.getName() + " is not a valid bean type! It has to be declared public to create fields!");
+
+    if (!Bean.class.isAssignableFrom(pBeanType) && !MapBean.class.isAssignableFrom(pBeanType)) //To make sure it isn't a transformed type
+      throw new RuntimeException(pBeanType.getName() + " is not a valid bean type! Do not use transformed bean types!");
+    return pBeanType;
+  }
+
+  /**
    * Reflects the bean fields of a bean type.
    *
    * @param pBeanType the type of the bean, which must be an extension of {@link Bean} to own specific fields
@@ -81,7 +100,7 @@ public final class BeanReflector
    */
   private static List<IField<?>> _createBeanMetadata(Class<? extends IBean> pBeanType)
   {
-    return reflectDeclaredBeanFields(BeanUtil.requiresDeclaredBeanType(pBeanType)).stream()
+    return reflectDeclaredBeanFields(requiresDeclaredBeanType(pBeanType)).stream()
         .map(pField -> {
           try
           {
@@ -133,7 +152,7 @@ public final class BeanReflector
   @SafeVarargs
   private static List<Field> _getDeclaredFields(Class<? extends IBean> pBeanType, Predicate<Field>... pFieldPredicates)
   {
-    Class current = BeanUtil.requiresDeclaredBeanType(pBeanType);
+    Class current = requiresDeclaredBeanType(pBeanType);
     final List<Field> declaredFields = new ArrayList<>();
     final Predicate<Field> combinedPredicate = pField -> Stream.of(pFieldPredicates)
         .allMatch(pPredicate -> pPredicate.test(pField));
