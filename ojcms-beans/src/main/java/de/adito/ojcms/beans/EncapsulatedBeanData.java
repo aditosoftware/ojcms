@@ -67,9 +67,23 @@ class EncapsulatedBeanData extends AbstractEncapsulatedData<FieldValueTuple<?>, 
   }
 
   @Override
+  public IField<?> removeFieldAtIndex(int pIndex)
+  {
+    final IField<?> removedField = fieldOrder.remove(_requiresInRange(pIndex));
+    getDatasource().removeField(removedField);
+    return removedField;
+  }
+
+  @Override
   public int getFieldCount()
   {
     return fieldOrder.size();
+  }
+
+  @Override
+  public IField<?> getFieldAtIndex(int pIndex)
+  {
+    return fieldOrder.get(_requiresInRange(pIndex));
   }
 
   @Override
@@ -136,5 +150,19 @@ class EncapsulatedBeanData extends AbstractEncapsulatedData<FieldValueTuple<?>, 
     if (!containsField(pField))
       throw new BeanFieldDoesNotExistException(pField);
     pAction.accept(pField);
+  }
+
+  /**
+   * Checks, if a given index is in range of this bean data core's fields.
+   *
+   * @param pIndex the index to check
+   * @return the checked index
+   */
+  private int _requiresInRange(int pIndex)
+  {
+    final int count = getFieldCount();
+    if (pIndex < 0 || pIndex >= count)
+      throw new IndexOutOfBoundsException("index: " + pIndex + " max index: " + (count - 1));
+    return pIndex;
   }
 }

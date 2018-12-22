@@ -293,7 +293,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
   {
     return stream()
         .filter(pTuple -> pTuple.getField().hasAnnotation(Identifier.class))
-        .collect(Collectors.toSet());
+        .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
   /**

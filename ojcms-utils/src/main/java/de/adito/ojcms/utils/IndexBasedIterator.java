@@ -15,7 +15,7 @@ public final class IndexBasedIterator<ELEMENT> implements Iterator<ELEMENT>
 {
   private int index;
   private int lastIndex = -1;
-  private final int endIndexExclusive;
+  private int endIndexExclusive;
   private final Function<Integer, ELEMENT> provider;
   @Nullable
   private final Consumer<Integer> remover;
@@ -94,5 +94,6 @@ public final class IndexBasedIterator<ELEMENT> implements Iterator<ELEMENT>
       throw new IllegalStateException();
     remover.accept(index = lastIndex);
     lastIndex = -1;
+    endIndexExclusive--;
   }
 }

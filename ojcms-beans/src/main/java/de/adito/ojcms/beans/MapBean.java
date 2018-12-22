@@ -5,6 +5,7 @@ import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
 import de.adito.ojcms.beans.datasource.MapBasedBeanDataSource;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.fields.util.*;
+import de.adito.ojcms.utils.IndexBasedIterator;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -185,46 +186,25 @@ final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMapB
     @Override
     public Iterator<Entry<KEY, VALUE>> iterator()
     {
-      return new _EntryIterator();
+      return new IndexBasedIterator<>(size(), this::_createEntryForField, encapsulated::removeFieldAtIndex);
     }
 
     @Override
     public int size()
     {
-      return getFieldCount();
-    }
-  }
-
-  /**
-   * The iterator for the entry set.
-   */
-  private class _EntryIterator implements Iterator<Map.Entry<KEY, VALUE>>
-  {
-    private final Iterator<FieldValueTuple<?>> tupleIterator = stream().collect(Collectors.toList()).iterator();
-    private FieldValueTuple current;
-
-    @Override
-    public boolean hasNext()
-    {
-      return tupleIterator.hasNext();
+      return encapsulated.getFieldCount();
     }
 
-    @Override
-    public Entry<KEY, VALUE> next()
+    /**
+     * Creates a map entry for a certain bean field at a specific field index.
+     *
+     * @param pFieldIndex the field index to create the map entry for
+     * @return the newly created entry
+     */
+    private Entry<KEY, VALUE> _createEntryForField(int pFieldIndex)
     {
-      current = tupleIterator.next();
-      //noinspection unchecked
-      return new AbstractMap.SimpleEntry<>(fieldKeyMapping.get(current.getField()), (VALUE) getValueConverted(current.getField(), valueType));
-    }
-
-    @Override
-    public void remove()
-    {
-      if (current == null)
-        throw new IllegalStateException();
-      //noinspection unchecked
-      encapsulated.removeField(current.getField());
-      current = null;
+      final IField<?> field = encapsulated.getFieldAtIndex(pFieldIndex);
+      return new AbstractMap.SimpleEntry<>(fieldKeyMapping.get(field), getValueConverted(field, valueType));
     }
   }
 }

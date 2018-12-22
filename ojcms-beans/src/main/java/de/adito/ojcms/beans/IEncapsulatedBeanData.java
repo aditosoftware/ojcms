@@ -54,11 +54,28 @@ interface IEncapsulatedBeanData extends IEncapsulatedData<FieldValueTuple<?>, IB
   <VALUE> void removeField(IField<VALUE> pField);
 
   /**
+   * Removes a bean field from the data core at a certain index.
+   *
+   * @param pIndex the index to remove the field from
+   * @throws IndexOutOfBoundsException if there's no field at the given index
+   */
+  IField<?> removeFieldAtIndex(int pIndex);
+
+  /**
    * The amount of bean fields of this data core.
    *
    * @return the amount of fields (includes private fields)
    */
   int getFieldCount();
+
+  /**
+   * The bean field at a certain index (index depends on the declaration order).
+   *
+   * @param pIndex the index of the bean field
+   * @return the bean field at a certain index
+   * @throws IndexOutOfBoundsException if there's no field at the given index
+   */
+  IField<?> getFieldAtIndex(int pIndex);
 
   /**
    * A map of the statistic data of this core.
