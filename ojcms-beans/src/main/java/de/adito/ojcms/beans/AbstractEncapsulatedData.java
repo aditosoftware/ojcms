@@ -25,7 +25,8 @@ import java.util.stream.Collectors;
 @EncapsulatedData
 abstract class AbstractEncapsulatedData<ELEMENT, DATASOURCE extends IDataSource> implements IEncapsulatedData<ELEMENT, DATASOURCE>
 {
-  private final Map<IBean<?>, Set<IField<?>>> weakReferencesMapping = new WeakHashMap<>();
+  private final Map<IEncapsulatedBeanData, Set<BeanReference>> weakReferencesMapping =
+      Collections.synchronizedMap(new WeakHashMap<>());
   private final Map<Class<? extends IEvent>, PublishSubject<? extends IEvent>> eventSubjects = new ConcurrentHashMap<>();
   private DATASOURCE datasource;
 
@@ -48,36 +49,41 @@ abstract class AbstractEncapsulatedData<ELEMENT, DATASOURCE extends IDataSource>
   @Override
   public Set<BeanReference> getDirectReferences()
   {
-    synchronized (weakReferencesMapping)
-    {
-      return weakReferencesMapping.entrySet().stream()
-          .flatMap(pEntry -> pEntry.getValue().stream()
-              .map(pField -> new BeanReference(pEntry.getKey(), pField)))
-          .collect(Collectors.toSet());
-    }
+    return weakReferencesMapping.values().stream()
+        .flatMap(Collection::stream)
+        .collect(Collectors.toSet());
   }
 
   @Override
   public void addWeakReference(IBean<?> pBean, IField<?> pField)
   {
-    synchronized (weakReferencesMapping)
-    {
-      weakReferencesMapping.computeIfAbsent(pBean, pKey -> new HashSet<>()).add(pField);
-    }
+    weakReferencesMapping.computeIfAbsent(pBean.getEncapsulatedData(), pKey -> new HashSet<>()).add(new BeanReference(pBean, pField));
   }
 
   @Override
   public void removeReference(IBean<?> pBean, IField<?> pField)
   {
-    synchronized (weakReferencesMapping)
+    final IEncapsulatedBeanData encapsulatedData = pBean.getEncapsulatedData();
+    boolean removed = false;
+    if (weakReferencesMapping.containsKey(encapsulatedData))
     {
-      if (!weakReferencesMapping.containsKey(pBean))
-        return;
-      Set<IField<?>> fields = weakReferencesMapping.get(pBean);
-      fields.remove(pField);
-      if (fields.isEmpty())
-        weakReferencesMapping.remove(pBean);
+      final Set<BeanReference> references = weakReferencesMapping.get(encapsulatedData);
+      final Iterator<BeanReference> it = references.iterator();
+      while (it.hasNext())
+      {
+        final BeanReference reference = it.next();
+        if (reference != null && reference.getField() == pField)
+        {
+          it.remove();
+          removed = true;
+          if (references.isEmpty())
+            weakReferencesMapping.remove(encapsulatedData);
+          break;
+        }
+      }
     }
+    if (!removed)
+      throw new RuntimeException("Unexpected: Unable to remove reference! bean: " + pBean + " field: " + pField);
   }
 
   @Override

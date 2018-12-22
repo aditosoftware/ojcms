@@ -4,6 +4,7 @@ import de.adito.ojcms.beans.IBean;
 import de.adito.ojcms.beans.fields.IField;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.stream.*;
 
@@ -14,9 +15,8 @@ import java.util.stream.*;
  *
  * @author Simon Danner, 24.11.2018
  */
-public final class BeanReference implements Iterable<BeanReference>
+public final class BeanReference extends WeakReference<IBean<?>> implements Iterable<BeanReference>
 {
-  private final IBean<?> bean;
   private final IField<?> field;
 
   /**
@@ -27,7 +27,7 @@ public final class BeanReference implements Iterable<BeanReference>
    */
   public BeanReference(IBean<?> pBean, IField<?> pField)
   {
-    bean = pBean;
+    super(Objects.requireNonNull(pBean));
     field = pField;
   }
 
@@ -38,7 +38,7 @@ public final class BeanReference implements Iterable<BeanReference>
    */
   public IBean<?> getBean()
   {
-    return bean;
+    return _requiresExistingReference();
   }
 
   /**
@@ -48,6 +48,7 @@ public final class BeanReference implements Iterable<BeanReference>
    */
   public IField<?> getField()
   {
+    _requiresExistingReference();
     return field;
   }
 
@@ -71,8 +72,9 @@ public final class BeanReference implements Iterable<BeanReference>
   @Override
   public String toString()
   {
+    _requiresExistingReference();
     return getClass().getSimpleName() + "{" +
-        "bean=" + bean +
+        "bean=" + getBean() +
         ", field=" + field +
         '}';
   }
@@ -83,13 +85,25 @@ public final class BeanReference implements Iterable<BeanReference>
     if (this == pObject) return true;
     if (pObject == null || getClass() != pObject.getClass()) return false;
 
-    BeanReference other = (BeanReference) pObject;
-    return bean == other.bean && field == other.field;
+    final BeanReference other = (BeanReference) pObject;
+    return _requiresExistingReference() == other.getBean() && field == other.field;
   }
 
   @Override
   public int hashCode()
   {
-    return Objects.hash(bean, field);
+    return Objects.hash(_requiresExistingReference(), field);
+  }
+
+  /**
+   * The bean holding the reference if the reference hasn't been collected by GC.
+   *
+   * @return the bean holding the reference
+   * @throws RuntimeException if the reference does not exist anymore
+   */
+  private IBean<?> _requiresExistingReference()
+  {
+    return Optional.ofNullable(get())
+        .orElseThrow(() -> new RuntimeException("This bean reference is not existing anymore!"));
   }
 }
