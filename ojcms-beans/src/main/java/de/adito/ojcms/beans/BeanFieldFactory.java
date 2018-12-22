@@ -58,7 +58,8 @@ public final class BeanFieldFactory
         })
         .findAny()
         .orElseThrow(() -> new RuntimeException("Unable to create field. There are no static fields or all of them are initialized already. " +
-                                                    "bean-type: " + pBeanType.getName()));
+                                                    "bean-type: " + pBeanType.getName() + ". Check the class type given to this method! " +
+                                                    "It must be the same as the type containing the bean field to create."));
     final Class<FIELD> fieldType = (Class<FIELD>) toCreate.getType();
     return (FIELD) createField(fieldType, _getGenType(toCreate, fieldType), toCreate.getName(), Arrays.asList(toCreate.getAnnotations()));
   }
