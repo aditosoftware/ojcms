@@ -104,9 +104,9 @@ class ColumnTypeImpl implements IColumnType
   }
 
   @Override
-  public @Nullable IForeignKey getForeignKey()
+  public Optional<IForeignKey> getForeignKey()
   {
-    return foreignKey;
+    return Optional.ofNullable(foreignKey);
   }
 
   @Override

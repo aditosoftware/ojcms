@@ -108,9 +108,10 @@ public class Create extends AbstractBaseStatement<Void, Create>
    */
   private void _foreignKeys(StatementFormatter pFormatter)
   {
+    //noinspection OptionalGetWithoutIsPresent
     final Map<String, IForeignKey> foreignKeyMapping = columns.stream()
-        .filter(pColumn -> pColumn.getColumnType().getForeignKey() != null)
-        .collect(Collectors.toMap(IColumnDefinition::getColumnName, pColumn -> pColumn.getColumnType().getForeignKey()));
+        .filter(pColumn -> pColumn.getColumnType().getForeignKey().isPresent())
+        .collect(Collectors.toMap(IColumnDefinition::getColumnName, pColumn -> pColumn.getColumnType().getForeignKey().get()));
     if (foreignKeyMapping.isEmpty())
       return;
     final OJSQLBuilder tableChecker = OJSQLBuilderFactory.newSQLBuilder(builder).create();

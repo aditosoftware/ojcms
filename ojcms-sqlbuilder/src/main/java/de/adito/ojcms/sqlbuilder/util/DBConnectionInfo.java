@@ -37,9 +37,9 @@ public final class DBConnectionInfo
     databaseType = Objects.requireNonNull(pDatabaseType);
     host = Objects.requireNonNull(pHost);
     port = pPort;
+    databaseName = Objects.requireNonNull(pDatabaseName);
     username = pUsername;
     password = pPassword;
-    databaseName = Objects.requireNonNull(pDatabaseName);
   }
 
   /**
@@ -50,58 +50,6 @@ public final class DBConnectionInfo
   public EDatabaseType getDatabaseType()
   {
     return databaseType;
-  }
-
-  /**
-   * The host address of the database to connect to.
-   *
-   * @return a host address
-   */
-  public String getHost()
-  {
-    return host;
-  }
-
-  /**
-   * The port of the database to connect to.
-   *
-   * @return a port number
-   */
-  public int getPort()
-  {
-    return port;
-  }
-
-  /**
-   * The name of the database to connect to.
-   *
-   * @return a database name
-   */
-  public String getDatabaseName()
-  {
-    return databaseName;
-  }
-
-  /**
-   * An optional username to use for the connection.
-   *
-   * @return a username or null, if not necessary
-   */
-  @Nullable
-  public String getUsername()
-  {
-    return username;
-  }
-
-  /**
-   * An optional password to use for the connection.
-   *
-   * @return a password or null, if not necessary
-   */
-  @Nullable
-  public String getPassword()
-  {
-    return password;
   }
 
   /**

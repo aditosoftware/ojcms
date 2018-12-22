@@ -1,11 +1,9 @@
 package de.adito.ojcms.beans;
 
-import de.adito.ojcms.beans.annotations.Statistics;
 import de.adito.ojcms.beans.annotations.internal.*;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.reactive.events.*;
 import de.adito.ojcms.beans.statistics.IStatisticData;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.*;
@@ -45,12 +43,13 @@ final class BeanEvents
    * @param <BEAN>    the generic bean type
    * @param <VALUE>   the data type of the bean field
    */
+  @SuppressWarnings("unchecked")
   static <BEAN extends IBean<BEAN>, VALUE> void setValueAndPropagate(BEAN pBean, IField<VALUE> pField, VALUE pNewValue)
   {
     final IEncapsulatedBeanData encapsulatedData = pBean.getEncapsulatedData();
     assert encapsulatedData != null;
     assert encapsulatedData.containsField(pField);
-    VALUE oldValue = encapsulatedData.getValue(pField);
+    final VALUE oldValue = encapsulatedData.getValue(pField);
     if (!Objects.equals(oldValue, pNewValue))
     {
       final IBeanFieldActivePredicate<BEAN> fieldActiveSupplier = pBean.getFieldActivePredicate();
@@ -66,7 +65,6 @@ final class BeanEvents
           .filter(pActiveField -> !optionalActiveFields.remove(pActiveField))
           .forEach(pNewActiveField -> propagate(new BeanFieldAddition<>(pBean, pNewActiveField)));
       //Fire the remaining as removed fields
-      //noinspection unchecked
       optionalActiveFields.stream()
           .map(pBeforeActiveField -> (IField) pBeforeActiveField)
           .forEach(pRemovedField -> propagate(new BeanFieldRemoval<>(pBean, pRemovedField, encapsulatedData.getValue(pRemovedField))));
@@ -84,13 +82,10 @@ final class BeanEvents
         resolver.apply(pNewValue)
             .forEach(pReferable -> pReferable.addWeakReference(pBean, pField));
       }
-      //Add a statistic entry, if the annotation is present
-      if (pField.hasAnnotation(Statistics.class))
-      {
-        IStatisticData<VALUE> statisticData = pBean.getStatisticData(pField);
-        assert statisticData != null;
-        statisticData.addEntry(pNewValue);
-      }
+      //Add a statistic entry if necessary
+      Optional.ofNullable(encapsulatedData.getStatisticData().get(pField))
+          .map(pData -> (IStatisticData<VALUE>) pData)
+          .ifPresent(pData -> pData.addEntry(pNewValue));
     }
   }
 
@@ -139,18 +134,17 @@ final class BeanEvents
    * @param pDeleteFunction the function to perform the removal based on the data core of the container.
    *                        It returns the removed bean or null, if no bean hasn't been removed
    * @param <BEAN>          the type of the beans in the container
-   * @return the removed bean or null, if no bean hasn't been removed
+   * @return the optionally removed bean
    */
-  @Nullable
-  static <BEAN extends IBean<BEAN>> BEAN removeFromContainer(IBeanContainer<BEAN> pContainer,
-                                                             Function<IEncapsulatedBeanContainerData<BEAN>, BEAN> pDeleteFunction)
+  static <BEAN extends IBean<BEAN>> Optional<BEAN> removeFromContainer(IBeanContainer<BEAN> pContainer,
+                                                                       Function<IEncapsulatedBeanContainerData<BEAN>, BEAN> pDeleteFunction)
   {
     final IEncapsulatedBeanContainerData<BEAN> enc = pContainer.getEncapsulatedData();
     assert enc != null;
     final BEAN removedBean = pDeleteFunction.apply(enc);
     if (removedBean != null)
       beanRemoved(pContainer, removedBean);
-    return removedBean;
+    return Optional.ofNullable(removedBean);
   }
 
   /**
@@ -193,10 +187,6 @@ final class BeanEvents
    */
   private static <BEAN extends IBean<BEAN>> void _tryAddStatisticEntry(IBeanContainer<BEAN> pContainer)
   {
-    if (!pContainer.getBeanType().isAnnotationPresent(Statistics.class))
-      return;
-    final IStatisticData<Integer> statisticData = pContainer.getStatisticData();
-    assert statisticData != null;
-    statisticData.addEntry(pContainer.size());
+    pContainer.getStatisticData().ifPresent(pData -> pData.addEntry(pContainer.size()));
   }
 }

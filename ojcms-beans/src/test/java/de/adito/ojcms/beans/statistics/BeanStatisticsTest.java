@@ -22,18 +22,20 @@ class BeanStatisticsTest extends AbstractOnNextCallCountTest
 {
   private static final int FIELD_STATISTICS_LIMIT = 10;
   private SomeBean bean;
+  private IStatisticData<String> statisticData;
 
   @BeforeEach
   public void resetBean()
   {
     bean = new SomeBean();
+    statisticData = bean.getStatisticData(SomeBean.field)
+        .orElseThrow(() -> new RuntimeException("Unexpected: statistics not available!"));
   }
 
   @Test
   public void testEntryAdditionForBean()
   {
     final String value = "value";
-    final IStatisticData<String> statisticData = bean.getStatisticData(SomeBean.field);
     assertNotNull(statisticData);
     bean.setValue(SomeBean.field, value);
     assertEquals(1, statisticData.size());
@@ -44,7 +46,8 @@ class BeanStatisticsTest extends AbstractOnNextCallCountTest
   public void testEntryAdditionForContainer() throws InterruptedException
   {
     final IBeanContainer<SomeBean> container = IBeanContainer.empty(SomeBean.class);
-    final IStatisticData<Integer> statisticData = container.getStatisticData();
+    assertTrue(container.getStatisticData().isPresent());
+    final IStatisticData<Integer> statisticData = container.getStatisticData().get();
     assertNotNull(statisticData);
     Thread.sleep(5); //Avoid overriding the initial entry
     container.addBean(bean);
@@ -61,7 +64,6 @@ class BeanStatisticsTest extends AbstractOnNextCallCountTest
   @Test
   public void testEntryObserver()
   {
-    final IStatisticData<String> statisticData = bean.getStatisticData(SomeBean.field);
     assertNotNull(statisticData);
     final AtomicInteger index = new AtomicInteger();
     observeWithCallCheck(statisticData.observeStatistics(), 10, pEntry -> assertEquals("value" + index.getAndIncrement(), pEntry.getValue()));
@@ -72,13 +74,12 @@ class BeanStatisticsTest extends AbstractOnNextCallCountTest
   public void testIntervalStatistics() throws InterruptedException
   {
     _setupTestStatistics(10);
-    final IStatisticData<String> beanStatistics = bean.getStatisticData(SomeBean.field);
     final int interval = 5;
-    assertNotNull(beanStatistics);
-    final LinkedList<Long> timestamps = new LinkedList<>(beanStatistics.getChangedDataStatistics().keySet());
+    assertNotNull(statisticData);
+    final LinkedList<Long> timestamps = new LinkedList<>(statisticData.getChangedDataStatistics().keySet());
     final long totalTimestampDiff = timestamps.getLast() - timestamps.getFirst();
     final int expectedEntryCount = (int) totalTimestampDiff / interval + (totalTimestampDiff % interval == 0 ? 1 : 2);
-    final Map<Long, String> intervalStatistics = beanStatistics.getIntervalStatistics(interval);
+    final Map<Long, String> intervalStatistics = statisticData.getIntervalStatistics(interval);
     final int actualEntrySize = intervalStatistics.size();
     assertEquals(expectedEntryCount, actualEntrySize);
     //wait a short time and add an entry, for which a statistic entry will be added
@@ -93,7 +94,6 @@ class BeanStatisticsTest extends AbstractOnNextCallCountTest
   public void testDataDestruction()
   {
     _setupTestStatistics(10);
-    final IStatisticData<String> statisticData = bean.getStatisticData(SomeBean.field);
     assertNotNull(statisticData);
     statisticData.destroy();
     assertEquals(0, statisticData.size());
@@ -104,8 +104,6 @@ class BeanStatisticsTest extends AbstractOnNextCallCountTest
   public void testCapacity()
   {
     _setupTestStatistics(15); //surpass limit
-    final IStatisticData<String> statisticData = bean.getStatisticData(SomeBean.field);
-    assertNotNull(statisticData);
     assertEquals(FIELD_STATISTICS_LIMIT, statisticData.getChangedDataStatistics().size());
   }
 

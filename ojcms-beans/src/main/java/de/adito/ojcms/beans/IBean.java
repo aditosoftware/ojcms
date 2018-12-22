@@ -267,20 +267,20 @@ public interface IBean<BEAN extends IBean<BEAN>>
   }
 
   /**
-   * The statistic data for a certain bean field. May be null if not present.
+   * The statistic data for a certain bean field. May not be present.
    *
    * @param pField  the bean field
    * @param <VALUE> the data type of the field
-   * @return the statistic data, or null if not existing
+   * @return optional statistic data
    */
-  @Nullable
-  default <VALUE> IStatisticData<VALUE> getStatisticData(IField<VALUE> pField)
+  default <VALUE> Optional<IStatisticData<VALUE>> getStatisticData(IField<VALUE> pField)
   {
     if (!hasField(Objects.requireNonNull(pField)))
       throw new BeanFieldDoesNotExistException(this, pField);
     assert getEncapsulatedData() != null;
     //noinspection unchecked
-    return (IStatisticData<VALUE>) getEncapsulatedData().getStatisticData().get(pField);
+    return Optional.ofNullable(getEncapsulatedData().getStatisticData().get(pField))
+        .map(pData -> (IStatisticData<VALUE>) pData);
   }
 
   /**

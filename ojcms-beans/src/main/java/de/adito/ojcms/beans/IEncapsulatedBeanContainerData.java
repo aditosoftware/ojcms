@@ -3,9 +3,8 @@ package de.adito.ojcms.beans;
 import de.adito.ojcms.beans.annotations.internal.EncapsulatedData;
 import de.adito.ojcms.beans.datasource.IBeanContainerDataSource;
 import de.adito.ojcms.beans.statistics.IStatisticData;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Comparator;
+import java.util.*;
 
 /**
  * Encapsulated bean container data core.
@@ -100,10 +99,11 @@ interface IEncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends IEnca
   void setLimit(int pMaxCount, boolean pEvicting);
 
   /**
-   * The statistic data of this core. (null if not present)
+   * Optional statistic data of this container data core.
+   * This data contains the number of beans in the data core at several points of time.
+   * This data may not be available, if there's no annotation set.
    *
-   * @return statistic bean amount data
+   * @return optional statistic data of this container data core,
    */
-  @Nullable
-  IStatisticData<Integer> getStatisticData();
+  Optional<IStatisticData<Integer>> getStatisticData();
 }

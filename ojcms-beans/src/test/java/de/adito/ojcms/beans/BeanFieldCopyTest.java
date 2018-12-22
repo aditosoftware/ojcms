@@ -6,7 +6,6 @@ import de.adito.ojcms.beans.fields.types.*;
 import de.adito.ojcms.beans.fields.util.IMapBean;
 import de.adito.ojcms.beans.util.*;
 import org.apache.commons.lang3.ClassUtils;
-import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -128,17 +127,16 @@ public class BeanFieldCopyTest
      * @param pValue        the data value for the field
      * @param pOptionalTest an optional test for the copied value afterwards
      */
-    public _GenericFieldValueWrapper(Class<? extends IField> pFieldType, VALUE pValue, @Nullable Consumer<VALUE> pOptionalTest)
+    public _GenericFieldValueWrapper(Class<? extends IField> pFieldType, VALUE pValue, Consumer<VALUE> pOptionalTest)
     {
       //noinspection unchecked
-      super((Class<? extends IField<VALUE>>) pFieldType, pValue, pOptionalTest);
+      super((Class<? extends IField<VALUE>>) pFieldType, pValue, Optional.ofNullable(pOptionalTest));
     }
 
-    @Nullable
     @Override
-    public Class getGenericFieldType()
+    public Optional<Class> getGenericFieldType()
     {
-      return value.getClass();
+      return Optional.of(value.getClass());
     }
   }
 
@@ -152,8 +150,7 @@ public class BeanFieldCopyTest
   {
     protected final VALUE value;
     private final Class<? extends IField<VALUE>> fieldType;
-    @Nullable
-    private final Consumer<VALUE> optionalTest;
+    private final Optional<Consumer<VALUE>> optionalTest;
 
     /**
      * Creates a field value wrapper.
@@ -163,7 +160,7 @@ public class BeanFieldCopyTest
      */
     public _FieldValueWrapper(Class<? extends IField<VALUE>> pFieldType, VALUE pValue)
     {
-      this(pFieldType, pValue, null);
+      this(pFieldType, pValue, Optional.empty());
     }
 
     /**
@@ -174,7 +171,7 @@ public class BeanFieldCopyTest
      * @param pValue        the data value for the field
      * @param pOptionalTest an optional test for the copied value afterwards
      */
-    public _FieldValueWrapper(Class<? extends IField<VALUE>> pFieldType, VALUE pValue, @Nullable Consumer<VALUE> pOptionalTest)
+    public _FieldValueWrapper(Class<? extends IField<VALUE>> pFieldType, VALUE pValue, Optional<Consumer<VALUE>> pOptionalTest)
     {
       fieldType = pFieldType;
       value = pValue;
@@ -183,14 +180,12 @@ public class BeanFieldCopyTest
 
     /**
      * An optional generic type of the field.
-     * May be null, if there's no generic type
      *
-     * @return an optional generic field type
+     * @return an optional generic type
      */
-    @Nullable
-    public Class getGenericFieldType()
+    public Optional<Class> getGenericFieldType()
     {
-      return null;
+      return Optional.empty();
     }
 
     /**
@@ -200,7 +195,7 @@ public class BeanFieldCopyTest
      */
     public Optional<Consumer<VALUE>> getOptionalTest()
     {
-      return Optional.ofNullable(optionalTest);
+      return optionalTest;
     }
   }
 }

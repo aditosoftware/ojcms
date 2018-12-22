@@ -7,7 +7,7 @@ import de.adito.ojcms.beans.reactive.IEvent;
 import de.adito.ojcms.beans.statistics.*;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,7 +25,7 @@ class EncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends AbstractEn
 {
   private final Class<BEAN> beanType;
   private _LimitInfo limitInfo = null;
-  private final IStatisticData<Integer> statisticData;
+  private final Optional<IStatisticData<Integer>> statisticData;
   private final Map<BEAN, Disposable> beanDisposableMapping = new ConcurrentHashMap<>();
 
   /**
@@ -38,7 +38,7 @@ class EncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends AbstractEn
   {
     super(pDataSource);
     beanType = pBeanType;
-    statisticData = _createStatisticData();
+    statisticData = _tryCreateStatisticData();
     //Observe all initial beans in the container
     StreamSupport.stream(pDataSource.spliterator(), false).forEach(this::_observeBean);
   }
@@ -130,9 +130,8 @@ class EncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends AbstractEn
     limitInfo = pMaxCount < 0 ? null : new _LimitInfo(pMaxCount, pEvicting);
   }
 
-  @Nullable
   @Override
-  public IStatisticData<Integer> getStatisticData()
+  public Optional<IStatisticData<Integer>> getStatisticData()
   {
     return statisticData;
   }
@@ -145,17 +144,16 @@ class EncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends AbstractEn
   }
 
   /**
-   * Creates the statistic data for this encapsulated data core.
+   * Tries to create the statistic data for this encapsulated data core.
    * This data is an amount of timestamps with an associated number,
    * which stands for the amount of beans in this container at the timestamp.
    *
-   * @return the statistic data for this encapsulated core
+   * @return the statistic data for this encapsulated data core
    */
-  @Nullable
-  private IStatisticData<Integer> _createStatisticData()
+  private Optional<IStatisticData<Integer>> _tryCreateStatisticData()
   {
     final Statistics statistics = beanType.getAnnotation(Statistics.class);
-    return statistics != null ? new StatisticData<>(statistics.capacity(), size()) : null;
+    return statistics != null ? Optional.of(new StatisticData<>(statistics.capacity(), size())) : Optional.empty();
   }
 
   /**

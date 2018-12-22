@@ -68,7 +68,6 @@ public abstract class AbstractField<VALUE> implements IField<VALUE>
   }
 
   @Override
-  @Nullable
   public <ANNOTATION extends Annotation> Optional<ANNOTATION> getAnnotation(Class<ANNOTATION> pType)
   {
     //noinspection unchecked

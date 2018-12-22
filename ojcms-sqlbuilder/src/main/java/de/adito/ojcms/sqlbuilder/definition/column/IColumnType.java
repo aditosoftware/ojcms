@@ -2,8 +2,8 @@ package de.adito.ojcms.sqlbuilder.definition.column;
 
 import de.adito.ojcms.sqlbuilder.definition.EDatabaseType;
 import de.adito.ojcms.sqlbuilder.format.IStatementFormat;
-import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.stream.*;
 
 /**
@@ -136,15 +136,13 @@ public interface IColumnType extends IStatementFormat, Iterable<EColumnModifier>
   IColumnType primaryKey();
 
   /**
-   * The foreign key of this column type instance.
-   * A {@link IForeignKey} is the target of a relation.
+   * An optional foreign key of this column type instance. A {@link IForeignKey} is the target of a relation.
    *
-   * @return a foreign key or null, if not present
+   * @return an optional foreign key
    */
-  @Nullable
-  default IForeignKey getForeignKey()
+  default Optional<IForeignKey> getForeignKey()
   {
-    return null;
+    return Optional.empty();
   }
 
   /**

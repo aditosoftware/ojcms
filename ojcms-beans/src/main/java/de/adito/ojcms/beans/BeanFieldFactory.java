@@ -5,7 +5,6 @@ import de.adito.ojcms.beans.annotations.internal.TypeDefaultField;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.util.BeanReflector;
 import de.adito.picoservice.IPicoRegistry;
-import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -105,7 +104,7 @@ public final class BeanFieldFactory
    */
   static <VALUE, FIELD extends IField<VALUE>> FIELD createField(Class<FIELD> pFieldType, String pName, Collection<Annotation> pAnnotations)
   {
-    return createField(pFieldType, null, pName, pAnnotations);
+    return createField(pFieldType, Optional.empty(), pName, pAnnotations);
   }
 
   /**
@@ -121,15 +120,16 @@ public final class BeanFieldFactory
    * @param <FIELD>      the generic field type
    * @return the newly created field
    */
-  static <VALUE, FIELD extends IField<VALUE>> FIELD createField(Class<FIELD> pFieldType, @Nullable Class pGenType, String pName,
+  static <VALUE, FIELD extends IField<VALUE>> FIELD createField(Class<FIELD> pFieldType, Optional<Class> pGenType, String pName,
                                                                 Collection<Annotation> pAnnotations)
   {
     try
     {
-      final boolean withGenType = pGenType != null;
-      final Constructor<FIELD> constructor = withGenType ? pFieldType.getDeclaredConstructor(Class.class, String.class, Collection.class) :
-          pFieldType.getDeclaredConstructor(String.class, Collection.class);
-      final FIELD field = constructor.newInstance(withGenType ? new Object[]{pGenType, pName, pAnnotations} : new Object[]{pName, pAnnotations});
+      final Class[] constructorArgTypes = pGenType.map(pType -> new Class[]{Class.class, String.class, Collection.class})
+          .orElseGet(() -> new Class[]{String.class, Collection.class});
+      final Object[] constructorArgs = pGenType.map(pClass -> new Object[]{pClass, pName, pAnnotations})
+          .orElseGet(() -> new Object[]{pName, pAnnotations});
+      final FIELD field = pFieldType.getConstructor(constructorArgTypes).newInstance(constructorArgs);
       _checkOptionalField(field);
       return field;
     }
@@ -140,27 +140,26 @@ public final class BeanFieldFactory
   }
 
   /**
-   * Evaluates the generic type of a bean field. Returns null, if not present.
+   * Evaluates an optional generic type of a bean field.
    *
    * @param pField     the field instance from the reflection API
    * @param pFieldType the type of the bean field
    * @param <FIELD>    the type of the bean field as generic
-   * @return the generic type of the field instance
+   * @return an optional generic type of the field instance
    */
-  @Nullable
-  private static <FIELD extends IField> Class _getGenType(Field pField, Class<FIELD> pFieldType)
+  private static <FIELD extends IField> Optional<Class> _getGenType(Field pField, Class<FIELD> pFieldType)
   {
     final Type genericType = pField.getGenericType();
     if (!(genericType instanceof ParameterizedType))
-      return null;
+      return Optional.empty();
 
     final Type fieldSuperType = pFieldType.getGenericSuperclass();
     if (!(fieldSuperType instanceof ParameterizedType))
-      return null;
+      return Optional.empty();
 
     final Type fieldSuperGenType = ((ParameterizedType) fieldSuperType).getActualTypeArguments()[0];
-    return (Class) (fieldSuperGenType instanceof ParameterizedType ? ((ParameterizedType) fieldSuperGenType).getRawType() :
-        ((ParameterizedType) genericType).getActualTypeArguments()[0]);
+    return Optional.of((Class) (fieldSuperGenType instanceof ParameterizedType ? ((ParameterizedType) fieldSuperGenType).getRawType() :
+        ((ParameterizedType) genericType).getActualTypeArguments()[0]));
   }
 
   /**

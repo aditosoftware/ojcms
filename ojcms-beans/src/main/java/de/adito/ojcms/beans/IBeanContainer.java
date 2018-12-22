@@ -8,7 +8,6 @@ import de.adito.ojcms.beans.references.*;
 import de.adito.ojcms.beans.statistics.IStatisticData;
 import de.adito.ojcms.utils.readonly.*;
 import io.reactivex.Observable;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.*;
@@ -277,7 +276,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
   default boolean removeBean(BEAN pBean)
   {
     Objects.requireNonNull(pBean);
-    return BeanEvents.removeFromContainer(this, pEncapsulated -> pEncapsulated.removeBean(pBean) ? pBean : null) != null;
+    return BeanEvents.removeFromContainer(this, pEncapsulated -> pEncapsulated.removeBean(pBean) ? pBean : null).isPresent();
   }
 
   /**
@@ -293,7 +292,8 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
     if (pIndex < 0 || pIndex >= size())
       throw new IndexOutOfBoundsException("index: " + pIndex);
 
-    return BeanEvents.removeFromContainer(this, pEncapsulated -> pEncapsulated.removeBean(pIndex));
+    return BeanEvents.removeFromContainer(this, pEncapsulated -> pEncapsulated.removeBean(pIndex))
+        .orElseThrow(() -> new RuntimeException("Unexpected: Unable to remove bean at index" + pIndex));
   }
 
   /**
@@ -446,14 +446,13 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
   }
 
   /**
-   * The statistic data of this container.
+   * Optional statistic data of this container.
    * This data contains the number of beans in this container at several points of time.
-   * This data may not be available, if there's no annotation set. In this case this method will return null.
+   * This data may not be available, if there's no annotation set.
    *
-   * @return the statistic data of this container, or null if not present
+   * @return optional statistic data of this container,
    */
-  @Nullable
-  default IStatisticData<Integer> getStatisticData()
+  default Optional<IStatisticData<Integer>> getStatisticData()
   {
     assert getEncapsulatedData() != null;
     return getEncapsulatedData().getStatisticData();
