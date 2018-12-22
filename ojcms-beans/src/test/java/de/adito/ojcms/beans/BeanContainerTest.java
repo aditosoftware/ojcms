@@ -1,6 +1,7 @@
 package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.annotations.Identifier;
+import de.adito.ojcms.beans.base.IEqualsHashCodeChecker;
 import de.adito.ojcms.beans.fields.types.*;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
@@ -11,7 +12,7 @@ import java.util.stream.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for {@link IBeanContainer}
+ * Tests for {@link IBeanContainer}.
  *
  * @author Simon Danner, 28.07.2018
  */
@@ -235,6 +236,25 @@ class BeanContainerTest
     assertEquals(2, distinctValues.size());
     assertTrue(distinctValues.contains(1));
     assertTrue(distinctValues.contains(2));
+  }
+
+  @Test
+  public void testEqualsAndHashCode()
+  {
+    final IBeanContainer<SomeBean> otherContainer = IBeanContainer.empty(SomeBean.class);
+    final IEqualsHashCodeChecker equalsHashCodeChecker = IEqualsHashCodeChecker.create(container, otherContainer);
+    equalsHashCodeChecker.makeAssertion(true);
+    container.addBean(new SomeBean());
+    equalsHashCodeChecker.makeAssertion(false);
+    otherContainer.addBean(new SomeBean());
+    equalsHashCodeChecker.makeAssertion(true);
+    IntStream.range(0, 5).forEach(pIndex -> {
+      container.addBean(new SomeBean());
+      otherContainer.addBean(new SomeBean());
+    });
+    equalsHashCodeChecker.makeAssertion(true);
+    container.getBean(3).setValue(SomeBean.someField, 9999);
+    equalsHashCodeChecker.makeAssertion(false);
   }
 
   /**

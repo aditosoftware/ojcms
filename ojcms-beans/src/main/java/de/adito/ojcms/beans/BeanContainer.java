@@ -4,7 +4,7 @@ import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
 import de.adito.ojcms.beans.datasource.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.stream.*;
 
 /**
  * A default implementation of the bean container interface.
@@ -64,5 +64,27 @@ public class BeanContainer<BEAN extends IBean<BEAN>> implements IBeanContainer<B
         stream()
             .map(Objects::toString)
             .collect(Collectors.joining("\n"));
+  }
+
+  @Override
+  public boolean equals(Object pOther)
+  {
+    if (this == pOther)
+      return true;
+
+    if (!(pOther instanceof BeanContainer))
+      return false;
+
+    //noinspection unchecked
+    final BeanContainer<BEAN> otherContainer = (BeanContainer<BEAN>) pOther;
+    final int size = size();
+    return size == otherContainer.size() &&
+        IntStream.range(0, size).allMatch(pIndex -> Objects.equals(getBean(pIndex), otherContainer.getBean(pIndex)));
+  }
+
+  @Override
+  public int hashCode()
+  {
+    return Objects.hash(stream().toArray(Object[]::new));
   }
 }
