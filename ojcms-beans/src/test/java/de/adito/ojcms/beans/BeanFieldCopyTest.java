@@ -3,6 +3,7 @@ package de.adito.ojcms.beans;
 import de.adito.ojcms.beans.exceptions.BeanCopyNotSupportedException;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.fields.types.*;
+import de.adito.ojcms.beans.fields.util.IMapBean;
 import de.adito.ojcms.beans.util.*;
 import org.apache.commons.lang3.ClassUtils;
 import org.jetbrains.annotations.Nullable;
@@ -35,10 +36,10 @@ public class BeanFieldCopyTest
     final Map<String, Integer> testMap = new HashMap<>();
     testMap.put("test1", 6);
     testMap.put("test2", 60);
-    final Consumer<MapBean<String, Integer>> mapTest = pMapBean -> {
-      assertEquals(2, pMapBean.stream().count());
-      assertEquals(6, pMapBean.getValue(pMapBean.getFieldFromKey("test1")));
-      assertEquals(60, pMapBean.getValue(pMapBean.getFieldFromKey("test2")));
+    final Consumer<IMapBean<String, Integer>> mapTest = pMapBean -> {
+      assertEquals(2, pMapBean.size());
+      assertEquals(6, (int) pMapBean.get("test1"));
+      assertEquals(60, (int) pMapBean.get("test2"));
       assertEquals(testMap, pMapBean);
     };
 

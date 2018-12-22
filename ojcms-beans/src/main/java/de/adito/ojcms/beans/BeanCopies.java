@@ -97,7 +97,7 @@ final class BeanCopies
   {
     final BEAN bean = COPY_CREATOR.newInstance(pBeanType);
     final IBeanDataSource dataSource = new MapBasedBeanDataSource(pFieldOrder);
-    final EncapsulatedBeanData<BEAN> encapsulatedData = new EncapsulatedBeanData<>(dataSource, pBeanType, pFieldOrder);
+    final EncapsulatedBeanData encapsulatedData = new EncapsulatedBeanData(dataSource, pFieldOrder);
     try
     {
       if (encapsulatedDataField == null)

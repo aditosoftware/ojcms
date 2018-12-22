@@ -1,13 +1,11 @@
 package de.adito.ojcms.beans.util;
 
 import de.adito.ojcms.beans.*;
-import de.adito.ojcms.beans.annotations.Statistics;
 import de.adito.ojcms.beans.fields.IField;
-import de.adito.ojcms.beans.statistics.*;
 
 import java.lang.reflect.*;
 import java.util.*;
-import java.util.function.*;
+import java.util.function.Predicate;
 import java.util.stream.*;
 
 /**
@@ -59,21 +57,6 @@ public final class BeanReflector
   }
 
   /**
-   * Reflects all bean fields annotated with {@link Statistics} of a bean type.
-   * Then creates a mapping for the statistic data for instances of the bean type.
-   *
-   * @param pBeanType the bean's type
-   * @return a map with the field as key and initial statistic data as value
-   */
-  public static Map<IField<?>, IStatisticData<?>> createBeanStatisticMappingForBeanType(Class<? extends IBean> pBeanType)
-  {
-    return reflectBeanFields(pBeanType).stream()
-        .filter(pField -> pField.hasAnnotation(Statistics.class))
-        .collect(Collectors.toMap(Function.identity(),
-                                  pField -> new StatisticData<>(pField.getAnnotationOrThrow(Statistics.class).capacity(), null)));
-  }
-
-  /**
    * Checks, if a bean type is a valid declared type.
    * It has to be public and an extension of {@link Bean}.
    * Throws a runtime exception, if the type is invalid.
@@ -87,7 +70,7 @@ public final class BeanReflector
     if (!Modifier.isPublic(pBeanType.getModifiers()))
       throw new RuntimeException(pBeanType.getName() + " is not a valid bean type! It has to be declared public to create fields!");
 
-    if (!Bean.class.isAssignableFrom(pBeanType) && !MapBean.class.isAssignableFrom(pBeanType)) //To make sure it isn't a transformed type
+    if (!Bean.class.isAssignableFrom(pBeanType)) //To make sure it isn't a transformed type
       throw new RuntimeException(pBeanType.getName() + " is not a valid bean type! Do not use transformed bean types!");
     return pBeanType;
   }

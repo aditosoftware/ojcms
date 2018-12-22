@@ -64,8 +64,7 @@ public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
   protected Bean()
   {
     final List<IField<?>> fieldOrder = BeanReflector.reflectBeanFields(getClass());
-    //noinspection unchecked
-    encapsulatedData = new EncapsulatedBeanData<>(new MapBasedBeanDataSource(fieldOrder), (Class<BEAN>) getClass(), fieldOrder);
+    encapsulatedData = new EncapsulatedBeanData(new MapBasedBeanDataSource(fieldOrder), fieldOrder);
     _checkForDuplicateFieldsAndFireCreation();
   }
 
@@ -76,8 +75,7 @@ public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
    */
   protected Bean(IBeanDataSource pCustomDataSource)
   {
-    //noinspection unchecked
-    encapsulatedData = new EncapsulatedBeanData<>(pCustomDataSource, (Class<BEAN>) getClass(), BeanReflector.reflectBeanFields(getClass()));
+    encapsulatedData = new EncapsulatedBeanData(pCustomDataSource, BeanReflector.reflectBeanFields(getClass()));
     _checkForDuplicateFieldsAndFireCreation();
   }
 

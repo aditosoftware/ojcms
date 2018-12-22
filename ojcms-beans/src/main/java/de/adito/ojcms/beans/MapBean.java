@@ -4,7 +4,7 @@ import de.adito.ojcms.beans.annotations.Detail;
 import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
 import de.adito.ojcms.beans.datasource.MapBasedBeanDataSource;
 import de.adito.ojcms.beans.fields.IField;
-import de.adito.ojcms.beans.fields.util.FieldValueTuple;
+import de.adito.ojcms.beans.fields.util.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -14,14 +14,13 @@ import java.util.stream.Collectors;
 /**
  * A special bean that represents a {@link Map}.
  * A key-value pair of the map will be presented as a bean field with the associated value.
- * This bean can additionally be treated as normal map as well.
  *
  * @param <KEY>   the map's key type
  * @param <VALUE> the map's value type
  * @author Simon Danner, 07.02.2017
  */
 @RequiresEncapsulatedAccess
-public final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IModifiableBean<MapBean<KEY, VALUE>>
+final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMapBean<KEY, VALUE>
 {
   private final IEncapsulatedBeanData encapsulated;
   private final boolean isDetail;
@@ -40,7 +39,7 @@ public final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implement
    * @param pValueType the map's value type
    * @param pIsDetail  <tt>true</tt>, if this map bean is considered as detail
    */
-  public MapBean(Map<KEY, VALUE> pMap, Class<VALUE> pValueType, boolean pIsDetail)
+  MapBean(Map<KEY, VALUE> pMap, Class<VALUE> pValueType, boolean pIsDetail)
   {
     this(pMap, pValueType, (pKey, pField) -> {}, pKey -> Optional.empty(), pIsDetail);
   }
@@ -60,8 +59,8 @@ public final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implement
    * @param pFieldCache         the field cache for keys/fields with the same key
    * @param pIsDetail           <tt>true</tt>, if this map bean is considered as detail
    */
-  public MapBean(Map<KEY, VALUE> pMap, Class<VALUE> pValueType, BiConsumer<KEY, IField<?>> pFieldCacheCallback,
-                 Function<KEY, Optional<IField<?>>> pFieldCache, boolean pIsDetail)
+  MapBean(Map<KEY, VALUE> pMap, Class<VALUE> pValueType, BiConsumer<KEY, IField<?>> pFieldCacheCallback,
+          Function<KEY, Optional<IField<?>>> pFieldCache, boolean pIsDetail)
   {
     fieldType = BeanFieldFactory.getFieldTypeFromType(pValueType);
     valueType = pValueType;
@@ -75,8 +74,7 @@ public final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implement
     final Map<IField<?>, VALUE> fieldValueMapping = pMap.entrySet().stream()
         .collect(LinkedHashMap::new, accumulator, Map::putAll);
     final List<IField<?>> fields = new ArrayList<>(fieldValueMapping.keySet());
-    //noinspection unchecked
-    encapsulated = new EncapsulatedBeanData<>(new MapBasedBeanDataSource(fields), getClass(), fields);
+    encapsulated = new EncapsulatedBeanData(new MapBasedBeanDataSource(fields), fields);
     fieldValueMapping.forEach(this::setValueConverted);
   }
 
@@ -85,7 +83,7 @@ public final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implement
    *
    * @param pExistingMapBean the existing map bean to copy
    */
-  public MapBean(MapBean<KEY, VALUE> pExistingMapBean)
+  MapBean(MapBean<KEY, VALUE> pExistingMapBean)
   {
     isDetail = pExistingMapBean.isDetail;
     fieldType = pExistingMapBean.fieldType;
@@ -95,8 +93,7 @@ public final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implement
     fieldCache = pExistingMapBean.fieldCache;
     fieldCacheCallback = pExistingMapBean.fieldCacheCallback;
     final List<IField<?>> fields = pExistingMapBean.streamFields().collect(Collectors.toList());
-    //noinspection unchecked
-    encapsulated = new EncapsulatedBeanData<>(new MapBasedBeanDataSource(pExistingMapBean), getClass(), fields);
+    encapsulated = new EncapsulatedBeanData(new MapBasedBeanDataSource(pExistingMapBean), fields);
   }
 
   @Override
@@ -125,25 +122,10 @@ public final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implement
     else
     {
       field = _createField(pKey);
-      addField(field);
+      encapsulated.addField(field, encapsulated.getFieldCount());
     }
     setValueConverted(field, pValue);
     return oldValue;
-  }
-
-  /**
-   * The bean field from a map key.
-   *
-   * @param pKey the key to find the bean field from
-   * @return the bean field for a certain key
-   * @throws IllegalArgumentException, if the key is not contained
-   */
-  @NotNull
-  public IField<?> getFieldFromKey(KEY pKey)
-  {
-    if (!keyFieldMapping.containsKey(pKey))
-      throw new IllegalArgumentException("The key '" + pKey + "' is not existing in the map bean!");
-    return keyFieldMapping.get(pKey);
   }
 
   /**
@@ -181,15 +163,16 @@ public final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implement
     final MapBean other = (MapBean) pObject;
     //MapBeans are the same, if all fields and associated values are equal
     //noinspection unchecked
-    return streamFields().allMatch(other::hasField) && streamFields()
-        .map(pIdentifierField -> (IField) pIdentifierField)
+    return encapsulated.getFieldCount() == other.encapsulated.getFieldCount() &&
+        encapsulated.streamFields().allMatch(other::hasField) && encapsulated.streamFields()
+        .map(pField -> (IField) pField)
         .allMatch(pIdentifierField -> Objects.equals(getValue(pIdentifierField), other.getValue(pIdentifierField)));
   }
 
   @Override
   public int hashCode()
   {
-    final FieldValueTuple[] tuples = stream().toArray(FieldValueTuple[]::new);
+    final FieldValueTuple[] tuples = encapsulated.stream().toArray(FieldValueTuple[]::new);
     return Objects.hash((Object[]) tuples);
   }
 
@@ -240,7 +223,7 @@ public final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implement
       if (current == null)
         throw new IllegalStateException();
       //noinspection unchecked
-      removeField(current.getField());
+      encapsulated.removeField(current.getField());
       current = null;
     }
   }

@@ -1,6 +1,7 @@
 package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.annotations.*;
+import de.adito.ojcms.beans.base.IEqualsHashCodeChecker;
 import de.adito.ojcms.beans.exceptions.*;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.fields.types.*;
@@ -8,7 +9,6 @@ import de.adito.ojcms.beans.fields.util.FieldValueTuple;
 import org.junit.jupiter.api.*;
 
 import java.util.*;
-import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -139,15 +139,12 @@ class BeanTest
   public void testEqualsAndHashCode()
   {
     final SomeBean anotherBean = new SomeBean();
-    final Consumer<Boolean> checker = pShouldBeEqual -> {
-      assertEquals(pShouldBeEqual, bean.equals(anotherBean));
-      assertEquals(pShouldBeEqual, bean.hashCode() == anotherBean.hashCode());
-    };
-    checker.accept(true);
+    final IEqualsHashCodeChecker equalsHashCodeChecker = IEqualsHashCodeChecker.create(bean, anotherBean);
+    equalsHashCodeChecker.makeAssertion(true);
     anotherBean.setPrivateValue(SomeBean.somePrivateField, "differentValue"); //This should not affect the behaviour
-    checker.accept(true);
+    equalsHashCodeChecker.makeAssertion(true);
     anotherBean.setValue(SomeBean.numberField, 111);
-    checker.accept(false);
+    equalsHashCodeChecker.makeAssertion(false);
   }
 
   @Test

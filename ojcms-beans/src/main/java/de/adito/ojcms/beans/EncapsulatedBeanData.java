@@ -1,26 +1,25 @@
 package de.adito.ojcms.beans;
 
+import de.adito.ojcms.beans.annotations.Statistics;
 import de.adito.ojcms.beans.annotations.internal.EncapsulatedData;
 import de.adito.ojcms.beans.datasource.IBeanDataSource;
 import de.adito.ojcms.beans.exceptions.BeanFieldDoesNotExistException;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.fields.util.FieldValueTuple;
-import de.adito.ojcms.beans.statistics.IStatisticData;
-import de.adito.ojcms.beans.util.BeanReflector;
+import de.adito.ojcms.beans.statistics.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.*;
-import java.util.stream.Stream;
+import java.util.stream.*;
 
 /**
  * The encapsulated bean data core implementation based on a {@link IBeanDataSource}.
  *
- * @param <BEAN> the runtime type of the bean the data core is for
  * @author Simon Danner, 08.12.2018
  */
 @EncapsulatedData
-class EncapsulatedBeanData<BEAN extends IBean<BEAN>> extends AbstractEncapsulatedData<FieldValueTuple<?>, IBeanDataSource>
+class EncapsulatedBeanData extends AbstractEncapsulatedData<FieldValueTuple<?>, IBeanDataSource>
     implements IEncapsulatedBeanData
 {
   private final List<IField<?>> fieldOrder;
@@ -30,14 +29,13 @@ class EncapsulatedBeanData<BEAN extends IBean<BEAN>> extends AbstractEncapsulate
    * Creates the encapsulated bean data core.
    *
    * @param pDataSource the data source it is based on
-   * @param pBeanType   the runtime type of the bean the data core is for
    * @param pFieldOrder the order of bean fields present as ordered list
    */
-  EncapsulatedBeanData(IBeanDataSource pDataSource, Class<BEAN> pBeanType, List<IField<?>> pFieldOrder)
+  EncapsulatedBeanData(IBeanDataSource pDataSource, List<IField<?>> pFieldOrder)
   {
     super(pDataSource);
     fieldOrder = new ArrayList<>(pFieldOrder);
-    statisticData = BeanReflector.createBeanStatisticMappingForBeanType(pBeanType);
+    statisticData = _createBeanStatisticMapping();
   }
 
   @Override
@@ -93,6 +91,19 @@ class EncapsulatedBeanData<BEAN extends IBean<BEAN>> extends AbstractEncapsulate
     final Stream<FieldValueTuple<?>> fieldValueTupleStream = fieldOrder.stream()
         .map(pField -> pField.newUntypedTuple(getValue(pField)));
     return fieldValueTupleStream.iterator();
+  }
+
+  /**
+   * Takes all bean fields annotated with {@link Statistics} and then creates a mapping for the statistic data for these fields.
+   *
+   * @return a map with the field as key and initial statistic data as value
+   */
+  private Map<IField<?>, IStatisticData<?>> _createBeanStatisticMapping()
+  {
+    return fieldOrder.stream()
+        .filter(pField -> pField.hasAnnotation(Statistics.class))
+        .collect(Collectors.toMap(Function.identity(),
+                                  pField -> new StatisticData<>(pField.getAnnotationOrThrow(Statistics.class).capacity(), null)));
   }
 
   /**

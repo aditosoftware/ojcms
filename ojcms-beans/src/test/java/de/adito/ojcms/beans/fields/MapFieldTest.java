@@ -1,12 +1,13 @@
 package de.adito.ojcms.beans.fields;
 
 import de.adito.ojcms.beans.*;
-import de.adito.ojcms.beans.fields.types.MapField;
+import de.adito.ojcms.beans.base.IEqualsHashCodeChecker;
+import de.adito.ojcms.beans.fields.util.IMapBean;
 import org.junit.jupiter.api.*;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.IntStream;
+import java.util.stream.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -39,21 +40,6 @@ class MapFieldTest
   }
 
   @Test
-  public void testToBeanTransformationWithPredicate()
-  {
-    //Allow only odd numbers
-    final MapBean<Integer, String> mapBean = SomeBean.mapField.createBeanFromMap(data, String.class,
-                                                                           pTuple -> Integer.parseInt(pTuple.getValue().substring(5)) % 2 == 0);
-    final AtomicInteger index = new AtomicInteger(1);
-    mapBean.stream()
-        .forEach(pTuple -> {
-          assertTrue(index.get() <= 9); //Make sure it are only five tuples
-          assertEquals(String.valueOf(index.get()), pTuple.getField().getName());
-          assertEquals("value" + index.getAndAdd(2), pTuple.getValue());
-        });
-  }
-
-  @Test
   public void testMapSize()
   {
     final SomeBean bean = new SomeBean();
@@ -72,12 +58,27 @@ class MapFieldTest
     assertTrue(map.values().stream().noneMatch(pValue -> pValue.equals("value5")));
   }
 
+  @Test
+  public void testEqualsAndHashCode()
+  {
+    final IMapBean<Integer, String> mapBean1 = SomeBean.mapField.createBeanFromMap(data, String.class);
+    final IMapBean<Integer, String> mapBean2 = SomeBean.mapField.createBeanFromMap(data, String.class);
+    final IEqualsHashCodeChecker equalsHashCodeChecker = IEqualsHashCodeChecker.create(mapBean1, mapBean2);
+    equalsHashCodeChecker.makeAssertion(true);
+    mapBean2.put(10, "value10");
+    equalsHashCodeChecker.makeAssertion(false);
+    mapBean2.remove(10);
+    equalsHashCodeChecker.makeAssertion(true);
+    mapBean2.put(5, "differentValue");
+    equalsHashCodeChecker.makeAssertion(false);
+  }
+
   /**
    * Tests, if the field tuples of a bean fit to the map entries accordingly.
    *
    * @param pBean the bean to test
    */
-  private void _testFieldTuples(IBean<?> pBean)
+  private static void _testFieldTuples(IBean<?> pBean)
   {
     final AtomicInteger index = new AtomicInteger();
     //Test in order and proper to bean transformation
