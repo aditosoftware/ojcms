@@ -8,12 +8,14 @@ import de.adito.ojcms.beans.fields.util.FieldValueTuple;
 import org.junit.jupiter.api.*;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test class for {@link IBean}.
  * Some methods of this interface do not have to be tested, because they are covered by other tests.
+ * The test is based on the basic implementing class {@link Bean}. So some tests include implementation details of the base class as well.
  *
  * @author Simon Danner, 28.07.2018
  */
@@ -127,8 +129,25 @@ class BeanTest
   public void testGetIdentifiers()
   {
     final Set<FieldValueTuple<?>> identifiers = bean.getIdentifiers();
-    assertEquals(1, identifiers.size());
-    assertSame(SomeBean.numberField, identifiers.iterator().next().getField());
+    assertEquals(2, identifiers.size());
+    final Iterator<FieldValueTuple<?>> it = identifiers.iterator();
+    assertSame(SomeBean.someField, it.next().getField());
+    assertSame(SomeBean.numberField, it.next().getField());
+  }
+
+  @Test
+  public void testEqualsAndHashCode()
+  {
+    final SomeBean anotherBean = new SomeBean();
+    final Consumer<Boolean> checker = pShouldBeEqual -> {
+      assertEquals(pShouldBeEqual, bean.equals(anotherBean));
+      assertEquals(pShouldBeEqual, bean.hashCode() == anotherBean.hashCode());
+    };
+    checker.accept(true);
+    anotherBean.setPrivateValue(SomeBean.somePrivateField, "differentValue"); //This should not affect the behaviour
+    checker.accept(true);
+    anotherBean.setValue(SomeBean.numberField, 111);
+    checker.accept(false);
   }
 
   @Test
@@ -163,6 +182,7 @@ class BeanTest
    */
   public static class SomeBean extends Bean<SomeBean>
   {
+    @Identifier
     public static final TextField someField = BeanFieldFactory.create(SomeBean.class);
     @Identifier
     public static final IntegerField numberField = BeanFieldFactory.create(SomeBean.class);

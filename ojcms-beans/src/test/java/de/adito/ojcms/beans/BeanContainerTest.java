@@ -1,6 +1,7 @@
 package de.adito.ojcms.beans;
 
-import de.adito.ojcms.beans.fields.types.IntegerField;
+import de.adito.ojcms.beans.annotations.Identifier;
+import de.adito.ojcms.beans.fields.types.*;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 
@@ -153,7 +154,10 @@ class BeanContainerTest
     container.addBean(bean);
     assertEquals(0, container.indexOf(bean));
     container.addBean(new SomeBean());
-    assertEquals(0, container.indexOf(bean));
+    assertEquals(0, container.indexOf(bean)); //Initial bean should still be the first
+    //Test behaviour for equals
+    assertEquals(-1, container.indexOf(new SomeBean(50)));
+    assertEquals(0, container.indexOf(new SomeBean()));
   }
 
   @Test
@@ -167,10 +171,16 @@ class BeanContainerTest
   @Test
   public void testContains()
   {
-    final SomeBean bean = new SomeBean();
+    final SomeBean bean = new SomeBean(42);
     container.addBean(bean);
     assertTrue(container.contains(bean));
-    assertFalse(container.contains(new SomeBean()));
+    //Test behaviour for equals
+    final SomeBean anotherBean = new SomeBean(43);
+    assertFalse(container.contains(anotherBean));
+    anotherBean.setValue(SomeBean.someField, 42);
+    assertTrue(container.contains(anotherBean));
+    anotherBean.setValue(SomeBean.anotherField, "differentValue");
+    assertTrue(container.contains(anotherBean));
   }
 
   @Test
@@ -232,15 +242,19 @@ class BeanContainerTest
    */
   public static class SomeBean extends Bean<SomeBean> implements Comparable<SomeBean>
   {
+    @Identifier
     public static final IntegerField someField = BeanFieldFactory.create(SomeBean.class);
+    public static final TextField anotherField = BeanFieldFactory.create(SomeBean.class);
 
     public SomeBean()
     {
+      this(0);
     }
 
     public SomeBean(int pValue)
     {
       setValue(someField, pValue);
+      setValue(anotherField, "anotherValue");
     }
 
     @Override

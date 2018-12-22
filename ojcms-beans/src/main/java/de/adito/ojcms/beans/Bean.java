@@ -179,8 +179,7 @@ public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
       return false;
     final Bean<BEAN> other = (Bean<BEAN>) pOther;
     return identifiers.stream()
-        .map(pIdentifierField -> (IField) pIdentifierField)
-        .allMatch(pIdentifierField -> Objects.equals(getValue(pIdentifierField), other.getValue(pIdentifierField)));
+        .allMatch(pIdentifier -> Objects.equals(pIdentifier.getValue(), other.getValue(pIdentifier.getField())));
   }
 
   @Override
