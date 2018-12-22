@@ -186,7 +186,9 @@ final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMapB
     @Override
     public Iterator<Entry<KEY, VALUE>> iterator()
     {
-      return new IndexBasedIterator<>(size(), this::_createEntryForField, encapsulated::removeFieldAtIndex);
+      return IndexBasedIterator.buildIterator(this::_createEntryForField, this::size)
+          .withRemover(encapsulated::removeFieldAtIndex)
+          .createIterator();
     }
 
     @Override

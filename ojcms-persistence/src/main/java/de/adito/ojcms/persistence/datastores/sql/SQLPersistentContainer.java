@@ -215,7 +215,9 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IBeanCo
   @Override
   public Iterator<BEAN> iterator()
   {
-    return new IndexBasedIterator<>(size(), this::getBean, this::removeBean);
+    return IndexBasedIterator.buildIterator(this::getBean, this::size)
+        .withRemover(this::removeBean)
+        .createIterator();
   }
 
   /**

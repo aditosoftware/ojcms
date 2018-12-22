@@ -38,8 +38,8 @@ public class BeanFieldCopyTest
     testMap.put("test2", 60);
     final Consumer<IMapBean<String, Integer>> mapTest = pMapBean -> {
       assertEquals(2, pMapBean.size());
-      assertEquals(6, (int) pMapBean.get("test1"));
-      assertEquals(60, (int) pMapBean.get("test2"));
+      assertSame(6, pMapBean.get("test1"));
+      assertSame(60, pMapBean.get("test2"));
       assertEquals(testMap, pMapBean);
     };
 
