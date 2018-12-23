@@ -1,10 +1,9 @@
-package de.adito.ojcms.beans;
+package de.adito.ojcms.beans.fields.types;
 
+import de.adito.ojcms.beans.*;
 import de.adito.ojcms.beans.annotations.Detail;
 import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
 import de.adito.ojcms.beans.fields.IField;
-import de.adito.ojcms.beans.fields.types.AbstractField;
-import de.adito.ojcms.beans.fields.util.IMapBean;
 import de.adito.ojcms.beans.util.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -42,8 +41,8 @@ public class MapField<KEY, VALUE> extends AbstractField<IMapBean<KEY, VALUE>>
    */
   public IMapBean<KEY, VALUE> createBeanFromMap(Map<KEY, VALUE> pMap, Class<VALUE> pValueType)
   {
-    return new MapBean<>(pMap, pValueType, fieldCache::put, pKey -> Optional.ofNullable(fieldCache.get(pKey)),
-                         hasAnnotation(Detail.class));
+    return IMapBean.createFromMap(pMap, pValueType, fieldCache::put, pKey -> Optional.ofNullable(fieldCache.get(pKey)),
+                                  hasAnnotation(Detail.class));
   }
 
   /**
@@ -61,7 +60,6 @@ public class MapField<KEY, VALUE> extends AbstractField<IMapBean<KEY, VALUE>>
   @Override
   public IMapBean<KEY, VALUE> copyValue(IMapBean<KEY, VALUE> pValue, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
   {
-    assert pValue instanceof MapBean;
-    return pValue.createCopy(pMode, pBean -> new MapBean<>((MapBean<KEY, VALUE>) pBean), pCustomFieldCopies);
+    return pValue.createCopy(pMode, IMapBean::createCopy, pCustomFieldCopies);
   }
 }

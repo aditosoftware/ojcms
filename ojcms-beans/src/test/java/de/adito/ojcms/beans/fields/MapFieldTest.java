@@ -2,7 +2,8 @@ package de.adito.ojcms.beans.fields;
 
 import de.adito.ojcms.beans.*;
 import de.adito.ojcms.beans.base.IEqualsHashCodeChecker;
-import de.adito.ojcms.beans.fields.util.IMapBean;
+import de.adito.ojcms.beans.IMapBean;
+import de.adito.ojcms.beans.fields.types.MapField;
 import org.junit.jupiter.api.*;
 
 import java.util.*;

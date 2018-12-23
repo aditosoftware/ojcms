@@ -3,7 +3,6 @@ package de.adito.ojcms.beans;
 import de.adito.ojcms.beans.exceptions.BeanCopyNotSupportedException;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.fields.types.*;
-import de.adito.ojcms.beans.fields.util.IMapBean;
 import de.adito.ojcms.beans.util.*;
 import org.apache.commons.lang3.ClassUtils;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -54,7 +53,8 @@ public class BeanFieldCopyTest
         new _FieldValueWrapper<>(IntegerField.class, 1),
         //new _GenericFieldValueWrapper<>(ListField.class, new ArrayList<>()),
         new _FieldValueWrapper<>(LongField.class, 4L),
-        new _GenericFieldValueWrapper<>(MapField.class, new MapBean<>(testMap, Integer.class, false), mapTest),
+        new _GenericFieldValueWrapper<>(MapField.class, IMapBean.createFromMap(testMap, Integer.class, (pName, pField) -> {},
+                                                                               pKey -> Optional.empty(), false), mapTest),
         //new _GenericFieldValueWrapper<>(SetField.class, new HashSet<>()),
         new _FieldValueWrapper<>(ShortField.class, (short) 7),
         new _FieldValueWrapper<>(TextField.class, "testing"));

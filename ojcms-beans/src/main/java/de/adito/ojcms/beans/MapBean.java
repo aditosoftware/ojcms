@@ -4,7 +4,7 @@ import de.adito.ojcms.beans.annotations.Detail;
 import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
 import de.adito.ojcms.beans.datasource.MapBasedBeanDataSource;
 import de.adito.ojcms.beans.fields.IField;
-import de.adito.ojcms.beans.fields.util.*;
+import de.adito.ojcms.beans.fields.util.FieldValueTuple;
 import de.adito.ojcms.utils.IndexBasedIterator;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,18 +32,6 @@ final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMapB
   private final Function<KEY, Optional<IField<?>>> fieldCache;
   private final BiConsumer<KEY, IField<?>> fieldCacheCallback;
   private final _EntrySet entrySet = new _EntrySet();
-
-  /**
-   * Creates a map representation as bean.
-   *
-   * @param pMap       the source map from which the bean will be created
-   * @param pValueType the map's value type
-   * @param pIsDetail  <tt>true</tt>, if this map bean is considered as detail
-   */
-  MapBean(Map<KEY, VALUE> pMap, Class<VALUE> pValueType, boolean pIsDetail)
-  {
-    this(pMap, pValueType, (pKey, pField) -> {}, pKey -> Optional.empty(), pIsDetail);
-  }
 
   /**
    * Creates a map representation as bean.
