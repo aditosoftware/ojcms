@@ -2,7 +2,7 @@ package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.annotations.OptionalField;
 import de.adito.ojcms.beans.annotations.internal.TypeDefaultField;
-import de.adito.ojcms.beans.exceptions.*;
+import de.adito.ojcms.beans.exceptions.OJInternalException;
 import de.adito.ojcms.beans.exceptions.field.BeanFieldCreationException;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.util.BeanReflector;
@@ -64,31 +64,46 @@ public final class BeanFieldFactory
   }
 
   /**
-   * Provides the bean field type for a certain inner data type.
+   * The bean field type for a certain inner data type.
    * This depends on the field types annotated with {@link TypeDefaultField}.
    * They determine what field type is the default for the searched data type.
+   * The field's value type might not be the data type directly because of converters or sub types.
    *
-   * @param pType   the inner data type of a field
-   * @param <VALUE> the generic data type
-   * @return the default field type for this data type
+   * @param pDataType the inner data type of a field to find the bean field type for
+   * @return an optional default field type for the data data type
    */
-  static <VALUE> Class<IField<VALUE>> getFieldTypeFromType(Class<VALUE> pType)
+  public static Class<IField<?>> getFieldTypeFromDataType(Class<?> pDataType)
+  {
+    return findFieldTypeFromDataType(pDataType)
+        .orElseThrow(() -> new OJInternalException("There is no bean field for this data type: " + pDataType.getSimpleName()));
+  }
+
+  /**
+   * Tries to find the bean field type for a certain inner data type.
+   * This depends on the field types annotated with {@link TypeDefaultField}.
+   * They determine what field type is the default for the searched data type.
+   * The field's value type might not be the data type directly because of converters or sub types.
+   *
+   * @param pDataType the inner data type of a field to find the bean field type for
+   * @return an optional default field type for the data data type
+   */
+  public static Optional<Class<IField<?>>> findFieldTypeFromDataType(Class<?> pDataType)
   {
     if (typeFieldMapping == null)
       typeFieldMapping = IPicoRegistry.INSTANCE.find(IField.class, TypeDefaultField.class).entrySet().stream()
           .flatMap(pEntry -> Stream.of(pEntry.getValue().types())
-              .map(pDataType -> new AbstractMap.SimpleEntry<>(pDataType, pEntry.getKey())))
+              .map(pType -> new AbstractMap.SimpleEntry<>(pType, pEntry.getKey())))
           .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                                     (pFieldType1, pFieldType2) ->
                                     {
                                       throw new OJInternalException("Incorrect default data types for bean field: " + pFieldType1.getSimpleName() +
                                                                         " supports the same data type as " + pFieldType2.getSimpleName());
                                     }));
-
-    if (!typeFieldMapping.containsKey(pType))
-      throw new OJInternalException("There is no bean field for this data type: " + pType.getSimpleName());
     //noinspection unchecked
-    return (Class<IField<VALUE>>) typeFieldMapping.get(pType);
+    return typeFieldMapping.entrySet().stream()
+        .filter(pEntry -> pEntry.getKey().isAssignableFrom(pDataType))
+        .findAny()
+        .map(pEntry -> (Class<IField<?>>) pEntry.getValue());
   }
 
   /**

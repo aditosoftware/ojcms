@@ -1,5 +1,6 @@
 package de.adito.ojcms.beans.fields.types;
 
+import de.adito.ojcms.beans.annotations.internal.TypeDefaultField;
 import de.adito.ojcms.beans.exceptions.OJInternalException;
 import de.adito.ojcms.beans.fields.serialization.ISerializableField;
 import de.adito.ojcms.beans.util.*;
@@ -7,13 +8,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import java.util.Collection;
+import java.util.*;
 
 /**
  * A bean field for an enumeration type.
  *
  * @author Simon Danner, 01.08.2018
  */
+@TypeDefaultField(types = Enum.class)
 public class EnumField<ENUM extends Enum> extends AbstractField<ENUM> implements ISerializableField<ENUM>
 {
   public EnumField(@NotNull Class<ENUM> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)

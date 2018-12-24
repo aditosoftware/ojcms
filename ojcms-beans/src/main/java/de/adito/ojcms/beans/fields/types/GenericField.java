@@ -1,14 +1,13 @@
 package de.adito.ojcms.beans.fields.types;
 
-import de.adito.ojcms.beans.*;
-import de.adito.ojcms.beans.exceptions.*;
+import de.adito.ojcms.beans.BeanFieldFactory;
 import de.adito.ojcms.beans.exceptions.copy.BeanCopyNotSupportedException;
-import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.util.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.logging.Logger;
 
 /**
  * A bean field that holds any generic type value.
@@ -18,6 +17,8 @@ import java.util.Collection;
  */
 public class GenericField<TYPE> extends AbstractField<TYPE>
 {
+  static Logger LOGGER = Logger.getLogger(GenericField.class.getName()); //open for testing purposes
+
   public GenericField(@NotNull Class<TYPE> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {
     super(_checkGenericType(pType), pName, pAnnotations);
@@ -38,29 +39,17 @@ public class GenericField<TYPE> extends AbstractField<TYPE>
   }
 
   /**
-   * Checks, if this generic field may be replaced by a bean- or bean container field.
+   * Checks, if this generic field may be replaced by an existing concrete bean field type.
    *
    * @param pGenericType the generic type of this field
    * @return the generic type to use in a super call
    */
-  protected static <TYPE> Class<TYPE> _checkGenericType(Class<TYPE> pGenericType)
+  private static <TYPE> Class<TYPE> _checkGenericType(Class<TYPE> pGenericType)
   {
-    if (IBean.class.isAssignableFrom(pGenericType))
-      _throwPossibleReplacementError(pGenericType, BeanField.class);
-    if (IBeanContainer.class.isAssignableFrom(pGenericType))
-      _throwPossibleReplacementError(pGenericType, ContainerField.class);
+    BeanFieldFactory.findFieldTypeFromDataType(pGenericType)
+        .ifPresent(pReplacement ->
+                       LOGGER.warning("A generic field is not required for this data type. Use " + pReplacement.getName() + " instead." +
+                                          " generic type: " + pGenericType.getName()));
     return pGenericType;
-  }
-
-  /**
-   * Throws a runtime exception that indicates that this field can be replaced by another bean field.
-   *
-   * @param pGenericType     the generic type of this field
-   * @param pReplacementType the type of the replacement field
-   */
-  private static <TYPE> void _throwPossibleReplacementError(Class<TYPE> pGenericType, Class<? extends IField> pReplacementType)
-  {
-    throw new OJRuntimeException("A generic field is not required for this type. Use a " + pReplacementType.getSimpleName() + " instead. " +
-                                     "Generic-Type: " + pGenericType.getSimpleName());
   }
 }

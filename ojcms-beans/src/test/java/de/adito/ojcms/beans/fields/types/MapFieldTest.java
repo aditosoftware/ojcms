@@ -1,14 +1,12 @@
-package de.adito.ojcms.beans.fields;
+package de.adito.ojcms.beans.fields.types;
 
 import de.adito.ojcms.beans.*;
 import de.adito.ojcms.beans.base.IEqualsHashCodeChecker;
-import de.adito.ojcms.beans.IMapBean;
-import de.adito.ojcms.beans.fields.types.MapField;
 import org.junit.jupiter.api.*;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.*;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 

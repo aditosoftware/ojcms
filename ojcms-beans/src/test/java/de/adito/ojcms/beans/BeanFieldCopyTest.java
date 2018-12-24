@@ -49,7 +49,7 @@ public class BeanFieldCopyTest
         new _FieldValueWrapper<>(DateField.class, Instant.now()),
         new _FieldValueWrapper<>(DecimalField.class, 5.2),
         new _GenericFieldValueWrapper<>(EnumField.class, TestEnum.HELLO),
-        new _GenericFieldValueWrapper<>(GenericField.class, new ArrayList<>()),
+        new _GenericFieldValueWrapper<>(GenericField.class, new Thread()),
         new _FieldValueWrapper<>(IntegerField.class, 1),
         //new _GenericFieldValueWrapper<>(ListField.class, new ArrayList<>()),
         new _FieldValueWrapper<>(LongField.class, 4L),

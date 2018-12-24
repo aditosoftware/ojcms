@@ -51,7 +51,7 @@ final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMapB
   MapBean(Map<KEY, VALUE> pMap, Class<VALUE> pValueType, BiConsumer<KEY, IField<?>> pFieldCacheCallback,
           Function<KEY, Optional<IField<?>>> pFieldCache, boolean pIsDetail)
   {
-    fieldType = BeanFieldFactory.getFieldTypeFromType(pValueType);
+    fieldType = BeanFieldFactory.getFieldTypeFromDataType(pValueType);
     valueType = pValueType;
     isDetail = pIsDetail;
     keyFieldMapping = new HashMap<>();

@@ -2,7 +2,7 @@ package de.adito.ojcms.beans.fields.types;
 
 import de.adito.ojcms.beans.*;
 import de.adito.ojcms.beans.annotations.Detail;
-import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
+import de.adito.ojcms.beans.annotations.internal.*;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.util.*;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @param <VALUE> the value type of the map
  * @author Simon Danner, 01.02.2017
  */
-@RequiresEncapsulatedAccess
+@TypeDefaultField(types = IMapBean.class)
 public class MapField<KEY, VALUE> extends AbstractField<IMapBean<KEY, VALUE>>
 {
   private final Map<KEY, IField<?>> fieldCache = new ConcurrentHashMap<>();
