@@ -3,6 +3,7 @@ package de.adito.ojcms.beans;
 import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
 import de.adito.ojcms.beans.datasource.*;
 import de.adito.ojcms.beans.exceptions.*;
+import de.adito.ojcms.beans.exceptions.copy.*;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.util.*;
 import org.objenesis.*;
@@ -110,7 +111,7 @@ final class BeanCopies
     }
     catch (NoSuchFieldException | IllegalAccessException pE)
     {
-      throw new RuntimeException("Unable to set encapsulated data core for bean type " + pBeanType.getName(), pE);
+      throw new OJInternalException("Unable to set encapsulated data core for bean type " + pBeanType.getName(), pE);
     }
   }
 
@@ -147,7 +148,7 @@ final class BeanCopies
             }
             catch (IllegalAccessException pE)
             {
-              throw new RuntimeException("Unable to set non bean value while copying a bean!", pE);
+              throw new OJInternalException("Unable to set non bean value while copying a bean!", pE);
             }
           });
     return pCopy;

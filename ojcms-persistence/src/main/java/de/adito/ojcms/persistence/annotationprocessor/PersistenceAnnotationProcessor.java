@@ -2,6 +2,7 @@ package de.adito.ojcms.persistence.annotationprocessor;
 
 import com.squareup.javapoet.*;
 import de.adito.ojcms.beans.*;
+import de.adito.ojcms.beans.exceptions.OJInternalException;
 import de.adito.ojcms.persistence.*;
 
 import javax.annotation.processing.*;
@@ -51,14 +52,14 @@ public class PersistenceAnnotationProcessor extends AbstractProcessor
       Persist annotation = pElement.getAnnotation(Persist.class);
 
       if (pElement.getKind() != ElementKind.CLASS || !types.isAssignable(pElement.asType(), beanSuperType))
-        throw new RuntimeException("A persistence annotation can only be used with bean classes!");
+        throw new OJPersistenceException("A persistence annotation can only be used for bean classes!");
 
       //Single bean or container?
       final Map<String, Element> mapping = annotation.mode() == EPersistenceMode.CONTAINER ? containers : beans;
 
       final String containerId = annotation.containerId();
       if (mapping.containsKey(containerId))
-        throw new RuntimeException("Persistent annotations cannot use the same persistence ID twice within the project! id: " + containerId);
+        throw new OJPersistenceException("Persistent annotations cannot use the same persistence ID twice! id: " + containerId);
 
       mapping.put(containerId, pElement);
     });
@@ -105,7 +106,7 @@ public class PersistenceAnnotationProcessor extends AbstractProcessor
     }
     catch (IOException pE)
     {
-      throw new RuntimeException("Unable to generate persistence classes!", pE);
+      throw new OJInternalException("Unable to generate persistence classes!", pE);
     }
   }
 
@@ -117,7 +118,7 @@ public class PersistenceAnnotationProcessor extends AbstractProcessor
    * @param pIsContainer <tt>true</tt>, if the field should provide a bean or a container (no single bean)
    * @return the type name
    */
-  private TypeName _getFieldType(Element pElement, boolean pIsContainer)
+  private static TypeName _getFieldType(Element pElement, boolean pIsContainer)
   {
     final TypeName beanType = TypeName.get(pElement.asType());
     return pIsContainer ? ParameterizedTypeName.get(ClassName.get(IBeanContainer.class), beanType) : beanType;

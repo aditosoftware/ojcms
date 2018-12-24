@@ -2,7 +2,8 @@ package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.annotations.*;
 import de.adito.ojcms.beans.base.IEqualsHashCodeChecker;
-import de.adito.ojcms.beans.exceptions.*;
+import de.adito.ojcms.beans.exceptions.bean.BeanIllegalAccessException;
+import de.adito.ojcms.beans.exceptions.field.BeanFieldDoesNotExistException;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.fields.types.*;
 import de.adito.ojcms.beans.fields.util.FieldValueTuple;

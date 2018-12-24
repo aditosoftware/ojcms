@@ -1,6 +1,8 @@
 package de.adito.ojcms.utils.collections;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Special test for {@link WeakInputSortedContainer} to test the weak reference behaviour.
@@ -11,19 +13,12 @@ import org.junit.jupiter.api.*;
 class WeakInputSortedContainerTest
 {
   @Test
-  public void testWeakReferences()
+  public void testWeakReferences() throws InterruptedException
   {
     final WeakInputSortedContainer<Object> container = new WeakInputSortedContainer<>();
     container.add(new Object());
     System.gc();
-    try
-    {
-      Thread.sleep(100);
-    }
-    catch (InterruptedException pE)
-    {
-      throw new RuntimeException(pE);
-    }
-    Assertions.assertTrue(container.isEmpty());
+    Thread.sleep(100);
+    assertTrue(container.isEmpty());
   }
 }

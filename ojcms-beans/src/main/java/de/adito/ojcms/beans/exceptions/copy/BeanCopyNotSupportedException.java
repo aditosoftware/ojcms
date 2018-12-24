@@ -1,9 +1,9 @@
-package de.adito.ojcms.beans.exceptions;
+package de.adito.ojcms.beans.exceptions.copy;
 
 import de.adito.ojcms.beans.fields.IField;
 
 /**
- * Exception for a bean field, which does not support a copy mechanism for its value.
+ * Exception for a bean field that does not support a copy mechanism for its value.
  *
  * @author Simon Danner, 14.04.2018
  */

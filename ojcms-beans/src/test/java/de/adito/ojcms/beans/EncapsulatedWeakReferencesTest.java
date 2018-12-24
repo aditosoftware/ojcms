@@ -1,5 +1,6 @@
 package de.adito.ojcms.beans;
 
+import de.adito.ojcms.beans.exceptions.OJInternalException;
 import de.adito.ojcms.beans.fields.types.BeanField;
 import org.junit.jupiter.api.*;
 
@@ -42,7 +43,7 @@ public class EncapsulatedWeakReferencesTest
   @Test
   public void testReferenceRemovalFail()
   {
-    assertThrows(RuntimeException.class, () -> referable.removeReference(new ReferringBean(someBean), ReferringBean.anotherRefField));
+    assertThrows(OJInternalException.class, () -> referable.removeReference(new ReferringBean(someBean), ReferringBean.anotherRefField));
   }
 
   @Test

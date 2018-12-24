@@ -3,6 +3,7 @@ package de.adito.ojcms.beans.statistics;
 import de.adito.ojcms.beans.*;
 import de.adito.ojcms.beans.annotations.Statistics;
 import de.adito.ojcms.beans.base.AbstractOnNextCallCountTest;
+import de.adito.ojcms.beans.exceptions.OJInternalException;
 import de.adito.ojcms.beans.fields.types.TextField;
 import org.junit.jupiter.api.*;
 
@@ -29,7 +30,7 @@ class BeanStatisticsTest extends AbstractOnNextCallCountTest
   {
     bean = new SomeBean();
     statisticData = bean.getStatisticData(SomeBean.field)
-        .orElseThrow(() -> new RuntimeException("Unexpected: statistics not available!"));
+        .orElseThrow(() -> new OJInternalException("Statistics not available!"));
   }
 
   @Test
@@ -91,7 +92,7 @@ class BeanStatisticsTest extends AbstractOnNextCallCountTest
   }
 
   @Test
-  public void testDataDestruction()
+  public void testDataDestruction() throws InterruptedException
   {
     _setupTestStatistics(10);
     assertNotNull(statisticData);
@@ -101,7 +102,7 @@ class BeanStatisticsTest extends AbstractOnNextCallCountTest
   }
 
   @Test
-  public void testCapacity()
+  public void testCapacity() throws InterruptedException
   {
     _setupTestStatistics(15); //surpass limit
     assertEquals(FIELD_STATISTICS_LIMIT, statisticData.getChangedDataStatistics().size());
@@ -112,21 +113,14 @@ class BeanStatisticsTest extends AbstractOnNextCallCountTest
    *
    * @param pSize the size of the entries
    */
-  private void _setupTestStatistics(int pSize)
+  private void _setupTestStatistics(int pSize) throws InterruptedException
   {
     final String value = "value";
-    IntStream.range(0, pSize)
-        .forEach(pIndex -> {
-          bean.setValue(SomeBean.field, value + pIndex);
-          try
-          {
-            Thread.sleep(10); //Leave some range between the timestamps
-          }
-          catch (InterruptedException pE)
-          {
-            throw new RuntimeException(pE);
-          }
-        });
+    for (int i = 0; i < pSize; i++)
+    {
+      bean.setValue(SomeBean.field, value + i);
+      Thread.sleep(10); //Leave some range between the timestamps
+    }
   }
 
   /**

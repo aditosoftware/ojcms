@@ -3,6 +3,7 @@ package de.adito.ojcms.beans;
 import de.adito.ojcms.beans.annotations.Statistics;
 import de.adito.ojcms.beans.annotations.internal.EncapsulatedData;
 import de.adito.ojcms.beans.datasource.IBeanContainerDataSource;
+import de.adito.ojcms.beans.exceptions.container.BeanContainerLimitReachedException;
 import de.adito.ojcms.beans.reactive.IEvent;
 import de.adito.ojcms.beans.statistics.*;
 import io.reactivex.Observable;
@@ -59,7 +60,7 @@ class EncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends AbstractEn
     if (limitInfo != null && limitInfo.limit == size())
     {
       if (!limitInfo.evicting)
-        throw new RuntimeException("The limit of this container is reached! limit: " + limitInfo.limit);
+        throw new BeanContainerLimitReachedException(limitInfo.limit);
       removeBean(getBean(0)); //Remove first bean if limit is reached and evicting flag is set
       pIndex--;
     }

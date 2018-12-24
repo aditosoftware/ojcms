@@ -1,6 +1,7 @@
 package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
+import de.adito.ojcms.beans.exceptions.OJInternalException;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -104,7 +105,7 @@ public enum EReferableResolver
     }
     catch (ClassCastException pE)
     {
-      throw new RuntimeException("The field's value should hold an encapsulated data core! type " + pValue.getClass().getName());
+      throw new OJInternalException("The field's value should hold an encapsulated data core! type " + pValue.getClass().getName());
     }
   }
 }

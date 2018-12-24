@@ -1,6 +1,7 @@
 package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
+import de.adito.ojcms.beans.exceptions.field.BeanFieldDuplicateException;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.reactive.events.*;
 
@@ -51,7 +52,7 @@ public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
     final IEncapsulatedBeanData encapsulated = getEncapsulatedData();
     assert encapsulated != null;
     if (encapsulated.streamFields().anyMatch(pField -> pField.getName().equals(pName)))
-      throw new RuntimeException("A field with the name '" + pName + "' is already existing at this bean!");
+      throw new BeanFieldDuplicateException(pName);
     final FIELD newField = BeanFieldFactory.createField(pFieldType, pName, pAnnotations);
     if (pIndex == -1)
       addField(newField);
@@ -83,7 +84,7 @@ public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
     final IEncapsulatedBeanData encapsulated = getEncapsulatedData();
     assert encapsulated != null;
     if (encapsulated.containsField(pField))
-      throw new RuntimeException("A bean cannot have the same field twice! field: " + pField.getName());
+      throw new BeanFieldDuplicateException(pField.getName());
     encapsulated.addField(pField, pIndex);
     if (getFieldActivePredicate().isOptionalActive(pField))
       //noinspection unchecked

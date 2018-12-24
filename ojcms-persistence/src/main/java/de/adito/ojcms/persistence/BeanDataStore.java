@@ -95,7 +95,7 @@ public final class BeanDataStore
         .filter(pEntry -> pEntry.getValue() == pContainer)
         .findAny()
         .map(Map.Entry::getKey)
-        .orElseThrow(() -> new RuntimeException("The container '" + pContainer + "' is not registered within the persistence framework!"));
+        .orElseThrow(() -> new OJPersistenceException("The container '" + pContainer + "' is not registered within the persistence framework!"));
   }
 
   /**
@@ -132,12 +132,12 @@ public final class BeanDataStore
     try
     {
       if (!pBeanType.isAnnotationPresent(Persist.class))
-        throw new RuntimeException("The bean type '" + pBeanType.getName() + "' is not marked as persistent bean!");
+        throw new OJPersistenceException(pBeanType);
       return pBeanType.newInstance();
     }
     catch (InstantiationException | IllegalAccessException pE)
     {
-      throw new RuntimeException("The persistent bean type '" + pBeanType.getName() + "' must define a default constructor!");
+      throw new OJPersistenceException("The persistent bean type '" + pBeanType.getName() + "' must define a default constructor!");
     }
   }
 }

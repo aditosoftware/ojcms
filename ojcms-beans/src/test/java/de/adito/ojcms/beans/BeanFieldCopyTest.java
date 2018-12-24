@@ -1,6 +1,6 @@
 package de.adito.ojcms.beans;
 
-import de.adito.ojcms.beans.exceptions.BeanCopyNotSupportedException;
+import de.adito.ojcms.beans.exceptions.copy.BeanCopyNotSupportedException;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.fields.types.*;
 import de.adito.ojcms.beans.util.*;

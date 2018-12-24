@@ -1,7 +1,8 @@
 package de.adito.ojcms.beans.fields.types;
 
 import de.adito.ojcms.beans.*;
-import de.adito.ojcms.beans.exceptions.BeanCopyNotSupportedException;
+import de.adito.ojcms.beans.exceptions.*;
+import de.adito.ojcms.beans.exceptions.copy.BeanCopyNotSupportedException;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.util.*;
 import org.jetbrains.annotations.NotNull;
@@ -59,7 +60,7 @@ public class GenericField<TYPE> extends AbstractField<TYPE>
    */
   private static <TYPE> void _throwPossibleReplacementError(Class<TYPE> pGenericType, Class<? extends IField> pReplacementType)
   {
-    throw new RuntimeException("A generic field is not required for this type. Use a " + pReplacementType.getSimpleName() + " instead. " +
-                                   "Generic-Type: " + pGenericType.getSimpleName());
+    throw new OJRuntimeException("A generic field is not required for this type. Use a " + pReplacementType.getSimpleName() + " instead. " +
+                                     "Generic-Type: " + pGenericType.getSimpleName());
   }
 }

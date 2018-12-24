@@ -1,5 +1,6 @@
 package de.adito.ojcms.beans.fields.types;
 
+import de.adito.ojcms.beans.exceptions.OJInternalException;
 import de.adito.ojcms.beans.fields.serialization.ISerializableField;
 import de.adito.ojcms.beans.util.*;
 import org.jetbrains.annotations.NotNull;
@@ -39,7 +40,7 @@ public class EnumField<ENUM extends Enum> extends AbstractField<ENUM> implements
     }
     catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException pE)
     {
-      throw new RuntimeException("Unable to convert an enum field's persistent value! value: " + pSerialString, pE);
+      throw new OJInternalException("Unable to convert an enum field's persistent value! value: " + pSerialString, pE);
     }
   }
 

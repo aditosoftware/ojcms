@@ -2,6 +2,8 @@ package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.annotations.OptionalField;
 import de.adito.ojcms.beans.annotations.internal.TypeDefaultField;
+import de.adito.ojcms.beans.exceptions.*;
+import de.adito.ojcms.beans.exceptions.field.BeanFieldCreationException;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.util.BeanReflector;
 import de.adito.picoservice.IPicoRegistry;
@@ -52,13 +54,11 @@ public final class BeanFieldFactory
           }
           catch (IllegalAccessException pE)
           {
-            throw new RuntimeException(pE);
+            throw new OJInternalException(pE);
           }
         })
         .findAny()
-        .orElseThrow(() -> new RuntimeException("Unable to create field. There are no static fields or all of them are initialized already. " +
-                                                    "bean-type: " + pBeanType.getName() + ". Check the class type given to this method! " +
-                                                    "It must be the same as the type containing the bean field to create."));
+        .orElseThrow(() -> new BeanFieldCreationException(pBeanType));
     final Class<FIELD> fieldType = (Class<FIELD>) toCreate.getType();
     return (FIELD) createField(fieldType, _getGenType(toCreate, fieldType), toCreate.getName(), Arrays.asList(toCreate.getAnnotations()));
   }
@@ -81,12 +81,12 @@ public final class BeanFieldFactory
           .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                                     (pFieldType1, pFieldType2) ->
                                     {
-                                      throw new RuntimeException("Incorrect default data types for bean fields: " + pFieldType1.getSimpleName() +
-                                                                     " supports the same data type as " + pFieldType2.getSimpleName());
+                                      throw new OJInternalException("Incorrect default data types for bean field: " + pFieldType1.getSimpleName() +
+                                                                        " supports the same data type as " + pFieldType2.getSimpleName());
                                     }));
 
     if (!typeFieldMapping.containsKey(pType))
-      throw new RuntimeException("There is no bean field for this data type: " + pType.getSimpleName());
+      throw new OJInternalException("There is no bean field for this data type: " + pType.getSimpleName());
     //noinspection unchecked
     return (Class<IField<VALUE>>) typeFieldMapping.get(pType);
   }
@@ -95,7 +95,7 @@ public final class BeanFieldFactory
    * Creates a new bean field based on a certain type und some initial data.
    * This method should only be used internally within this package.
    *
-   * @param pFieldType   the fields's type
+   * @param pFieldType   the field's type
    * @param pName        the field's name
    * @param pAnnotations the field's annotations
    * @param <VALUE>      the field's data type
@@ -112,10 +112,10 @@ public final class BeanFieldFactory
    * It's also possible to provide an additional generic type of the bean field.
    * For example, this may be the bean type of a container field.
    *
-   * @param pFieldType   the fields's type
-   * @param pGenType     the fields's generic type (NOT the same type of the field as generic)
-   * @param pName        the fields's name
-   * @param pAnnotations the fields's annotations
+   * @param pFieldType   the field's type
+   * @param pGenType     the field's generic type (NOT the same type of the field as generic)
+   * @param pName        the field's name
+   * @param pAnnotations the field's annotations
    * @param <VALUE>      the field's data type
    * @param <FIELD>      the generic field type
    * @return the newly created field
@@ -135,7 +135,7 @@ public final class BeanFieldFactory
     }
     catch (NoSuchMethodException | InstantiationException | InvocationTargetException | IllegalAccessException pE)
     {
-      throw new RuntimeException(pE);
+      throw new OJInternalException(pE);
     }
   }
 

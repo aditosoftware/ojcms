@@ -2,7 +2,7 @@ package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
 import de.adito.ojcms.beans.datasource.*;
-import de.adito.ojcms.beans.exceptions.BeanFieldDoesNotExistException;
+import de.adito.ojcms.beans.exceptions.field.*;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.fields.util.FieldValueTuple;
 import de.adito.ojcms.beans.util.BeanReflector;
@@ -59,7 +59,7 @@ public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
 
   /**
    * Creates the bean with the default map based data source.
-   * The fields will be reflect from the static definitions (see the example above).
+   * The fields will be reflected from the static definitions (see the example above).
    */
   protected Bean()
   {
@@ -133,13 +133,11 @@ public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
   private void _checkForDuplicateFields()
   {
     final Set<IField<?>> checker = new HashSet<>();
-    List<IField<?>> duplicates = streamFields()
+    final List<IField<?>> duplicates = streamFields()
         .filter(pField -> !checker.add(pField))
         .collect(Collectors.toList());
     if (!duplicates.isEmpty())
-      throw new RuntimeException("A bean cannot define a field twice! duplicates: " + duplicates.stream()
-          .map(IField::getName)
-          .collect(Collectors.joining(", ")));
+      throw new BeanFieldDuplicateException(duplicates);
   }
 
   /**

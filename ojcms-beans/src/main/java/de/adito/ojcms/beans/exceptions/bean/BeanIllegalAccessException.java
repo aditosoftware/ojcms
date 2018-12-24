@@ -1,6 +1,7 @@
-package de.adito.ojcms.beans.exceptions;
+package de.adito.ojcms.beans.exceptions.bean;
 
 import de.adito.ojcms.beans.IBean;
+import de.adito.ojcms.beans.exceptions.OJRuntimeException;
 import de.adito.ojcms.beans.fields.IField;
 
 /**
@@ -8,7 +9,7 @@ import de.adito.ojcms.beans.fields.IField;
  *
  * @author Simon Danner, 29.01.2018
  */
-public class BeanIllegalAccessException extends RuntimeException
+public class BeanIllegalAccessException extends OJRuntimeException
 {
   public BeanIllegalAccessException(IBean<?> pBean, IField<?> pField)
   {

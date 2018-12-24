@@ -55,7 +55,7 @@ public enum EDatabaseType
     }
     catch (ClassNotFoundException pE)
     {
-      throw new RuntimeException("Driver '" + driverName + "' not found!", pE);
+      throw new OJDatabaseException("Database driver '" + driverName + "' not found!", pE);
     }
   }
 

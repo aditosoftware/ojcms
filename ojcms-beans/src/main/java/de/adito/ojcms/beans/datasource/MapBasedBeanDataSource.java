@@ -1,6 +1,7 @@
 package de.adito.ojcms.beans.datasource;
 
 import de.adito.ojcms.beans.IBean;
+import de.adito.ojcms.beans.exceptions.OJInternalException;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.fields.util.FieldValueTuple;
 
@@ -53,7 +54,7 @@ public final class MapBasedBeanDataSource implements IBeanDataSource
   {
     final boolean existing = values.containsKey(pField);
     if (!pAllowNewField && !existing)
-      throw new RuntimeException("It is not allowed to add new fields for this bean. field: " + pField.getName());
+      throw new OJInternalException("It is not allowed to add new fields for this bean data core. field: " + pField.getName());
     values.put(pField, pValue == null ? pField.getInitialValue() : pValue);
   }
 

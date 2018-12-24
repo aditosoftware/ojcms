@@ -2,6 +2,7 @@ package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.annotations.Identifier;
 import de.adito.ojcms.beans.base.IEqualsHashCodeChecker;
+import de.adito.ojcms.beans.exceptions.container.BeanContainerLimitReachedException;
 import de.adito.ojcms.beans.fields.types.*;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
@@ -200,7 +201,7 @@ class BeanContainerTest
   {
     container.withLimit(1, false);
     container.addBean(new SomeBean());
-    assertThrows(RuntimeException.class, () -> container.addBean(new SomeBean()));
+    assertThrows(BeanContainerLimitReachedException.class, () -> container.addBean(new SomeBean()));
   }
 
   @Test

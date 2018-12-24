@@ -3,7 +3,8 @@ package de.adito.ojcms.beans;
 import de.adito.ojcms.beans.annotations.Identifier;
 import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
 import de.adito.ojcms.beans.datasource.*;
-import de.adito.ojcms.beans.exceptions.*;
+import de.adito.ojcms.beans.exceptions.bean.*;
+import de.adito.ojcms.beans.exceptions.field.*;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.fields.util.FieldValueTuple;
 import de.adito.ojcms.beans.references.*;
@@ -90,7 +91,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
       //noinspection unchecked
       return (TARGET) actualValue;
     return pField.getFromConverter(pConvertType)
-        .orElseThrow(() -> new RuntimeException("The field " + pField.getName() + " is not able to convert to " + pConvertType.getSimpleName()))
+        .orElseThrow(() -> new ValueConversionUnsupportedException(pField, pConvertType))
         .apply(actualValue);
   }
 
@@ -138,7 +139,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
       final Class<SOURCE> sourceType = (Class<SOURCE>) pValueToConvert.getClass();
       convertedValue = pField.getDataType().isAssignableFrom(sourceType) ? (VALUE) pValueToConvert :
           pField.getToConverter(sourceType)
-              .orElseThrow(() -> new RuntimeException("The field " + pField.getName() + " cannot convert to " + sourceType.getSimpleName()))
+              .orElseThrow(() -> new ValueConversionUnsupportedException(pField, sourceType))
               .apply(pValueToConvert);
     }
     setValue(pField, convertedValue);
@@ -323,12 +324,10 @@ public interface IBean<BEAN extends IBean<BEAN>>
     for (IField<?> field : pChain)
     {
       if (!current.hasField(field))
-        throw new RuntimeException("Invalid chain. The parent bean '" + current + "'" +
-                                       " does not contain a field " + field.getName() + ".");
+        throw new InvalidChainException(current, field);
       final Object value = current.getValue(field);
       if (!(value instanceof IBean))
-        throw new RuntimeException("Invalid chain. It can only contain bean reference fields. " + field.getName() + " is of data type " +
-                                       field.getDataType().getName());
+        throw new InvalidChainException(field);
       current = (IBean<?>) value;
     }
 
@@ -364,8 +363,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
   {
     final IBean<?> deepBean = resolveDeepBean(pChain);
     if (!deepBean.hasField(pDeepField))
-      throw new RuntimeException("The resolved deep bean '" + deepBean + "' does not contain the field '" + pDeepField.getName() +
-                                     "' to evaluate the value for.");
+      throw new InvalidChainException(deepBean, pDeepField);
     return deepBean.getValue(pDeepField);
   }
 

@@ -2,6 +2,7 @@ package de.adito.ojcms.sqlbuilder.definition.condition;
 
 import de.adito.ojcms.sqlbuilder.definition.*;
 import de.adito.ojcms.sqlbuilder.format.*;
+import de.adito.ojcms.sqlbuilder.util.OJDatabaseException;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -33,7 +34,7 @@ class InConditionImpl<VALUE> extends ConditionImpl<VALUE>
         .map(pValue -> pTupleCreator.apply(pColumn, pValue))
         .collect(Collectors.toList());
     if (values.isEmpty())
-      throw new RuntimeException("The elements of an 'IN'-condition cannot be empty!");
+      throw new OJDatabaseException("The elements of an 'IN'-condition cannot be empty!");
   }
 
   @Override

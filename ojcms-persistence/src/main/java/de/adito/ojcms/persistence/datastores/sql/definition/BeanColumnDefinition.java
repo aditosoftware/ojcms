@@ -72,7 +72,7 @@ public class BeanColumnDefinition<VALUE> implements IColumnDefinition, IBeanFiel
     //noinspection unchecked
     final Class<? extends IBean> beanType = (Class<? extends IBean>) beanField.getDataType();
     if (!beanType.isAnnotationPresent(Persist.class))
-      throw new RuntimeException("A persistent bean can only create a reference to another persistent bean! type: " + beanType.getName());
+      throw new OJPersistenceException(beanType);
     final Persist annotation = beanType.getAnnotation(Persist.class);
     final String tableName = annotation.mode() == EPersistenceMode.SINGLE ? IDatabaseConstants.BEAN_TABLE_NAME : annotation.containerId();
     final String columnName = annotation.mode() == EPersistenceMode.SINGLE ? IDatabaseConstants.BEAN_TABLE_BEAN_ID :

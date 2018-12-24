@@ -1,6 +1,7 @@
 package de.adito.ojcms.beans.references;
 
 import de.adito.ojcms.beans.IBean;
+import de.adito.ojcms.beans.exceptions.OJRuntimeException;
 import de.adito.ojcms.beans.fields.IField;
 import org.jetbrains.annotations.NotNull;
 
@@ -104,6 +105,6 @@ public final class BeanReference extends WeakReference<IBean<?>> implements Iter
   private IBean<?> _requiresExistingReference()
   {
     return Optional.ofNullable(get())
-        .orElseThrow(() -> new RuntimeException("This bean reference is not existing anymore!"));
+        .orElseThrow(() -> new OJRuntimeException("This bean reference is not existing anymore!"));
   }
 }

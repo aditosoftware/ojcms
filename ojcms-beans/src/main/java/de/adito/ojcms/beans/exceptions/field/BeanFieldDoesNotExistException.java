@@ -1,6 +1,7 @@
-package de.adito.ojcms.beans.exceptions;
+package de.adito.ojcms.beans.exceptions.field;
 
 import de.adito.ojcms.beans.IBean;
+import de.adito.ojcms.beans.exceptions.OJRuntimeException;
 import de.adito.ojcms.beans.fields.IField;
 
 /**
@@ -8,12 +9,12 @@ import de.adito.ojcms.beans.fields.IField;
  *
  * @author Simon Danner, 17.08.2017
  */
-public class BeanFieldDoesNotExistException extends RuntimeException
+public class BeanFieldDoesNotExistException extends OJRuntimeException
 {
   /**
    * Creates a new exception for a certain field on a specific bean.
    *
-   * @param pBean the bean missing the field
+   * @param pBean  the bean missing the field
    * @param pField the missing field
    */
   public BeanFieldDoesNotExistException(IBean<?> pBean, IField<?> pField)
@@ -34,7 +35,7 @@ public class BeanFieldDoesNotExistException extends RuntimeException
   /**
    * Creates a new exception for a certain field name on a specific bean.
    *
-   * @param pBean the bean missing the field
+   * @param pBean      the bean missing the field
    * @param pFieldName the missing field's name
    */
   public BeanFieldDoesNotExistException(IBean<?> pBean, String pFieldName)

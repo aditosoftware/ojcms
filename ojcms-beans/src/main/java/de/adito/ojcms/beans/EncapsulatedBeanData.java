@@ -3,7 +3,7 @@ package de.adito.ojcms.beans;
 import de.adito.ojcms.beans.annotations.Statistics;
 import de.adito.ojcms.beans.annotations.internal.EncapsulatedData;
 import de.adito.ojcms.beans.datasource.IBeanDataSource;
-import de.adito.ojcms.beans.exceptions.BeanFieldDoesNotExistException;
+import de.adito.ojcms.beans.exceptions.field.BeanFieldDoesNotExistException;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.fields.util.FieldValueTuple;
 import de.adito.ojcms.beans.statistics.*;

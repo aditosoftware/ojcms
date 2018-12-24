@@ -1,5 +1,6 @@
 package de.adito.ojcms.sqlbuilder.definition;
 
+import de.adito.ojcms.sqlbuilder.util.OJDatabaseException;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.*;
@@ -41,7 +42,7 @@ class DefaultValueSerializer implements IValueSerializer
   {
     final Class<VALUE> dataType = pColumnValueTuple.getColumn().getDataType();
     if (!supportedTypesToSerial.containsKey(dataType))
-      throw new RuntimeException(dataType.getName() + " is not a supported value type for this serializer!");
+      throw new OJDatabaseException(dataType.getName() + " is not a supported value type for this serializer!");
     final VALUE value = pColumnValueTuple.getValue();
     return value == null ? null : supportedTypesToSerial.get(dataType).apply(value);
   }
@@ -51,7 +52,7 @@ class DefaultValueSerializer implements IValueSerializer
   {
     final Class<VALUE> dataType = pColumnIdentification.getDataType();
     if (!supportedTypesFromSerial.containsKey(dataType))
-      throw new RuntimeException(dataType.getName() + " is not a supported value type for this deserializer!");
+      throw new OJDatabaseException(dataType.getName() + " is not a supported value type for this deserializer!");
     //noinspection unchecked
     return pSerialValue == null ? null : (VALUE) supportedTypesFromSerial.get(dataType).apply(pSerialValue);
   }

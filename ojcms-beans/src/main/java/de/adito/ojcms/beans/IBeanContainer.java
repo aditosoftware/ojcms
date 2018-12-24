@@ -2,6 +2,7 @@ package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
 import de.adito.ojcms.beans.datasource.*;
+import de.adito.ojcms.beans.exceptions.*;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.reactive.events.*;
 import de.adito.ojcms.beans.references.*;
@@ -108,7 +109,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
   static <BEAN extends IBean<BEAN>> IBeanContainer<BEAN> ofVariableNotEmpty(BEAN... pBeans)
   {
     if (pBeans.length == 0)
-      throw new RuntimeException("Unable to infer bean type! Empty varargs argument not allowed here!");
+      throw new OJRuntimeException("Unable to infer bean type! Empty varargs argument not allowed here!");
     //noinspection unchecked
     final Class<BEAN> type = (Class<BEAN>) pBeans[0].getClass();
     return ofVariable(type, pBeans);
@@ -140,7 +141,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
   {
     final Iterator<BEAN> it = pBeans.iterator();
     if (!it.hasNext())
-      throw new RuntimeException("Unable to infer bean type! The amount of beans cannot be empty!");
+      throw new OJRuntimeException("Unable to infer bean type! The amount of beans cannot be empty!");
     //noinspection unchecked
     final Class<BEAN> type = (Class<BEAN>) it.next().getClass();
     return ofIterable(type, pBeans);
@@ -293,7 +294,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
       throw new IndexOutOfBoundsException("index: " + pIndex);
 
     return BeanEvents.removeFromContainer(this, pEncapsulated -> pEncapsulated.removeBean(pIndex))
-        .orElseThrow(() -> new RuntimeException("Unexpected: Unable to remove bean at index" + pIndex));
+        .orElseThrow(() -> new OJInternalException("Unable to remove bean at index" + pIndex));
   }
 
   /**

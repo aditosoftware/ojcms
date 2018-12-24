@@ -2,6 +2,7 @@ package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.annotations.Private;
 import de.adito.ojcms.beans.base.AbstractOnNextCallCountTest;
+import de.adito.ojcms.beans.exceptions.field.BeanFieldDuplicateException;
 import de.adito.ojcms.beans.fields.types.*;
 import org.junit.jupiter.api.*;
 
@@ -113,7 +114,7 @@ class BeanObserverTest extends AbstractOnNextCallCountTest
   public void testDuplicateFieldFails()
   {
     final IntegerField addedField = bean.addField(IntegerField.class, "testField", Collections.emptySet());
-    assertThrows(RuntimeException.class, () -> bean.addField(addedField));
+    assertThrows(BeanFieldDuplicateException.class, () -> bean.addField(addedField));
   }
 
   @Test

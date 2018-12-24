@@ -1,6 +1,8 @@
 package de.adito.ojcms.beans.fields;
 
-import de.adito.ojcms.beans.exceptions.BeanCopyNotSupportedException;
+import de.adito.ojcms.beans.exceptions.*;
+import de.adito.ojcms.beans.exceptions.copy.BeanCopyNotSupportedException;
+import de.adito.ojcms.beans.exceptions.field.BeanFieldMissingInformation;
 import de.adito.ojcms.beans.fields.util.*;
 import de.adito.ojcms.beans.util.*;
 
@@ -123,8 +125,7 @@ public interface IField<VALUE>
    */
   default <ANNOTATION extends Annotation> ANNOTATION getAnnotationOrThrow(Class<ANNOTATION> pType)
   {
-    return getAnnotation(pType)
-        .orElseThrow(() -> new RuntimeException("This field is not annotated by the annotation type: " + pType.getName()));
+    return getAnnotation(pType).orElseThrow(() -> new BeanFieldMissingInformation(pType));
   }
 
   /**
@@ -160,9 +161,7 @@ public interface IField<VALUE>
    */
   default <INFO> INFO getAdditionalInformationOrThrow(IAdditionalFieldInfo<INFO> pIdentifier)
   {
-    return getAdditionalInformation(pIdentifier)
-        .orElseThrow(() -> new RuntimeException("Additional information of type " + pIdentifier.getDataType().getName()
-                                                    + " is not present at this field!"));
+    return getAdditionalInformation(pIdentifier).orElseThrow(() -> new BeanFieldMissingInformation(pIdentifier));
   }
 
   /**
@@ -245,7 +244,8 @@ public interface IField<VALUE>
   default FieldValueTuple<?> newUntypedTuple(Object pValue)
   {
     if (pValue != null && !getDataType().isAssignableFrom(pValue.getClass()))
-      throw new RuntimeException("type-mismatch: field type: " + getDataType().getName() + " value type: " + pValue.getClass().getName());
+      throw new OJRuntimeException("type-mismatch for field value tuple:" +
+                                       " field type: " + getDataType().getName() + " value type: " + pValue.getClass().getName());
     //noinspection unchecked
     return new FieldValueTuple(this, pValue);
   }

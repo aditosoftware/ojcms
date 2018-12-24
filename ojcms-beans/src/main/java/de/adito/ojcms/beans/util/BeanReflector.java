@@ -1,6 +1,8 @@
 package de.adito.ojcms.beans.util;
 
 import de.adito.ojcms.beans.*;
+import de.adito.ojcms.beans.exceptions.*;
+import de.adito.ojcms.beans.exceptions.bean.NoDeclaredBeanTypeException;
 import de.adito.ojcms.beans.fields.IField;
 
 import java.lang.reflect.*;
@@ -68,10 +70,10 @@ public final class BeanReflector
   public static Class<? extends IBean> requiresDeclaredBeanType(Class<? extends IBean> pBeanType)
   {
     if (!Modifier.isPublic(pBeanType.getModifiers()))
-      throw new RuntimeException(pBeanType.getName() + " is not a valid bean type! It has to be declared public to create fields!");
+      throw new NoDeclaredBeanTypeException(pBeanType, "It has to be declared public to create fields!");
 
     if (!Bean.class.isAssignableFrom(pBeanType)) //To make sure it isn't a transformed type
-      throw new RuntimeException(pBeanType.getName() + " is not a valid bean type! Do not use transformed bean types!");
+      throw new NoDeclaredBeanTypeException(pBeanType, "Do not use transformed or differently represented bean types!");
     return pBeanType;
   }
 
@@ -91,7 +93,7 @@ public final class BeanReflector
           }
           catch (IllegalAccessException pE)
           {
-            throw new RuntimeException(pE);
+            throw new OJInternalException(pE);
           }
         })
         .collect(Collectors.toList());
