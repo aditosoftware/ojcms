@@ -1,6 +1,6 @@
 package de.adito.ojcms.beans.fields;
 
-import de.adito.ojcms.beans.exceptions.*;
+import de.adito.ojcms.beans.exceptions.OJRuntimeException;
 import de.adito.ojcms.beans.exceptions.copy.BeanCopyNotSupportedException;
 import de.adito.ojcms.beans.exceptions.field.BeanFieldMissingInformation;
 import de.adito.ojcms.beans.fields.util.*;
@@ -34,7 +34,7 @@ public interface IField<VALUE>
   String getName();
 
   /**
-   * A default value for this field. By default it is null.
+   * A default value for this field. By default it is the initial value.
    * A default value may be used in special scenarios and defined for such cases exclusively.
    * Do not mix this up with {@link IField#getInitialValue()}, which returns the initial value
    * for a certain data type (like 'false' for boolean)
@@ -43,7 +43,7 @@ public interface IField<VALUE>
    */
   default VALUE getDefaultValue()
   {
-    return null;
+    return getInitialValue();
   }
 
   /**
