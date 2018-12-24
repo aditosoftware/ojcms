@@ -208,6 +208,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
   @WriteOperation
   default void addBean(BEAN pBean, int pIndex)
   {
+    IndexChecker.check(() -> size() + 1, pIndex);
     assert getEncapsulatedData() != null;
     getEncapsulatedData().addBean(Objects.requireNonNull(pBean), pIndex);
     BeanEvents.beanAdded(this, pBean);

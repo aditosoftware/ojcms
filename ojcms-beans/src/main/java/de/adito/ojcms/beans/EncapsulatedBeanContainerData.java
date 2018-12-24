@@ -55,7 +55,7 @@ class EncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends AbstractEn
   @Override
   public void addBean(BEAN pBean, int pIndex)
   {
-    indexChecker.check(pIndex);
+    IndexChecker.check(() -> size() + 1, pIndex);
     //Is the limit reached?
     if (limitInfo != null && limitInfo.limit == size())
     {
