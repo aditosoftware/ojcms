@@ -7,6 +7,7 @@ import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.reactive.events.*;
 import de.adito.ojcms.beans.references.*;
 import de.adito.ojcms.beans.statistics.IStatisticData;
+import de.adito.ojcms.utils.IndexChecker;
 import de.adito.ojcms.utils.readonly.*;
 import io.reactivex.Observable;
 
@@ -256,11 +257,8 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
   @WriteOperation
   default BEAN replaceBean(BEAN pBean, int pIndex)
   {
-    if (pIndex < 0 || pIndex >= size())
-      throw new IndexOutOfBoundsException("index: " + pIndex);
-
     assert getEncapsulatedData() != null;
-    final BEAN removed = getEncapsulatedData().replaceBean(Objects.requireNonNull(pBean), pIndex);
+    final BEAN removed = getEncapsulatedData().replaceBean(Objects.requireNonNull(pBean), IndexChecker.check(this::size, pIndex));
     if (removed != null)
       BeanEvents.beanRemoved(this, removed);
     BeanEvents.beanAdded(this, pBean);
@@ -290,9 +288,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
   @WriteOperation
   default BEAN removeBean(int pIndex)
   {
-    if (pIndex < 0 || pIndex >= size())
-      throw new IndexOutOfBoundsException("index: " + pIndex);
-
+    IndexChecker.check(this::size, pIndex);
     return BeanEvents.removeFromContainer(this, pEncapsulated -> pEncapsulated.removeBean(pIndex))
         .orElseThrow(() -> new OJInternalException("Unable to remove bean at index" + pIndex));
   }
@@ -330,11 +326,8 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    */
   default BEAN getBean(int pIndex)
   {
-    if (pIndex < 0 || pIndex >= size())
-      throw new IndexOutOfBoundsException("index: " + pIndex);
-
     assert getEncapsulatedData() != null;
-    return getEncapsulatedData().getBean(pIndex);
+    return getEncapsulatedData().getBean(IndexChecker.check(this::size, pIndex));
   }
 
   /**

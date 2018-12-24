@@ -7,6 +7,7 @@ import de.adito.ojcms.beans.exceptions.field.BeanFieldDoesNotExistException;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.fields.util.FieldValueTuple;
 import de.adito.ojcms.beans.statistics.*;
+import de.adito.ojcms.utils.IndexChecker;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -24,6 +25,7 @@ class EncapsulatedBeanData extends AbstractEncapsulatedData<FieldValueTuple<?>, 
 {
   private final List<IField<?>> fieldOrder;
   private final Map<IField<?>, IStatisticData<?>> statisticData;
+  private final IndexChecker indexChecker = IndexChecker.create(this::getFieldCount);
 
   /**
    * Creates the encapsulated bean data core.
@@ -69,7 +71,7 @@ class EncapsulatedBeanData extends AbstractEncapsulatedData<FieldValueTuple<?>, 
   @Override
   public IField<?> removeFieldAtIndex(int pIndex)
   {
-    final IField<?> removedField = fieldOrder.remove(_requiresInRange(pIndex));
+    final IField<?> removedField = fieldOrder.remove(indexChecker.check(pIndex));
     getDatasource().removeField(removedField);
     return removedField;
   }
@@ -83,7 +85,7 @@ class EncapsulatedBeanData extends AbstractEncapsulatedData<FieldValueTuple<?>, 
   @Override
   public IField<?> getFieldAtIndex(int pIndex)
   {
-    return fieldOrder.get(_requiresInRange(pIndex));
+    return fieldOrder.get(indexChecker.check(pIndex));
   }
 
   @Override
@@ -150,19 +152,5 @@ class EncapsulatedBeanData extends AbstractEncapsulatedData<FieldValueTuple<?>, 
     if (!containsField(pField))
       throw new BeanFieldDoesNotExistException(pField);
     pAction.accept(pField);
-  }
-
-  /**
-   * Checks, if a given index is in range of this bean data core's fields.
-   *
-   * @param pIndex the index to check
-   * @return the checked index
-   */
-  private int _requiresInRange(int pIndex)
-  {
-    final int count = getFieldCount();
-    if (pIndex < 0 || pIndex >= count)
-      throw new IndexOutOfBoundsException("index: " + pIndex + " max index: " + (count - 1));
-    return pIndex;
   }
 }

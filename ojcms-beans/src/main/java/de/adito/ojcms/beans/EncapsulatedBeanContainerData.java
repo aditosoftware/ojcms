@@ -6,6 +6,7 @@ import de.adito.ojcms.beans.datasource.IBeanContainerDataSource;
 import de.adito.ojcms.beans.exceptions.container.BeanContainerLimitReachedException;
 import de.adito.ojcms.beans.reactive.IEvent;
 import de.adito.ojcms.beans.statistics.*;
+import de.adito.ojcms.utils.IndexChecker;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import org.jetbrains.annotations.NotNull;
@@ -28,6 +29,7 @@ class EncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends AbstractEn
   private _LimitInfo limitInfo = null;
   private final Optional<IStatisticData<Integer>> statisticData;
   private final Map<BEAN, Disposable> beanDisposableMapping = new ConcurrentHashMap<>();
+  private final IndexChecker indexChecker = IndexChecker.create(this::size);
 
   /**
    * Creates the encapsulated bean container data core.
@@ -53,9 +55,7 @@ class EncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends AbstractEn
   @Override
   public void addBean(BEAN pBean, int pIndex)
   {
-    if (pIndex < 0 || pIndex > size())
-      throw new IndexOutOfBoundsException("index: " + pIndex);
-
+    indexChecker.check(pIndex);
     //Is the limit reached?
     if (limitInfo != null && limitInfo.limit == size())
     {
@@ -71,10 +71,7 @@ class EncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends AbstractEn
   @Override
   public BEAN replaceBean(BEAN pReplacement, int pIndex)
   {
-    if (pIndex < 0 || pIndex >= size())
-      throw new IndexOutOfBoundsException("index: " + pIndex);
-
-    final BEAN removed = removeBean(pIndex);
+    final BEAN removed = removeBean(indexChecker.check(pIndex));
     addBean(pReplacement, pIndex);
     return removed;
   }
@@ -89,10 +86,7 @@ class EncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends AbstractEn
   @Override
   public BEAN removeBean(int pIndex)
   {
-    if (pIndex < 0 || pIndex >= size())
-      throw new IndexOutOfBoundsException("index: " + pIndex);
-
-    return getDatasource().removeBean(pIndex);
+    return getDatasource().removeBean(indexChecker.check(pIndex));
   }
 
   @Override

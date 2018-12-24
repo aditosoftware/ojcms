@@ -13,7 +13,7 @@ import de.adito.ojcms.sqlbuilder.definition.condition.IWhereCondition;
 import de.adito.ojcms.sqlbuilder.result.ResultRow;
 import de.adito.ojcms.sqlbuilder.statements.Select;
 import de.adito.ojcms.sqlbuilder.util.*;
-import de.adito.ojcms.utils.IndexBasedIterator;
+import de.adito.ojcms.utils.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -37,6 +37,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IBeanCo
   private Map<Integer, _BeanData> beanCache = new HashMap<>();
   private final Map<BEAN, Integer> additionQueue = new HashMap<>();
   private boolean shouldQueueAdditions = false;
+  private final IndexChecker indexChecker = IndexChecker.create(this::size);
 
   /**
    * Removes all obsolete bean container database tables.
@@ -144,7 +145,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IBeanCo
   @Override
   public BEAN removeBean(int pIndex)
   {
-    final BEAN removed = getBean(_requireInRange(pIndex));
+    final BEAN removed = getBean(indexChecker.check(pIndex));
     removed.useDefaultEncapsulatedDataSource(); //Use default data sources to allow existence after the removal
     _removeByIndex(pIndex);
     return removed;
@@ -153,7 +154,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IBeanCo
   @Override
   public BEAN getBean(int pIndex)
   {
-    return beanCache.computeIfAbsent(_requireInRange(pIndex), pCreationIndex ->
+    return beanCache.computeIfAbsent(indexChecker.check(pIndex), pCreationIndex ->
         _injectPersistentSource(_createBeanInstance(), pCreationIndex)).instance;
   }
 
@@ -221,21 +222,6 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IBeanCo
   }
 
   /**
-   * Makes sure an index is within the range of this container.
-   * It has to be between 0 and size().
-   *
-   * @param pIndex the index to check
-   * @return the checked index
-   */
-  private int _requireInRange(int pIndex)
-  {
-    final int size = size();
-    if (pIndex < 0 || pIndex >= size)
-      throw new IndexOutOfBoundsException("The index for the bean is not within the range of this container. index: " + pIndex + ", size: " + size);
-    return pIndex;
-  }
-
-  /**
    * Injects a database based data source into a bean instance.
    *
    * @param pInstance the bean instance to inject to data source
@@ -281,11 +267,8 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IBeanCo
    */
   private void _removeByIndex(int pIndex)
   {
-    if (pIndex < 0 || pIndex >= size())
-      throw new IndexOutOfBoundsException("index: " + pIndex);
-
     final boolean deleted = builder.doDelete(pDelete -> pDelete
-        .whereId(pIndex)
+        .whereId(indexChecker.check(pIndex))
         .delete());
 
     if (!deleted)

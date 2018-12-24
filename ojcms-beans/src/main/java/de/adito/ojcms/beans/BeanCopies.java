@@ -2,7 +2,7 @@ package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
 import de.adito.ojcms.beans.datasource.*;
-import de.adito.ojcms.beans.exceptions.*;
+import de.adito.ojcms.beans.exceptions.OJInternalException;
 import de.adito.ojcms.beans.exceptions.copy.*;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.util.*;
@@ -24,6 +24,10 @@ final class BeanCopies
 {
   private static final Objenesis COPY_CREATOR = new ObjenesisStd();
   private static Field encapsulatedDataField = null;
+
+  private BeanCopies()
+  {
+  }
 
   /**
    * Creates a copy of a bean.
