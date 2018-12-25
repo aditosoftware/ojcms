@@ -58,7 +58,7 @@ public class BeanOptionalFieldTest extends AbstractOnNextCallCountTest
   /**
    * Some bean with optional fields.
    */
-  public static class SomeBean extends Bean<SomeBean>
+  public static class SomeBean extends OJBean<SomeBean>
   {
     public static final TextField normalField = OJFields.create(SomeBean.class);
     @OptionalField(_Condition1.class)

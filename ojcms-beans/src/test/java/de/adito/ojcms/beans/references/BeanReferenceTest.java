@@ -66,7 +66,7 @@ class BeanReferenceTest
   /**
    * Some data POJO that manages a person registry.
    */
-  public static class Data extends Bean<Data>
+  public static class Data extends OJBean<Data>
   {
     public static final BeanField<PersonRegistry> registry = OJFields.create(Data.class);
 
@@ -79,7 +79,7 @@ class BeanReferenceTest
   /**
    * A bean that holds multiple persons through a bean container field.
    */
-  public static class PersonRegistry extends Bean<PersonRegistry>
+  public static class PersonRegistry extends OJBean<PersonRegistry>
   {
     public static final ContainerField<Person> persons = OJFields.create(PersonRegistry.class);
 
@@ -90,9 +90,9 @@ class BeanReferenceTest
   }
 
   /**
-   * Bean for a person with an address property (reference).
+   * OJBean for a person with an address property (reference).
    */
-  public static class Person extends Bean<Person>
+  public static class Person extends OJBean<Person>
   {
     public static final TextField name = OJFields.create(Person.class);
     public static final BeanField<Address> address = OJFields.create(Person.class);
@@ -105,9 +105,9 @@ class BeanReferenceTest
   }
 
   /**
-   * Bean for an address.
+   * OJBean for an address.
    */
-  public static class Address extends Bean<Address>
+  public static class Address extends OJBean<Address>
   {
     public static final TextField city = OJFields.create(Address.class);
     public static final IntegerField postalCode = OJFields.create(Address.class);

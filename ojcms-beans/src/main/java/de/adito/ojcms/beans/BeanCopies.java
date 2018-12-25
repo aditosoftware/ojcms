@@ -107,7 +107,7 @@ final class BeanCopies
     {
       if (encapsulatedDataField == null)
       {
-        encapsulatedDataField = Bean.class.getDeclaredField(Bean.ENCAPSULATED_DATA_FIELD_NAME);
+        encapsulatedDataField = OJBean.class.getDeclaredField(OJBean.ENCAPSULATED_DATA_FIELD_NAME);
         encapsulatedDataField.setAccessible(true);
       }
       encapsulatedDataField.set(bean, encapsulatedData);

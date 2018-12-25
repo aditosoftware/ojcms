@@ -84,7 +84,7 @@ public class BeanFieldCopyTest
   /**
    * Some bean.
    */
-  public static class SomeBean extends Bean<SomeBean>
+  public static class SomeBean extends OJBean<SomeBean>
   {
     public static final TextField someField = OJFields.create(SomeBean.class);
     public static final TextField anotherField = OJFields.create(SomeBean.class);

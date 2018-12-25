@@ -28,7 +28,7 @@ public final class BeanReflector
   /**
    * Reflects the bean fields of a certain bean type.
    *
-   * @param pBeanType the type of the bean, which must be a sub class of {@link Bean} to own specific fields
+   * @param pBeanType the type of the bean, which must be a sub class of {@link OJBean} to own specific fields
    * @return a list of bean fields
    */
   public static List<IField<?>> reflectBeanFields(Class<? extends IBean> pBeanType)
@@ -39,7 +39,7 @@ public final class BeanReflector
   /**
    * Reflects the declared bean fields of a certain bean type.
    *
-   * @param pBeanType the type of the bean, which must be a sub class of {@link Bean} to own specific fields
+   * @param pBeanType the type of the bean, which must be a sub class of {@link OJBean} to own specific fields
    * @return a list of the declared fields
    */
   public static List<Field> reflectDeclaredBeanFields(Class<? extends IBean> pBeanType)
@@ -60,7 +60,7 @@ public final class BeanReflector
 
   /**
    * Checks, if a bean type is a valid declared type.
-   * It has to be public and an extension of {@link Bean}.
+   * It has to be public and an extension of {@link OJBean}.
    * Throws a runtime exception, if the type is invalid.
    * This check can be used in any cases, where especially transformed types are not allowed.
    *
@@ -72,7 +72,7 @@ public final class BeanReflector
     if (!Modifier.isPublic(pBeanType.getModifiers()))
       throw new NoDeclaredBeanTypeException(pBeanType, "It has to be declared public to create fields!");
 
-    if (!Bean.class.isAssignableFrom(pBeanType)) //To make sure it isn't a transformed type
+    if (!OJBean.class.isAssignableFrom(pBeanType)) //To make sure it isn't a transformed type
       throw new NoDeclaredBeanTypeException(pBeanType, "Do not use transformed or differently represented bean types!");
     return pBeanType;
   }
@@ -80,7 +80,7 @@ public final class BeanReflector
   /**
    * Reflects the bean fields of a bean type.
    *
-   * @param pBeanType the type of the bean, which must be an extension of {@link Bean} to own specific fields
+   * @param pBeanType the type of the bean, which must be an extension of {@link OJBean} to own specific fields
    * @return a list of bean fields from the given type
    */
   private static List<IField<?>> _createBeanMetadata(Class<? extends IBean> pBeanType)
@@ -102,7 +102,7 @@ public final class BeanReflector
   /**
    * Returns all public and static bean fields from a bean class type.
    *
-   * @param pBeanType the type of the bean, which must be a sub class of {@link Bean} to own specific fields
+   * @param pBeanType the type of the bean, which must be a sub class of {@link OJBean} to own specific fields
    * @return a list of declared fields of the bean type
    */
   private static List<Field> _getDeclaredBeanFields(Class<? extends IBean> pBeanType)
@@ -147,7 +147,7 @@ public final class BeanReflector
           .filter(combinedPredicate)
           .forEach(declaredFields::add);
     }
-    while ((current = current.getSuperclass()) != null && !current.equals(Bean.class));
+    while ((current = current.getSuperclass()) != null && !current.equals(OJBean.class));
     return declaredFields;
   }
 }

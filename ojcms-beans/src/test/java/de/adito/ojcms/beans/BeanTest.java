@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Test class for {@link IBean}.
  * Some methods of this interface do not have to be tested, because they are covered by other tests.
- * The test is based on the basic implementing class {@link Bean}. So some tests include implementation details of the base class as well.
+ * The test is based on the basic implementing class {@link OJBean}. So some tests include implementation details of the base class as well.
  *
  * @author Simon Danner, 28.07.2018
  */
@@ -178,7 +178,7 @@ class BeanTest
   /**
    * Some bean.
    */
-  public static class SomeBean extends Bean<SomeBean>
+  public static class SomeBean extends OJBean<SomeBean>
   {
     @Identifier
     public static final TextField someField = OJFields.create(SomeBean.class);
@@ -210,7 +210,7 @@ class BeanTest
   /**
    * A deep bean that holds a reference to another bean.
    */
-  public static class DeepBean extends Bean<DeepBean>
+  public static class DeepBean extends OJBean<DeepBean>
   {
     public static final DeeperBean DEEPER_BEAN = new DeeperBean();
     public static final BeanField<DeeperBean> deeperField = OJFields.create(DeepBean.class);
@@ -224,7 +224,7 @@ class BeanTest
   /**
    * An even deeper bean that holds a very deep value.
    */
-  public static class DeeperBean extends Bean<DeeperBean>
+  public static class DeeperBean extends OJBean<DeeperBean>
   {
     public static final int DEEP_VALUE = 42;
     public static final IntegerField deepValue = OJFields.create(DeeperBean.class);

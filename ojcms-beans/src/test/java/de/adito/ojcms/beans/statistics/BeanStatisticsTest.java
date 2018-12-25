@@ -127,7 +127,7 @@ class BeanStatisticsTest extends AbstractOnNextCallCountTest
    * A bean type that collects statistics.
    */
   @Statistics(capacity = 100)
-  public static class SomeBean extends Bean<SomeBean>
+  public static class SomeBean extends OJBean<SomeBean>
   {
     @Statistics(capacity = FIELD_STATISTICS_LIMIT)
     public static final TextField field = OJFields.create(SomeBean.class);

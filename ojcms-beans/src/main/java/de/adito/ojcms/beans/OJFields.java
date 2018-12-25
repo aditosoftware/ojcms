@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 /**
  * Static entry point to create bean fields.
  * All concrete beans of the application should use this class to create their fields.
- * For an example take a look at {@link Bean}.
+ * For an example take a look at {@link OJBean}.
  *
  * @author Simon Danner, 25.12.2018
  */
@@ -32,12 +32,12 @@ public final class OJFields
    *
    * @param pBeanType the bean type to which the created field should belong to
    * @param <BEAN>    the generic type of the parameter above
-   *                  (is here based on the concrete {@link Bean} class rather than on the interface, so it can not be a transformed bean type)
+   *                  (is here based on the concrete {@link OJBean} class rather than on the interface, so it can not be a transformed bean type)
    * @param <FIELD>   the generic type of the field that will be created
    * @return the newly created field instance
    */
   @SuppressWarnings("unchecked")
-  public static <BEAN extends Bean<BEAN>, FIELD extends IField> FIELD create(Class<BEAN> pBeanType)
+  public static <BEAN extends OJBean<BEAN>, FIELD extends IField> FIELD create(Class<BEAN> pBeanType)
   {
     final Field declaredFieldToCreate = BeanReflector.reflectDeclaredBeanFields(pBeanType).stream()
         .filter(pField -> {

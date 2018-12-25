@@ -261,7 +261,7 @@ class BeanContainerTest
   /**
    * Some bean for the container.
    */
-  public static class SomeBean extends Bean<SomeBean> implements Comparable<SomeBean>
+  public static class SomeBean extends OJBean<SomeBean> implements Comparable<SomeBean>
   {
     @Identifier
     public static final IntegerField someField = OJFields.create(SomeBean.class);

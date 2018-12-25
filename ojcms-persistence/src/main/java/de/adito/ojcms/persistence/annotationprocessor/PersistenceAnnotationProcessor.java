@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 @SupportedAnnotationTypes("de.adito.ojcms.persistence.Persist")
 public class PersistenceAnnotationProcessor extends AbstractProcessor
 {
-  private static final String BEAN_BASE_TYPE = Bean.class.getName();
+  private static final String BEAN_BASE_TYPE = OJBean.class.getName();
   private static final String BASE_PATH = "de.adito.ojcms.persistence";
   private static final Class RETRIEVER_CLASS = OJPersistence.class;
   private static final String RETRIEVER_METHOD = "dataStore()";

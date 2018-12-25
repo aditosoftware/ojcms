@@ -25,7 +25,7 @@ import java.util.stream.*;
  * This method may be called 'virtual field', because it gives access to an imaginary field that holds the data core.
  * This means you only have to give a reference to any bean data core to get a completed bean, if this interface is used.
  *
- * This interface is implemented by the default abstract bean class {@link Bean}, which is used to create the application's beans.
+ * This interface is implemented by the default abstract bean class {@link OJBean}, which is used to create the application's beans.
  * But it may also be used for any other class that should be treated as bean.
  * Furthermore you are able to extend this interface through special methods for your use case.
  *

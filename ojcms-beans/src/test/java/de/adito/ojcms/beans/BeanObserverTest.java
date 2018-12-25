@@ -180,7 +180,7 @@ class BeanObserverTest extends AbstractOnNextCallCountTest
    * Some bean to add listeners to.
    * Has to be a modifiable bean to test the creation and removal events.
    */
-  public static class SomeBean extends Bean<SomeBean> implements IModifiableBean<SomeBean>
+  public static class SomeBean extends OJBean<SomeBean> implements IModifiableBean<SomeBean>
   {
     public SomeBean(String pValue1, int pValue2)
     {

@@ -107,7 +107,7 @@ class MapFieldTest
   /**
    * Some bean with a map field.
    */
-  public static class SomeBean extends Bean<SomeBean>
+  public static class SomeBean extends OJBean<SomeBean>
   {
     public static final MapField<Integer, String> mapField = OJFields.create(SomeBean.class);
     public static final MapField<String, SomeBean> mapField2 = OJFields.create(SomeBean.class);

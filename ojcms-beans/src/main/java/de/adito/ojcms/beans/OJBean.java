@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  *
  * A specific bean of the application defines its fields static to allow access without reflection.
  * Here is an example:
- * "public class SomeBean extends Bean {
+ * "public class SomeBean extends OJBean<SomeBean> {
  * public static final TextField someField = BeanFieldFactory.create(SomeBean.class)"
  * }"
  *
@@ -38,10 +38,10 @@ import java.util.stream.Collectors;
  * @see BeanFieldFactory
  */
 @RequiresEncapsulatedAccess
-public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
+public abstract class OJBean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
 {
   static final String ENCAPSULATED_DATA_FIELD_NAME = "encapsulatedData";
-  private static final Logger LOGGER = Logger.getLogger(Bean.class.getName());
+  private static final Logger LOGGER = Logger.getLogger(OJBean.class.getName());
   private final IEncapsulatedBeanData encapsulatedData;
 
   //Initial check for the constant value that is holding the encapsulated data field name
@@ -49,7 +49,7 @@ public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
   {
     try
     {
-      Bean.class.getDeclaredField(ENCAPSULATED_DATA_FIELD_NAME);
+      OJBean.class.getDeclaredField(ENCAPSULATED_DATA_FIELD_NAME);
     }
     catch (NoSuchFieldException pE)
     {
@@ -61,7 +61,7 @@ public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
    * Creates the bean with the default map based data source.
    * The fields will be reflected from the static definitions (see the example above).
    */
-  protected Bean()
+  protected OJBean()
   {
     final List<IField<?>> fieldOrder = BeanReflector.reflectBeanFields(getClass());
     encapsulatedData = new EncapsulatedBeanData(new MapBasedBeanDataSource(fieldOrder), fieldOrder);
@@ -73,7 +73,7 @@ public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
    *
    * @param pCustomDataSource the custom data source
    */
-  protected Bean(IBeanDataSource pCustomDataSource)
+  protected OJBean(IBeanDataSource pCustomDataSource)
   {
     encapsulatedData = new EncapsulatedBeanData(pCustomDataSource, BeanReflector.reflectBeanFields(getClass()));
     _checkForDuplicateFieldsAndFireCreation();
@@ -173,7 +173,7 @@ public abstract class Bean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
     final Set<FieldValueTuple<?>> identifiers = getIdentifiers();
     if (identifiers.isEmpty())
       return false;
-    final Bean<BEAN> other = (Bean<BEAN>) pOther;
+    final OJBean<BEAN> other = (OJBean<BEAN>) pOther;
     return identifiers.stream()
         .allMatch(pIdentifier -> Objects.equals(pIdentifier.getValue(), other.getValue(pIdentifier.getField())));
   }
