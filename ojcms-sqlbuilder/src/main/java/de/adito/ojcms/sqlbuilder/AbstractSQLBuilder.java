@@ -4,6 +4,7 @@ import de.adito.ojcms.sqlbuilder.definition.*;
 import de.adito.ojcms.sqlbuilder.definition.column.IColumnDefinition;
 import de.adito.ojcms.sqlbuilder.statements.*;
 import de.adito.ojcms.sqlbuilder.util.*;
+import de.adito.ojcms.utils.StringUtility;
 
 import java.io.IOException;
 import java.sql.*;
@@ -37,14 +38,12 @@ public abstract class AbstractSQLBuilder
   protected AbstractSQLBuilder(EDatabaseType pDatabaseType, DBConnectionInfo pConnectionInfo, boolean pCloseAfterStatement,
                                IValueSerializer pSerializer, String pIdColumnName)
   {
-    if (pIdColumnName == null || pIdColumnName.isEmpty())
-      throw new IllegalArgumentException("The id column name must given! name: " + pIdColumnName);
     databaseType = Objects.requireNonNull(pDatabaseType);
     connectionInfo = Objects.requireNonNull(pConnectionInfo);
     closeAfterStatement = pCloseAfterStatement;
     connectionSupplier = _createConnectionSupplier();
     serializer = Objects.requireNonNull(pSerializer);
-    idColumnName = pIdColumnName;
+    idColumnName = StringUtility.requireNotEmpty(pIdColumnName, "id column name");
     databaseType.initDriver();
   }
 

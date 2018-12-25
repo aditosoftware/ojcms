@@ -4,6 +4,7 @@ import de.adito.ojcms.sqlbuilder.definition.*;
 import de.adito.ojcms.sqlbuilder.definition.column.IColumnDefinition;
 import de.adito.ojcms.sqlbuilder.statements.Create;
 import de.adito.ojcms.sqlbuilder.util.DBConnectionInfo;
+import de.adito.ojcms.utils.StringUtility;
 
 import java.util.function.Consumer;
 
@@ -32,9 +33,7 @@ public final class OJSQLBuilderForTable extends AbstractSQLBuilder
                        IValueSerializer pSerializer, String pTableName, String pIdColumnName)
   {
     super(pDatabaseType, pConnectionInfo, pCloseAfterStatement, pSerializer, pIdColumnName);
-    if (pTableName == null || pTableName.isEmpty())
-      throw new IllegalArgumentException("The table name must not be null or empty!");
-    tableName = pTableName;
+    tableName = StringUtility.requireNotEmpty(pTableName, "table name");
   }
 
   /**

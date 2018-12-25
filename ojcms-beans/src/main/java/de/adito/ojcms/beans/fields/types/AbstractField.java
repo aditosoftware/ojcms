@@ -3,7 +3,8 @@ package de.adito.ojcms.beans.fields.types;
 import de.adito.ojcms.beans.annotations.*;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.fields.util.IAdditionalFieldInfo;
-import org.jetbrains.annotations.*;
+import de.adito.ojcms.utils.StringUtility;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
 import java.util.*;
@@ -17,7 +18,7 @@ import java.util.function.Function;
  * @param <VALUE> the data type that is wrapped by this field (e.g. String, Integer etc)
  * @author Simon Danner, 23.08.2016
  */
-public abstract class AbstractField<VALUE> implements IField<VALUE>
+abstract class AbstractField<VALUE> implements IField<VALUE>
 {
   private final Class<VALUE> dataType;
   private final String name;
@@ -36,9 +37,9 @@ public abstract class AbstractField<VALUE> implements IField<VALUE>
    */
   protected AbstractField(@NotNull Class<VALUE> pDataType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {
-    dataType = pDataType;
-    name = pName;
-    annotations = pAnnotations;
+    dataType = Objects.requireNonNull(pDataType);
+    name = StringUtility.requireNotEmpty(pName, "name");
+    annotations = Objects.requireNonNull(pAnnotations);
   }
 
   @Override
