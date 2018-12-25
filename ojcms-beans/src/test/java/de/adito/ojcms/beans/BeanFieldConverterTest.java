@@ -60,7 +60,7 @@ class BeanFieldConverterTest
    */
   public static class SomeBean extends Bean<SomeBean>
   {
-    public static final DateField dateField = BeanFieldFactory.create(SomeBean.class);
+    public static final DateField dateField = OJFields.create(SomeBean.class);
   }
 
   /**

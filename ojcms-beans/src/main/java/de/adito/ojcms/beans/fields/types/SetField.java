@@ -1,6 +1,7 @@
 package de.adito.ojcms.beans.fields.types;
 
-import de.adito.ojcms.beans.annotations.internal.TypeDefaultField;
+import de.adito.ojcms.beans.annotations.GenericBeanField;
+import de.adito.ojcms.beans.annotations.internal.*;
 import de.adito.ojcms.beans.fields.serialization.ISerializableFieldJson;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,9 +15,10 @@ import java.util.*;
  * @author Simon Danner, 01.08.2018
  */
 @TypeDefaultField(types = Set.class)
+@GenericBeanField(genericWrapperType = Set.class)
 public class SetField<ELEMENT> extends AbstractField<Set<ELEMENT>> implements ISerializableFieldJson<Set<ELEMENT>>
 {
-  public SetField(@NotNull Class<Set<ELEMENT>> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
+  protected SetField(@NotNull Class<Set<ELEMENT>> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {
     super(pType, pName, pAnnotations);
   }

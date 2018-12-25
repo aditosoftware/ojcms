@@ -46,7 +46,7 @@ class BeanObserverTest extends AbstractOnNextCallCountTest
   @Test
   public void testAdditionAtTheEnd()
   {
-    final DecimalField fieldToAdd = new DecimalField("fieldX", Collections.emptySet());
+    final DecimalField fieldToAdd = BeanFieldFactory.createField(DecimalField.class, "fieldX", Collections.emptyList());
     observeWithCallCheck(bean.observeFieldAdditions(), 1, pChange -> {
       assertSame(fieldToAdd, pChange.getField());
       assertEquals(2, pChange.getSource().getFieldIndex(pChange.getField()));
@@ -57,12 +57,12 @@ class BeanObserverTest extends AbstractOnNextCallCountTest
   @Test
   public void testAdditionAtACertainIndex()
   {
-    final DecimalField fieldToAdd = new DecimalField("fieldX", Collections.emptySet());
+    final DecimalField fieldToAdd = BeanFieldFactory.createField(DecimalField.class, "fieldX", Collections.emptyList());
     observeWithCallCheck(bean.observeFieldAdditions(), 1, pChange -> {
       assertSame(fieldToAdd, pChange.getField());
       assertEquals(0, pChange.getSource().getFieldIndex(pChange.getField()));
     });
-    bean.addField(fieldToAdd, 0);
+    bean.addFieldAtIndex(fieldToAdd, 0);
   }
 
   @Test
@@ -74,14 +74,14 @@ class BeanObserverTest extends AbstractOnNextCallCountTest
       assertEquals(String.class, pChange.getField().getDataType());
       assertTrue(pChange.getField().hasAnnotation(Private.class));
     });
-    bean.addField(TextField.class, fieldName, Collections.singleton(new Private()
+    bean.fieldAdder(TextField.class, fieldName, Collections.singleton(new Private()
     {
       @Override
       public Class<? extends Annotation> annotationType()
       {
         return Private.class;
       }
-    }));
+    })).addAtTheEnd();
   }
 
   @Test
@@ -113,7 +113,7 @@ class BeanObserverTest extends AbstractOnNextCallCountTest
   @Test
   public void testDuplicateFieldFails()
   {
-    final IntegerField addedField = bean.addField(IntegerField.class, "testField", Collections.emptySet());
+    final IntegerField addedField = bean.fieldAdder(IntegerField.class, "testField", Collections.emptySet()).addAtTheEnd();
     assertThrows(BeanFieldDuplicateException.class, () -> bean.addField(addedField));
   }
 
@@ -188,7 +188,7 @@ class BeanObserverTest extends AbstractOnNextCallCountTest
       setValue(field2, pValue2);
     }
 
-    public static final TextField field1 = BeanFieldFactory.create(SomeBean.class);
-    public static final IntegerField field2 = BeanFieldFactory.create(SomeBean.class);
+    public static final TextField field1 = OJFields.create(SomeBean.class);
+    public static final IntegerField field2 = OJFields.create(SomeBean.class);
   }
 }

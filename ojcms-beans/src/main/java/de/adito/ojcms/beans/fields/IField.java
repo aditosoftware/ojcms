@@ -20,6 +20,32 @@ import java.util.function.Function;
 public interface IField<VALUE>
 {
   /**
+   * The bean field type for a specific inner data type.
+   * The data type of the field may be different than the given data type because of possibly present converters.
+   *
+   * @param pDataType the data type to find the bean field type for
+   * @return the bean field type
+   * @throws OJRuntimeException if the bean field type could not be determined
+   */
+  static Class<IField<?>> getFieldTypeFromDataType(Class<?> pDataType)
+  {
+    return findFieldTypeFromDataType(pDataType)
+        .orElseThrow(() -> new OJRuntimeException("There is no bean field for this data type: " + pDataType.getSimpleName()));
+  }
+
+  /**
+   * Tries to find the bean field type for a specific inner data type.
+   * The data type of the field may be different than the given data type because of possibly present converters.
+   *
+   * @param pDataType the data type to find the bean field type for
+   * @return an optional bean field type
+   */
+  static Optional<Class<IField<?>>> findFieldTypeFromDataType(Class<?> pDataType)
+  {
+    return FieldJavaTypes.findFieldTypeFromDataType(pDataType);
+  }
+
+  /**
    * The inner data type of this field.
    *
    * @return the data type of this field

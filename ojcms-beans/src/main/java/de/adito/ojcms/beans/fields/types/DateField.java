@@ -19,7 +19,7 @@ import java.util.*;
 @TypeDefaultField(types = {Instant.class, Date.class})
 public class DateField extends AbstractField<Instant> implements ISerializableFieldToString<Instant>
 {
-  public DateField(@NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
+  protected DateField(@NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {
     super(Instant.class, pName, pAnnotations);
     registerConverter(Date.class, Date::toInstant, Date::from);

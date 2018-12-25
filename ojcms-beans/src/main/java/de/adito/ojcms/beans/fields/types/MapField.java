@@ -1,7 +1,7 @@
 package de.adito.ojcms.beans.fields.types;
 
 import de.adito.ojcms.beans.*;
-import de.adito.ojcms.beans.annotations.Detail;
+import de.adito.ojcms.beans.annotations.*;
 import de.adito.ojcms.beans.annotations.internal.*;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.util.*;
@@ -20,11 +20,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Simon Danner, 01.02.2017
  */
 @TypeDefaultField(types = IMapBean.class)
+@GenericBeanField(genericWrapperType = IMapBean.class)
 public class MapField<KEY, VALUE> extends AbstractField<IMapBean<KEY, VALUE>>
 {
   private final Map<KEY, IField<?>> fieldCache = new ConcurrentHashMap<>();
 
-  public MapField(@NotNull Class<IMapBean<KEY, VALUE>> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
+  protected MapField(@NotNull Class<IMapBean<KEY, VALUE>> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {
     super(pType, pName, pAnnotations);
   }

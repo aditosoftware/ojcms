@@ -2,6 +2,7 @@ package de.adito.ojcms.beans.fields.types;
 
 import de.adito.ojcms.beans.*;
 import de.adito.ojcms.beans.base.IEqualsHashCodeChecker;
+import de.adito.ojcms.beans.fields.IField;
 import org.junit.jupiter.api.*;
 
 import java.util.*;
@@ -72,6 +73,21 @@ class MapFieldTest
     equalsHashCodeChecker.makeAssertion(false);
   }
 
+  @Test
+  public void testWithSubTypesOfDefaultFields()
+  {
+    //Use a value type that is a sub type of a field's base type (BeanField in this case)
+    final Map<String, SomeBean> map = new HashMap<>();
+    map.put("key1", new SomeBean());
+    map.put("key2", new SomeBean());
+    map.put("key3", new SomeBean());
+    final IMapBean<String, SomeBean> mapBean = SomeBean.mapField2.createBeanFromMap(map, SomeBean.class);
+    final IField<?> firstField = mapBean.streamFields()
+        .findFirst()
+        .orElseThrow(AssertionError::new);
+    assertSame(BeanField.class, firstField.getClass());
+  }
+
   /**
    * Tests, if the field tuples of a bean fit to the map entries accordingly.
    *
@@ -93,6 +109,7 @@ class MapFieldTest
    */
   public static class SomeBean extends Bean<SomeBean>
   {
-    public static final MapField<Integer, String> mapField = BeanFieldFactory.create(SomeBean.class);
+    public static final MapField<Integer, String> mapField = OJFields.create(SomeBean.class);
+    public static final MapField<String, SomeBean> mapField2 = OJFields.create(SomeBean.class);
   }
 }

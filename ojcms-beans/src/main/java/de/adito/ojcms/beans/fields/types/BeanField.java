@@ -1,6 +1,7 @@
 package de.adito.ojcms.beans.fields.types;
 
 import de.adito.ojcms.beans.*;
+import de.adito.ojcms.beans.annotations.GenericBeanField;
 import de.adito.ojcms.beans.annotations.internal.*;
 import de.adito.ojcms.beans.util.*;
 import org.jetbrains.annotations.NotNull;
@@ -16,9 +17,10 @@ import java.util.Collection;
  */
 @TypeDefaultField(types = IBean.class)
 @ReferenceField(resolverType = EReferableResolver.SINGLE)
+@GenericBeanField
 public class BeanField<BEAN extends IBean<BEAN>> extends AbstractField<BEAN>
 {
-  public BeanField(@NotNull Class<BEAN> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
+  protected BeanField(@NotNull Class<BEAN> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {
     super(pType, pName, pAnnotations);
   }

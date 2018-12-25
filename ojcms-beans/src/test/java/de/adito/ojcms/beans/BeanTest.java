@@ -181,12 +181,12 @@ class BeanTest
   public static class SomeBean extends Bean<SomeBean>
   {
     @Identifier
-    public static final TextField someField = BeanFieldFactory.create(SomeBean.class);
+    public static final TextField someField = OJFields.create(SomeBean.class);
     @Identifier
-    public static final IntegerField numberField = BeanFieldFactory.create(SomeBean.class);
+    public static final IntegerField numberField = OJFields.create(SomeBean.class);
     @Private
-    public static final TextField somePrivateField = BeanFieldFactory.create(SomeBean.class);
-    public static final BeanField<DeepBean> deepField = BeanFieldFactory.create(SomeBean.class);
+    public static final TextField somePrivateField = OJFields.create(SomeBean.class);
+    public static final BeanField<DeepBean> deepField = OJFields.create(SomeBean.class);
 
     public SomeBean()
     {
@@ -213,7 +213,7 @@ class BeanTest
   public static class DeepBean extends Bean<DeepBean>
   {
     public static final DeeperBean DEEPER_BEAN = new DeeperBean();
-    public static final BeanField<DeeperBean> deeperField = BeanFieldFactory.create(DeepBean.class);
+    public static final BeanField<DeeperBean> deeperField = OJFields.create(DeepBean.class);
 
     public DeepBean()
     {
@@ -227,7 +227,7 @@ class BeanTest
   public static class DeeperBean extends Bean<DeeperBean>
   {
     public static final int DEEP_VALUE = 42;
-    public static final IntegerField deepValue = BeanFieldFactory.create(DeeperBean.class);
+    public static final IntegerField deepValue = OJFields.create(DeeperBean.class);
 
     public DeeperBean()
     {

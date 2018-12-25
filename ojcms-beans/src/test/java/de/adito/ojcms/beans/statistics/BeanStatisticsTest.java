@@ -130,6 +130,6 @@ class BeanStatisticsTest extends AbstractOnNextCallCountTest
   public static class SomeBean extends Bean<SomeBean>
   {
     @Statistics(capacity = FIELD_STATISTICS_LIMIT)
-    public static final TextField field = BeanFieldFactory.create(SomeBean.class);
+    public static final TextField field = OJFields.create(SomeBean.class);
   }
 }

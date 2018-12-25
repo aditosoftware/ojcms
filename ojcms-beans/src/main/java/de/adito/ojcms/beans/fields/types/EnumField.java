@@ -1,5 +1,6 @@
 package de.adito.ojcms.beans.fields.types;
 
+import de.adito.ojcms.beans.annotations.GenericBeanField;
 import de.adito.ojcms.beans.annotations.internal.TypeDefaultField;
 import de.adito.ojcms.beans.exceptions.OJInternalException;
 import de.adito.ojcms.beans.fields.serialization.ISerializableField;
@@ -16,9 +17,10 @@ import java.util.*;
  * @author Simon Danner, 01.08.2018
  */
 @TypeDefaultField(types = Enum.class)
+@GenericBeanField
 public class EnumField<ENUM extends Enum> extends AbstractField<ENUM> implements ISerializableField<ENUM>
 {
-  public EnumField(@NotNull Class<ENUM> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
+  protected EnumField(@NotNull Class<ENUM> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {
     super(pType, pName, pAnnotations);
   }

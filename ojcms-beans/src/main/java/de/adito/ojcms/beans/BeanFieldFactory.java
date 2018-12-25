@@ -1,114 +1,29 @@
 package de.adito.ojcms.beans;
 
-import de.adito.ojcms.beans.annotations.OptionalField;
-import de.adito.ojcms.beans.annotations.internal.TypeDefaultField;
+import de.adito.ojcms.beans.annotations.*;
 import de.adito.ojcms.beans.exceptions.OJInternalException;
-import de.adito.ojcms.beans.exceptions.field.BeanFieldCreationException;
 import de.adito.ojcms.beans.fields.IField;
-import de.adito.ojcms.beans.util.BeanReflector;
-import de.adito.picoservice.IPicoRegistry;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
-import java.util.stream.*;
+import java.util.function.Supplier;
 
 /**
  * A static factory to create bean fields.
  * Fields should only be created via the methods of this class.
  * They take care of some initialization work.
  *
- * All specific beans of the application should use this class to create their fields.
- * For an example take a look at {@link Bean}.
- *
  * @author Simon Danner, 23.08.2016
  */
-public final class BeanFieldFactory
+final class BeanFieldFactory
 {
-  private static Map<Class, Class<? extends IField>> typeFieldMapping;
-
   private BeanFieldFactory()
   {
   }
 
   /**
-   * Takes a look at all static bean fields of a certain class and creates the first not initialized field automatically.
-   * In this way all bean fields can be created through this method.
-   * Usage: "public static final TextField name = BeanFieldFactory.create(CLASSNAME.class);"
-   * This method takes care about the whole initialization of the certain field. (name, type, annotations, etc.)
-   *
-   * @param pBeanType the bean type to which the created field should belong to
-   * @param <BEAN>    the generic type of the parameter above
-   *                  (is here based on the concrete {@link Bean} class rather than on the interface, so it can not be a transformed bean type
-   * @param <FIELD>   the generic type of the field that will be created
-   * @return the newly created field instance
-   */
-  @SuppressWarnings("unchecked")
-  public static <BEAN extends Bean<BEAN>, FIELD extends IField> FIELD create(Class<BEAN> pBeanType)
-  {
-    final Field toCreate = BeanReflector.reflectDeclaredBeanFields(pBeanType).stream()
-        .filter(pField -> {
-          try
-          {
-            return pField.get(null) == null;
-          }
-          catch (IllegalAccessException pE)
-          {
-            throw new OJInternalException(pE);
-          }
-        })
-        .findAny()
-        .orElseThrow(() -> new BeanFieldCreationException(pBeanType));
-    final Class<FIELD> fieldType = (Class<FIELD>) toCreate.getType();
-    return (FIELD) createField(fieldType, _getGenType(toCreate, fieldType), toCreate.getName(), Arrays.asList(toCreate.getAnnotations()));
-  }
-
-  /**
-   * The bean field type for a certain inner data type.
-   * This depends on the field types annotated with {@link TypeDefaultField}.
-   * They determine what field type is the default for the searched data type.
-   * The field's value type might not be the data type directly because of converters or sub types.
-   *
-   * @param pDataType the inner data type of a field to find the bean field type for
-   * @return an optional default field type for the data data type
-   */
-  public static Class<IField<?>> getFieldTypeFromDataType(Class<?> pDataType)
-  {
-    return findFieldTypeFromDataType(pDataType)
-        .orElseThrow(() -> new OJInternalException("There is no bean field for this data type: " + pDataType.getSimpleName()));
-  }
-
-  /**
-   * Tries to find the bean field type for a certain inner data type.
-   * This depends on the field types annotated with {@link TypeDefaultField}.
-   * They determine what field type is the default for the searched data type.
-   * The field's value type might not be the data type directly because of converters or sub types.
-   *
-   * @param pDataType the inner data type of a field to find the bean field type for
-   * @return an optional default field type for the data data type
-   */
-  public static Optional<Class<IField<?>>> findFieldTypeFromDataType(Class<?> pDataType)
-  {
-    if (typeFieldMapping == null)
-      typeFieldMapping = IPicoRegistry.INSTANCE.find(IField.class, TypeDefaultField.class).entrySet().stream()
-          .flatMap(pEntry -> Stream.of(pEntry.getValue().types())
-              .map(pType -> new AbstractMap.SimpleEntry<>(pType, pEntry.getKey())))
-          .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
-                                    (pFieldType1, pFieldType2) ->
-                                    {
-                                      throw new OJInternalException("Incorrect default data types for bean field: " + pFieldType1.getSimpleName() +
-                                                                        " supports the same data type as " + pFieldType2.getSimpleName());
-                                    }));
-    //noinspection unchecked
-    return typeFieldMapping.entrySet().stream()
-        .filter(pEntry -> pEntry.getKey().isAssignableFrom(pDataType))
-        .findAny()
-        .map(pEntry -> (Class<IField<?>>) pEntry.getValue());
-  }
-
-  /**
    * Creates a new bean field based on a certain type und some initial data.
-   * This method should only be used internally within this package.
    *
    * @param pFieldType   the field's type
    * @param pName        the field's name
@@ -119,32 +34,37 @@ public final class BeanFieldFactory
    */
   static <VALUE, FIELD extends IField<VALUE>> FIELD createField(Class<FIELD> pFieldType, String pName, Collection<Annotation> pAnnotations)
   {
-    return createField(pFieldType, Optional.empty(), pName, pAnnotations);
+    return createField(pFieldType, () -> null, pName, pAnnotations);
   }
 
   /**
    * Creates a new bean field based on a certain type und some initial data.
    * It's also possible to provide an additional generic type of the bean field.
-   * For example, this may be the bean type of a container field.
    *
-   * @param pFieldType   the field's type
-   * @param pGenType     the field's generic type (NOT the same type of the field as generic)
-   * @param pName        the field's name
-   * @param pAnnotations the field's annotations
-   * @param <VALUE>      the field's data type
-   * @param <FIELD>      the generic field type
+   * @param pFieldType           the field's type
+   * @param pGenericTypeSupplier a supplier for an optional generic type for the field type. (null if not present)
+   *                             this is necessary if fields use an generic type as the field's data value directly.
+   *                             see {@link de.adito.ojcms.beans.annotations.GenericBeanField}
+   * @param pName                the field's name
+   * @param pAnnotations         the field's annotations
+   * @param <VALUE>              the field's data type
+   * @param <FIELD>              the generic field type
    * @return the newly created field
    */
-  static <VALUE, FIELD extends IField<VALUE>> FIELD createField(Class<FIELD> pFieldType, Optional<Class> pGenType, String pName,
-                                                                Collection<Annotation> pAnnotations)
+  static <VALUE, FIELD extends IField<VALUE>> FIELD createField(Class<FIELD> pFieldType, Supplier<Class<?>> pGenericTypeSupplier,
+                                                                String pName, Collection<Annotation> pAnnotations)
   {
     try
     {
-      final Class[] constructorArgTypes = pGenType.map(pType -> new Class[]{Class.class, String.class, Collection.class})
+      final Optional<Class<?>> optionalGenericType = _getGenericType(pFieldType, pGenericTypeSupplier);
+      final Class[] constructorArgTypes = optionalGenericType.map(pType -> new Class[]{Class.class, String.class, Collection.class})
           .orElseGet(() -> new Class[]{String.class, Collection.class});
-      final Object[] constructorArgs = pGenType.map(pClass -> new Object[]{pClass, pName, pAnnotations})
+      final Object[] constructorArgs = optionalGenericType.map(pClass -> new Object[]{pClass, pName, pAnnotations})
           .orElseGet(() -> new Object[]{pName, pAnnotations});
-      final FIELD field = pFieldType.getConstructor(constructorArgTypes).newInstance(constructorArgs);
+      final Constructor<FIELD> constructor = pFieldType.getDeclaredConstructor(constructorArgTypes);
+      if (!constructor.isAccessible())
+        constructor.setAccessible(true);
+      final FIELD field = constructor.newInstance(constructorArgs);
       _checkOptionalField(field);
       return field;
     }
@@ -155,26 +75,22 @@ public final class BeanFieldFactory
   }
 
   /**
-   * Evaluates an optional generic type of a bean field.
+   * An optional generic type for the bean field to create.
+   * All generic bean field types should be annotated by {@link GenericBeanField}.
+   * If {@link GenericBeanField#genericWrapperType()} is set, this type will be used.
+   * Otherwise the given supplier will define the value if necessary.
    *
-   * @param pField     the field instance from the reflection API
-   * @param pFieldType the type of the bean field
-   * @param <FIELD>    the type of the bean field as generic
-   * @return an optional generic type of the field instance
+   * @param pFieldType           the bean field type to create an instance
+   * @param pGenericTypeSupplier the supplier for the generic type of the field, if it uses the generic type as data type directly
+   * @return an optional generic type for the field to create
    */
-  private static <FIELD extends IField> Optional<Class> _getGenType(Field pField, Class<FIELD> pFieldType)
+  private static Optional<Class<?>> _getGenericType(Class<? extends IField> pFieldType, Supplier<Class<?>> pGenericTypeSupplier)
   {
-    final Type genericType = pField.getGenericType();
-    if (!(genericType instanceof ParameterizedType))
+    if (!pFieldType.isAnnotationPresent(GenericBeanField.class))
       return Optional.empty();
 
-    final Type fieldSuperType = pFieldType.getGenericSuperclass();
-    if (!(fieldSuperType instanceof ParameterizedType))
-      return Optional.empty();
-
-    final Type fieldSuperGenType = ((ParameterizedType) fieldSuperType).getActualTypeArguments()[0];
-    return Optional.of((Class) (fieldSuperGenType instanceof ParameterizedType ? ((ParameterizedType) fieldSuperGenType).getRawType() :
-        ((ParameterizedType) genericType).getActualTypeArguments()[0]));
+    final Class<?> wrapperType = pFieldType.getAnnotation(GenericBeanField.class).genericWrapperType();
+    return wrapperType != void.class ? Optional.of(wrapperType) : Optional.ofNullable(pGenericTypeSupplier.get());
   }
 
   /**

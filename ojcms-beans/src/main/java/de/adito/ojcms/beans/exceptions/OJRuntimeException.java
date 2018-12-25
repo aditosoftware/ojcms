@@ -29,4 +29,15 @@ public class OJRuntimeException extends RuntimeException
   {
     super(pCause);
   }
+
+  /**
+   * Creates new exception with a detailed message and a throwable cause.
+   *
+   * @param pDetailMessage a detailed message describing the cause of the exception
+   * @param pCause the cause of the exception
+   */
+  public OJRuntimeException(String pDetailMessage, Throwable pCause)
+  {
+    super(pDetailMessage, pCause);
+  }
 }

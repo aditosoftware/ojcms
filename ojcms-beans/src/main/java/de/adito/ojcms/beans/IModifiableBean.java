@@ -27,59 +27,36 @@ public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
    * @param pFieldType   the new field's data type
    * @param pName        the new field's name
    * @param pAnnotations the new field's annotations
-   * @param <VALUE>      the generic data type of the new field
    * @return the created field instance
    */
-  default <VALUE, FIELD extends IField<VALUE>> FIELD addField(Class<FIELD> pFieldType, String pName, Collection<Annotation> pAnnotations)
+  default <FIELD extends IField> BeanFieldAdder<FIELD> fieldAdder(Class<FIELD> pFieldType, String pName, Collection<Annotation> pAnnotations)
   {
-    return addField(pFieldType, pName, pAnnotations, -1);
-  }
-
-  /**
-   * Extends this bean by one field.
-   * A new field instance will be created.
-   *
-   * @param pFieldType   the new field's data type
-   * @param pName        the new field's name
-   * @param pAnnotations the new field's annotations
-   * @param pIndex       the index to add the field, or -1 to put the field at the end (includes private fields)
-   * @param <VALUE>      the generic data type of the new field
-   * @return the created field instance
-   */
-  default <VALUE, FIELD extends IField<VALUE>> FIELD addField(Class<FIELD> pFieldType, String pName,
-                                                              Collection<Annotation> pAnnotations, int pIndex)
-  {
+    assert getEncapsulatedData() != null;
     final IEncapsulatedBeanData encapsulated = getEncapsulatedData();
-    assert encapsulated != null;
     if (encapsulated.streamFields().anyMatch(pField -> pField.getName().equals(pName)))
       throw new BeanFieldDuplicateException(pName);
-    final FIELD newField = BeanFieldFactory.createField(pFieldType, pName, pAnnotations);
-    if (pIndex == -1)
-      addField(newField);
-    else
-      addField(newField, pIndex);
-    return newField;
+    return new BeanFieldAdder<>(this::addFieldAtIndex, encapsulated::getFieldCount, pFieldType, pName, pAnnotations);
   }
 
   /**
-   * Extends this bean by a already existing field instance.
+   * Extends this bean by an already existing field instance.
    *
    * @param pField  the field to add
    * @param <VALUE> the field's data type
    */
   default <VALUE> void addField(IField<VALUE> pField)
   {
-    addField(pField, getEncapsulatedData().getFieldCount());
+    addFieldAtIndex(pField, getEncapsulatedData().getFieldCount());
   }
 
   /**
-   * Extends this bean by a already existing field instance at a certain index.
+   * Extends this bean by an already existing field instance at a certain index.
    *
    * @param pField  the field to add
    * @param pIndex  the index of the field (includes private fields)
    * @param <VALUE> the field's data type
    */
-  default <VALUE> void addField(IField<VALUE> pField, int pIndex)
+  default <VALUE> void addFieldAtIndex(IField<VALUE> pField, int pIndex)
   {
     final IEncapsulatedBeanData encapsulated = getEncapsulatedData();
     assert encapsulated != null;

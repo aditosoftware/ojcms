@@ -16,7 +16,7 @@ import java.util.Collection;
 @TypeDefaultField(types = Double.class)
 public class DecimalField extends AbstractField<Double> implements ISerializableFieldToString<Double>
 {
-  public DecimalField(@NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
+  protected DecimalField(@NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {
     super(Double.class, pName, pAnnotations);
   }

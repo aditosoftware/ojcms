@@ -68,7 +68,7 @@ class BeanReferenceTest
    */
   public static class Data extends Bean<Data>
   {
-    public static final BeanField<PersonRegistry> registry = BeanFieldFactory.create(Data.class);
+    public static final BeanField<PersonRegistry> registry = OJFields.create(Data.class);
 
     public Data()
     {
@@ -81,7 +81,7 @@ class BeanReferenceTest
    */
   public static class PersonRegistry extends Bean<PersonRegistry>
   {
-    public static final ContainerField<Person> persons = BeanFieldFactory.create(PersonRegistry.class);
+    public static final ContainerField<Person> persons = OJFields.create(PersonRegistry.class);
 
     public PersonRegistry()
     {
@@ -94,8 +94,8 @@ class BeanReferenceTest
    */
   public static class Person extends Bean<Person>
   {
-    public static final TextField name = BeanFieldFactory.create(Person.class);
-    public static final BeanField<Address> address = BeanFieldFactory.create(Person.class);
+    public static final TextField name = OJFields.create(Person.class);
+    public static final BeanField<Address> address = OJFields.create(Person.class);
 
     public Person()
     {
@@ -109,8 +109,8 @@ class BeanReferenceTest
    */
   public static class Address extends Bean<Address>
   {
-    public static final TextField city = BeanFieldFactory.create(Address.class);
-    public static final IntegerField postalCode = BeanFieldFactory.create(Address.class);
+    public static final TextField city = OJFields.create(Address.class);
+    public static final IntegerField postalCode = OJFields.create(Address.class);
 
     public Address()
     {

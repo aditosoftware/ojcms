@@ -65,7 +65,7 @@ public class BeanFieldCopyTest
   public <VALUE> void testFieldCopyMechanisms(_FieldValueWrapper<VALUE> pFieldValueWrapper)
   {
     assertNotNull(pFieldValueWrapper.value);
-    final IField<VALUE> field = BeanFieldFactory.createField(pFieldValueWrapper.fieldType, pFieldValueWrapper.getGenericFieldType(),
+    final IField<VALUE> field = BeanFieldFactory.createField(pFieldValueWrapper.fieldType, pFieldValueWrapper::getGenericFieldType,
                                                              "test", Collections.emptySet());
     try
     {
@@ -86,8 +86,8 @@ public class BeanFieldCopyTest
    */
   public static class SomeBean extends Bean<SomeBean>
   {
-    public static final TextField someField = BeanFieldFactory.create(SomeBean.class);
-    public static final TextField anotherField = BeanFieldFactory.create(SomeBean.class);
+    public static final TextField someField = OJFields.create(SomeBean.class);
+    public static final TextField anotherField = OJFields.create(SomeBean.class);
 
     public SomeBean()
     {
@@ -134,9 +134,9 @@ public class BeanFieldCopyTest
     }
 
     @Override
-    public Optional<Class> getGenericFieldType()
+    public Class<?> getGenericFieldType()
     {
-      return Optional.of(value.getClass());
+      return value.getClass();
     }
   }
 
@@ -181,11 +181,11 @@ public class BeanFieldCopyTest
     /**
      * An optional generic type of the field.
      *
-     * @return an optional generic type
+     * @return an optional generic type (null if not present)
      */
-    public Optional<Class> getGenericFieldType()
+    public Class<?> getGenericFieldType()
     {
-      return Optional.empty();
+      return null;
     }
 
     /**

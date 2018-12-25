@@ -1,6 +1,6 @@
 package de.adito.ojcms.beans;
 
-import de.adito.ojcms.beans.annotations.Detail;
+import de.adito.ojcms.beans.annotations.*;
 import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
 import de.adito.ojcms.beans.datasource.MapBasedBeanDataSource;
 import de.adito.ojcms.beans.fields.IField;
@@ -24,9 +24,13 @@ import java.util.stream.Collectors;
 final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMapBean<KEY, VALUE>
 {
   private final IEncapsulatedBeanData encapsulated;
-  private final boolean isDetail;
-  private final Class<? extends IField<?>> fieldType; //the field type may differ from the generic type due to value converters
+
+  //Field information
+  private final Class<? extends IField> fieldType; //the field type may differ from the generic type due to value converters
+  private final Supplier<Class<?>> genericFieldTypeSupplier;
   private final Class<VALUE> valueType;
+  private final boolean isDetail;
+
   private final Map<KEY, IField<?>> keyFieldMapping;
   private final Map<IField<?>, KEY> fieldKeyMapping;
   private final Function<KEY, Optional<IField<?>>> fieldCache;
@@ -51,7 +55,8 @@ final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMapB
   MapBean(Map<KEY, VALUE> pMap, Class<VALUE> pValueType, BiConsumer<KEY, IField<?>> pFieldCacheCallback,
           Function<KEY, Optional<IField<?>>> pFieldCache, boolean pIsDetail)
   {
-    fieldType = BeanFieldFactory.getFieldTypeFromDataType(pValueType);
+    fieldType = IField.getFieldTypeFromDataType(pValueType);
+    genericFieldTypeSupplier = () -> fieldType.isAnnotationPresent(GenericBeanField.class) ? pValueType : null;
     valueType = pValueType;
     isDetail = pIsDetail;
     keyFieldMapping = new HashMap<>();
@@ -74,9 +79,10 @@ final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMapB
    */
   MapBean(MapBean<KEY, VALUE> pExistingMapBean)
   {
-    isDetail = pExistingMapBean.isDetail;
     fieldType = pExistingMapBean.fieldType;
+    genericFieldTypeSupplier = pExistingMapBean.genericFieldTypeSupplier;
     valueType = pExistingMapBean.valueType;
+    isDetail = pExistingMapBean.isDetail;
     keyFieldMapping = new HashMap<>(pExistingMapBean.keyFieldMapping);
     fieldKeyMapping = new HashMap<>(pExistingMapBean.fieldKeyMapping);
     fieldCache = pExistingMapBean.fieldCache;
@@ -130,7 +136,7 @@ final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMapB
         .orElseGet(() ->
                    {
                      //noinspection unchecked
-                     final IField<?> field = BeanFieldFactory.createField((Class<? extends IField>) fieldType, Objects.toString(pKey),
+                     final IField<?> field = BeanFieldFactory.createField(fieldType, genericFieldTypeSupplier, Objects.toString(pKey),
                                                                           Collections.singleton(Detail.INSTANCE));
                      fieldCacheCallback.accept(pKey, field);
                      return field;

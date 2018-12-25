@@ -264,8 +264,8 @@ class BeanContainerTest
   public static class SomeBean extends Bean<SomeBean> implements Comparable<SomeBean>
   {
     @Identifier
-    public static final IntegerField someField = BeanFieldFactory.create(SomeBean.class);
-    public static final TextField anotherField = BeanFieldFactory.create(SomeBean.class);
+    public static final IntegerField someField = OJFields.create(SomeBean.class);
+    public static final TextField anotherField = OJFields.create(SomeBean.class);
 
     public SomeBean()
     {

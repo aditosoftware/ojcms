@@ -71,8 +71,8 @@ public class EncapsulatedWeakReferencesTest
    */
   public static class ReferringBean extends Bean<ReferringBean>
   {
-    public static final BeanField<SomeBean> refField = BeanFieldFactory.create(ReferringBean.class);
-    public static final BeanField<SomeBean> anotherRefField = BeanFieldFactory.create(ReferringBean.class);
+    public static final BeanField<SomeBean> refField = OJFields.create(ReferringBean.class);
+    public static final BeanField<SomeBean> anotherRefField = OJFields.create(ReferringBean.class);
 
     public ReferringBean(SomeBean pRefBean)
     {

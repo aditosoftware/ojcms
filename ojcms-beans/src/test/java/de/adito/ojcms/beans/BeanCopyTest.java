@@ -68,8 +68,8 @@ class BeanCopyTest
    */
   public static class Data extends Bean<Data>
   {
-    public static final BeanField<Person> person1 = BeanFieldFactory.create(Data.class);
-    public static final BeanField<Person> person2 = BeanFieldFactory.create(Data.class);
+    public static final BeanField<Person> person1 = OJFields.create(Data.class);
+    public static final BeanField<Person> person2 = OJFields.create(Data.class);
     private List<Integer> someNormalList = new ArrayList<>();
 
     public Data(Person pPerson1, Person pPerson2)
@@ -85,8 +85,8 @@ class BeanCopyTest
    */
   public static class Person extends Bean<Person>
   {
-    public static final TextField name = BeanFieldFactory.create(Person.class);
-    public static final BeanField<Address> address = BeanFieldFactory.create(Person.class);
+    public static final TextField name = OJFields.create(Person.class);
+    public static final BeanField<Address> address = OJFields.create(Person.class);
 
     public Person()
     {
@@ -100,8 +100,8 @@ class BeanCopyTest
    */
   public static class Address extends Bean<Address>
   {
-    public static final TextField city = BeanFieldFactory.create(Address.class);
-    public static final IntegerField postalCode = BeanFieldFactory.create(Address.class);
+    public static final TextField city = OJFields.create(Address.class);
+    public static final IntegerField postalCode = OJFields.create(Address.class);
     private final String someNormalField = "value";
 
     public Address()

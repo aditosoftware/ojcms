@@ -60,11 +60,11 @@ public class BeanOptionalFieldTest extends AbstractOnNextCallCountTest
    */
   public static class SomeBean extends Bean<SomeBean>
   {
-    public static final TextField normalField = BeanFieldFactory.create(SomeBean.class);
+    public static final TextField normalField = OJFields.create(SomeBean.class);
     @OptionalField(_Condition1.class)
-    public static final IntegerField optionalField1 = BeanFieldFactory.create(SomeBean.class);
+    public static final IntegerField optionalField1 = OJFields.create(SomeBean.class);
     @OptionalField(_Condition2.class)
-    public static final DateField optionalField2 = BeanFieldFactory.create(SomeBean.class);
+    public static final DateField optionalField2 = OJFields.create(SomeBean.class);
 
     public SomeBean()
     {

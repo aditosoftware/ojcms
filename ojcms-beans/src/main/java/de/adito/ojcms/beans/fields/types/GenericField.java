@@ -1,7 +1,8 @@
 package de.adito.ojcms.beans.fields.types;
 
-import de.adito.ojcms.beans.BeanFieldFactory;
+import de.adito.ojcms.beans.annotations.GenericBeanField;
 import de.adito.ojcms.beans.exceptions.copy.BeanCopyNotSupportedException;
+import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.util.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,11 +16,12 @@ import java.util.logging.Logger;
  * @param <TYPE> the generic data type this field is referring to
  * @author Simon Danner, 07.09.2017
  */
+@GenericBeanField
 public class GenericField<TYPE> extends AbstractField<TYPE>
 {
   static Logger LOGGER = Logger.getLogger(GenericField.class.getName()); //open for testing purposes
 
-  public GenericField(@NotNull Class<TYPE> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
+  protected GenericField(@NotNull Class<TYPE> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {
     super(_checkGenericType(pType), pName, pAnnotations);
   }
@@ -46,7 +48,7 @@ public class GenericField<TYPE> extends AbstractField<TYPE>
    */
   private static <TYPE> Class<TYPE> _checkGenericType(Class<TYPE> pGenericType)
   {
-    BeanFieldFactory.findFieldTypeFromDataType(pGenericType)
+    IField.findFieldTypeFromDataType(pGenericType)
         .ifPresent(pReplacement ->
                        LOGGER.warning("A generic field is not required for this data type. Use " + pReplacement.getName() + " instead." +
                                           " generic type: " + pGenericType.getName()));
