@@ -28,11 +28,10 @@ final class BeanFieldFactory
    * @param pFieldType   the field's type
    * @param pName        the field's name
    * @param pAnnotations the field's annotations
-   * @param <VALUE>      the field's data type
    * @param <FIELD>      the generic field type
    * @return the newly created field
    */
-  static <VALUE, FIELD extends IField<VALUE>> FIELD createField(Class<FIELD> pFieldType, String pName, Collection<Annotation> pAnnotations)
+  static <FIELD extends IField> FIELD createField(Class<FIELD> pFieldType, String pName, Collection<Annotation> pAnnotations)
   {
     return createField(pFieldType, () -> null, pName, pAnnotations);
   }
@@ -47,11 +46,10 @@ final class BeanFieldFactory
    *                             see {@link de.adito.ojcms.beans.annotations.GenericBeanField}
    * @param pName                the field's name
    * @param pAnnotations         the field's annotations
-   * @param <VALUE>              the field's data type
    * @param <FIELD>              the generic field type
    * @return the newly created field
    */
-  static <VALUE, FIELD extends IField<VALUE>> FIELD createField(Class<FIELD> pFieldType, Supplier<Class<?>> pGenericTypeSupplier,
+  static <FIELD extends IField> FIELD createField(Class<FIELD> pFieldType, Supplier<Class<?>> pGenericTypeSupplier,
                                                                 String pName, Collection<Annotation> pAnnotations)
   {
     try

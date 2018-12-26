@@ -135,7 +135,6 @@ final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMapB
     final IField<?> newField = fieldCache.apply(pKey)
         .orElseGet(() ->
                    {
-                     //noinspection unchecked
                      final IField<?> field = BeanFieldFactory.createField(fieldType, genericFieldTypeSupplier, Objects.toString(pKey),
                                                                           Collections.singleton(Detail.INSTANCE));
                      fieldCacheCallback.accept(pKey, field);

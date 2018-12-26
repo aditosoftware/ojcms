@@ -57,7 +57,7 @@ public final class OJFields
     final Supplier<Class<?>> genericTypeSupplier = _genericTypeSupplier(declaredFieldToCreate, beanFieldType);
     final String fieldName = declaredFieldToCreate.getName();
     final List<Annotation> annotations = Arrays.asList(declaredFieldToCreate.getAnnotations());
-    return (FIELD) BeanFieldFactory.createField(beanFieldType, genericTypeSupplier, fieldName, annotations);
+    return BeanFieldFactory.createField(beanFieldType, genericTypeSupplier, fieldName, annotations);
   }
 
   /**

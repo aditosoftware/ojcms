@@ -71,8 +71,7 @@ public final class BeanFieldAdder<FIELD extends IField>
    */
   public FIELD addAtIndex(int pIndex)
   {
-    //noinspection unchecked
-    final FIELD field = (FIELD) BeanFieldFactory.createField(beanFieldType, () -> genericType, fieldName, annotations);
+    final FIELD field = BeanFieldFactory.createField(beanFieldType, () -> genericType, fieldName, annotations);
     addFunction.accept(field, pIndex);
     return field;
   }
