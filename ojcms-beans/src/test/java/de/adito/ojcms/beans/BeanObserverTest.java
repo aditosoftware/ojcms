@@ -2,7 +2,9 @@ package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.annotations.Private;
 import de.adito.ojcms.beans.base.AbstractOnNextCallCountTest;
+import de.adito.ojcms.beans.datasource.IBeanDataSource;
 import de.adito.ojcms.beans.exceptions.field.BeanFieldDuplicateException;
+import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.fields.types.*;
 import org.junit.jupiter.api.*;
 
@@ -154,6 +156,33 @@ class BeanObserverTest extends AbstractOnNextCallCountTest
       assertEquals(newValue, pChange.getNewValue());
     });
     bean.setValue(SomeBean.field1, newValue);
+  }
+
+  @Test
+  public void testObserversStayWhenDataSourceIsChanged()
+  {
+    justCallCheck(bean.observeValues(), 1);
+    bean.setEncapsulatedDataSource(new IBeanDataSource()
+    {
+      @Override
+      public <VALUE> VALUE getValue(IField<VALUE> pField)
+      {
+        return pField.getInitialValue();
+      }
+
+      @Override
+      public <VALUE> void setValue(IField<VALUE> pField, VALUE pValue, boolean pAllowNewField)
+      {
+
+      }
+
+      @Override
+      public <VALUE> void removeField(IField<VALUE> pField)
+      {
+
+      }
+    });
+    bean.setValue(SomeBean.field1, "someValue");
   }
 
   /**
