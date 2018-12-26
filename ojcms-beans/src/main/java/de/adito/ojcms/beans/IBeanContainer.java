@@ -549,7 +549,8 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    *
    * @param <BEAN> the type of the beans in the container
    */
-  final class BeanContainerListProxy<BEAN extends IBean<BEAN>> extends AbstractList<BEAN> //NOSONAR
+  @SuppressWarnings("squid:S2160")
+  final class BeanContainerListProxy<BEAN extends IBean<BEAN>> extends AbstractList<BEAN>
   {
     private final IBeanContainer<BEAN> container;
 
