@@ -119,7 +119,7 @@ public abstract class OJBean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
   private void _checkForDuplicateFieldsAndFireCreation()
   {
     _checkForDuplicateFields();
-    BeanCreationRegistry.fireCreationIfAnnotationPresent(this);
+    BeanCreationEvents.fireCreationIfAnnotationPresent(this);
   }
 
   /**

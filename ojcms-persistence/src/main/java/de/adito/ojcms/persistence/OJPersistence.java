@@ -4,7 +4,7 @@ import de.adito.ojcms.beans.*;
 import de.adito.ojcms.persistence.datastores.*;
 
 import java.util.*;
-import java.util.function.*;
+import java.util.function.Function;
 import java.util.stream.*;
 
 /**
@@ -31,7 +31,7 @@ public final class OJPersistence
   {
     final PersistentDataSourcesFactory factory = new PersistentDataSourcesFactory(() -> beanDataStore);
     beanDataStore = new BeanDataStore(Objects.requireNonNull(pDataStoreSupplier).apply(factory));
-    BeanCreationRegistry.listenByAnnotation(Persist.class, new _BeanCreationListener());
+    _observeBeanCreations(); //For automatic container addition mode
   }
 
   /**
@@ -77,6 +77,23 @@ public final class OJPersistence
   }
 
   /**
+   * Observes bean creation events for {@link EStorageMode#AUTOMATIC}.
+   * If the automatic mode is set, every created bean should be added to the associated container automatically
+   */
+  @SuppressWarnings("unchecked")
+  private static void _observeBeanCreations()
+  {
+    BeanCreationEvents.observeCreationByAnnotationType(Persist.class).subscribe(pCreationEvent -> {
+      final Persist annotation = pCreationEvent.getCreationAnnotation();
+      final IBean<?> createdBean = pCreationEvent.getCreatedBean();
+      if (annotation.mode() == EPersistenceMode.SINGLE || annotation.storageMode() == EStorageMode.MANUAL)
+        return;
+      final IBeanContainer container = beanDataStore.getContainerByPersistenceId(annotation.containerId(), createdBean.getClass());
+      container.addBean(createdBean);
+    });
+  }
+
+  /**
    * All persistent container ids of a stream of annotated elements. Refers to {@link Persist#containerId()}.
    *
    * @param pAnnotatedElements the stream of annotated elements
@@ -87,24 +104,5 @@ public final class OJPersistence
     return pAnnotatedElements
         .map(pElement -> pElement.getAnnotation(Persist.class).containerId())
         .collect(Collectors.toList());
-  }
-
-  /**
-   * Listener for created persistent beans.
-   * A persistent bean data source has to be annotated with {@link Persist}.
-   * The listener adds a newly created bean (anywhere in the code) to the according persistent bean container
-   * if the storage mode is {@link EStorageMode#AUTOMATIC}.
-   */
-  private static class _BeanCreationListener implements BiConsumer<IBean<?>, Persist>
-  {
-    @SuppressWarnings("unchecked")
-    @Override
-    public void accept(IBean<?> pCreatedBean, Persist pAnnotation)
-    {
-      if (pAnnotation.mode() == EPersistenceMode.SINGLE || pAnnotation.storageMode() == EStorageMode.MANUAL)
-        return;
-      final IBeanContainer container = beanDataStore.getContainerByPersistenceId(pAnnotation.containerId(), pCreatedBean.getClass());
-      container.addBean(pCreatedBean);
-    }
   }
 }
