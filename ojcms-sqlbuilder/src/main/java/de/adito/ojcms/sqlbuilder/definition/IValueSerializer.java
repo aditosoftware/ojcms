@@ -10,11 +10,6 @@ import org.jetbrains.annotations.Nullable;
 public interface IValueSerializer
 {
   /**
-   * Default serializer implementation.
-   */
-  IValueSerializer DEFAULT = new DefaultValueSerializer();
-
-  /**
    * Converts the value of a column value tuple to a serial format.
    *
    * @param pColumnValueTuple the column value tuple

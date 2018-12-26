@@ -1,6 +1,7 @@
 package de.adito.ojcms.beans.fields.types;
 
 import de.adito.ojcms.beans.annotations.*;
+import de.adito.ojcms.beans.exceptions.OJRuntimeException;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.fields.util.IAdditionalFieldInfo;
 import de.adito.ojcms.utils.StringUtility;
@@ -101,7 +102,8 @@ abstract class AbstractField<VALUE> implements IField<VALUE>
   @Override
   public <INFO> void addAdditionalInformation(IAdditionalFieldInfo<INFO> pIdentifier, INFO pValue)
   {
-    assert pIdentifier.getDataType().isAssignableFrom(pValue.getClass());
+    if (!pIdentifier.getDataType().isAssignableFrom(pValue.getClass()))
+      throw new OJRuntimeException("Bad data type: " + pValue.getClass() + " should be from type " + pIdentifier.getDataType());
     additionalInformation.put(pIdentifier, pValue);
   }
 

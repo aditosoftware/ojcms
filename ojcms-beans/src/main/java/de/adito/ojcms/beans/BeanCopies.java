@@ -10,7 +10,7 @@ import org.objenesis.*;
 
 import java.lang.reflect.*;
 import java.util.*;
-import java.util.function.Function;
+import java.util.function.*;
 import java.util.stream.*;
 
 /**
@@ -32,7 +32,7 @@ final class BeanCopies
   /**
    * Creates a copy of a bean.
    * If you want to use a custom constructor call to create the copy,
-   * you may use {@link #doCreateCopy(IBean, ECopyMode, Function, CustomFieldCopy[])}.
+   * you may use {@link #doCreateCopy(IBean, ECopyMode, UnaryOperator, CustomFieldCopy[])}.
    *
    * @param pOriginal     the original bean to create the copy of
    * @param pMode         the copy mode
@@ -61,7 +61,7 @@ final class BeanCopies
    * @param pCustomCopies          a collection of custom copy mechanisms for specific bean fields
    * @return a copy of the bean
    */
-  static <BEAN extends IBean<BEAN>> BEAN doCreateCopy(BEAN pOriginal, ECopyMode pMode, Function<BEAN, BEAN> pCustomConstructorCall,
+  static <BEAN extends IBean<BEAN>> BEAN doCreateCopy(BEAN pOriginal, ECopyMode pMode, UnaryOperator<BEAN> pCustomConstructorCall,
                                                       CustomFieldCopy<?>... pCustomCopies)
   {
     return _setValues(pOriginal, pCustomConstructorCall.apply(pOriginal), pMode, pCustomCopies);
@@ -140,14 +140,12 @@ final class BeanCopies
                             Optional.ofNullable(customCopiesMap.get(pField)), pCustomCopies)));
     //If required, set non bean values as well
     if (pMode.shouldCopyAllFields())
-      BeanReflector.reflectDeclaredNonBeanFields(pOriginal.getClass()).stream()
-          .peek(pField -> {
-            if (!pField.isAccessible())
-              pField.setAccessible(true);
-          })
+      BeanReflector.reflectDeclaredNonBeanFields(pOriginal.getClass())
           .forEach(pField -> {
             try
             {
+              if (!pField.isAccessible())
+                pField.setAccessible(true);
               pField.set(pCopy, pField.get(pOriginal));
             }
             catch (IllegalAccessException pE)

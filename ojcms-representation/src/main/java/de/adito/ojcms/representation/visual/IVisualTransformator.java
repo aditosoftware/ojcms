@@ -65,9 +65,9 @@ interface IVisualTransformator<LOGIC, VISUAL, SOURCE extends ILinkable>
    * It's not supported by default.
    *
    * @return a queue for operations
-   * @throws UnsupportedOperationException if not supported
+   * @throws UnsupportedOperationException if not supported by the component
    */
-  default Queue<Runnable> getBeforeTransformationQueue() throws UnsupportedOperationException
+  default Queue<Runnable> getBeforeTransformationQueue()
   {
     throw new UnsupportedOperationException("A before transformation queue is not supported. Provide a container/queue!");
   }

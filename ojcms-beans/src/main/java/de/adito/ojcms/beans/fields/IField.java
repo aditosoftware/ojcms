@@ -8,7 +8,7 @@ import de.adito.ojcms.beans.util.*;
 
 import java.lang.annotation.Annotation;
 import java.util.*;
-import java.util.function.Function;
+import java.util.function.*;
 
 /**
  * A field of a bean that is based on an inner data type.
@@ -283,7 +283,7 @@ public interface IField<VALUE>
    * @return the copy creator wrapper
    * @see CustomFieldCopy
    */
-  default CustomFieldCopy<VALUE> customFieldCopy(Function<VALUE, VALUE> pCopyCreator)
+  default CustomFieldCopy<VALUE> customFieldCopy(UnaryOperator<VALUE> pCopyCreator)
   {
     return new CustomFieldCopy<>(this, pCopyCreator);
   }

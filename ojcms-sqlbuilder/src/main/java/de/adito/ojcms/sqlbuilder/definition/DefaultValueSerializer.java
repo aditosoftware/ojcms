@@ -13,7 +13,7 @@ import java.util.function.Function;
  *
  * @author Simon Danner, 18.06.2018
  */
-class DefaultValueSerializer implements IValueSerializer
+public class DefaultValueSerializer implements IValueSerializer
 {
   private static Map<Class, Function<Object, String>> supportedTypesToSerial = new HashMap<>();
   private static Map<Class, Function<String, ?>> supportedTypesFromSerial = new HashMap<>();

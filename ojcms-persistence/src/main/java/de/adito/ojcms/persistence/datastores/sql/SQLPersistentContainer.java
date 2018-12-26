@@ -21,6 +21,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.*;
 
+import static de.adito.ojcms.persistence.datastores.sql.util.DatabaseConstants.*;
+
 /**
  * Implementation of a persistent bean container data source that is used to create a container instance later on.
  * A database table stands for one data source. This means the data comes from the database directly,
@@ -47,7 +49,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IBeanCo
    */
   public static void removeObsoletes(DBConnectionInfo pConnectionInfo, Collection<String> pStillExistingContainerIds)
   {
-    final OJSQLBuilder builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionInfo.getDatabaseType(), IDatabaseConstants.ID_COLUMN)
+    final OJSQLBuilder builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionInfo.getDatabaseType(), ID_COLUMN)
         .withClosingAndRenewingConnection(pConnectionInfo)
         .create();
     final List<String> allTables = builder.getAllTableNames();
@@ -66,7 +68,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IBeanCo
   public static <BEAN extends IBean<BEAN>> void createTableForContainer(DBConnectionInfo pConnectionInfo, Class<BEAN> pBeanType,
                                                                         String pTableName)
   {
-    final OJSQLBuilderForTable builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionInfo.getDatabaseType(), IDatabaseConstants.ID_COLUMN)
+    final OJSQLBuilderForTable builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionInfo.getDatabaseType(), ID_COLUMN)
         .forSingleTable(pTableName)
         .withClosingAndRenewingConnection(pConnectionInfo)
         .create();
@@ -102,7 +104,7 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IBeanCo
     beanType = pBeanType;
     isAutomaticAdditionMode = pBeanType.getAnnotation(Persist.class).storageMode() == EStorageMode.AUTOMATIC;
     final List<BeanColumnIdentification<?>> columns = BeanColumnIdentification.ofMultiple(BeanReflector.reflectBeanFields(beanType));
-    builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionInfo.getDatabaseType(), IDatabaseConstants.ID_COLUMN)
+    builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionInfo.getDatabaseType(), ID_COLUMN)
         .forSingleTable(pTableName)
         .withClosingAndRenewingConnection(pConnectionInfo)
         .withCustomSerializer(new BeanSQLSerializer(pDataStoreSupplier))

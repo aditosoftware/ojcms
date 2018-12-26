@@ -104,19 +104,6 @@ public final class OJSQLBuilderFactory
     private final String tableName;
 
     /**
-     * Creates a new builder with the required information.
-     *
-     * @param pDatabaseType the type of the database to use for the builder
-     * @param pIdColumnName a global name for all id columns for the builder
-     * @param pTableName    the name of the single table for the builder
-     */
-    private BuilderForTable(EDatabaseType pDatabaseType, String pIdColumnName, String pTableName)
-    {
-      super(pDatabaseType, pIdColumnName);
-      tableName = pTableName;
-    }
-
-    /**
      * Creates a copy of a builder based an a {@link Builder}.
      * This constructor may be used to change from a normal builder to a single table builder.
      *
@@ -152,12 +139,12 @@ public final class OJSQLBuilderFactory
    * @param <SQLBUILDER> the type of the final SQL statement builder, which will be created by this builder
    * @param <BUILDER>    the concrete type of this builder (used for pipelining)
    */
-  private static abstract class _AbstractBuilder<SQLBUILDER extends AbstractSQLBuilder, BUILDER extends _AbstractBuilder<SQLBUILDER, BUILDER>>
+  private abstract static class _AbstractBuilder<SQLBUILDER extends AbstractSQLBuilder, BUILDER extends _AbstractBuilder<SQLBUILDER, BUILDER>>
   {
     protected final EDatabaseType databaseType;
     protected final String idColumnName;
     protected DBConnectionInfo connectionInfo;
-    protected IValueSerializer serializer = IValueSerializer.DEFAULT;
+    protected IValueSerializer serializer = new DefaultValueSerializer();
     protected boolean closeConnectionAfterStatement = true;
 
     /**

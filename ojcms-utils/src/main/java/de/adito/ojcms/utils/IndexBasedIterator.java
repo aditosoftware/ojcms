@@ -14,8 +14,8 @@ import java.util.function.*;
  */
 public final class IndexBasedIterator<ELEMENT> implements Iterator<ELEMENT>
 {
-  private final Function<Integer, ELEMENT> provider;
-  private final Supplier<Integer> sizeProvider;
+  private final IntFunction<ELEMENT> elementProvider;
+  private final IntSupplier sizeSupplier;
   @Nullable
   private Consumer<Integer> remover;
 
@@ -32,7 +32,7 @@ public final class IndexBasedIterator<ELEMENT> implements Iterator<ELEMENT>
    * @param <ELEMENT>        the elements provided by the iterator
    * @return a builder for the iterator. Use {@link Builder#createIterator()} to create it finally.
    */
-  public static <ELEMENT> Builder<ELEMENT> buildIterator(Function<Integer, ELEMENT> pElementProvider, Supplier<Integer> pSizeProvider)
+  public static <ELEMENT> Builder<ELEMENT> buildIterator(IntFunction<ELEMENT> pElementProvider, IntSupplier pSizeProvider)
   {
     return new Builder<>(pElementProvider, pSizeProvider);
   }
@@ -41,19 +41,19 @@ public final class IndexBasedIterator<ELEMENT> implements Iterator<ELEMENT>
    * Creates a new index based iterator.
    *
    * @param pElementProvider   a function providing an element for a given index
-   * @param pSizeProvider      a provider for the current size of the data structure to iterate
+   * @param pSizeSupplier      a elementProvider for the current size of the data structure to iterate
    * @param pStartIndex        the start index
    * @param pEndIndexExclusive the end index (exclusive)
    * @param pRemover           an optional action to remove an element at a given index
    */
-  private IndexBasedIterator(Function<Integer, ELEMENT> pElementProvider, Supplier<Integer> pSizeProvider, int pStartIndex,
+  private IndexBasedIterator(IntFunction<ELEMENT> pElementProvider, IntSupplier pSizeSupplier, int pStartIndex,
                              int pEndIndexExclusive, @Nullable Consumer<Integer> pRemover)
   {
     index = pStartIndex;
     endIndexExclusive = pEndIndexExclusive;
-    provider = Objects.requireNonNull(pElementProvider);
-    sizeProvider = Objects.requireNonNull(pSizeProvider);
-    expectedSize = sizeProvider.get();
+    elementProvider = Objects.requireNonNull(pElementProvider);
+    sizeSupplier = Objects.requireNonNull(pSizeSupplier);
+    expectedSize = sizeSupplier.getAsInt();
     remover = pRemover;
   }
 
@@ -68,9 +68,10 @@ public final class IndexBasedIterator<ELEMENT> implements Iterator<ELEMENT>
   {
     if (!hasNext())
       throw new NoSuchElementException();
-    if (expectedSize != sizeProvider.get())
+    if (expectedSize != sizeSupplier.getAsInt())
       throw new ConcurrentModificationException();
-    return provider.apply(lastIndex = index++);
+    lastIndex = index;
+    return elementProvider.apply(index++);
   }
 
   @Override
@@ -80,9 +81,10 @@ public final class IndexBasedIterator<ELEMENT> implements Iterator<ELEMENT>
       throw new UnsupportedOperationException();
     if (lastIndex < 0)
       throw new IllegalStateException();
-    if (expectedSize != sizeProvider.get())
+    if (expectedSize != sizeSupplier.getAsInt())
       throw new ConcurrentModificationException();
-    remover.accept(index = lastIndex);
+    remover.accept(lastIndex);
+    index = lastIndex;
     lastIndex = -1;
     endIndexExclusive--;
     expectedSize--;
@@ -95,9 +97,10 @@ public final class IndexBasedIterator<ELEMENT> implements Iterator<ELEMENT>
    */
   public static class Builder<ELEMENT>
   {
-    private final Function<Integer, ELEMENT> elementProvider;
-    private final Supplier<Integer> sizeSupplier;
-    private int start = -1, end = -1;
+    private final IntFunction<ELEMENT> elementProvider;
+    private final IntSupplier sizeSupplier;
+    private int start = -1;
+    private int end = -1;
     @Nullable
     private Consumer<Integer> remover;
 
@@ -105,12 +108,12 @@ public final class IndexBasedIterator<ELEMENT> implements Iterator<ELEMENT>
      * Creates the builder initially with least required parameters
      *
      * @param pElementProvider a function providing an element for a given index
-     * @param pSizeProvider    a function providing an element for a given index
+     * @param pSizeSupplier    a function providing an element for a given index
      */
-    public Builder(Function<Integer, ELEMENT> pElementProvider, Supplier<Integer> pSizeProvider)
+    public Builder(IntFunction<ELEMENT> pElementProvider, IntSupplier pSizeSupplier)
     {
       elementProvider = pElementProvider;
-      sizeSupplier = pSizeProvider;
+      sizeSupplier = pSizeSupplier;
     }
 
     /**
@@ -157,7 +160,9 @@ public final class IndexBasedIterator<ELEMENT> implements Iterator<ELEMENT>
      */
     public Iterator<ELEMENT> createIterator()
     {
-      return new IndexBasedIterator<>(elementProvider, sizeSupplier, start == -1 ? 0 : start, end == -1 ? sizeSupplier.get() : end, remover);
+      final int startIndex = start == -1 ? 0 : start;
+      final int endIndex = end == -1 ? sizeSupplier.getAsInt() : end;
+      return new IndexBasedIterator<>(elementProvider, sizeSupplier, startIndex, endIndex, remover);
     }
   }
 }

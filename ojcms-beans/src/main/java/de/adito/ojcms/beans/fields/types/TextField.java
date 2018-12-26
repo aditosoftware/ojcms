@@ -30,8 +30,7 @@ public class TextField extends AbstractField<String> implements ISerializableFie
   @Override
   public String copyValue(String pValue, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
   {
-    //noinspection RedundantStringConstructorCall
-    return pValue == null ? null : new String(pValue);
+    return pValue;
   }
 
   @Override

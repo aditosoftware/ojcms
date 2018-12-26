@@ -14,10 +14,13 @@ import java.util.Objects;
 public final class DBConnectionInfo
 {
   private final EDatabaseType databaseType;
-  private final String host, databaseName;
+  private final String host;
+  private final String databaseName;
   private final int port;
   @Nullable
-  private final String username, password;
+  private final String username;
+  @Nullable
+  private final String password;
 
   /**
    * Creates a new database information instance.

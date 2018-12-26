@@ -127,7 +127,7 @@ public enum EDatabaseType
   private static Map<EColumnType, Function<IColumnType, String>> _createColumnMapping(Consumer<Map<EColumnType,
       Function<IColumnType, String>>> pMapConsumer)
   {
-    final Map<EColumnType, Function<IColumnType, String>> map = new HashMap<>();
+    final Map<EColumnType, Function<IColumnType, String>> map = new EnumMap<>(EColumnType.class);
     pMapConsumer.accept(map);
     return map;
   }

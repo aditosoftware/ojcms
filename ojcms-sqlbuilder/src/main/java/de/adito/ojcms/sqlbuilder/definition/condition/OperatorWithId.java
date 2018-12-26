@@ -52,6 +52,8 @@ class OperatorWithId extends AbstractNegatable<OperatorWithId> implements IPrepa
    */
   private IColumnIdentification<Integer> _getIdentification(String pIdColumnName)
   {
-    return identification == null ? (identification = IColumnIdentification.of(pIdColumnName, Integer.class)) : identification;
+    if (identification == null)
+      identification = IColumnIdentification.of(pIdColumnName, Integer.class);
+    return identification;
   }
 }

@@ -4,7 +4,7 @@ import de.adito.ojcms.beans.reactive.events.NewStatisticEntry;
 import io.reactivex.Observable;
 
 import java.util.*;
-import java.util.function.Function;
+import java.util.function.LongFunction;
 
 /**
  * Statistic data of bean elements.
@@ -64,7 +64,7 @@ public interface IStatisticData<ENTRY>
     final long firstTimestamp = timestamps.getFirst();
     final long lastTimestamp = timestamps.getLast();
     //Resolves the value for a timestamp (removes all outdated timestamps from the list -> the first entry will be current timestamp)
-    final Function<Long, ENTRY> valueResolver = pTimestamp -> {
+    final LongFunction<ENTRY> valueResolver = pTimestamp -> {
       while (timestamps.size() > 1 && timestamps.get(1) <= pTimestamp)
         timestamps.removeFirst();
       return changes.get(timestamps.getFirst());

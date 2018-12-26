@@ -7,7 +7,7 @@ import de.adito.ojcms.beans.fields.types.BeanField;
 import de.adito.ojcms.beans.fields.util.IBeanFieldBased;
 import de.adito.ojcms.persistence.*;
 import de.adito.ojcms.persistence.datastores.sql.*;
-import de.adito.ojcms.persistence.datastores.sql.util.IDatabaseConstants;
+import de.adito.ojcms.persistence.datastores.sql.util.DatabaseConstants;
 import de.adito.ojcms.sqlbuilder.definition.column.*;
 
 import java.util.Collection;
@@ -74,9 +74,9 @@ public class BeanColumnDefinition<VALUE> implements IColumnDefinition, IBeanFiel
     if (!beanType.isAnnotationPresent(Persist.class))
       throw new OJPersistenceException(beanType);
     final Persist annotation = beanType.getAnnotation(Persist.class);
-    final String tableName = annotation.mode() == EPersistenceMode.SINGLE ? IDatabaseConstants.BEAN_TABLE_NAME : annotation.containerId();
-    final String columnName = annotation.mode() == EPersistenceMode.SINGLE ? IDatabaseConstants.BEAN_TABLE_BEAN_ID :
-        IDatabaseConstants.ID_COLUMN;
+    final String tableName = annotation.mode() == EPersistenceMode.SINGLE ? DatabaseConstants.BEAN_TABLE_NAME : annotation.containerId();
+    final String columnName = annotation.mode() == EPersistenceMode.SINGLE ? DatabaseConstants.BEAN_TABLE_BEAN_ID :
+        DatabaseConstants.ID_COLUMN;
     columnType.foreignKey(IForeignKey.of(tableName, columnName, pConnectionInfo -> {
       if (annotation.mode() == EPersistenceMode.SINGLE)
         SQLPersistentBean.createBeanTable(pConnectionInfo);

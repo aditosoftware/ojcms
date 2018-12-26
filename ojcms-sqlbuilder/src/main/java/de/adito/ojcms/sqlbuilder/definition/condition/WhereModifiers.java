@@ -43,7 +43,14 @@ public class WhereModifiers
   {
     if (idCondition == null && whereCondition == null)
       return Optional.empty();
-    return Optional.of(idCondition == null ? whereCondition : whereCondition == null ? idCondition : new _Combiner());
+    final IPreparedStatementFormat condition;
+    if (idCondition == null)
+      condition = whereCondition;
+    else if (whereCondition == null)
+      condition = idCondition;
+    else
+      condition = new _Combiner();
+    return Optional.of(condition);
   }
 
   /**

@@ -1,6 +1,6 @@
 package de.adito.ojcms.utils;
 
-import java.util.function.Supplier;
+import java.util.function.IntSupplier;
 
 /**
  * Index checker utility for index based data structures.
@@ -9,7 +9,7 @@ import java.util.function.Supplier;
  */
 public final class IndexChecker
 {
-  private final Supplier<Integer> sizeSupplier;
+  private final IntSupplier sizeSupplier;
 
   /**
    * Creates a check instance for multiple usages.
@@ -17,7 +17,7 @@ public final class IndexChecker
    * @param pCurrentSizeSupplier a supplier for the current size of the data structure (max index = size - 1)
    * @return an index checker instance
    */
-  public static IndexChecker create(Supplier<Integer> pCurrentSizeSupplier)
+  public static IndexChecker create(IntSupplier pCurrentSizeSupplier)
   {
     return new IndexChecker(pCurrentSizeSupplier);
   }
@@ -30,7 +30,7 @@ public final class IndexChecker
    * @return the checked index
    * @throws IndexOutOfBoundsException if the index is out of it bounds
    */
-  public static int check(Supplier<Integer> pCurrentSizeSupplier, int pIndex)
+  public static int check(IntSupplier pCurrentSizeSupplier, int pIndex)
   {
     return create(pCurrentSizeSupplier).check(pIndex);
   }
@@ -40,7 +40,7 @@ public final class IndexChecker
    *
    * @param pSizeSupplier supplier for the current size of the data structure (max index = size - 1)
    */
-  private IndexChecker(Supplier<Integer> pSizeSupplier)
+  private IndexChecker(IntSupplier pSizeSupplier)
   {
     sizeSupplier = pSizeSupplier;
   }
@@ -54,7 +54,7 @@ public final class IndexChecker
    */
   public int check(int pIndex)
   {
-    final int maxIndex = sizeSupplier.get() - 1;
+    final int maxIndex = sizeSupplier.getAsInt() - 1;
     if (pIndex < 0 || pIndex > maxIndex)
       throw new IndexOutOfBoundsException("index: " + pIndex + " max index: " + maxIndex);
     return pIndex;

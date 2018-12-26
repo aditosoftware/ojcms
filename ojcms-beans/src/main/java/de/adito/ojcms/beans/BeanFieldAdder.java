@@ -15,8 +15,8 @@ import java.util.function.*;
  */
 public final class BeanFieldAdder<FIELD extends IField>
 {
-  private final BiConsumer<FIELD, Integer> addFunction;
-  private final Supplier<Integer> fieldCountSupplier;
+  private final ObjIntConsumer<FIELD> addFunction;
+  private final IntSupplier fieldCountSupplier;
   private final Class<FIELD> beanFieldType;
   private final String fieldName;
   private final Collection<Annotation> annotations;
@@ -31,7 +31,7 @@ public final class BeanFieldAdder<FIELD extends IField>
    * @param pFieldName          the name of the field to create
    * @param pAnnotations        the annotations of the field to create
    */
-  BeanFieldAdder(BiConsumer<FIELD, Integer> pAddFunction, Supplier<Integer> pFieldCountSupplier, Class<FIELD> pBeanFieldType,
+  BeanFieldAdder(ObjIntConsumer<FIELD> pAddFunction, IntSupplier pFieldCountSupplier, Class<FIELD> pBeanFieldType,
                  String pFieldName, Collection<Annotation> pAnnotations)
   {
     addFunction = Objects.requireNonNull(pAddFunction);
@@ -61,7 +61,7 @@ public final class BeanFieldAdder<FIELD extends IField>
    */
   public FIELD addAtTheEnd()
   {
-    return addAtIndex(fieldCountSupplier.get());
+    return addAtIndex(fieldCountSupplier.getAsInt());
   }
 
   /**

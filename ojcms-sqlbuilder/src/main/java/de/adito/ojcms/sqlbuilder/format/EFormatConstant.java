@@ -61,5 +61,9 @@ public enum EFormatConstant
   public static class StaticConstants
   {
     public static final String COUNT_AS = "rowNumber";
+
+    private StaticConstants()
+    {
+    }
   }
 }

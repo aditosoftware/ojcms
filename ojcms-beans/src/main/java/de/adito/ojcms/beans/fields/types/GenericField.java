@@ -19,7 +19,8 @@ import java.util.logging.Logger;
 @GenericBeanField
 public class GenericField<TYPE> extends AbstractField<TYPE>
 {
-  static Logger LOGGER = Logger.getLogger(GenericField.class.getName()); //open for testing purposes
+  //open for testing purposes
+  static Logger LOGGER = Logger.getLogger(GenericField.class.getName()); //NOSONAR
 
   protected GenericField(@NotNull Class<TYPE> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {

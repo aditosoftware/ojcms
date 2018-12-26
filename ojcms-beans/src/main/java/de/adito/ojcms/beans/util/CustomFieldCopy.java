@@ -2,7 +2,7 @@ package de.adito.ojcms.beans.util;
 
 import de.adito.ojcms.beans.fields.IField;
 
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 /**
  * Information for creating custom bean field value copies.
@@ -13,7 +13,7 @@ import java.util.function.Function;
 public class CustomFieldCopy<VALUE>
 {
   private final IField<VALUE> field;
-  private final Function<VALUE, VALUE> copyCreator;
+  private final UnaryOperator<VALUE> copyCreator;
 
   /**
    * Creates a custom field copy information.
@@ -21,7 +21,7 @@ public class CustomFieldCopy<VALUE>
    * @param pField       the bean field to create the value's copy from
    * @param pCopyCreator a function to create a copy of the value
    */
-  public CustomFieldCopy(IField<VALUE> pField, Function<VALUE, VALUE> pCopyCreator)
+  public CustomFieldCopy(IField<VALUE> pField, UnaryOperator<VALUE> pCopyCreator)
   {
     field = pField;
     copyCreator = pCopyCreator;
@@ -42,7 +42,7 @@ public class CustomFieldCopy<VALUE>
    *
    * @return a function creating the copied value
    */
-  public Function<VALUE, VALUE> getCopyCreator()
+  public UnaryOperator<VALUE> getCopyCreator()
   {
     return copyCreator;
   }

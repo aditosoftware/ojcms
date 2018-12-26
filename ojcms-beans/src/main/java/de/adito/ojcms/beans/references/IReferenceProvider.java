@@ -41,7 +41,7 @@ public interface IReferenceProvider
           .collect(Collectors.toSet());
       allNodes.addAll(newNodes);
     }
-    while (newNodes.size() > 0);
+    while (!newNodes.isEmpty());
 
     return allNodes;
   }

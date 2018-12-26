@@ -62,14 +62,14 @@ public interface IColumnIdentification<VALUE> extends IStatementFormat
   /**
    * Creates a new column identification.
    *
-   * @param pName            the name of the column
-   * @param pDataType        the data type of the column
-   * @param pNumericResolver an optional function to determine, if the column has a numeric value
-   * @param <VALUE>          the generic data type of the column
+   * @param pName              the name of the column
+   * @param pDataType          the data type of the column
+   * @param pNumericDeterminer an optional predicate to determine, if the column has a numeric value
+   * @param <VALUE>            the generic data type of the column
    * @return the created column identification
    */
   static <VALUE> IColumnIdentification<VALUE> of(String pName, Class<VALUE> pDataType,
-                                                 @Nullable BiFunction<String, Class<VALUE>, Boolean> pNumericResolver)
+                                                 @Nullable BiPredicate<String, Class<VALUE>> pNumericDeterminer)
   {
     return new IColumnIdentification<VALUE>()
     {
@@ -88,7 +88,7 @@ public interface IColumnIdentification<VALUE> extends IStatementFormat
       @Override
       public boolean isNumeric()
       {
-        return pNumericResolver == null ? IColumnIdentification.super.isNumeric() : pNumericResolver.apply(pName, pDataType);
+        return pNumericDeterminer == null ? IColumnIdentification.super.isNumeric() : pNumericDeterminer.test(pName, pDataType);
       }
     };
   }
@@ -114,15 +114,15 @@ public interface IColumnIdentification<VALUE> extends IStatementFormat
    * @param pSourceCollection  the collection of source objects
    * @param pNameResolver      a function to resolve the column name from a source object
    * @param pDataTypeResolver  a function to resolve the data type for the column from a source object
-   * @param pIsNumericResolver an optional function to determine, if a column has a generic column value
+   * @param pNumericDeterminer an optional predicate to determine, if the column has a numeric value
    * @param <SOURCE>           the generic type of the source objects
    * @return an array of column identifications
    */
   static <SOURCE> IColumnIdentification[] ofMultiple(Collection<SOURCE> pSourceCollection, Function<SOURCE, String> pNameResolver,
                                                      Function<SOURCE, Class> pDataTypeResolver,
-                                                     @Nullable BiFunction<String, Class, Boolean> pIsNumericResolver)
+                                                     @Nullable BiPredicate<String, Class> pNumericDeterminer)
   {
-    return ofMultiple(pSourceCollection.stream(), pNameResolver, pDataTypeResolver, pIsNumericResolver);
+    return ofMultiple(pSourceCollection.stream(), pNameResolver, pDataTypeResolver, pNumericDeterminer);
   }
 
   /**
@@ -146,17 +146,17 @@ public interface IColumnIdentification<VALUE> extends IStatementFormat
    * @param pStream            a stream of source objects
    * @param pNameResolver      a function to resolve the column name from a source object
    * @param pDataTypeResolver  a function to resolve the data type for the column from a source object
-   * @param pIsNumericResolver an optional function to determine, if a column has a generic column value
+   * @param pNumericDeterminer an optional predicate to determine, if the column has a numeric value
    * @param <SOURCE>           the generic type of the source objects
    * @return an array of column identifications
    */
   static <SOURCE> IColumnIdentification[] ofMultiple(Stream<SOURCE> pStream, Function<SOURCE, String> pNameResolver,
                                                      Function<SOURCE, Class> pDataTypeResolver,
-                                                     @Nullable BiFunction<String, Class, Boolean> pIsNumericResolver)
+                                                     @Nullable BiPredicate<String, Class> pNumericDeterminer)
   {
     //noinspection unchecked
     Function<SOURCE, IColumnIdentification> mapper = pSource -> of(pNameResolver.apply(pSource), pDataTypeResolver.apply(pSource),
-                                                                   (BiFunction) pIsNumericResolver);
+                                                                   (BiPredicate) pNumericDeterminer);
     return pStream
         .map(mapper)
         .toArray(IColumnIdentification[]::new);

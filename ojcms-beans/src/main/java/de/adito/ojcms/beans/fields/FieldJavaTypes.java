@@ -16,6 +16,10 @@ final class FieldJavaTypes
 {
   private static Map<Class, Class<? extends IField>> typeFieldMapping;
 
+  private FieldJavaTypes()
+  {
+  }
+
   /**
    * Tries to find the bean field type for a certain inner data type.
    * This depends on the field types annotated with {@link TypeDefaultField}.

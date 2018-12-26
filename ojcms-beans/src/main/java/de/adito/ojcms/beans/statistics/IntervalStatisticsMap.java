@@ -1,7 +1,7 @@
 package de.adito.ojcms.beans.statistics;
 
 import java.util.LinkedHashMap;
-import java.util.function.Function;
+import java.util.function.LongFunction;
 import java.util.stream.LongStream;
 
 /**
@@ -14,10 +14,10 @@ import java.util.stream.LongStream;
  */
 class IntervalStatisticsMap<ENTRY> extends LinkedHashMap<Long, ENTRY>
 {
-  private final int interval;
-  private Function<Long, ENTRY> valueResolver;
-  private long firstTimestamp;
-  private long lastTimestamp;
+  private transient final int interval;
+  private transient LongFunction<ENTRY> valueResolver;
+  private transient long firstTimestamp;
+  private transient long lastTimestamp;
 
   /**
    * Creates a new interval based statistic map.
@@ -29,7 +29,7 @@ class IntervalStatisticsMap<ENTRY> extends LinkedHashMap<Long, ENTRY>
    * @param pLastTimestamp  the last timestamp of the value changes
    * @param pStatisticData  the statistic data itself to register the observer
    */
-  IntervalStatisticsMap(int pInterval, Function<Long, ENTRY> pValueResolver, long pFirstTimestamp, long pLastTimestamp,
+  IntervalStatisticsMap(int pInterval, LongFunction<ENTRY> pValueResolver, long pFirstTimestamp, long pLastTimestamp,
                         IStatisticData<ENTRY> pStatisticData)
   {
     interval = pInterval;

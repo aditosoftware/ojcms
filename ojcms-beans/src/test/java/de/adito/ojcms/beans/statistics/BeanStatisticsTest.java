@@ -50,7 +50,8 @@ class BeanStatisticsTest extends AbstractOnNextCallCountTest
     assertTrue(container.getStatisticData().isPresent());
     final IStatisticData<Integer> statisticData = container.getStatisticData().get();
     assertNotNull(statisticData);
-    Thread.sleep(5); //Avoid overriding the initial entry
+    //Avoid overriding the initial entry
+    Thread.sleep(5); //NOSONAR
     container.addBean(bean);
     assertEquals(2, statisticData.size());
     final Iterator<Integer> it = statisticData.getChangedDataStatistics().values().iterator();
@@ -84,7 +85,7 @@ class BeanStatisticsTest extends AbstractOnNextCallCountTest
     final int actualEntrySize = intervalStatistics.size();
     assertEquals(expectedEntryCount, actualEntrySize);
     //wait a short time and add an entry, for which a statistic entry will be added
-    Thread.sleep(10);
+    Thread.sleep(10); //NOSONAR
     final String newEntry = "someEntry";
     bean.setValue(SomeBean.field, newEntry);
     assertTrue(actualEntrySize < intervalStatistics.size());
@@ -119,7 +120,8 @@ class BeanStatisticsTest extends AbstractOnNextCallCountTest
     for (int i = 0; i < pSize; i++)
     {
       bean.setValue(SomeBean.field, value + i);
-      Thread.sleep(10); //Leave some range between the timestamps
+      //Leave some range between the timestamps
+      Thread.sleep(10); //NOSONAR
     }
   }
 

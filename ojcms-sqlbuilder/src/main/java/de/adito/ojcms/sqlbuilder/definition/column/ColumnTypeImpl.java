@@ -1,6 +1,6 @@
 package de.adito.ojcms.sqlbuilder.definition.column;
 
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -12,7 +12,9 @@ import java.util.*;
 class ColumnTypeImpl implements IColumnType
 {
   private final EColumnType columnType;
-  private int length = -1, precision = -1, scale = -1;
+  private int length = -1;
+  private int precision = -1;
+  private int scale = -1;
   private boolean isPrimaryKey;
   private IForeignKey foreignKey;
   private List<EColumnModifier> modifiers;

@@ -72,7 +72,7 @@ public class BeanFieldCopyTest
       final VALUE copiedValue = field.copyValue(pFieldValueWrapper.value, ECopyMode.DEEP_ONLY_BEAN_FIELDS);
       final Class<?> valueType = copiedValue.getClass();
       assertTrue(ClassUtils.isPrimitiveOrWrapper(valueType) || Enum.class.isAssignableFrom(valueType) ||
-                     copiedValue != pFieldValueWrapper.value);
+                     String.class.isAssignableFrom(valueType) || copiedValue != pFieldValueWrapper.value);
       pFieldValueWrapper.getOptionalTest().ifPresent(pTest -> pTest.accept((copiedValue)));
     }
     catch (BeanCopyNotSupportedException pE)

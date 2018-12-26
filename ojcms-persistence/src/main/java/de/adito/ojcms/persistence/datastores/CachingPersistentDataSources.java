@@ -20,7 +20,7 @@ final class CachingPersistentDataSources implements IPersistentSourcesStore
   private final Map<String, IBeanDataSource> beanDataSourcesCache = new ConcurrentHashMap<>();
   private final Map<String, IBeanContainerDataSource<?>> containerDataSourcesCache = new ConcurrentHashMap<>();
   private final BiFunction<String, Class<? extends IBean<?>>, IBeanDataSource> beanResolver;
-  private final Function<String, Boolean> beanExistingDeterminer;
+  private final Predicate<String> beanExistingDeterminer;
   private final BiFunction<String, Class<? extends IBean<?>>, IBeanContainerDataSource<?>> containerResolver;
   private final Consumer<Collection<IBean<?>>> singleBeanObsoleteRemover;
   private final Consumer<Collection<String>> containerObsoleteRemover;
@@ -29,7 +29,7 @@ final class CachingPersistentDataSources implements IPersistentSourcesStore
    * Creates the caching persistent data sources store.
    *
    * @param pBeanResolver              a function to get a persistent bean data source from a container id and a certain bean type
-   * @param pBeanExistingDeterminer    a function that determines if a single bean data source is existing by its persistence id
+   * @param pBeanExistingDeterminer    a predicate that determines if a single bean data source is existing by its persistence id
    * @param pContainerResolver         a function to get a persistent bean container data source from a container id and a certain bean type
    * @param pSingleBeanObsoleteRemover a function to clean up obsolete single bean sources in the persistent data store,
    *                                   takes a collection of all still existing single beans
@@ -37,13 +37,13 @@ final class CachingPersistentDataSources implements IPersistentSourcesStore
    *                                   takes a collection of all still existing container persistent ids
    */
   CachingPersistentDataSources(BiFunction<String, Class<? extends IBean<?>>, IBeanDataSource> pBeanResolver,
-                               Function<String, Boolean> pBeanExistingDeterminer,
+                               Predicate<String> pBeanExistingDeterminer,
                                BiFunction<String, Class<? extends IBean<?>>, IBeanContainerDataSource<?>> pContainerResolver,
                                Consumer<Collection<IBean<?>>> pSingleBeanObsoleteRemover,
                                Consumer<Collection<String>> pContainerObsoleteRemover)
   {
     beanResolver = Objects.requireNonNull(pBeanResolver);
-    beanExistingDeterminer = pBeanExistingDeterminer;
+    beanExistingDeterminer = Objects.requireNonNull(pBeanExistingDeterminer);
     containerResolver = Objects.requireNonNull(pContainerResolver);
     singleBeanObsoleteRemover = Objects.requireNonNull(pSingleBeanObsoleteRemover);
     containerObsoleteRemover = Objects.requireNonNull(pContainerObsoleteRemover);
@@ -58,7 +58,7 @@ final class CachingPersistentDataSources implements IPersistentSourcesStore
   @Override
   public boolean isSingleBeanSourceExisting(String pPersistenceId)
   {
-    return beanExistingDeterminer.apply(pPersistenceId);
+    return beanExistingDeterminer.test(pPersistenceId);
   }
 
   @Override

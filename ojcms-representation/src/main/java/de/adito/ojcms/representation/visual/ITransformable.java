@@ -83,9 +83,9 @@ interface ITransformable<LOGIC, VISUAL, SOURCE extends ILinkable>
    * The queue will be executed right after the transformation.
    *
    * @param pOperation the operation to queue
-   * @throws UnsupportedOperationException may throw an exception, if there is no operation container provided by the transformator
+   * @throws UnsupportedOperationException might throw an exception if there is no operation container provided by the transformator
    */
-  default void queueOperation(Runnable pOperation) throws UnsupportedOperationException
+  default void queueOperation(Runnable pOperation)
   {
     if (isTransformed())
       throw new AlreadyTransformedException(getClass().getSimpleName());
@@ -101,7 +101,7 @@ interface ITransformable<LOGIC, VISUAL, SOURCE extends ILinkable>
    * Throws a {@link NotTransformedException} if the transformation is not completed.
    * May be used as an 'assertion' within the development.
    */
-  default void transformedOrThrow() throws NotTransformedException
+  default void transformedOrThrow()
   {
     transformedOrThrow(() -> new NotTransformedException(getClass().getName()));
   }

@@ -13,7 +13,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Detail
 {
-  Detail INSTANCE = new Detail() {
+  Detail INSTANCE = new Detail() { //NOSONAR
     @Override
     public Class<? extends Annotation> annotationType()
     {

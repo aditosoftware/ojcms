@@ -549,7 +549,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    *
    * @param <BEAN> the type of the beans in the container
    */
-  final class BeanContainerListProxy<BEAN extends IBean<BEAN>> extends AbstractList<BEAN>
+  final class BeanContainerListProxy<BEAN extends IBean<BEAN>> extends AbstractList<BEAN> //NOSONAR
   {
     private final IBeanContainer<BEAN> container;
 

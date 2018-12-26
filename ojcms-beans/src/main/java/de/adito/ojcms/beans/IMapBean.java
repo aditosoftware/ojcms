@@ -1,5 +1,6 @@
 package de.adito.ojcms.beans;
 
+import de.adito.ojcms.beans.exceptions.OJRuntimeException;
 import de.adito.ojcms.beans.fields.IField;
 
 import java.util.*;
@@ -48,7 +49,8 @@ public interface IMapBean<KEY, VALUE> extends Map<KEY, VALUE>, IBean<IMapBean<KE
    */
   static <KEY, VALUE> IMapBean<KEY, VALUE> createCopy(IMapBean<KEY, VALUE> pOriginalMapBean)
   {
-    assert pOriginalMapBean instanceof MapBean;
+    if (!(pOriginalMapBean instanceof MapBean))
+      throw new OJRuntimeException("Only map beans created by this interface can be used for copying!");
     return new MapBean<>((MapBean<KEY, VALUE>) pOriginalMapBean);
   }
 

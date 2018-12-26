@@ -16,7 +16,7 @@ import java.util.function.Supplier;
  *
  * @author Simon Danner, 19.02.2018
  */
-public class BeanSQLSerializer implements IValueSerializer
+public class BeanSQLSerializer extends DefaultValueSerializer
 {
   private static final String SEPARATOR = ";";
   private final Supplier<BeanDataStore> beanDataStoreSupplier;
@@ -34,19 +34,19 @@ public class BeanSQLSerializer implements IValueSerializer
   @Override
   public @Nullable <VALUE> String toSerial(IColumnValueTuple<VALUE> pColumnValueTuple)
   {
-    //noinspection unchecked
-    return pColumnValueTuple instanceof IBeanFieldTupleBased ?
-        _toPersistent(((IBeanFieldTupleBased<VALUE>) pColumnValueTuple).getFieldValueTuple()) :
-        IValueSerializer.DEFAULT.toSerial(pColumnValueTuple);
+    if (pColumnValueTuple instanceof IBeanFieldTupleBased)
+      //noinspection unchecked
+      return _toPersistent(((IBeanFieldTupleBased<VALUE>) pColumnValueTuple).getFieldValueTuple());
+    return super.toSerial(pColumnValueTuple);
   }
 
   @Override
   public <VALUE> @Nullable VALUE fromSerial(IColumnIdentification<VALUE> pColumnIdentification, String pSerialValue)
   {
-    //noinspection unchecked
-    return pColumnIdentification instanceof IBeanFieldBased ?
-        _fromPersistent(((IBeanFieldBased<VALUE>) pColumnIdentification).getBeanField(), pSerialValue) :
-        IValueSerializer.DEFAULT.fromSerial(pColumnIdentification, pSerialValue);
+    if (pColumnIdentification instanceof IBeanFieldBased)
+      //noinspection unchecked
+      return _fromPersistent(((IBeanFieldBased<VALUE>) pColumnIdentification).getBeanField(), pSerialValue);
+    return super.fromSerial(pColumnIdentification, pSerialValue);
   }
 
   /**

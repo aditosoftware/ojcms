@@ -1,6 +1,6 @@
 package de.adito.ojcms.utils.collections;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -18,7 +18,7 @@ class WeakInputSortedContainerTest
     final WeakInputSortedContainer<Object> container = new WeakInputSortedContainer<>();
     container.add(new Object());
     System.gc();
-    Thread.sleep(100);
+    Thread.sleep(100); //NOSONAR
     assertTrue(container.isEmpty());
   }
 }

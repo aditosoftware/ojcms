@@ -206,9 +206,10 @@ public final class StatementFormatter
    */
   public StatementFormatter appendMultiplePrepared(Stream<? extends IPreparedStatementFormat> pFormatStream, ESeparator... pSeparators)
   {
-    return _appendMultiple(pFormatStream
-                               .peek(pFormat -> arguments.addAll(pFormat.getArguments(idColumnName)))
-                               .map(pFormat -> toFormat(pFormat, databaseType, idColumnName)), pSeparators);
+    return _appendMultiple(pFormatStream.map(pFormat -> {
+      arguments.addAll(pFormat.getArguments(idColumnName));
+      return toFormat(pFormat, databaseType, idColumnName);
+    }), pSeparators);
   }
 
   /**

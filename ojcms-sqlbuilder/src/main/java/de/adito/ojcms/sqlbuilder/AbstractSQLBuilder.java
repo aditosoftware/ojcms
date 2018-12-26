@@ -85,7 +85,7 @@ public abstract class AbstractSQLBuilder
    *
    * @param pDeleteStatement the statement to execute (defined in a pipelining mechanism)
    */
-  public boolean doDelete(Function<Delete, Boolean> pDeleteStatement)
+  public boolean doDelete(Function<Delete, Boolean> pDeleteStatement) //NOSONAR
   {
     return _query(configureStatementBeforeExecution(new Delete(_createSuccessfulExecutor(), this, databaseType, serializer,
                                                                _createResultExecutor(), idColumnName)), pDeleteStatement);

@@ -48,7 +48,7 @@ public class EncapsulatedWeakReferencesTest
   }
 
   @Test
-  public void testWeakness() throws InterruptedException
+  public void testWeakness()
   {
     //noinspection unused
     ReferringBean referringBean = new ReferringBean(someBean);
@@ -56,7 +56,6 @@ public class EncapsulatedWeakReferencesTest
     //noinspection UnusedAssignment
     referringBean = null;
     System.gc();
-    Thread.sleep(100);
     assertTrue(referable.getDirectReferences().isEmpty());
   }
 

@@ -15,7 +15,7 @@ import de.adito.ojcms.utils.readonly.*;
 import org.jetbrains.annotations.*;
 
 import java.util.*;
-import java.util.function.Function;
+import java.util.function.*;
 import java.util.stream.*;
 
 import static de.adito.ojcms.beans.BeanCopies.doCreateCopy;
@@ -244,7 +244,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
    * Creates a copy of this bean.
    * This method expects an existing default constructor for this concrete bean type.
    * If the copy should include deep fields, all deep beans are supposed to have default constructors as well.
-   * If it is not possible to provide a default constructor, you may use {@link IBean#createCopy(ECopyMode, Function, CustomFieldCopy[])}
+   * If it is not possible to provide a default constructor, you may use {@link IBean#createCopy(ECopyMode, UnaryOperator, CustomFieldCopy[])}
    * to create bean copies. It allows you to define a custom constructor call to create the new instance.
    *
    * A copy will always be created with the default {@link IBeanDataSource}.
@@ -270,7 +270,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
    * @param pCustomFieldCopies     a collection of custom copy mechanisms for specific bean fields
    * @return a copy of this bean
    */
-  default BEAN createCopy(ECopyMode pMode, Function<BEAN, BEAN> pCustomConstructorCall, CustomFieldCopy<?>... pCustomFieldCopies)
+  default BEAN createCopy(ECopyMode pMode, UnaryOperator<BEAN> pCustomConstructorCall, CustomFieldCopy<?>... pCustomFieldCopies)
   {
     return doCreateCopy(toRuntimeBean(this), pMode, pCustomConstructorCall, pCustomFieldCopies);
   }
