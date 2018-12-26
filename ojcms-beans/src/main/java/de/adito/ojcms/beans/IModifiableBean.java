@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  * @author Simon Danner, 01.02.2017
  */
 @RequiresEncapsulatedAccess
-public interface IModifiableBean<BEAN extends IBean<BEAN>> extends IBean<BEAN>
+public interface IModifiableBean<BEAN extends IModifiableBean<BEAN>> extends IBean<BEAN>
 {
   /**
    * Extends this bean by one field.
