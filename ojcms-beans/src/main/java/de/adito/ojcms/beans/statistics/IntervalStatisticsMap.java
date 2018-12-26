@@ -12,9 +12,10 @@ import java.util.stream.LongStream;
  * @param <ENTRY> the data type of the statistic entry values
  * @author Simon Danner, 28.07.2018
  */
+@SuppressWarnings("squid:S2160")
 class IntervalStatisticsMap<ENTRY> extends LinkedHashMap<Long, ENTRY>
 {
-  private transient final int interval;
+  private final transient int interval;
   private transient LongFunction<ENTRY> valueResolver;
   private transient long firstTimestamp;
   private transient long lastTimestamp;

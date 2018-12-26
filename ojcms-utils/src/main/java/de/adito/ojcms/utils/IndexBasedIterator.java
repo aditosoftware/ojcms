@@ -17,7 +17,7 @@ public final class IndexBasedIterator<ELEMENT> implements Iterator<ELEMENT>
   private final IntFunction<ELEMENT> elementProvider;
   private final IntSupplier sizeSupplier;
   @Nullable
-  private Consumer<Integer> remover;
+  private IntConsumer remover;
 
   private int index;
   private int lastIndex = -1;
@@ -47,7 +47,7 @@ public final class IndexBasedIterator<ELEMENT> implements Iterator<ELEMENT>
    * @param pRemover           an optional action to remove an element at a given index
    */
   private IndexBasedIterator(IntFunction<ELEMENT> pElementProvider, IntSupplier pSizeSupplier, int pStartIndex,
-                             int pEndIndexExclusive, @Nullable Consumer<Integer> pRemover)
+                             int pEndIndexExclusive, @Nullable IntConsumer pRemover)
   {
     index = pStartIndex;
     endIndexExclusive = pEndIndexExclusive;
@@ -102,7 +102,7 @@ public final class IndexBasedIterator<ELEMENT> implements Iterator<ELEMENT>
     private int start = -1;
     private int end = -1;
     @Nullable
-    private Consumer<Integer> remover;
+    private IntConsumer remover;
 
     /**
      * Creates the builder initially with least required parameters
@@ -147,7 +147,7 @@ public final class IndexBasedIterator<ELEMENT> implements Iterator<ELEMENT>
      * @param pRemover an action to remove an element at a given index
      * @return the builder to enable a pipelining mechanism
      */
-    public Builder<ELEMENT> withRemover(@NotNull Consumer<Integer> pRemover)
+    public Builder<ELEMENT> withRemover(@NotNull IntConsumer pRemover)
     {
       remover = Objects.requireNonNull(pRemover);
       return this;

@@ -7,6 +7,10 @@ package de.adito.ojcms.persistence.datastores.sql.util;
  */
 public final class DatabaseConstants
 {
+  private DatabaseConstants()
+  {
+  }
+
   public static final String BEAN_TABLE_NAME = "OJbeans";
   public static final String BEAN_TABLE_COLUMN_PREFIX = "field";
   public static final String BEAN_TABLE_BEAN_ID = "beanId";

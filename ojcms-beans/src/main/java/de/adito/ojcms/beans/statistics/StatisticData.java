@@ -69,6 +69,7 @@ public class StatisticData<ENTRY> implements IStatisticData<ENTRY>
   /**
    * A limited evicting map that only allows a certain number of entries.
    */
+  @SuppressWarnings("squid:S2160")
   private class _LimitedMap extends LinkedHashMap<Long, ENTRY>
   {
     private final int limit;
