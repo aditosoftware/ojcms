@@ -113,10 +113,10 @@ public class BeanSQLSerializer implements IValueSerializer
    */
   private String _referenceBean(@NotNull IBean<?> pBean)
   {
-    Class<? extends IBean> beanType = pBean.getClass();
+    final Class<? extends IBean> beanType = pBean.getClass();
     if (!beanType.isAnnotationPresent(Persist.class))
       throw new BeanSerializationException("Bean references within a persistent bean must always refer to another persistent bean!");
-    Persist annotation = beanType.getAnnotation(Persist.class);
+    final Persist annotation = beanType.getAnnotation(Persist.class);
     //noinspection unchecked
     return annotation.mode() == EPersistenceMode.SINGLE ? annotation.containerId() :
         String.valueOf(beanDataStoreSupplier.get().getContainerByPersistenceId(annotation.containerId(), beanType).indexOf(pBean));
@@ -181,7 +181,7 @@ public class BeanSQLSerializer implements IValueSerializer
    * @param <VALUE>   the generic data type
    * @return the error message
    */
-  private <VALUE> String _notSerializableMessage(IField<VALUE> pField, boolean pToSerial)
+  private static <VALUE> String _notSerializableMessage(IField<VALUE> pField, boolean pToSerial)
   {
     return "Unable to " + (pToSerial ? "persist" : "read") + " the value of the bean field " + pField.getName() +
         " with type " + pField.getDataType() + "! The field must either be a reference or serializable field!";

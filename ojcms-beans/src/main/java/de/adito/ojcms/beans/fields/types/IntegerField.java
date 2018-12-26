@@ -1,5 +1,6 @@
 package de.adito.ojcms.beans.fields.types;
 
+import de.adito.ojcms.beans.annotations.NeverNull;
 import de.adito.ojcms.beans.annotations.internal.TypeDefaultField;
 import de.adito.ojcms.beans.fields.serialization.ISerializableFieldToString;
 import de.adito.ojcms.beans.util.*;
@@ -13,18 +14,13 @@ import java.util.Collection;
  *
  * @author Simon Danner, 27.01.2017
  */
+@NeverNull
 @TypeDefaultField(types = Integer.class)
 public class IntegerField extends AbstractField<Integer> implements ISerializableFieldToString<Integer>
 {
   protected IntegerField(@NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {
     super(Integer.class, pName, pAnnotations);
-  }
-
-  @Override
-  public Integer getDefaultValue()
-  {
-    return 0;
   }
 
   @Override

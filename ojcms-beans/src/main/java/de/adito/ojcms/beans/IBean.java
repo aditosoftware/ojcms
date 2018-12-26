@@ -1,6 +1,6 @@
 package de.adito.ojcms.beans;
 
-import de.adito.ojcms.beans.annotations.Identifier;
+import de.adito.ojcms.beans.annotations.*;
 import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
 import de.adito.ojcms.beans.datasource.*;
 import de.adito.ojcms.beans.exceptions.bean.*;
@@ -47,29 +47,31 @@ public interface IBean<BEAN extends IBean<BEAN>>
    * @param pField  the bean field
    * @param <VALUE> the field's data type
    * @return the value for the bean field
+   * @throws BeanFieldDoesNotExistException if the bean field does not exist at the bean
+   * @throws BeanIllegalAccessException     if access the bean field's data is not allowed
+   * @throws NullValueForbiddenException    if a null value would have been returned, but the field is marked as {@link NeverNull}
    */
   default <VALUE> VALUE getValue(IField<VALUE> pField)
   {
-    assert getEncapsulatedData() != null;
-    if (!getEncapsulatedData().containsField((Objects.requireNonNull(pField))))
-      throw new BeanFieldDoesNotExistException(this, pField);
-    if (pField.isPrivate())
-      throw new BeanIllegalAccessException(this, pField);
-    return getEncapsulatedData().getValue(pField);
+    return BeanEvents.requestValue(this, pField, false);
   }
 
   /**
    * The value for a bean field.
-   * If null, the field's default value will be returned.
+   * If the current value is the initial value of the field, the default value of the field will be returned.
    * This method can only be called if the field has no private access modifier {@link de.adito.ojcms.beans.annotations.Private}.
    *
    * @param pField  the bean field
    * @param <VALUE> the field's data type
    * @return the value for the bean field or the field's default value if null
+   * @throws BeanFieldDoesNotExistException if the bean field does not exist at the bean
+   * @throws BeanIllegalAccessException     if access the bean field's data is not allowed
+   * @throws NullValueForbiddenException    if a null value would have been returned, but the field is marked as {@link NeverNull}
    */
   default <VALUE> VALUE getValueOrDefault(IField<VALUE> pField)
   {
-    return Optional.ofNullable(getValue(pField)).orElse(pField.getDefaultValue());
+    final VALUE value = getValue(Objects.requireNonNull(pField));
+    return Objects.equals(value, pField.getInitialValue()) ? pField.getDefaultValue() : value;
   }
 
   /**
@@ -83,6 +85,9 @@ public interface IBean<BEAN extends IBean<BEAN>>
    * @param <VALUE>      the field's data type
    * @param <TARGET>     the generic type to convert to
    * @return the converted value for the bean field
+   * @throws BeanFieldDoesNotExistException if the bean field does not exist at the bean
+   * @throws BeanIllegalAccessException     if access the bean field's data is not allowed
+   * @throws NullValueForbiddenException    if a null value would have been returned, but the field is marked as {@link NeverNull}
    */
   default <VALUE, TARGET> TARGET getValueConverted(IField<VALUE> pField, Class<TARGET> pConvertType)
   {

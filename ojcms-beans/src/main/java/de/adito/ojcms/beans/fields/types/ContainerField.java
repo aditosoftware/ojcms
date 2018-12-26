@@ -1,8 +1,8 @@
 package de.adito.ojcms.beans.fields.types;
 
 import de.adito.ojcms.beans.*;
+import de.adito.ojcms.beans.annotations.*;
 import de.adito.ojcms.beans.annotations.internal.*;
-import de.adito.ojcms.beans.annotations.GenericBeanField;
 import de.adito.ojcms.beans.util.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,6 +15,7 @@ import java.util.Collection;
  * @param <BEAN> the type of the beans in the container
  * @author Simon Danner, 09.02.2017
  */
+@NeverNull
 @TypeDefaultField(types = IBeanContainer.class)
 @ReferenceField(resolverType = EReferableResolver.MULTI)
 @GenericBeanField(genericWrapperType = IBeanContainer.class)

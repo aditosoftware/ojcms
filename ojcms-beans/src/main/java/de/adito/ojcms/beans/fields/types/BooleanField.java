@@ -1,5 +1,6 @@
 package de.adito.ojcms.beans.fields.types;
 
+import de.adito.ojcms.beans.annotations.NeverNull;
 import de.adito.ojcms.beans.annotations.internal.TypeDefaultField;
 import de.adito.ojcms.beans.fields.serialization.ISerializableFieldToString;
 import de.adito.ojcms.beans.util.*;
@@ -13,18 +14,13 @@ import java.util.Collection;
  *
  * @author Simon Danner, 19.01.2017
  */
+@NeverNull
 @TypeDefaultField(types = Boolean.class)
 public class BooleanField extends AbstractField<Boolean> implements ISerializableFieldToString<Boolean>
 {
   protected BooleanField(@NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {
     super(Boolean.class, pName, pAnnotations);
-  }
-
-  @Override
-  public Boolean getDefaultValue()
-  {
-    return false;
   }
 
   @Override

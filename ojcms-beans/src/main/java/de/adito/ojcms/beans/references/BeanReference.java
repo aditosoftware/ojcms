@@ -100,7 +100,7 @@ public final class BeanReference extends WeakReference<IBean<?>> implements Iter
    * The bean holding the reference if the reference hasn't been collected by GC.
    *
    * @return the bean holding the reference
-   * @throws RuntimeException if the reference does not exist anymore
+   * @throws OJRuntimeException if the reference does not exist anymore
    */
   private IBean<?> _requiresExistingReference()
   {

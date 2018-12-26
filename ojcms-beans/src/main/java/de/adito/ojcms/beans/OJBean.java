@@ -94,11 +94,8 @@ public abstract class OJBean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
    */
   protected <VALUE> VALUE getPrivateValue(IField<VALUE> pField)
   {
-    assert getEncapsulatedData() != null;
-    if (!getEncapsulatedData().containsField(pField))
-      throw new BeanFieldDoesNotExistException(this, pField);
     _checkNotPrivateAndWarn(pField);
-    return encapsulatedData.getValue(pField);
+    return BeanEvents.requestValue(this, pField, true);
   }
 
   /**

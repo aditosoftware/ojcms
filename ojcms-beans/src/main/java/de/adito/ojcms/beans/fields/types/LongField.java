@@ -1,5 +1,6 @@
 package de.adito.ojcms.beans.fields.types;
 
+import de.adito.ojcms.beans.annotations.NeverNull;
 import de.adito.ojcms.beans.annotations.internal.TypeDefaultField;
 import de.adito.ojcms.beans.fields.serialization.ISerializableFieldToString;
 import de.adito.ojcms.beans.util.*;
@@ -13,18 +14,13 @@ import java.util.Collection;
  *
  * @author Simon Danner, 14.02.2017
  */
+@NeverNull
 @TypeDefaultField(types = Long.class)
 public class LongField extends AbstractField<Long> implements ISerializableFieldToString<Long>
 {
   public LongField(@NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {
     super(Long.class, pName, pAnnotations);
-  }
-
-  @Override
-  public Long getDefaultValue()
-  {
-    return 0L;
   }
 
   @Override

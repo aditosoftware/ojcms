@@ -1,9 +1,13 @@
 package de.adito.ojcms.beans;
 
+import de.adito.ojcms.beans.annotations.NeverNull;
 import de.adito.ojcms.beans.annotations.internal.*;
+import de.adito.ojcms.beans.exceptions.bean.*;
+import de.adito.ojcms.beans.exceptions.field.BeanFieldDoesNotExistException;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.reactive.events.*;
 import de.adito.ojcms.beans.statistics.IStatisticData;
+import de.adito.ojcms.beans.util.BeanReflector;
 
 import java.util.*;
 import java.util.function.*;
@@ -46,6 +50,7 @@ final class BeanEvents
   @SuppressWarnings("unchecked")
   static <BEAN extends IBean<BEAN>, VALUE> void setValueAndPropagate(BEAN pBean, IField<VALUE> pField, VALUE pNewValue)
   {
+    _checkNullAllowed(pField, pNewValue);
     final IEncapsulatedBeanData encapsulatedData = pBean.getEncapsulatedData();
     assert encapsulatedData != null;
     assert encapsulatedData.containsField(pField);
@@ -72,21 +77,49 @@ final class BeanEvents
       propagate(new BeanValueChange<>(pBean, pField, oldValue, pNewValue));
       //Finally adjust the references if necessary
       final Class<? extends IField> fieldType = pField.getClass();
-      if (fieldType.isAnnotationPresent(ReferenceField.class))
+      BeanReflector.doIfAnnotationPresent(fieldType, ReferenceField.class, pReferenceField ->
       {
-        final Function<Object, Stream<IReferable>> resolver = fieldType.getAnnotation(ReferenceField.class).resolverType().getResolver();
+        final Function<Object, Stream<IReferable>> resolver = pReferenceField.resolverType().getResolver();
         //Remove old references based on the old value
         resolver.apply(oldValue)
             .forEach(pReferable -> pReferable.removeReference(pBean, pField));
         //Add the new ones
         resolver.apply(pNewValue)
             .forEach(pReferable -> pReferable.addWeakReference(pBean, pField));
-      }
+      });
       //Add a statistic entry if necessary
       Optional.ofNullable(encapsulatedData.getStatisticData().get(pField))
           .map(pData -> (IStatisticData<VALUE>) pData)
           .ifPresent(pData -> pData.addEntry(pNewValue));
     }
+  }
+
+  /**
+   * A data value for a certain bean field is requested.
+   * This method takes care of correct access rules and proper values to return.
+   *
+   * @param pBean               the bean to get the value from
+   * @param pField              the bean field to get the value from
+   * @param pAllowPrivateAccess <tt>true</tt> if private access is allowed
+   * @param <VALUE>             the data type of the field and the value to retrieve
+   * @return the value for the bean field
+   * @throws BeanFieldDoesNotExistException if the bean field does not exist at the bean
+   * @throws BeanIllegalAccessException if access the bean field's data is not allowed
+   * @throws NullValueForbiddenException if a null value would have been returned, but the field is marked as {@link NeverNull}
+   */
+  static <VALUE> VALUE requestValue(IBean<?> pBean, IField<VALUE> pField, boolean pAllowPrivateAccess)
+  {
+    final IEncapsulatedBeanData encapsulatedData = pBean.getEncapsulatedData();
+    assert encapsulatedData != null;
+    if (!encapsulatedData.containsField((Objects.requireNonNull(pField))))
+      throw new BeanFieldDoesNotExistException(pBean, pField);
+    if (!pAllowPrivateAccess && pField.isPrivate())
+      throw new BeanIllegalAccessException(pBean, pField);
+    final VALUE value = encapsulatedData.getValue(pField);
+    //Check if null is allowed
+    if (value == null && (pField.hasAnnotation(NeverNull.class) || pField.getClass().isAnnotationPresent(NeverNull.class)))
+      throw new NullValueForbiddenException(pField);
+    return value;
   }
 
   /**
@@ -176,6 +209,19 @@ final class BeanEvents
       }
     }
     return removed;
+  }
+
+  /**
+   * Checks, if the value to set might be null and if this is allowed for the field to change the value from.
+   *
+   * @param pField  the field to change the value from
+   * @param pValue  the new value
+   * @param <VALUE> the data type of the value
+   */
+  private static <VALUE> void _checkNullAllowed(IField<VALUE> pField, VALUE pValue)
+  {
+    if (pValue == null && (pField.hasAnnotation(NeverNull.class) || pField.getClass().isAnnotationPresent(NeverNull.class)))
+      throw new NullValueForbiddenException(pField);
   }
 
   /**

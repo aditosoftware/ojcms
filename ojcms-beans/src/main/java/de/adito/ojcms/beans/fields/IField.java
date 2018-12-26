@@ -147,7 +147,7 @@ public interface IField<VALUE>
    *
    * @param pType the annotation's type
    * @return an annotation instance for a certain type
-   * @throws RuntimeException if the requested annotation is not present
+   * @throws BeanFieldMissingInformation if the requested annotation is not present
    */
   default <ANNOTATION extends Annotation> ANNOTATION getAnnotationOrThrow(Class<ANNOTATION> pType)
   {

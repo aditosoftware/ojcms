@@ -1,13 +1,14 @@
 package de.adito.ojcms.beans.util;
 
 import de.adito.ojcms.beans.*;
-import de.adito.ojcms.beans.exceptions.*;
+import de.adito.ojcms.beans.exceptions.OJInternalException;
 import de.adito.ojcms.beans.exceptions.bean.NoDeclaredBeanTypeException;
 import de.adito.ojcms.beans.fields.IField;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
-import java.util.function.Predicate;
+import java.util.function.*;
 import java.util.stream.*;
 
 /**
@@ -75,6 +76,21 @@ public final class BeanReflector
     if (!OJBean.class.isAssignableFrom(pBeanType)) //To make sure it isn't a transformed type
       throw new NoDeclaredBeanTypeException(pBeanType, "Do not use transformed or differently represented bean types!");
     return pBeanType;
+  }
+
+  /**
+   * Performs an action if a certain annotation type is present.
+   *
+   * @param pType the type that might be annotated
+   * @param pAnnotationType the annotation type to check
+   * @param pAction the action to perform (based on the annotation)
+   * @param <ANNOTATION> the generic type of the annotation
+   */
+  public static <ANNOTATION extends Annotation> void doIfAnnotationPresent(Class<?> pType, Class<ANNOTATION> pAnnotationType,
+                                                                           Consumer<ANNOTATION> pAction)
+  {
+    if (pType.isAnnotationPresent(pAnnotationType))
+      pAction.accept(pType.getAnnotation(pAnnotationType));
   }
 
   /**

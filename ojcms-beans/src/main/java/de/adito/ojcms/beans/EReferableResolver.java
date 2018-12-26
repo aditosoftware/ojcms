@@ -83,7 +83,7 @@ public enum EReferableResolver
    *
    * @param pValue the value of the field
    * @return an optional retrieved encapsulated data core (empty if the value is null or wrong type)
-   * @throws RuntimeException if the value is no {@link IEncapsulatedDataHolder}
+   * @throws OJInternalException if the value is no {@link IEncapsulatedDataHolder}
    */
   private static Optional<IEncapsulatedData<?, ?>> _tryGetEncapsulated(Object pValue)
   {

@@ -1,5 +1,6 @@
 package de.adito.ojcms.beans.fields.types;
 
+import de.adito.ojcms.beans.annotations.NeverNull;
 import de.adito.ojcms.beans.annotations.internal.TypeDefaultField;
 import de.adito.ojcms.beans.fields.serialization.ISerializableFieldToString;
 import de.adito.ojcms.beans.util.*;
@@ -16,6 +17,7 @@ import java.util.*;
  *
  * @author Simon Danner, 23.08.2016
  */
+@NeverNull
 @TypeDefaultField(types = {Instant.class, Date.class})
 public class DateField extends AbstractField<Instant> implements ISerializableFieldToString<Instant>
 {
@@ -24,6 +26,12 @@ public class DateField extends AbstractField<Instant> implements ISerializableFi
     super(Instant.class, pName, pAnnotations);
     registerConverter(Date.class, Date::toInstant, Date::from);
     registerConverter(Long.class, Instant::ofEpochMilli, Instant::toEpochMilli);
+  }
+
+  @Override
+  public Instant getInitialValue()
+  {
+    return Instant.now();
   }
 
   @Override

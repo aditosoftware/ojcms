@@ -1,5 +1,6 @@
 package de.adito.ojcms.beans.fields.types;
 
+import de.adito.ojcms.beans.annotations.NeverNull;
 import de.adito.ojcms.beans.annotations.internal.TypeDefaultField;
 import de.adito.ojcms.beans.fields.serialization.ISerializableFieldToString;
 import de.adito.ojcms.beans.util.*;
@@ -13,18 +14,13 @@ import java.util.Collection;
  *
  * @author Simon Danner, 23.08.2016
  */
+@NeverNull
 @TypeDefaultField(types = Double.class)
 public class DecimalField extends AbstractField<Double> implements ISerializableFieldToString<Double>
 {
   protected DecimalField(@NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {
     super(Double.class, pName, pAnnotations);
-  }
-
-  @Override
-  public Double getDefaultValue()
-  {
-    return 0.0;
   }
 
   @Override

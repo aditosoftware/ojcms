@@ -2,13 +2,16 @@ package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.annotations.*;
 import de.adito.ojcms.beans.base.IEqualsHashCodeChecker;
-import de.adito.ojcms.beans.exceptions.bean.BeanIllegalAccessException;
+import de.adito.ojcms.beans.datasource.IBeanDataSource;
+import de.adito.ojcms.beans.exceptions.bean.*;
 import de.adito.ojcms.beans.exceptions.field.BeanFieldDoesNotExistException;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.fields.types.*;
 import de.adito.ojcms.beans.fields.util.FieldValueTuple;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 
+import java.lang.annotation.Annotation;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -49,7 +52,7 @@ class BeanTest
   @Test
   public void testGetValueSuccess()
   {
-    assertEquals(VALUE, bean.getValue(SomeBean.someField));
+    assertEquals(VALUE, bean.getValue(SomeBean.specialTextField));
   }
 
   @Test
@@ -61,11 +64,17 @@ class BeanTest
   @Test
   public void testGetValueOrDefault()
   {
-    bean.setValue(SomeBean.someField, null);
-    bean.setValue(SomeBean.numberField, null);
-    assertNull(bean.getValueOrDefault(SomeBean.someField));
-    assertEquals(SomeBean.numberField.getInitialValue(), bean.getValue(SomeBean.numberField));
-    assertEquals(0, (int) bean.getValueOrDefault(SomeBean.numberField));
+    bean.setValue(SomeBean.specialTextField, SpecialTextField.INITIAL_VALUE);
+    assertEquals(SpecialTextField.DEFAULT_VALUE, bean.getValueOrDefault(SomeBean.specialTextField));
+  }
+
+  @Test
+  public void testGetNullValueForbidden()
+  {
+    bean.setEncapsulatedDataSource(new _NullReturningBeanDataSource());
+    assertThrows(NullValueForbiddenException.class, () -> bean.getValue(SomeBean.specialTextField)); //Field type annotated
+    assertThrows(NullValueForbiddenException.class, () -> bean.getValue(SomeBean.numberField)); //Number field type annotated naturally
+    assertThrows(NullValueForbiddenException.class, () -> bean.getPrivateValue(SomeBean.somePrivateField)); //Field instance annotated
   }
 
   @Test
@@ -79,6 +88,14 @@ class BeanTest
   public void testSetValuePrivateField()
   {
     assertThrows(BeanIllegalAccessException.class, () -> bean.setValue(SomeBean.somePrivateField, "test"));
+  }
+
+  @Test
+  public void testSetNullValueForbidden()
+  {
+    assertThrows(NullValueForbiddenException.class, () -> bean.setValue(SomeBean.specialTextField, null)); //Field type annotated
+    assertThrows(NullValueForbiddenException.class, () -> bean.setValue(SomeBean.numberField, null)); //Number field type annotated naturally
+    assertThrows(NullValueForbiddenException.class, () -> bean.setPrivateValue(SomeBean.somePrivateField, null)); //Field instance annotated
   }
 
   @Test
@@ -97,7 +114,7 @@ class BeanTest
   @Test
   public void testHasFieldSuccess()
   {
-    assertTrue(bean.hasField(SomeBean.someField));
+    assertTrue(bean.hasField(SomeBean.specialTextField));
   }
 
   @Test
@@ -122,7 +139,7 @@ class BeanTest
   @Test
   public void testFieldIndex()
   {
-    assertEquals(0, bean.getFieldIndex(SomeBean.someField));
+    assertEquals(0, bean.getFieldIndex(SomeBean.specialTextField));
     assertEquals(1, bean.getFieldIndex(SomeBean.numberField));
   }
 
@@ -132,7 +149,7 @@ class BeanTest
     final Set<FieldValueTuple<?>> identifiers = bean.getIdentifiers();
     assertEquals(2, identifiers.size());
     final Iterator<FieldValueTuple<?>> it = identifiers.iterator();
-    assertSame(SomeBean.someField, it.next().getField());
+    assertSame(SomeBean.specialTextField, it.next().getField());
     assertSame(SomeBean.numberField, it.next().getField());
   }
 
@@ -157,8 +174,8 @@ class BeanTest
   @Test
   public void testFindFieldByNameSuccess()
   {
-    final IField<?> field = bean.getFieldByName("someField");
-    assertSame(SomeBean.someField, field);
+    final IField<?> field = bean.getFieldByName("specialTextField");
+    assertSame(SomeBean.specialTextField, field);
   }
 
   @Test
@@ -181,16 +198,17 @@ class BeanTest
   public static class SomeBean extends OJBean<SomeBean>
   {
     @Identifier
-    public static final TextField someField = OJFields.create(SomeBean.class);
+    public static final SpecialTextField specialTextField = OJFields.create(SomeBean.class);
     @Identifier
     public static final IntegerField numberField = OJFields.create(SomeBean.class);
+    @NeverNull
     @Private
     public static final TextField somePrivateField = OJFields.create(SomeBean.class);
     public static final BeanField<DeepBean> deepField = OJFields.create(SomeBean.class);
 
     public SomeBean()
     {
-      setValue(someField, VALUE);
+      setValue(specialTextField, VALUE);
       setValue(numberField, 42);
       setPrivateValue(somePrivateField, PRIVATE_VALUE);
       setValue(deepField, new DeepBean());
@@ -232,6 +250,57 @@ class BeanTest
     public DeeperBean()
     {
       setValue(deepValue, DEEP_VALUE);
+    }
+  }
+
+  /**
+   * A text field with a special default value.
+   */
+  @NeverNull
+  public static class SpecialTextField extends TextField
+  {
+    public static final String DEFAULT_VALUE = "default";
+    public static final String INITIAL_VALUE = "initial";
+
+    protected SpecialTextField(@NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
+    {
+      super(pName, pAnnotations);
+    }
+
+    @Override
+    public String getDefaultValue()
+    {
+      return DEFAULT_VALUE;
+    }
+
+    @Override
+    public String getInitialValue()
+    {
+      return INITIAL_VALUE;
+    }
+  }
+
+  /**
+   * A bean data source that always returns null values to test {@link NeverNull} fields.
+   */
+  private static class _NullReturningBeanDataSource implements IBeanDataSource
+  {
+    @Override
+    public <VALUE> VALUE getValue(IField<VALUE> pField)
+    {
+      return null;
+    }
+
+    @Override
+    public <VALUE> void setValue(IField<VALUE> pField, VALUE pValue, boolean pAllowNewField)
+    {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <VALUE> void removeField(IField<VALUE> pField)
+    {
+      throw new UnsupportedOperationException();
     }
   }
 }

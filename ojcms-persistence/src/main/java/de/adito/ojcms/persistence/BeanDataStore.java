@@ -125,7 +125,7 @@ public final class BeanDataStore
    * @param pBeanType the bean type to instantiate
    * @param <BEAN>    the generic bean type
    * @return the create bean instance.
-   * @throws RuntimeException if the persistence annotation is missing
+   * @throws OJPersistenceException if the persistence annotation is missing
    */
   public static <BEAN extends IBean<BEAN>> BEAN newPersistentBeanInstance(Class<BEAN> pBeanType)
   {
