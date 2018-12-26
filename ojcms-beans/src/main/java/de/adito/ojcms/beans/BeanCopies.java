@@ -32,14 +32,14 @@ final class BeanCopies
   /**
    * Creates a copy of a bean.
    * If you want to use a custom constructor call to create the copy,
-   * you may use {@link #createCopy(IBean, ECopyMode, Function, CustomFieldCopy[])}.
+   * you may use {@link #doCreateCopy(IBean, ECopyMode, Function, CustomFieldCopy[])}.
    *
    * @param pOriginal     the original bean to create the copy of
    * @param pMode         the copy mode
    * @param pCustomCopies a collection of custom copy mechanisms for specific bean fields
    * @return a copy of the bean
    */
-  static <BEAN extends IBean<BEAN>> BEAN createCopy(BEAN pOriginal, ECopyMode pMode, CustomFieldCopy<?>... pCustomCopies)
+  static <BEAN extends IBean<BEAN>> BEAN doCreateCopy(BEAN pOriginal, ECopyMode pMode, CustomFieldCopy<?>... pCustomCopies)
   {
     //noinspection unchecked
     final Class<BEAN> beanType = (Class<BEAN>) BeanReflector.requiresDeclaredBeanType(pOriginal.getClass());
@@ -52,7 +52,7 @@ final class BeanCopies
   /**
    * Creates a copy of a bean.
    * This method should be used, if you want to use a custom constructor call to create the copy.
-   * Otherwise use {@link #createCopy(IBean, ECopyMode, CustomFieldCopy[])},
+   * Otherwise use {@link #doCreateCopy(IBean, ECopyMode, CustomFieldCopy[])},
    * where you are not supposed to define a custom constructor call.
    *
    * @param pOriginal              the original bean to create the copy of
@@ -61,8 +61,8 @@ final class BeanCopies
    * @param pCustomCopies          a collection of custom copy mechanisms for specific bean fields
    * @return a copy of the bean
    */
-  static <BEAN extends IBean<BEAN>> BEAN createCopy(BEAN pOriginal, ECopyMode pMode, Function<BEAN, BEAN> pCustomConstructorCall,
-                                                    CustomFieldCopy<?>... pCustomCopies)
+  static <BEAN extends IBean<BEAN>> BEAN doCreateCopy(BEAN pOriginal, ECopyMode pMode, Function<BEAN, BEAN> pCustomConstructorCall,
+                                                      CustomFieldCopy<?>... pCustomCopies)
   {
     return _setValues(pOriginal, pCustomConstructorCall.apply(pOriginal), pMode, pCustomCopies);
   }

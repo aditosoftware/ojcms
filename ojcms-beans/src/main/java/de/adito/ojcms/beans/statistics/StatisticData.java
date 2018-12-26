@@ -3,7 +3,7 @@ package de.adito.ojcms.beans.statistics;
 import de.adito.ojcms.beans.reactive.events.NewStatisticEntry;
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -46,7 +46,7 @@ public class StatisticData<ENTRY> implements IStatisticData<ENTRY>
   }
 
   @Override
-  public void addEntry(@NotNull ENTRY pEntry)
+  public void addEntry(ENTRY pEntry)
   {
     long timeStamp = System.currentTimeMillis();
     statistics.put(timeStamp, pEntry);

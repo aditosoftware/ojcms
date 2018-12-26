@@ -2,7 +2,6 @@ package de.adito.ojcms.beans.statistics;
 
 import de.adito.ojcms.beans.reactive.events.NewStatisticEntry;
 import io.reactivex.Observable;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.Function;
@@ -79,7 +78,7 @@ public interface IStatisticData<ENTRY>
    *
    * @param pEntry the new entry
    */
-  void addEntry(@NotNull ENTRY pEntry);
+  void addEntry(ENTRY pEntry);
 
   /**
    * Deletes this statistic data.

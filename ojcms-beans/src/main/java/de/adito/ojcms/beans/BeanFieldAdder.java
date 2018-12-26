@@ -1,9 +1,10 @@
 package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.fields.IField;
+import de.adito.ojcms.utils.StringUtility;
 
 import java.lang.annotation.Annotation;
-import java.util.Collection;
+import java.util.*;
 import java.util.function.*;
 
 /**
@@ -33,11 +34,11 @@ public final class BeanFieldAdder<FIELD extends IField>
   BeanFieldAdder(BiConsumer<FIELD, Integer> pAddFunction, Supplier<Integer> pFieldCountSupplier, Class<FIELD> pBeanFieldType,
                  String pFieldName, Collection<Annotation> pAnnotations)
   {
-    addFunction = pAddFunction;
-    fieldCountSupplier = pFieldCountSupplier;
-    beanFieldType = pBeanFieldType;
-    fieldName = pFieldName;
-    annotations = pAnnotations;
+    addFunction = Objects.requireNonNull(pAddFunction);
+    fieldCountSupplier = Objects.requireNonNull(pFieldCountSupplier);
+    beanFieldType = Objects.requireNonNull(pBeanFieldType);
+    fieldName = StringUtility.requireNotEmpty(pFieldName, "field name");
+    annotations = Objects.requireNonNull(pAnnotations);
   }
 
   /**

@@ -3,6 +3,8 @@ package de.adito.ojcms.beans;
 import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
 import de.adito.ojcms.beans.datasource.IDataSource;
 
+import static de.adito.ojcms.beans.BeanInternalEvents.requestEncapsulatedData;
+
 /**
  * An extension for a type that holds {@link IEncapsulatedData}.
  * The data source of an encapsulated data core might be exchanged via this interface as well.
@@ -31,6 +33,6 @@ interface IEncapsulatedDataHolder<ELEMENT, DATASOURCE extends IDataSource, ENCAP
    */
   default void setEncapsulatedDataSource(DATASOURCE pDataSource)
   {
-    getEncapsulatedData().setDataSource(pDataSource);
+    requestEncapsulatedData(this).setDataSource(pDataSource);
   }
 }

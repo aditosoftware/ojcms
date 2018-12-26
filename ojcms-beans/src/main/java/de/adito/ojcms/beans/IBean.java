@@ -10,12 +10,17 @@ import de.adito.ojcms.beans.fields.util.FieldValueTuple;
 import de.adito.ojcms.beans.references.*;
 import de.adito.ojcms.beans.statistics.IStatisticData;
 import de.adito.ojcms.beans.util.*;
+import de.adito.ojcms.utils.StringUtility;
 import de.adito.ojcms.utils.readonly.*;
 import org.jetbrains.annotations.*;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.*;
+
+import static de.adito.ojcms.beans.BeanCopies.doCreateCopy;
+import static de.adito.ojcms.beans.BeanInternalEvents.*;
+import static java.util.Objects.requireNonNull;
 
 /**
  * The functional wrapper interface of a bean.
@@ -48,12 +53,12 @@ public interface IBean<BEAN extends IBean<BEAN>>
    * @param <VALUE> the field's data type
    * @return the value for the bean field
    * @throws BeanFieldDoesNotExistException if the bean field does not exist at the bean
-   * @throws BeanIllegalAccessException     if access the bean field's data is not allowed
+   * @throws BeanIllegalAccessException     if access to the bean field's data is not allowed
    * @throws NullValueForbiddenException    if a null value would have been returned, but the field is marked as {@link NeverNull}
    */
   default <VALUE> VALUE getValue(IField<VALUE> pField)
   {
-    return BeanEvents.requestValue(this, pField, false);
+    return requestValue(this, pField, EAccessRule.PRIVATE_ACCESS_FORBIDDEN);
   }
 
   /**
@@ -65,12 +70,12 @@ public interface IBean<BEAN extends IBean<BEAN>>
    * @param <VALUE> the field's data type
    * @return the value for the bean field or the field's default value if null
    * @throws BeanFieldDoesNotExistException if the bean field does not exist at the bean
-   * @throws BeanIllegalAccessException     if access the bean field's data is not allowed
+   * @throws BeanIllegalAccessException     if access to the bean field's data is not allowed
    * @throws NullValueForbiddenException    if a null value would have been returned, but the field is marked as {@link NeverNull}
    */
   default <VALUE> VALUE getValueOrDefault(IField<VALUE> pField)
   {
-    final VALUE value = getValue(Objects.requireNonNull(pField));
+    final VALUE value = getValue(pField);
     return Objects.equals(value, pField.getInitialValue()) ? pField.getDefaultValue() : value;
   }
 
@@ -85,9 +90,10 @@ public interface IBean<BEAN extends IBean<BEAN>>
    * @param <VALUE>      the field's data type
    * @param <TARGET>     the generic type to convert to
    * @return the converted value for the bean field
-   * @throws BeanFieldDoesNotExistException if the bean field does not exist at the bean
-   * @throws BeanIllegalAccessException     if access the bean field's data is not allowed
-   * @throws NullValueForbiddenException    if a null value would have been returned, but the field is marked as {@link NeverNull}
+   * @throws BeanFieldDoesNotExistException      if the bean field does not exist at the bean
+   * @throws BeanIllegalAccessException          if access to the bean field's data is not allowed
+   * @throws NullValueForbiddenException         if a null value would have been returned, but the field is marked as {@link NeverNull}
+   * @throws ValueConversionUnsupportedException if the conversion is not possible
    */
   default <VALUE, TARGET> TARGET getValueConverted(IField<VALUE> pField, Class<TARGET> pConvertType)
   {
@@ -108,17 +114,14 @@ public interface IBean<BEAN extends IBean<BEAN>>
    * @param pField  the bean field for which the value should be set
    * @param pValue  the new value
    * @param <VALUE> the field's data type
+   * @throws BeanFieldDoesNotExistException if the bean field does not exist at the bean
+   * @throws BeanIllegalAccessException     if access to the bean field's data is not allowed
+   * @throws NullValueForbiddenException    if a null value would have been returned, but the field is marked as {@link NeverNull}
    */
   @WriteOperation
   default <VALUE> void setValue(IField<VALUE> pField, VALUE pValue)
   {
-    assert getEncapsulatedData() != null;
-    if (!getEncapsulatedData().containsField(Objects.requireNonNull(pField)))
-      throw new BeanFieldDoesNotExistException(this, pField);
-    if (pField.isPrivate())
-      throw new BeanIllegalAccessException(this, pField);
-    //noinspection unchecked
-    BeanEvents.setValueAndPropagate((BEAN) this, pField, pValue);
+    setValueAndPropagate(toRuntimeBean(this), pField, pValue, EAccessRule.PRIVATE_ACCESS_FORBIDDEN);
   }
 
   /**
@@ -133,6 +136,10 @@ public interface IBean<BEAN extends IBean<BEAN>>
    * @param pValueToConvert the new value that possibly has to be transformed beforehand
    * @param <VALUE>         he field's data type
    * @param <SOURCE>        the value's type before its conversion
+   * @throws BeanFieldDoesNotExistException      if the bean field does not exist at the bean
+   * @throws BeanIllegalAccessException          if access to the bean field's data is not allowed
+   * @throws NullValueForbiddenException         if a null value would have been returned, but the field is marked as {@link NeverNull}
+   * @throws ValueConversionUnsupportedException if the conversion is not possible
    */
   @WriteOperation
   @SuppressWarnings("unchecked")
@@ -142,7 +149,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
     if (pValueToConvert != null)
     {
       final Class<SOURCE> sourceType = (Class<SOURCE>) pValueToConvert.getClass();
-      convertedValue = pField.getDataType().isAssignableFrom(sourceType) ? (VALUE) pValueToConvert :
+      convertedValue = requireNonNull(pField).getDataType().isAssignableFrom(sourceType) ? (VALUE) pValueToConvert :
           pField.getToConverter(sourceType)
               .orElseThrow(() -> new ValueConversionUnsupportedException(pField, sourceType))
               .apply(pValueToConvert);
@@ -151,7 +158,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
   }
 
   /**
-   * Clears the values of all public field's of this bean back to the initial values of every field.
+   * Clears the values of all public field's of this bean back to the initial value of every field.
    */
   @WriteOperation
   default void clear()
@@ -169,8 +176,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
    */
   default IBeanFieldActivePredicate<BEAN> getFieldActivePredicate()
   {
-    //noinspection unchecked
-    return () -> (BEAN) this;
+    return () -> toRuntimeBean(this);
   }
 
   /**
@@ -179,13 +185,13 @@ public interface IBean<BEAN extends IBean<BEAN>>
    *
    * @param pField the bean field to check
    * @return <tt>true</tt> if the field is present
+   * @throws BeanIllegalAccessException if access to the bean field's data is not allowed
    */
   default boolean hasField(IField<?> pField)
   {
-    if (pField.isPrivate())
+    if (requireNonNull(pField).isPrivate())
       throw new BeanIllegalAccessException(this, pField);
-    assert getEncapsulatedData() != null;
-    return getEncapsulatedData().containsField(pField);
+    return requestEncapsulatedData(this).containsField(pField);
   }
 
   /**
@@ -196,13 +202,12 @@ public interface IBean<BEAN extends IBean<BEAN>>
    */
   default int getFieldCount()
   {
-    assert getEncapsulatedData() != null;
     return (int) streamFields().count();
   }
 
   /**
    * The index of a bean field.
-   * Generally the index depends on the order of the defined fields.
+   * The index depends on the order of the defined fields generally.
    * Ignores private fields.
    *
    * @param pField  the bean field
@@ -211,7 +216,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
    */
   default <VALUE> int getFieldIndex(IField<VALUE> pField)
   {
-    if (pField.isPrivate())
+    if (requireNonNull(pField).isPrivate())
       throw new BeanIllegalAccessException(this, pField);
     return streamFields()
         .collect(Collectors.toList())
@@ -224,9 +229,11 @@ public interface IBean<BEAN extends IBean<BEAN>>
    *
    * @param pFieldName the name of the field
    * @return the bean field with the name to search for
+   * @throws BeanFieldDoesNotExistException if the bean field could not be found
    */
   default IField<?> getFieldByName(String pFieldName)
   {
+    StringUtility.requireNotEmpty(pFieldName, "field name");
     return streamFields()
         .filter(pField -> pField.getName().equals(pFieldName))
         .findAny()
@@ -249,9 +256,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
    */
   default BEAN createCopy(ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
   {
-    assert getEncapsulatedData() != null;
-    //noinspection unchecked
-    return BeanCopies.createCopy((BEAN) this, pMode, pCustomFieldCopies);
+    return doCreateCopy(toRuntimeBean(this), pMode, pCustomFieldCopies);
   }
 
   /**
@@ -267,9 +272,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
    */
   default BEAN createCopy(ECopyMode pMode, Function<BEAN, BEAN> pCustomConstructorCall, CustomFieldCopy<?>... pCustomFieldCopies)
   {
-    assert getEncapsulatedData() != null;
-    //noinspection unchecked
-    return BeanCopies.createCopy((BEAN) this, pMode, pCustomConstructorCall, pCustomFieldCopies);
+    return doCreateCopy(toRuntimeBean(this), pMode, pCustomConstructorCall, pCustomFieldCopies);
   }
 
   /**
@@ -281,11 +284,9 @@ public interface IBean<BEAN extends IBean<BEAN>>
    */
   default <VALUE> Optional<IStatisticData<VALUE>> getStatisticData(IField<VALUE> pField)
   {
-    if (!hasField(Objects.requireNonNull(pField)))
-      throw new BeanFieldDoesNotExistException(this, pField);
-    assert getEncapsulatedData() != null;
+    final IStatisticData<?> statisticData = requestEncapsulatedDataForField(this, pField).getStatisticData().get(pField);
     //noinspection unchecked
-    return Optional.ofNullable(getEncapsulatedData().getStatisticData().get(pField))
+    return Optional.ofNullable(statisticData)
         .map(pData -> (IStatisticData<VALUE>) pData);
   }
 
@@ -326,7 +327,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
   default IBean<?> resolveDeepBean(List<IField<?>> pChain)
   {
     IBean<?> current = this;
-    for (IField<?> field : pChain)
+    for (IField<?> field : requireNonNull(pChain))
     {
       if (!current.hasField(field))
         throw new InvalidChainException(current, field);
@@ -373,14 +374,13 @@ public interface IBean<BEAN extends IBean<BEAN>>
   }
 
   /**
-   * This bean as read only version.
+   * This bean as a read only version.
    * This will be a new instance, but the data core stays the same.
    *
-   * @return this bean as read only version
+   * @return this bean as a read only version
    */
   default IBean<BEAN> asReadOnly()
   {
-    assert getEncapsulatedData() != null;
     //noinspection unchecked
     return ReadOnlyInvocationHandler.createReadOnlyInstance(IBean.class, this);
   }
@@ -393,8 +393,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
    */
   default Stream<IField<?>> streamFields()
   {
-    assert getEncapsulatedData() != null;
-    return getEncapsulatedData().streamFields()
+    return requestEncapsulatedData(this).streamFields()
         .filter(pField -> !pField.isPrivate())
         .filter(pField -> getFieldActivePredicate().isOptionalActive(pField));
   }
@@ -407,8 +406,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
    */
   default Stream<FieldValueTuple<?>> stream()
   {
-    assert getEncapsulatedData() != null;
-    return getEncapsulatedData().stream()
+    return requestEncapsulatedData(this).stream()
         .filter(pFieldTuple -> !pFieldTuple.getField().isPrivate())
         .filter(pFieldTuple -> getFieldActivePredicate().isOptionalActive(pFieldTuple.getField()));
   }
@@ -427,7 +425,6 @@ public interface IBean<BEAN extends IBean<BEAN>>
   @Override
   default Set<BeanReference> getDirectReferences()
   {
-    assert getEncapsulatedData() != null;
-    return getEncapsulatedData().getDirectReferences();
+    return requestEncapsulatedData(this).getDirectReferences();
   }
 }

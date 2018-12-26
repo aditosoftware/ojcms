@@ -10,6 +10,8 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static de.adito.ojcms.beans.BeanInternalEvents.*;
+
 /**
  * A modifiable bean with dynamical fields.
  * Allows the extension and removal of bean fields.
@@ -31,8 +33,7 @@ public interface IModifiableBean<BEAN extends IModifiableBean<BEAN>> extends IBe
    */
   default <FIELD extends IField> BeanFieldAdder<FIELD> fieldAdder(Class<FIELD> pFieldType, String pName, Collection<Annotation> pAnnotations)
   {
-    assert getEncapsulatedData() != null;
-    final IEncapsulatedBeanData encapsulated = getEncapsulatedData();
+    final IEncapsulatedBeanData encapsulated = requestEncapsulatedData(this);
     if (encapsulated.streamFields().anyMatch(pField -> pField.getName().equals(pName)))
       throw new BeanFieldDuplicateException(pName);
     return new BeanFieldAdder<>(this::addFieldAtIndex, encapsulated::getFieldCount, pFieldType, pName, pAnnotations);
@@ -46,7 +47,7 @@ public interface IModifiableBean<BEAN extends IModifiableBean<BEAN>> extends IBe
    */
   default <VALUE> void addField(IField<VALUE> pField)
   {
-    addFieldAtIndex(pField, getEncapsulatedData().getFieldCount());
+    addFieldAtIndex(pField, requestEncapsulatedData(this).getFieldCount());
   }
 
   /**
@@ -58,14 +59,13 @@ public interface IModifiableBean<BEAN extends IModifiableBean<BEAN>> extends IBe
    */
   default <VALUE> void addFieldAtIndex(IField<VALUE> pField, int pIndex)
   {
-    final IEncapsulatedBeanData encapsulated = getEncapsulatedData();
-    assert encapsulated != null;
+    final IEncapsulatedBeanData encapsulated = requestEncapsulatedData(this);
     if (encapsulated.containsField(pField))
       throw new BeanFieldDuplicateException(pField.getName());
     encapsulated.addField(pField, pIndex);
     if (getFieldActivePredicate().isOptionalActive(pField))
       //noinspection unchecked
-      BeanEvents.propagate(new BeanFieldAddition<>((BEAN) this, pField));
+      propagateChange(new BeanFieldAddition<>((BEAN) this, pField));
   }
 
   /**
@@ -77,12 +77,11 @@ public interface IModifiableBean<BEAN extends IModifiableBean<BEAN>> extends IBe
    */
   default <VALUE> VALUE removeField(IField<VALUE> pField)
   {
-    final IEncapsulatedBeanData encapsulated = getEncapsulatedData();
-    assert encapsulated != null;
+    final IEncapsulatedBeanData encapsulated = requestEncapsulatedDataForField(this, pField);
     final VALUE oldValue = encapsulated.getValue(pField);
     encapsulated.removeField(pField);
     //noinspection unchecked
-    BeanEvents.propagate(new BeanFieldRemoval<>((BEAN) this, pField, oldValue));
+    propagateChange(new BeanFieldRemoval<>((BEAN) this, pField, oldValue));
     return oldValue;
   }
 

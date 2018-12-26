@@ -19,7 +19,8 @@ public class EncapsulatedWeakReferencesTest
   @BeforeEach
   public void init()
   {
-    referable = (someBean = new SomeBean()).getEncapsulatedData();
+    someBean = new SomeBean();
+    referable = BeanInternalEvents.requestEncapsulatedData(someBean);
   }
 
   @Test

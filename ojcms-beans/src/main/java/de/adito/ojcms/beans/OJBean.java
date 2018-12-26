@@ -2,7 +2,7 @@ package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
 import de.adito.ojcms.beans.datasource.*;
-import de.adito.ojcms.beans.exceptions.field.*;
+import de.adito.ojcms.beans.exceptions.field.BeanFieldDuplicateException;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.fields.util.FieldValueTuple;
 import de.adito.ojcms.beans.util.BeanReflector;
@@ -10,6 +10,8 @@ import de.adito.ojcms.beans.util.BeanReflector;
 import java.util.*;
 import java.util.logging.*;
 import java.util.stream.Collectors;
+
+import static de.adito.ojcms.beans.BeanInternalEvents.*;
 
 /**
  * The default implementing abstract class of the bean interface.
@@ -95,7 +97,7 @@ public abstract class OJBean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
   protected <VALUE> VALUE getPrivateValue(IField<VALUE> pField)
   {
     _checkNotPrivateAndWarn(pField);
-    return BeanEvents.requestValue(this, pField, true);
+    return requestValue(this, pField, EAccessRule.PRIVATE_ACCESS_GRANTED);
   }
 
   /**
@@ -107,12 +109,8 @@ public abstract class OJBean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
    */
   protected <VALUE> void setPrivateValue(IField<VALUE> pField, VALUE pValue)
   {
-    assert getEncapsulatedData() != null;
-    if (!getEncapsulatedData().containsField(pField))
-      throw new BeanFieldDoesNotExistException(this, pField);
     _checkNotPrivateAndWarn(pField);
-    //noinspection unchecked
-    BeanEvents.setValueAndPropagate((BEAN) this, pField, pValue);
+    setValueAndPropagate(toRuntimeBean(this), pField, pValue, EAccessRule.PRIVATE_ACCESS_GRANTED);
   }
 
   /**

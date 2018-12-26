@@ -2,10 +2,13 @@ package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
 import de.adito.ojcms.beans.exceptions.OJInternalException;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import static de.adito.ojcms.beans.BeanInternalEvents.requestEncapsulatedData;
 
 /**
  * Variants to resolve {@link IReferable} instances from a bean value.
@@ -97,11 +100,11 @@ public enum EReferableResolver
    * @param pValue the value to retrieve the data core from
    * @return the encapsulated data core
    */
-  private static IEncapsulatedData<?, ?> _toEncapsulated(Object pValue)
+  private static IEncapsulatedData<?, ?> _toEncapsulated(@NotNull Object pValue)
   {
     try
     {
-      return ((IEncapsulatedDataHolder<?, ?, ?>) pValue).getEncapsulatedData();
+      return requestEncapsulatedData((IEncapsulatedDataHolder<?, ?, ?>) Objects.requireNonNull(pValue));
     }
     catch (ClassCastException pE)
     {

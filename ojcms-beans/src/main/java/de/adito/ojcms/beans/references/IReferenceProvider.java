@@ -29,7 +29,7 @@ public interface IReferenceProvider
    */
   default Set<BeanReference> getAllReferences()
   {
-    Set<BeanReference> allNodes = getDirectReferences();
+    final Set<BeanReference> allNodes = getDirectReferences();
     Set<BeanReference> newNodes = allNodes;
     do
     {

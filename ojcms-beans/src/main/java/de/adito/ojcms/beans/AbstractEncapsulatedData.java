@@ -15,6 +15,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import static de.adito.ojcms.beans.BeanInternalEvents.requestEncapsulatedDataForField;
+
 /**
  * Abstract implementation of an encapsulated data core.
  * Handles weak references and change events.
@@ -58,13 +60,14 @@ abstract class AbstractEncapsulatedData<ELEMENT, DATASOURCE extends IDataSource>
   @Override
   public void addWeakReference(IBean<?> pBean, IField<?> pField)
   {
-    weakReferencesMapping.computeIfAbsent(pBean.getEncapsulatedData(), pKey -> new HashSet<>()).add(new BeanReference(pBean, pField));
+    final IEncapsulatedBeanData encapsulatedData = requestEncapsulatedDataForField(pBean, pField);
+    weakReferencesMapping.computeIfAbsent(encapsulatedData, pKey -> new HashSet<>()).add(new BeanReference(pBean, pField));
   }
 
   @Override
   public void removeReference(IBean<?> pBean, IField<?> pField)
   {
-    final IEncapsulatedBeanData encapsulatedData = pBean.getEncapsulatedData();
+    final IEncapsulatedBeanData encapsulatedData = requestEncapsulatedDataForField(pBean, pField);
     boolean removed = false;
     if (weakReferencesMapping.containsKey(encapsulatedData))
     {

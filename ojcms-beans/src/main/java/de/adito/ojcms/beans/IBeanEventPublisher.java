@@ -1,10 +1,14 @@
 package de.adito.ojcms.beans;
 
-import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
+import de.adito.ojcms.beans.annotations.internal.EncapsulatedData;
 import de.adito.ojcms.beans.datasource.IDataSource;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.reactive.events.*;
 import io.reactivex.Observable;
+
+import java.util.Objects;
+
+import static de.adito.ojcms.beans.BeanInternalEvents.requestEncapsulatedData;
 
 /**
  * Provides {@link Observable} instances for bean events.
@@ -15,7 +19,7 @@ import io.reactivex.Observable;
  * @param <ENCAPSULATED> the type of the encapsulated data core held by the type implementing this interface
  * @author Simon Danner, 07.12.2018
  */
-@RequiresEncapsulatedAccess
+@EncapsulatedData
 interface IBeanEventPublisher<ELEMENT, BEAN extends IBean<BEAN>, DATASOURCE extends IDataSource,
     ENCAPSULATED extends IEncapsulatedData<ELEMENT, DATASOURCE>> extends IEncapsulatedDataHolder<ELEMENT, DATASOURCE, ENCAPSULATED>
 {
@@ -26,9 +30,8 @@ interface IBeanEventPublisher<ELEMENT, BEAN extends IBean<BEAN>, DATASOURCE exte
    */
   default Observable<BeanValueChange<BEAN, ?>> observeValues()
   {
-    assert getEncapsulatedData() != null;
     //noinspection unchecked
-    return getEncapsulatedData().observeByType(BeanValueChange.class)
+    return requestEncapsulatedData(this).observeByType(BeanValueChange.class)
         .map(pChange -> (BeanValueChange<BEAN, ?>) pChange);
   }
 
@@ -39,6 +42,7 @@ interface IBeanEventPublisher<ELEMENT, BEAN extends IBean<BEAN>, DATASOURCE exte
    */
   default <VALUE> Observable<BeanValueChange<BEAN, VALUE>> observeFieldValue(IField<VALUE> pField)
   {
+    Objects.requireNonNull(pField);
     //noinspection unchecked
     return observeValues()
         .filter(pChange -> pChange.getField() == pField)
@@ -52,9 +56,8 @@ interface IBeanEventPublisher<ELEMENT, BEAN extends IBean<BEAN>, DATASOURCE exte
    */
   default Observable<BeanFieldAddition<BEAN, ?>> observeFieldAdditions()
   {
-    assert getEncapsulatedData() != null;
     //noinspection unchecked
-    return getEncapsulatedData().observeByType(BeanFieldAddition.class)
+    return requestEncapsulatedData(this).observeByType(BeanFieldAddition.class)
         .map(pChange -> (BeanFieldAddition<BEAN, ?>) pChange);
   }
 
@@ -65,9 +68,8 @@ interface IBeanEventPublisher<ELEMENT, BEAN extends IBean<BEAN>, DATASOURCE exte
    */
   default Observable<BeanFieldRemoval<BEAN, ?>> observeFieldRemovals()
   {
-    assert getEncapsulatedData() != null;
     //noinspection unchecked
-    return getEncapsulatedData().observeByType(BeanFieldRemoval.class)
+    return requestEncapsulatedData(this).observeByType(BeanFieldRemoval.class)
         .map(pChange -> (BeanFieldRemoval<BEAN, ?>) pChange);
   }
 }

@@ -3,6 +3,8 @@ package de.adito.ojcms.beans;
 import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
 import de.adito.ojcms.beans.reactive.AbstractEvent;
 
+import static de.adito.ojcms.beans.BeanInternalEvents.requestEncapsulatedData;
+
 /**
  * An event based on a source that holds its data in an {@link IEncapsulatedData} data core.
  * The triggered event can be published trough the data core because it is an {@link IEventReceiver}.
@@ -26,6 +28,6 @@ public abstract class AbstractChangeEvent<SOURCE extends IEncapsulatedDataHolder
   void publishEventToSource()
   {
     final Class<EVENT> eventType = (Class<EVENT>) getClass();
-    getSource().getEncapsulatedData().getEventObserverFromType(eventType).onNext((EVENT) this);
+    requestEncapsulatedData(getSource()).getEventObserverFromType(eventType).onNext((EVENT) this);
   }
 }

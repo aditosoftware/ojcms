@@ -15,6 +15,9 @@ import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
 
+import static de.adito.ojcms.beans.BeanInternalEvents.*;
+import static java.util.Objects.requireNonNull;
+
 /**
  * The functional wrapper interface of a bean container.
  * A bean container is separated in this wrapper and an encapsulated data core.
@@ -184,8 +187,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    */
   default Class<BEAN> getBeanType()
   {
-    assert getEncapsulatedData() != null;
-    return getEncapsulatedData().getBeanType();
+    return requestEncapsulatedData(this).getBeanType();
   }
 
   /**
@@ -209,9 +211,8 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
   default void addBean(BEAN pBean, int pIndex)
   {
     IndexChecker.check(() -> size() + 1, pIndex);
-    assert getEncapsulatedData() != null;
-    getEncapsulatedData().addBean(Objects.requireNonNull(pBean), pIndex);
-    BeanEvents.beanAdded(this, pBean);
+    requestEncapsulatedData(this).addBean(requireNonNull(pBean), pIndex);
+    beanAdded(this, pBean);
   }
 
   /**
@@ -244,7 +245,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
   @WriteOperation
   default void merge(IBeanContainer<? extends BEAN> pOtherContainer)
   {
-    pOtherContainer.forEachBean(this::addBean);
+    requireNonNull(pOtherContainer).forEachBean(this::addBean);
   }
 
   /**
@@ -258,11 +259,10 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
   @WriteOperation
   default BEAN replaceBean(BEAN pBean, int pIndex)
   {
-    assert getEncapsulatedData() != null;
-    final BEAN removed = getEncapsulatedData().replaceBean(Objects.requireNonNull(pBean), IndexChecker.check(this::size, pIndex));
+    final BEAN removed = requestEncapsulatedData(this).replaceBean(requireNonNull(pBean), IndexChecker.check(this::size, pIndex));
     if (removed != null)
-      BeanEvents.beanRemoved(this, removed);
-    BeanEvents.beanAdded(this, pBean);
+      beanRemoved(this, removed);
+    beanAdded(this, pBean);
     return removed;
   }
 
@@ -275,8 +275,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
   @WriteOperation
   default boolean removeBean(BEAN pBean)
   {
-    Objects.requireNonNull(pBean);
-    return BeanEvents.removeFromContainer(this, pEncapsulated -> pEncapsulated.removeBean(pBean) ? pBean : null).isPresent();
+    return removeFromContainer(this, pEncapsulated -> pEncapsulated.removeBean(requireNonNull(pBean)) ? pBean : null).isPresent();
   }
 
   /**
@@ -290,7 +289,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
   default BEAN removeBean(int pIndex)
   {
     IndexChecker.check(this::size, pIndex);
-    return BeanEvents.removeFromContainer(this, pEncapsulated -> pEncapsulated.removeBean(pIndex))
+    return removeFromContainer(this, pEncapsulated -> pEncapsulated.removeBean(pIndex))
         .orElseThrow(() -> new OJInternalException("Unable to remove bean at index" + pIndex));
   }
 
@@ -303,7 +302,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
   @WriteOperation
   default boolean removeBeanIf(Predicate<BEAN> pPredicate)
   {
-    return BeanEvents.removeBeanIf(this, pPredicate, false);
+    return doRemoveBeanIf(this, pPredicate, false);
   }
 
   /**
@@ -316,7 +315,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
   @WriteOperation
   default boolean removeBeanIfAndBreak(Predicate<BEAN> pPredicate)
   {
-    return BeanEvents.removeBeanIf(this, pPredicate, true);
+    return doRemoveBeanIf(this, pPredicate, true);
   }
 
   /**
@@ -327,8 +326,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    */
   default BEAN getBean(int pIndex)
   {
-    assert getEncapsulatedData() != null;
-    return getEncapsulatedData().getBean(IndexChecker.check(this::size, pIndex));
+    return requestEncapsulatedData(this).getBean(IndexChecker.check(this::size, pIndex));
   }
 
   /**
@@ -340,8 +338,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    */
   default int indexOf(BEAN pBean)
   {
-    assert getEncapsulatedData() != null;
-    return getEncapsulatedData().indexOfBean(Objects.requireNonNull(pBean));
+    return requestEncapsulatedData(this).indexOfBean(requireNonNull(pBean));
   }
 
   /**
@@ -351,8 +348,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    */
   default int size()
   {
-    assert getEncapsulatedData() != null;
-    return getEncapsulatedData().size();
+    return requestEncapsulatedData(this).size();
   }
 
   /**
@@ -371,7 +367,6 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
   @WriteOperation
   default void clear()
   {
-    assert getEncapsulatedData() != null;
     removeBeanIf(pBean -> true); //Do not just simply clear the data core, else events won't be propagated
   }
 
@@ -383,8 +378,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    */
   default boolean contains(BEAN pBean)
   {
-    assert getEncapsulatedData() != null;
-    return getEncapsulatedData().indexOfBean(Objects.requireNonNull(pBean)) >= 0;
+    return indexOf(pBean) >= 0;
   }
 
   /**
@@ -395,8 +389,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
   @WriteOperation
   default void sort(Comparator<BEAN> pComparator)
   {
-    assert getEncapsulatedData() != null;
-    getEncapsulatedData().sort(Objects.requireNonNull(pComparator));
+    requestEncapsulatedData(this).sort(pComparator);
   }
 
   /**
@@ -409,8 +402,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
   @WriteOperation
   default IBeanContainer<BEAN> withLimit(int pMaxCount, boolean pEvicting)
   {
-    assert getEncapsulatedData() != null;
-    getEncapsulatedData().setLimit(pMaxCount, pEvicting);
+    requestEncapsulatedData(this).setLimit(pMaxCount, pEvicting);
     return this;
   }
 
@@ -421,9 +413,8 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    */
   default Observable<BeanContainerAddition<BEAN>> observeAdditions()
   {
-    assert getEncapsulatedData() != null;
     //noinspection unchecked
-    return getEncapsulatedData().observeByType(BeanContainerAddition.class)
+    return requestEncapsulatedData(this).observeByType(BeanContainerAddition.class)
         .map(pChange -> (BeanContainerAddition<BEAN>) pChange);
   }
 
@@ -434,9 +425,8 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    */
   default Observable<BeanContainerRemoval<BEAN>> observeRemovals()
   {
-    assert getEncapsulatedData() != null;
     //noinspection unchecked
-    return getEncapsulatedData().observeByType(BeanContainerRemoval.class)
+    return requestEncapsulatedData(this).observeByType(BeanContainerRemoval.class)
         .map(pChange -> (BeanContainerRemoval<BEAN>) pChange);
   }
 
@@ -449,8 +439,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    */
   default Optional<IStatisticData<Integer>> getStatisticData()
   {
-    assert getEncapsulatedData() != null;
-    return getEncapsulatedData().getStatisticData();
+    return requestEncapsulatedData(this).getStatisticData();
   }
 
   /**
@@ -464,7 +453,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    */
   default <VALUE> Set<VALUE> getDistinctValuesFromField(IField<VALUE> pField)
   {
-    Objects.requireNonNull(pField);
+    requireNonNull(pField);
     return getDistinctValues(pBean -> pBean.getValue(pField));
   }
 
@@ -504,7 +493,6 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    */
   default IBeanContainer<BEAN> asReadOnly()
   {
-    assert getEncapsulatedData() != null;
     //noinspection unchecked
     return ReadOnlyInvocationHandler.createReadOnlyInstance(IBeanContainer.class, this);
   }
@@ -516,8 +504,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    */
   default Stream<BEAN> stream()
   {
-    assert getEncapsulatedData() != null;
-    return getEncapsulatedData().stream();
+    return requestEncapsulatedData(this).stream();
   }
 
   /**
@@ -527,8 +514,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    */
   default Stream<BEAN> parallelStream()
   {
-    assert getEncapsulatedData() != null;
-    return getEncapsulatedData().parallelStream();
+    return requestEncapsulatedData(this).parallelStream();
   }
 
   /**
@@ -555,8 +541,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
   @Override
   default Set<BeanReference> getDirectReferences()
   {
-    assert getEncapsulatedData() != null;
-    return getEncapsulatedData().getDirectReferences();
+    return requestEncapsulatedData(this).getDirectReferences();
   }
 
   /**
