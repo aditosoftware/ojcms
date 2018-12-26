@@ -3,7 +3,7 @@ package de.adito.ojcms.utils;
 import org.junit.jupiter.api.*;
 
 import java.util.*;
-import java.util.function.Consumer;
+import java.util.function.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class IndexBasedIteratorTest
 {
   private List<Integer> list;
-  private final Consumer<Integer> remover = pIndex -> list.remove((int) pIndex);
+  private final IntConsumer remover = pIndex -> list.remove((int) pIndex);
 
   @BeforeEach
   public void initList()
