@@ -96,6 +96,17 @@ public final class OJSQLBuilderForTable extends AbstractSQLBuilder
     return super.getColumnCount(tableName);
   }
 
+  /**
+   * Determines, if a column is present.
+   *
+   * @param pColumnName the name of the column to check
+   * @return <tt>true</tt> if the column is present
+   */
+  public boolean hasColumn(String pColumnName)
+  {
+    return super.hasColumn(tableName, pColumnName);
+  }
+
   @Override
   protected <RESULT, STATEMENT extends AbstractBaseStatement<RESULT, STATEMENT>> STATEMENT configureStatementBeforeExecution(STATEMENT pStatement)
   {

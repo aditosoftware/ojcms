@@ -3,6 +3,7 @@ package de.adito.ojcms.sqlbuilder.statements;
 import de.adito.ojcms.sqlbuilder.*;
 import de.adito.ojcms.sqlbuilder.definition.*;
 import de.adito.ojcms.sqlbuilder.result.SingleColumnResult;
+import de.adito.ojcms.sqlbuilder.util.OJDatabaseException;
 import de.adito.ojcms.utils.OptionalNullable;
 
 import java.sql.ResultSet;
@@ -15,7 +16,7 @@ import java.sql.ResultSet;
  */
 public class SingleSelect<VALUE> extends AbstractSelect<SingleSelect<VALUE>>
 {
-  private final IColumnIdentification<VALUE> column;
+  private IColumnIdentification<VALUE> column;
 
   /**
    * Creates a new select statement based on single column.
@@ -25,13 +26,13 @@ public class SingleSelect<VALUE> extends AbstractSelect<SingleSelect<VALUE>>
    * @param pDatabaseType      the database type used for this statement
    * @param pSerializer        the value serializer
    * @param pIdColumnName      the name of the id column
-   * @param pColumn            the single column to select
    */
   public SingleSelect(IStatementExecutor<ResultSet> pStatementExecutor, AbstractSQLBuilder pBuilder, EDatabaseType pDatabaseType,
-                      IValueSerializer pSerializer, String pIdColumnName, IColumnIdentification<VALUE> pColumn)
+                      IValueSerializer pSerializer, String pIdColumnName, IColumnIdentification<VALUE> pColumnToSelect)
   {
-    super(pStatementExecutor, pBuilder, pDatabaseType, pSerializer, pIdColumnName, pColumn);
-    column = pColumn;
+    super(pStatementExecutor, pBuilder, pDatabaseType, pSerializer, pIdColumnName);
+    column = pColumnToSelect;
+    addColumns(column);
   }
 
   /**
@@ -53,6 +54,8 @@ public class SingleSelect<VALUE> extends AbstractSelect<SingleSelect<VALUE>>
    */
   public SingleColumnResult<VALUE> fullResult()
   {
+    if (column == null)
+      throw new OJDatabaseException("A column must be selected to use a single select statement!");
     return new SingleColumnResult<>(column, doQuery());
   }
 }

@@ -6,12 +6,11 @@ import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.util.BeanReflector;
 import de.adito.ojcms.persistence.*;
 import de.adito.ojcms.persistence.datastores.sql.definition.*;
-import de.adito.ojcms.persistence.datastores.sql.util.*;
+import de.adito.ojcms.persistence.datastores.sql.util.BeanSQLSerializer;
 import de.adito.ojcms.sqlbuilder.*;
 import de.adito.ojcms.sqlbuilder.definition.ENumericOperation;
 import de.adito.ojcms.sqlbuilder.definition.condition.IWhereCondition;
-import de.adito.ojcms.sqlbuilder.result.ResultRow;
-import de.adito.ojcms.sqlbuilder.statements.Select;
+import de.adito.ojcms.sqlbuilder.statements.SingleSelect;
 import de.adito.ojcms.sqlbuilder.util.*;
 import de.adito.ojcms.utils.*;
 import org.jetbrains.annotations.NotNull;
@@ -21,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.*;
 
-import static de.adito.ojcms.persistence.datastores.sql.util.DatabaseConstants.*;
+import static de.adito.ojcms.persistence.datastores.sql.util.DatabaseConstants.ID_COLUMN;
 
 /**
  * Implementation of a persistent bean container data source that is used to create a container instance later on.
@@ -172,18 +171,17 @@ public class SQLPersistentContainer<BEAN extends IBean<BEAN>> implements IBeanCo
           if (conditions.length == 0)
             throw new OJDatabaseException("A bean instance not created by this container can only be used for a index-of or contains search," +
                                               " if there are bean fields marked as @Identifier!");
-          return builder.doSelect(pSelect -> pSelect
+          return builder.doSelectId(pSelect -> pSelect
               .where(conditions)
               .firstResult()
-              .map(ResultRow::getIdIfAvailable)
-              .orElse(-1));
+              .orIfNotPresent(-1));
         });
   }
 
   @Override
   public int size()
   {
-    return builder.doSelect(Select::countRows);
+    return builder.doSelectId(SingleSelect::countRows);
   }
 
   @Override

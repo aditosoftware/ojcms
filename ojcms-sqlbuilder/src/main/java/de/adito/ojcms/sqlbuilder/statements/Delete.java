@@ -4,13 +4,13 @@ import de.adito.ojcms.sqlbuilder.*;
 import de.adito.ojcms.sqlbuilder.definition.*;
 import de.adito.ojcms.sqlbuilder.definition.condition.*;
 import de.adito.ojcms.sqlbuilder.format.*;
-import de.adito.ojcms.sqlbuilder.util.OJDatabaseException;
 
-import java.io.IOException;
-import java.sql.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
+import static de.adito.ojcms.sqlbuilder.definition.ENumericOperation.*;
 import static de.adito.ojcms.sqlbuilder.definition.condition.IWhereOperator.*;
+import static de.adito.ojcms.sqlbuilder.format.EFormatter.*;
 
 /**
  * A delete statement.
@@ -19,9 +19,6 @@ import static de.adito.ojcms.sqlbuilder.definition.condition.IWhereOperator.*;
  */
 public class Delete extends AbstractSQLStatement<WhereModifiers, Boolean, Boolean, Delete>
 {
-  private final IStatementExecutor<ResultSet> idUpdater;
-  private final String idColumnName;
-
   /**
    * Creates a new delete statement.
    *
@@ -29,15 +26,12 @@ public class Delete extends AbstractSQLStatement<WhereModifiers, Boolean, Boolea
    * @param pBuilder           the builder that created this statement to use other kinds of statements for a concrete statement
    * @param pDatabaseType      the database type used for this statement
    * @param pSerializer        the value serializer
-   * @param pIdUpdater         the statement executor to update the id column, when deleting rows
-   * @param pIdColumnName      the name of the id column
+   * @param pIdColumnName      the id column name
    */
   public Delete(IStatementExecutor<Boolean> pStatementExecutor, AbstractSQLBuilder pBuilder, EDatabaseType pDatabaseType,
-                IValueSerializer pSerializer, IStatementExecutor<ResultSet> pIdUpdater, String pIdColumnName)
+                IValueSerializer pSerializer, String pIdColumnName)
   {
-    super(pStatementExecutor, pBuilder, pDatabaseType, pSerializer, new WhereModifiers());
-    idColumnName = pIdColumnName;
-    idUpdater = pIdUpdater;
+    super(pStatementExecutor, pBuilder, pDatabaseType, pSerializer, new WhereModifiers(), pIdColumnName);
   }
 
   /**
@@ -51,83 +45,63 @@ public class Delete extends AbstractSQLStatement<WhereModifiers, Boolean, Boolea
   }
 
   @Override
-  public void close() throws IOException
-  {
-    super.close();
-    idUpdater.close();
-  }
-
-  @Override
   protected Boolean doQuery()
   {
-    final List<Integer> idsToDelete = _getIdsToDelete();
-    final StatementFormatter statement = EFormatter.DELETE.create(databaseType, idColumnName)
+    _IdArranger idArranger = new _IdArranger(); //Store ids to delete before the deletion
+    final StatementFormatter deleteStatement = DELETE.create(databaseType, idColumnIdentification.getColumnName())
         .appendTableName(getTableName())
         .appendWhereCondition(modifiers);
-    final Boolean result = executeStatement(statement);
-    //update row ids
-    if (!idsToDelete.isEmpty())
-    {
-      //update all ranges between two ids to delete
-      for (int i = 0; i < idsToDelete.size() - 1; i++)
-      {
-        final int offset = i;
-        builder.doUpdate(pUpdate -> pUpdate
-            .adaptId(ENumericOperation.SUBTRACT, offset + 1)
-            .whereId(IWhereConditionsForId.create(greaterThan(), idsToDelete.get(offset))
-                         .and(lessThan(), idsToDelete.get(offset + 1)))
-            .update());
-      }
-      //update all rows after the last id to delete
-      builder.doUpdate(pUpdate -> pUpdate
-          .adaptId(ENumericOperation.SUBTRACT, 1)
-          .whereId(greaterThan(), idsToDelete.get(idsToDelete.size() - 1))
-          .update());
-    }
+    final Boolean result = executeStatement(deleteStatement);
+    idArranger.rearrangeIds(); //Rearrange after the deletion
     return result;
   }
 
   /**
-   * The ids of the rows, that will be deleted through this delete statement.
-   * Might be empty, if there's either no id column or no affected row by the statement.
-   *
-   * @return a list of all affected row ids of the delete statement
+   * Rearranges the ids after a deletion.
+   * If there is no id column, no work must be done.
    */
-  private List<Integer> _getIdsToDelete()
+  private class _IdArranger
   {
-    final List<Integer> idsToDelete = new ArrayList<>();
-    final StatementFormatter formatter = EFormatter.SELECT.create(databaseType, idColumnName)
-        .appendConstant(EFormatConstant.STAR)
-        .appendTableName(getTableName())
-        .appendWhereCondition(modifiers);
-    final ResultSet result = idUpdater.executeStatement(formatter.getStatement(), formatter.getSerialArguments(serializer));
-    try
-    {
-      int idColumnIndex = _idColumnIndex(result);
-      if (idColumnIndex == -1)
-        return idsToDelete;
-      while (result.next())
-        idsToDelete.add(result.getInt(idColumnIndex));
-      return idsToDelete;
-    }
-    catch (SQLException pE)
-    {
-      throw new OJDatabaseException(pE);
-    }
-  }
+    private final Optional<List<Integer>> deletedIds;
 
-  /**
-   * The column index of the id column of a database {@link ResultSet}.
-   *
-   * @param pResult the result set to find the id column
-   * @return the column index of the id column of the statement result
-   */
-  private Integer _idColumnIndex(ResultSet pResult) throws SQLException
-  {
-    final ResultSetMetaData metaData = pResult.getMetaData();
-    for (int i = 1; i <= metaData.getColumnCount(); i++)
-      if (metaData.getColumnName(i).equals(idColumnName))
-        return i;
-    return -1;
+    /**
+     * Creates the rearranger and stores all ids that will be deleted beforehand.
+     */
+    private _IdArranger()
+    {
+      if (!isIdColumnPresent())
+        deletedIds = Optional.empty();
+      else
+        deletedIds = Optional.of(builder.doSelectId(pSelect -> pSelect
+            .whereId(modifiers.getWhereIdCondition().orElse(null))
+            .where(modifiers.getWhereCondition().orElse(null))
+            .fullResult()
+            .stream()
+            .collect(Collectors.toList())));
+    }
+
+    /**
+     * Rearranges the remaining ids to be in a consecutive order again.
+     */
+    void rearrangeIds()
+    {
+      deletedIds.ifPresent(pDeletedIds -> {
+        //update all ranges between two ids to delete
+        for (int i = 0; i < pDeletedIds.size() - 1; i++)
+        {
+          final int offset = i;
+          builder.doUpdate(pUpdate -> pUpdate
+              .adaptId(SUBTRACT, offset + 1)
+              .whereId(IWhereConditionsForId.create(greaterThan(), pDeletedIds.get(offset))
+                           .and(lessThan(), pDeletedIds.get(offset + 1)))
+              .update());
+        }
+        //update all rows after the last id to delete
+        builder.doUpdate(pUpdate -> pUpdate
+            .adaptId(SUBTRACT, 1)
+            .whereId(greaterThan(), pDeletedIds.get(pDeletedIds.size() - 1))
+            .update());
+      });
+    }
   }
 }

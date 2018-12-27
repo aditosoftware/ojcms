@@ -54,8 +54,8 @@ public abstract class AbstractSQLBuilder
    */
   public void doCreate(Consumer<Create> pCreateStatement)
   {
-    _execute(configureStatementBeforeExecution(new Create(_createNoResultExecutor(), this, databaseType, serializer, idColumnName)),
-             pCreateStatement);
+    final Create statement = new Create(_createNoResultExecutor(), this, databaseType, serializer, idColumnName);
+    _execute(configureStatementBeforeExecution(statement), pCreateStatement);
   }
 
   /**
@@ -65,8 +65,8 @@ public abstract class AbstractSQLBuilder
    */
   public void doInsert(Consumer<Insert> pInsertStatement)
   {
-    _execute(configureStatementBeforeExecution(new Insert(_createNoResultExecutor(), this, databaseType, serializer, idColumnName)),
-             pInsertStatement);
+    final Insert statement = new Insert(_createNoResultExecutor(), this, databaseType, serializer, idColumnName);
+    _execute(configureStatementBeforeExecution(statement), pInsertStatement);
   }
 
   /**
@@ -76,8 +76,8 @@ public abstract class AbstractSQLBuilder
    */
   public void doUpdate(Consumer<Update> pUpdateStatement)
   {
-    _execute(configureStatementBeforeExecution(new Update(_createNoResultExecutor(), this, databaseType, serializer, idColumnName)),
-             pUpdateStatement);
+    final Update statement = new Update(_createNoResultExecutor(), this, databaseType, serializer, idColumnName);
+    _execute(configureStatementBeforeExecution(statement), pUpdateStatement);
   }
 
   /**
@@ -87,39 +87,51 @@ public abstract class AbstractSQLBuilder
    */
   public boolean doDelete(Function<Delete, Boolean> pDeleteStatement) //NOSONAR
   {
-    return _query(configureStatementBeforeExecution(new Delete(_createSuccessfulExecutor(), this, databaseType, serializer,
-                                                               _createResultExecutor(), idColumnName)), pDeleteStatement);
+    final Delete statement = new Delete(_createSuccessfulExecutor(), this, databaseType, serializer, idColumnName);
+    return _query(configureStatementBeforeExecution(statement), pDeleteStatement);
   }
 
   /**
    * Creates a new select statement.
    *
    * @param pSelectQuery the select query to execute (defined in a pipelining mechanism)
-   * @param pColumns     the columns to select
    * @param <RESULT>     the type of the result
    * @return the result of the select statement
    */
-  public <RESULT> RESULT doSelect(Function<Select, RESULT> pSelectQuery, IColumnIdentification... pColumns)
+  public <RESULT> RESULT doSelect(Function<Select, RESULT> pSelectQuery)
   {
-    final Select select = pColumns == null || pColumns.length == 0 ?
-        new Select(_createResultExecutor(), this, databaseType, serializer, idColumnName) :
-        new Select(_createResultExecutor(), this, databaseType, serializer, idColumnName, pColumns);
-    return _query(configureStatementBeforeExecution(select), pSelectQuery);
+    final Select statement = new Select(_createResultExecutor(), this, databaseType, serializer, idColumnName);
+    return _query(configureStatementBeforeExecution(statement), pSelectQuery);
   }
 
   /**
    * Creates a new single select statement.
    * This query will select one certain column only.
    *
-   * @param pColumn      the single column to select
+   * @param pColumnToSelect the single column to select
+   * @param pSelectQuery    the select query to execute (defined in a pipelining mechanism)
+   * @param <VALUE>         the data type of the column
+   * @param <RESULT>        the type of the result
+   * @return the result of the select statement
+   */
+  public <VALUE, RESULT> RESULT doSelectOne(IColumnIdentification<VALUE> pColumnToSelect, Function<SingleSelect<VALUE>, RESULT> pSelectQuery)
+  {
+    final SingleSelect<VALUE> select = new SingleSelect<>(_createResultExecutor(), this, databaseType, serializer, idColumnName, pColumnToSelect);
+    return _query(configureStatementBeforeExecution(select), pSelectQuery);
+  }
+
+  /**
+   * Creates a new single select statement to select the id column of a database table.
+   *
    * @param pSelectQuery the select query to execute (defined in a pipelining mechanism)
-   * @param <VALUE>      the data type of the column
    * @param <RESULT>     the type of the result
    * @return the result of the select statement
    */
-  public <VALUE, RESULT> RESULT doSelectOne(IColumnIdentification<VALUE> pColumn, Function<SingleSelect<VALUE>, RESULT> pSelectQuery)
+  public <RESULT> RESULT doSelectId(Function<SingleSelect<Integer>, RESULT> pSelectQuery)
   {
-    final SingleSelect<VALUE> select = new SingleSelect<>(_createResultExecutor(), this, databaseType, serializer, idColumnName, pColumn);
+    final IColumnIdentification<Integer> idColumnIdentification = IColumnIdentification.of(idColumnName, Integer.class);
+    final SingleSelect<Integer> select = new SingleSelect<>(_createResultExecutor(), this, databaseType, serializer, idColumnName,
+                                                            idColumnIdentification);
     return _query(configureStatementBeforeExecution(select), pSelectQuery);
   }
 
@@ -199,36 +211,46 @@ public abstract class AbstractSQLBuilder
    */
   protected List<String> getAllTableNames()
   {
-    final List<String> names = new ArrayList<>();
-    final Connection connection = connectionSupplier.get();
-    try
-    {
-      final ResultSet tables = connection.getMetaData().getTables(null, null, "%", null);
+    return _retrieveFromMetaData(pMetaData -> {
+      final List<String> names = new ArrayList<>();
+      final ResultSet tables = pMetaData.getTables(null, null, "%", null);
       while (tables.next())
       {
         final String name = tables.getString(3);
         if (!name.startsWith(databaseType.getSystemTablesPrefix())) //Exclude system tables
           names.add(tables.getString(3));
       }
-      _tryCloseConnection(connection);
-    }
-    catch (SQLException pE)
-    {
-      throw new OJDatabaseException(pE);
-    }
-    return names;
+      return names;
+    });
   }
 
   /**
    * The column count of a certain table.
    *
+   * @param pTableName the name of the table to retrieve the column count from
    * @return the number of columns of a database table
    */
   protected int getColumnCount(String pTableName)
   {
-    return doSelect(pSelect -> pSelect
-        .from(pTableName)
-        .countColumns());
+    return _retrieveFromMetaData(pMetaData -> {
+      final ResultSet result = pMetaData.getColumns(null, null, pTableName.toUpperCase(), null);
+      int count = 0;
+      while (result.next())
+        count++;
+      return count;
+    });
+  }
+
+  /**
+   * Determines, if a column name is present at a certain database table.
+   *
+   * @param pTableName  the name of the database table
+   * @param pColumnName the name of the column to check
+   * @return <tt>true</tt> if the column is present
+   */
+  protected boolean hasColumn(String pTableName, String pColumnName)
+  {
+    return _retrieveFromMetaData(pMetaData -> pMetaData.getColumns(null, null, pTableName.toUpperCase(), pColumnName.toUpperCase()).next());
   }
 
   /**
@@ -292,7 +314,7 @@ public abstract class AbstractSQLBuilder
   {
     if (closeAfterStatement)
       return connectionInfo::createConnection;
-    final Connection permanentConnection = connectionInfo.createConnection();
+    final Connection permanentConnection = connectionInfo.createConnection(); //NOSONAR
     return () -> permanentConnection;
   }
 
@@ -402,6 +424,31 @@ public abstract class AbstractSQLBuilder
   }
 
   /**
+   * Retrieves any information of the metadata of a database connection.
+   * The connection will be closed afterwards. Do not keep a reference to the metadata instance.
+   *
+   * @param pResultResolver a function to retrieve the information from the database metadata
+   * @param <RESULT>        the type of the information/result
+   * @return the information from the database metadata
+   */
+  private <RESULT> RESULT _retrieveFromMetaData(_ThrowingFunction<DatabaseMetaData, RESULT, SQLException> pResultResolver)
+  {
+    final Connection connection = connectionSupplier.get();
+    try
+    {
+      return pResultResolver.apply(connection.getMetaData());
+    }
+    catch (SQLException pE)
+    {
+      throw new OJDatabaseException(pE);
+    }
+    finally
+    {
+      _tryCloseConnection(connection);
+    }
+  }
+
+  /**
    * Tries to close a database connection.
    *
    * @param pCloseable the closeable, that represents the connection
@@ -448,7 +495,8 @@ public abstract class AbstractSQLBuilder
   private class _StatementExecutor<RESULT> implements IStatementExecutor<RESULT>
   {
     private final _ThrowingFunction<PreparedStatement, RESULT, SQLException> executor;
-    private Connection connection = null;
+    private Connection connection;
+    private PreparedStatement statement;
 
     /**
      * Creates the executor.
@@ -466,11 +514,11 @@ public abstract class AbstractSQLBuilder
       connection = connectionSupplier.get();
       try
       {
-        final PreparedStatement preparedStatement = connection.prepareStatement(pSQLStatement);
+        statement = connection.prepareStatement(pSQLStatement); //NOSONAR
         int argIndex = 1;
         for (String arg : pArgs)
-          preparedStatement.setString(argIndex++, arg);
-        return executor.apply(preparedStatement);
+          statement.setString(argIndex++, arg);
+        return executor.apply(statement);
       }
       catch (SQLException pE)
       {
@@ -481,16 +529,16 @@ public abstract class AbstractSQLBuilder
     @Override
     public void close() throws IOException
     {
-      if (connection != null)
+      try
       {
-        try
-        {
+        if (statement != null)
+          statement.close();
+        if (connection != null)
           connection.close();
-        }
-        catch (SQLException pE)
-        {
-          throw new IOException(pE);
-        }
+      }
+      catch (SQLException pE)
+      {
+        throw new IOException(pE);
       }
     }
   }

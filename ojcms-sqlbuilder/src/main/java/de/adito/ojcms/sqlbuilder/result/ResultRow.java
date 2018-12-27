@@ -15,20 +15,17 @@ import java.util.*;
 public final class ResultRow
 {
   private final IValueSerializer serializer;
-  private final int index; //-1 if not available
   private final Map<String, String> values;
 
   /**
    * Creates a new result row.
    *
-   * @param pSerializer   the serializer for the database values
-   * @param pResultSet    the result set to build this row from (can not be stored, because the result set may be closed in the future)
-   * @param pIdColumnName the name of the id column
+   * @param pSerializer the serializer for the database values
+   * @param pResultSet  the result set to build this row from (can not be stored, because the result set may be closed in the future)
    */
-  public ResultRow(IValueSerializer pSerializer, ResultSet pResultSet, String pIdColumnName)
+  public ResultRow(IValueSerializer pSerializer, ResultSet pResultSet)
   {
     serializer = pSerializer;
-    index = _getIdIfAvailable(pResultSet, pIdColumnName);
     values = _createValueMap(pResultSet);
   }
 
@@ -61,51 +58,19 @@ public final class ResultRow
   }
 
   /**
-   * The id/index of the row, if available.
-   *
-   * @return the id of this result row
-   * @throws OJDatabaseException if not available
-   */
-  public Integer getIdIfAvailable()
-  {
-    if (index < 0)
-      throw new OJDatabaseException("An id column is not available in this result row!");
-    return index;
-  }
-
-  /**
-   * The index of this row, -1 if not available.
-   *
-   * @param pResultSet    the result set of the SQL statement
-   * @param pIdColumnName the name of the id column
-   * @return the index of the row, or -1 if not available
-   */
-  private int _getIdIfAvailable(ResultSet pResultSet, String pIdColumnName)
-  {
-    try
-    {
-      return pResultSet.getInt(pIdColumnName);
-    }
-    catch (SQLException pE)
-    {
-      return -1;
-    }
-  }
-
-  /**
    * Creates the column value map for this row.
    * The mapping is from the column name to the serial value of the associated column.
    *
    * @param pResultSet the result set of the SQL statement
    * @return the column value map for this row
    */
-  private Map<String, String> _createValueMap(ResultSet pResultSet)
+  private static Map<String, String> _createValueMap(ResultSet pResultSet)
   {
     try
     {
       final ResultSetMetaData metadata = pResultSet.getMetaData();
       final Map<String, String> mapping = new HashMap<>();
-      for (int i = index == -1 ? 1 : 2; i <= metadata.getColumnCount(); i++)
+      for (int i = 1; i <= metadata.getColumnCount(); i++)
         mapping.put(metadata.getColumnName(i).toUpperCase(), pResultSet.getString(i));
       return mapping;
     }

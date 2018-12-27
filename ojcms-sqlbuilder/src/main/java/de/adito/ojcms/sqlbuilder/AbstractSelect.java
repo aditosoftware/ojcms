@@ -9,6 +9,9 @@ import java.sql.*;
 import java.util.*;
 import java.util.function.Supplier;
 
+import static de.adito.ojcms.sqlbuilder.format.EFormatConstant.*;
+import static de.adito.ojcms.sqlbuilder.format.ESeparator.COMMA_WITH_WHITESPACE;
+
 /**
  * An abstract base class for select statements.
  * The statement will return a {@link Result}.
@@ -18,8 +21,8 @@ import java.util.function.Supplier;
  */
 public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>> extends AbstractSQLStatement<SelectModifiers, Result, ResultSet, SELECT>
 {
-  private final List<IColumnIdentification<?>> columns;
-  private final String idColumnName;
+  private List<IColumnIdentification<?>> columnsToSelect = new ArrayList<>();
+  private boolean shouldSelectAllColumns = true;
 
   /**
    * Creates a new select statement.
@@ -29,14 +32,11 @@ public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>> exte
    * @param pDatabaseType      the database type used for this select statement
    * @param pSerializer        the value serializer
    * @param pIdColumnName      the name of the id column
-   * @param pColumns           the column names to select
    */
   protected AbstractSelect(IStatementExecutor<ResultSet> pStatementExecutor, AbstractSQLBuilder pBuilder, EDatabaseType pDatabaseType,
-                           IValueSerializer pSerializer, String pIdColumnName, IColumnIdentification<?>... pColumns)
+                           IValueSerializer pSerializer, String pIdColumnName)
   {
-    super(pStatementExecutor, pBuilder, pDatabaseType, pSerializer, new SelectModifiers());
-    columns = Arrays.asList(pColumns);
-    idColumnName = pIdColumnName;
+    super(pStatementExecutor, pBuilder, pDatabaseType, pSerializer, new SelectModifiers(), pIdColumnName);
   }
 
   /**
@@ -50,7 +50,7 @@ public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>> exte
     try
     {
       final ResultSet resultSet = _query();
-      return resultSet.next() ? resultSet.getInt(EFormatConstant.StaticConstants.COUNT_AS) : 0;
+      return resultSet.next() ? resultSet.getInt(StaticConstants.COUNT_AS) : 0;
     }
     catch (SQLException pE)
     {
@@ -67,7 +67,7 @@ public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>> exte
   {
     try
     {
-      return _query().getMetaData().getColumnCount();
+      return shouldSelectAllColumns ? _query().getMetaData().getColumnCount() : columnsToSelect.size();
     }
     catch (SQLException pE)
     {
@@ -97,10 +97,50 @@ public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>> exte
     return (SELECT) this;
   }
 
+  /**
+   * The id column identification for this statement.
+   *
+   * @return an id column identification
+   */
+  public IColumnIdentification<Integer> idColumn()
+  {
+    return idColumnIdentification;
+  }
+
+  /**
+   * Adds columns to select through the statement. Must be at least one column.
+   *
+   * @param pColumns the column identifications the select
+   * @return the select statement itself to enable a pipelining mechanism
+   */
+  protected SELECT addColumns(IColumnIdentification<?>... pColumns)
+  {
+    if (pColumns.length == 0)
+      throw new OJDatabaseException("At least one column has to be selected!");
+    columnsToSelect.addAll(Arrays.asList(pColumns));
+    shouldSelectAllColumns = false;
+    //noinspection unchecked
+    return (SELECT) this;
+  }
+
+  /**
+   * Configures the select statement to select all columns of the database table.
+   * This is the default, but it may be used for a better readability.
+   *
+   * @return the select statement itself to enable a pipelining mechanism
+   */
+  protected SELECT selectAllColumns()
+  {
+    columnsToSelect.clear();
+    shouldSelectAllColumns = true;
+    //noinspection unchecked
+    return (SELECT) this;
+  }
+
   @Override
   protected Result doQuery()
   {
-    return new Result(serializer, _query(), idColumnName);
+    return new Result(serializer, _query());
   }
 
   /**
@@ -110,23 +150,23 @@ public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>> exte
    */
   private ResultSet _query()
   {
-    final Supplier<String> columnSupplier = () -> StatementFormatter.join(columns.stream().map(IColumnIdentification::getColumnName),
-                                                                          ESeparator.COMMA_WITH_WHITESPACE);
-    final StatementFormatter statement = EFormatter.SELECT.create(databaseType, idColumnName)
-        .conditional(modifiers.distinct(), pFormatter -> pFormatter.appendConstant(EFormatConstant.DISTINCT))
+    final Supplier<String> columnSupplier = () -> StatementFormatter.join(columnsToSelect.stream().map(IColumnIdentification::getColumnName),
+                                                                          COMMA_WITH_WHITESPACE);
+    final StatementFormatter statement = EFormatter.SELECT.create(databaseType, idColumnIdentification.getColumnName())
+        .conditional(modifiers.distinct(), pFormat -> pFormat.appendConstant(DISTINCT))
         .conditionalOrElse(modifiers.count(),
                            //with count
-                           pFormatter -> pFormatter.conditionalOrElse(columns.isEmpty(),
-                                                                      //use * for all columns
-                                                                      pInner -> pInner.appendConstant(EFormatConstant.COUNT, EFormatConstant.STAR.toStatementFormat()),
-                                                                      //the columns to select are defined
-                                                                      pInner -> pInner.appendConstant(EFormatConstant.COUNT, columnSupplier.get())),
+                           pFormat -> pFormat.conditionalOrElse(shouldSelectAllColumns,
+                                                                //use * for all columns
+                                                                pInner -> pInner.appendConstant(COUNT, STAR.toStatementFormat()),
+                                                                //the columns to select are defined
+                                                                pInner -> pInner.appendConstant(COUNT, columnSupplier.get())),
                            //without count
-                           pFormatter -> pFormatter.conditionalOrElse(columns.isEmpty(),
-                                                                      //use * for all columns
-                                                                      pInner -> pInner.appendConstant(EFormatConstant.STAR),
-                                                                      //the columns to select are defined
-                                                                      pInner -> pInner.appendMultiple(columns.stream(), ESeparator.COMMA_WITH_WHITESPACE)))
+                           pFormat -> pFormat.conditionalOrElse(shouldSelectAllColumns,
+                                                                //use * for all columns
+                                                                pInner -> pInner.appendConstant(STAR),
+                                                                //the columns to select are defined
+                                                                pInner -> pInner.appendMultiple(columnsToSelect.stream(), COMMA_WITH_WHITESPACE)))
         .appendTableName(getTableName())
         .appendWhereCondition(modifiers);
     return executeStatement(statement);

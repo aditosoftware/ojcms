@@ -30,19 +30,24 @@ public class Select extends AbstractSelect<Select>
   }
 
   /**
-   * Creates a new select statement.
+   * Defines the columns to select. Must be at least one column.
    *
-   * @param pStatementExecutor the executor for this statement
-   * @param pBuilder           the builder that created this statement to use other kinds of statements for a concrete statement
-   * @param pDatabaseType      the database type used for this statement
-   * @param pSerializer        the value serializer
-   * @param pIdColumnName      the id column name
-   * @param pColumns           the columns to select
+   * @param pColumns the columns to select
+   * @return the select statement itself to enable a pipelining mechanism
    */
-  public Select(IStatementExecutor<ResultSet> pStatementExecutor, AbstractSQLBuilder pBuilder, EDatabaseType pDatabaseType,
-                IValueSerializer pSerializer, String pIdColumnName, IColumnIdentification<?>... pColumns)
+  public Select select(IColumnIdentification<?>... pColumns)
   {
-    super(pStatementExecutor, pBuilder, pDatabaseType, pSerializer, pIdColumnName, pColumns);
+    return addColumns(pColumns);
+  }
+
+  /**
+   * Defines the statement to select all columns. This is the default but might be used for better readability.
+   *
+   * @return the select statement itself to enable a pipelining mechanism
+   */
+  public Select selectAll()
+  {
+    return selectAllColumns();
   }
 
   /**

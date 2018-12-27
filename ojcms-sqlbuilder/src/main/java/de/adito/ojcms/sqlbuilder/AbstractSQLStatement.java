@@ -2,7 +2,9 @@ package de.adito.ojcms.sqlbuilder;
 
 import de.adito.ojcms.sqlbuilder.definition.*;
 import de.adito.ojcms.sqlbuilder.definition.condition.*;
+import org.jetbrains.annotations.*;
 
+import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
@@ -27,11 +29,12 @@ public abstract class AbstractSQLStatement<MODIFIERS extends WhereModifiers, RES
    * @param pDatabaseType      the database type used for this statement
    * @param pSerializer        the value serializer
    * @param pModifiers         the modifiers for this statement
+   * @param pIdColumnName      the id column name
    */
   public AbstractSQLStatement(IStatementExecutor<INNERRESULT> pStatementExecutor, AbstractSQLBuilder pBuilder, EDatabaseType pDatabaseType,
-                              IValueSerializer pSerializer, MODIFIERS pModifiers)
+                              IValueSerializer pSerializer, MODIFIERS pModifiers, String pIdColumnName)
   {
-    super(pStatementExecutor, pBuilder, pDatabaseType, pSerializer);
+    super(pStatementExecutor, pBuilder, pDatabaseType, pSerializer, pIdColumnName);
     modifiers = pModifiers;
   }
 
@@ -62,7 +65,7 @@ public abstract class AbstractSQLStatement<MODIFIERS extends WhereModifiers, RES
    */
   public STATEMENT where(IWhereCondition<?>... pConditions)
   {
-    if (pConditions.length == 0)
+    if (pConditions == null || pConditions.length == 0)
       //noinspection unchecked
       return (STATEMENT) this;
 
@@ -77,10 +80,10 @@ public abstract class AbstractSQLStatement<MODIFIERS extends WhereModifiers, RES
    * Sets the where condition for this statement.
    * The condition might contain multiple, concatenated conditions.
    *
-   * @param pConditions the where condition to set
+   * @param pConditions the where condition to set (can be null, then nothing happens)
    * @return the statement itself to enable a pipelining mechanism
    */
-  public STATEMENT where(IWhereConditions pConditions)
+  public STATEMENT where(@Nullable IWhereConditions pConditions)
   {
     modifiers.setWhereCondition(pConditions);
     //noinspection unchecked
@@ -105,18 +108,18 @@ public abstract class AbstractSQLStatement<MODIFIERS extends WhereModifiers, RES
    * @param pId            the row id for the condition
    * @return the statement itself to enable a pipelining mechanism
    */
-  public STATEMENT whereId(IWhereOperator pWhereOperator, int pId)
+  public STATEMENT whereId(@NotNull IWhereOperator pWhereOperator, int pId)
   {
-    return whereId(IWhereConditionsForId.create(pWhereOperator, pId));
+    return whereId(IWhereConditionsForId.create(Objects.requireNonNull(pWhereOperator), pId));
   }
 
   /**
    * Configures the statement to only affect rows with certain ids (based on a multiple where condition).
    *
-   * @param pMultipleConditions the multiple id condition
+   * @param pMultipleConditions the multiple id condition (can be null, then nothing happens)
    * @return the statement itself to enable a pipelining mechanism
    */
-  public STATEMENT whereId(IWhereConditionsForId pMultipleConditions)
+  public STATEMENT whereId(@Nullable IWhereConditionsForId pMultipleConditions)
   {
     modifiers.setWhereIdCondition(pMultipleConditions);
     //noinspection unchecked

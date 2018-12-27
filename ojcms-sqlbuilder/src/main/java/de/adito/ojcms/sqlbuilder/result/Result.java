@@ -6,12 +6,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
 import java.util.*;
+import java.util.stream.*;
 
 /**
  * The result of a select statement.
  * This result can only be used once, because it is based on an open database connection
  * and a cursor, which is moved through a {@link ResultSet}.
- * Either use {@link #getFirst()} or {@link #iterator()}.
+ * Either use {@link #getFirst()} or {@link #iterator()} / {@link #stream()}.
  *
  * @author Simon Danner, 26.04.2018
  */
@@ -19,21 +20,18 @@ public final class Result implements Iterable<ResultRow>
 {
   private final IValueSerializer serializer;
   private final ResultSet resultSet;
-  private final String idColumnName;
   private boolean used = false;
 
   /**
    * Creates a new result.
    *
-   * @param pSerializer   a value serializer
-   * @param pResult       the result set from the query
-   * @param pIdColumnName the name of the id column
+   * @param pSerializer a value serializer
+   * @param pResult     the result set from the query
    */
-  public Result(IValueSerializer pSerializer, ResultSet pResult, String pIdColumnName)
+  public Result(IValueSerializer pSerializer, ResultSet pResult)
   {
     serializer = pSerializer;
     resultSet = pResult;
-    idColumnName = pIdColumnName;
   }
 
   /**
@@ -46,7 +44,7 @@ public final class Result implements Iterable<ResultRow>
     _checkUsage();
     try
     {
-      return resultSet.next() ? Optional.of(new ResultRow(serializer, resultSet, idColumnName)) : Optional.empty();
+      return resultSet.next() ? Optional.of(new ResultRow(serializer, resultSet)) : Optional.empty();
     }
     catch (SQLException pE)
     {
@@ -61,12 +59,20 @@ public final class Result implements Iterable<ResultRow>
     _checkUsage();
     return new Iterator<ResultRow>()
     {
+      private boolean lookedAhead;
+      private boolean hasNext;
+
       @Override
       public boolean hasNext()
       {
         try
         {
-          return !resultSet.isAfterLast();
+          if (!lookedAhead)
+          {
+            hasNext = resultSet.next();
+            lookedAhead = true;
+          }
+          return hasNext;
         }
         catch (SQLException pE)
         {
@@ -77,21 +83,22 @@ public final class Result implements Iterable<ResultRow>
       @Override
       public ResultRow next()
       {
-        if (hasNext())
-        {
-          try
-          {
-            resultSet.next();
-            return new ResultRow(serializer, resultSet, idColumnName);
-          }
-          catch (SQLException pE)
-          {
-            throw new OJDatabaseException(pE);
-          }
-        }
-        throw new NoSuchElementException();
+        if (!hasNext())
+          throw new NoSuchElementException();
+        lookedAhead = false;
+        return new ResultRow(serializer, resultSet);
       }
     };
+  }
+
+  /**
+   * A stream of all result rows of this result.
+   *
+   * @return a stream of result rows
+   */
+  public Stream<ResultRow> stream()
+  {
+    return StreamSupport.stream(spliterator(), false);
   }
 
   /**

@@ -7,7 +7,11 @@ import de.adito.ojcms.sqlbuilder.util.OJDatabaseException;
 
 import java.util.*;
 
+import static de.adito.ojcms.sqlbuilder.definition.ENumericOperation.*;
 import static de.adito.ojcms.sqlbuilder.definition.condition.IWhereOperator.greaterThanOrEqual;
+import static de.adito.ojcms.sqlbuilder.format.EFormatConstant.*;
+import static de.adito.ojcms.sqlbuilder.format.EFormatter.*;
+import static de.adito.ojcms.sqlbuilder.format.ESeparator.*;
 
 /**
  * An insert statement.
@@ -16,7 +20,6 @@ import static de.adito.ojcms.sqlbuilder.definition.condition.IWhereOperator.grea
  */
 public class Insert extends AbstractBaseStatement<Void, Insert>
 {
-  private final IColumnIdentification<Integer> idColumnIdentification;
   private final List<IColumnValueTuple<?>> values = new ArrayList<>();
 
   /**
@@ -31,8 +34,7 @@ public class Insert extends AbstractBaseStatement<Void, Insert>
   public Insert(IStatementExecutor<Void> pStatementExecutor, AbstractSQLBuilder pBuilder, EDatabaseType pDatabaseType,
                 IValueSerializer pSerializer, String pIdColumnName)
   {
-    super(pStatementExecutor, pBuilder, pDatabaseType, pSerializer);
-    idColumnIdentification = IColumnIdentification.of(pIdColumnName, Integer.class);
+    super(pStatementExecutor, pBuilder, pDatabaseType, pSerializer, pIdColumnName);
   }
 
   /**
@@ -86,18 +88,18 @@ public class Insert extends AbstractBaseStatement<Void, Insert>
     if (values.get(0).getColumn() == idColumnIdentification)
       //noinspection unchecked
       builder.doUpdate(pUpdate -> pUpdate
-          .adaptId(ENumericOperation.ADD, 1)
+          .adaptId(ADD, 1)
           .whereId(greaterThanOrEqual(), ((IColumnValueTuple<Integer>) values.get(0)).getValue())
           .update());
-    final StatementFormatter statement = EFormatter.INSERT.create(databaseType, idColumnIdentification.getColumnName())
+    final StatementFormatter statement = INSERT.create(databaseType, idColumnIdentification.getColumnName())
         .appendTableName(getTableName())
         .openBracket()
         .appendEnumeration(values.stream().map(pTuple -> pTuple.getColumn().getColumnName().toUpperCase()),
-                           ESeparator.COMMA_WITH_WHITESPACE)
+                           COMMA_WITH_WHITESPACE)
         .closeBracket()
-        .appendConstant(EFormatConstant.VALUES)
+        .appendConstant(VALUES)
         .openBracket()
-        .appendMultipleArgumentEnumeration(values, ESeparator.COMMA_WITH_WHITESPACE)
+        .appendMultipleArgumentEnumeration(values, COMMA_WITH_WHITESPACE)
         .closeBracket();
     executeStatement(statement);
   }

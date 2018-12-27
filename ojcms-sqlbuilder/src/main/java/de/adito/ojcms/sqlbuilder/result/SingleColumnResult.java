@@ -5,6 +5,7 @@ import de.adito.ojcms.utils.OptionalNullable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.stream.*;
 
 /**
  * The result of a select statement for a single column.
@@ -64,5 +65,15 @@ public class SingleColumnResult<VALUE> implements Iterable<VALUE>
         throw new NoSuchElementException();
       }
     };
+  }
+
+  /**
+   * A stream of the single values of each selected rows.
+   *
+   * @return a stream of the selected values
+   */
+  public Stream<VALUE> stream()
+  {
+    return StreamSupport.stream(spliterator(), false);
   }
 }

@@ -4,9 +4,14 @@ import de.adito.ojcms.sqlbuilder.*;
 import de.adito.ojcms.sqlbuilder.definition.*;
 import de.adito.ojcms.sqlbuilder.definition.column.*;
 import de.adito.ojcms.sqlbuilder.format.*;
+import de.adito.ojcms.sqlbuilder.util.OJDatabaseException;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static de.adito.ojcms.sqlbuilder.format.EFormatConstant.*;
+import static de.adito.ojcms.sqlbuilder.format.EFormatter.*;
+import static de.adito.ojcms.sqlbuilder.format.ESeparator.*;
 
 /**
  * A create statement.
@@ -30,8 +35,9 @@ public class Create extends AbstractBaseStatement<Void, Create>
   public Create(IStatementExecutor<Void> pStatementExecutor, AbstractSQLBuilder pBuilder, EDatabaseType pDatabaseType,
                 IValueSerializer pSerializer, String pIdColumnName)
   {
-    super(pStatementExecutor, pBuilder, pDatabaseType, pSerializer);
-    idColumnDefinition = IColumnDefinition.of(pIdColumnName, EColumnType.INT.create().primaryKey().modifiers(EColumnModifier.NOT_NULL));
+    super(pStatementExecutor, pBuilder, pDatabaseType, pSerializer, pIdColumnName);
+    idColumnDefinition = IColumnDefinition.of(pIdColumnName.toUpperCase(),
+                                              EColumnType.INT.create().primaryKey().modifiers(EColumnModifier.NOT_NULL));
   }
 
   /**
@@ -53,6 +59,8 @@ public class Create extends AbstractBaseStatement<Void, Create>
    */
   public Create columns(IColumnDefinition... pColumnDefinitions)
   {
+    if (pColumnDefinitions == null || pColumnDefinitions.length == 0)
+      throw new OJDatabaseException("The columns to create cannot be empty!");
     columns.addAll(Arrays.asList(pColumnDefinitions));
     return this;
   }
@@ -73,10 +81,13 @@ public class Create extends AbstractBaseStatement<Void, Create>
    */
   public void create()
   {
-    final StatementFormatter statement = EFormatter.CREATE.create(databaseType, idColumnDefinition.getColumnName())
+    if (columns.isEmpty())
+      throw new OJDatabaseException("At least one column must be defined to create a table!");
+
+    final StatementFormatter statement = CREATE.create(databaseType, idColumnDefinition.getColumnName())
         .appendTableName(getTableName())
         .openBracket()
-        .appendMultiple(columns.stream(), ESeparator.COMMA, ESeparator.NEW_LINE)
+        .appendMultiple(columns.stream(), COMMA, NEW_LINE)
         .appendFunctional(this::_primaryKeys)
         .appendFunctional(this::_foreignKeys)
         .closeBracket();
@@ -96,8 +107,8 @@ public class Create extends AbstractBaseStatement<Void, Create>
         .collect(Collectors.toList());
     if (primaryKeyColumnNames.isEmpty())
       return;
-    pFormatter.appendSeparator(ESeparator.COMMA, ESeparator.NEW_LINE);
-    pFormatter.appendConstant(EFormatConstant.PRIMARY_KEY, String.join(", ", primaryKeyColumnNames));
+    pFormatter.appendSeparator(COMMA, NEW_LINE);
+    pFormatter.appendConstant(PRIMARY_KEY, String.join(", ", primaryKeyColumnNames));
   }
 
   /**
@@ -118,8 +129,8 @@ public class Create extends AbstractBaseStatement<Void, Create>
     foreignKeyMapping.forEach((pColumn, pReference) -> {
       if (!tableChecker.hasTable(pReference.getTableName()))
         pReference.createReferencedTable(tableChecker.getConnectionInfo()); //Create referenced table, if necessary
-      pFormatter.appendSeparator(ESeparator.COMMA, ESeparator.NEW_LINE);
-      pFormatter.appendConstant(EFormatConstant.FOREIGN_KEY, pColumn, pReference.getTableName(),
+      pFormatter.appendSeparator(COMMA, NEW_LINE);
+      pFormatter.appendConstant(FOREIGN_KEY, pColumn, pReference.getTableName(),
                                 String.join(", ", pReference.getColumnNames()));
     });
   }

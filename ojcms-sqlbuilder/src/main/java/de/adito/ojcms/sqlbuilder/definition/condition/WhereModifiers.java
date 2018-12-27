@@ -15,6 +15,26 @@ public class WhereModifiers
   private IWhereConditions whereCondition;
 
   /**
+   * The optional where id condition.
+   *
+   * @return an optional (maybe concatenated) where id condition
+   */
+  public Optional<IWhereConditionsForId> getWhereIdCondition()
+  {
+    return Optional.ofNullable(idCondition);
+  }
+
+  /**
+   * The optional where condition.
+   *
+   * @return an optional (maybe concatenated) where condition
+   */
+  public Optional<IWhereConditions> getWhereCondition()
+  {
+    return Optional.ofNullable(whereCondition);
+  }
+
+  /**
    * Sets a multiple where condition for the id column.
    *
    * @param pMultipleIdCondition the multiple id condition

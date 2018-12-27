@@ -74,4 +74,10 @@ public final class OJSQLBuilder extends AbstractSQLBuilder
   {
     return super.getColumnCount(pTableName);
   }
+
+  @Override
+  public boolean hasColumn(String pTableName, String pColumnName)
+  {
+    return super.hasColumn(pTableName, pColumnName);
+  }
 }

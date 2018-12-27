@@ -8,7 +8,7 @@ import java.util.stream.*;
 
 /**
  * A multiple condition.
- * This interface helps combine the arguments for a prepared statement.
+ * This interface helps combining the arguments for a prepared statement.
  *
  * @param <CONDITION> the runtime type of the multiple condition
  * @author Simon Danner, 21.07.2018

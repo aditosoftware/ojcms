@@ -2,7 +2,7 @@ package de.adito.ojcms.sqlbuilder;
 
 import de.adito.ojcms.sqlbuilder.definition.*;
 import de.adito.ojcms.sqlbuilder.format.StatementFormatter;
-import de.adito.ojcms.sqlbuilder.util.OJDatabaseException;
+import de.adito.ojcms.utils.StringUtility;
 
 import java.io.IOException;
 
@@ -22,6 +22,7 @@ public abstract class AbstractBaseStatement<RESULT, STATEMENT extends AbstractBa
   protected final AbstractSQLBuilder builder;
   protected final EDatabaseType databaseType;
   protected final IValueSerializer serializer;
+  protected final IColumnIdentification<Integer> idColumnIdentification;
   private String tableName;
 
   /**
@@ -31,14 +32,16 @@ public abstract class AbstractBaseStatement<RESULT, STATEMENT extends AbstractBa
    * @param pBuilder      the builder that created this statement to use other kinds of statements for a concrete statement
    * @param pDatabaseType the database type used for this statement
    * @param pSerializer   the value serializer
+   * @param pIdColumnName the name of the global id column
    */
   protected AbstractBaseStatement(IStatementExecutor<RESULT> pExecutor, AbstractSQLBuilder pBuilder, EDatabaseType pDatabaseType,
-                                  IValueSerializer pSerializer)
+                                  IValueSerializer pSerializer, String pIdColumnName)
   {
     executor = pExecutor;
     builder = pBuilder;
     databaseType = pDatabaseType;
     serializer = pSerializer;
+    idColumnIdentification = IColumnIdentification.of(pIdColumnName.toUpperCase(), Integer.class);
   }
 
   /**
@@ -59,9 +62,7 @@ public abstract class AbstractBaseStatement<RESULT, STATEMENT extends AbstractBa
    */
   protected String getTableName()
   {
-    if (tableName == null || tableName.isEmpty())
-      throw new OJDatabaseException("A table name must be set to execute this SQL-statement!");
-    return tableName;
+    return StringUtility.requireNotEmpty(tableName, "table name");
   }
 
   /**
@@ -75,6 +76,16 @@ public abstract class AbstractBaseStatement<RESULT, STATEMENT extends AbstractBa
     tableName = pTableName.toUpperCase();
     //noinspection unchecked
     return (STATEMENT) this;
+  }
+
+  /**
+   * Determines, if the table the statement is based on has an id column.
+   *
+   * @return <tt>true</tt> if the id column is present
+   */
+  protected boolean isIdColumnPresent()
+  {
+    return builder.hasColumn(getTableName(), idColumnIdentification.getColumnName());
   }
 
   @Override
