@@ -91,8 +91,7 @@ public final class SneakyCopyUtils
     try
     {
       final Type expectedType = pGenericTypes.length == 0 ? pBaseType : TypeToken.getParameterized(pBaseType, pGenericTypes).getType();
-      //noinspection unchecked
-      return (VALUE) gson.fromJson(gson.toJson(pValueToCopy), expectedType);
+      return gson.fromJson(gson.toJson(pValueToCopy), expectedType);
     }
     catch (Exception pE)
     {

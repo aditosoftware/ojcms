@@ -13,8 +13,8 @@ import org.objenesis.*;
 
 import java.lang.reflect.*;
 import java.util.*;
-import java.util.function.*;
-import java.util.stream.*;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 /**
  * Utility class for bean copies.
@@ -137,74 +137,122 @@ final class BeanCopies
    */
   private static <BEAN extends IBean<BEAN>> BEAN _setValues(BEAN pOriginal, BEAN pCopy, ECopyMode pMode, CustomFieldCopy<?>[] pCustomCopies)
   {
-    final Map<IField<?>, Function> customCopiesMap = pMode.shouldCopyDeep() ? _createCustomCopiesMap(pCustomCopies) : Collections.emptyMap();
+    final _BeanValueCopyCreator beanValueCopyCreator = new _BeanValueCopyCreator(pMode, pCustomCopies);
     //noinspection unchecked,RedundantCast
     pCopy.streamFields()
-        .forEach(pField -> pCopy.setValue((IField) pField, !pMode.shouldCopyDeep() ? pOriginal.getValue(pField) :
-            _copyFieldValue((IField) pField, pOriginal.getValue(pField), pMode,
-                            Optional.ofNullable(customCopiesMap.get(pField)), pCustomCopies)));
-    //If required, set non bean values as well
+        .forEach(pField -> pCopy.setValue((IField) pField, beanValueCopyCreator.copyFieldValue((IField) pField, pOriginal.getValue(pField))));
+    //If required set non bean values as well
     if (pMode.shouldCopyAllFields())
+    {
+      final _NonBeanValueCopyCreator copyCreator = new _NonBeanValueCopyCreator(pMode);
       BeanReflector.reflectDeclaredNonBeanFields(pOriginal.getClass())
           .forEach(pField -> {
             try
             {
               if (!pField.isAccessible())
                 pField.setAccessible(true);
-              final Object value = pField.get(pOriginal);
-              final Class<?> dataType = pField.getType();
-              final Type genericType = pField.getGenericType();
-              final Type[] genericTypes = genericType instanceof ParameterizedType ?
-                  ((ParameterizedType) genericType).getActualTypeArguments() : new Type[0];
-              pField.set(pCopy, pMode.shouldCopyDeep() ? SneakyCopyUtils.createDeepCopy(value, dataType, genericTypes) : value);
+              pField.set(pCopy, copyCreator.copyValue(pField, pField.get(pOriginal)));
             }
             catch (IllegalAccessException pE)
             {
               throw new OJInternalException("Unable to set non bean value while copying a bean!", pE);
             }
-            catch (CopyUnsupportedException pE)
-            {
-              throw new BeanCopyException("Unable to create a deep copy of a non bean field: " + pField, pE);
-            }
           });
+    }
     return pCopy;
   }
 
   /**
-   * Creates a copy of a certain field value.
-   *
-   * @param pField               the bean field to copy the value of
-   * @param pValue               the value to copy
-   * @param pMode                the copy mode
-   * @param pOptionalCopyCreator a optional function to create the copy {@link CustomFieldCopy}
-   * @param pCustomCopies        a collection of custom copy mechanisms for specific bean fields
-   * @param <VALUE>              the generic type of the field value
-   * @return the copied value
+   * Creates copies of bean values.
    */
-  private static <VALUE> VALUE _copyFieldValue(IField<VALUE> pField, VALUE pValue, ECopyMode pMode,
-                                               Optional<Function<VALUE, VALUE>> pOptionalCopyCreator, CustomFieldCopy<?>[] pCustomCopies)
+  private static class _BeanValueCopyCreator
   {
-    try
+    private final ECopyMode mode;
+    private final CustomFieldCopy<?>[] customCopies;
+    private final Map<IField<?>, UnaryOperator> fieldCustomCopyMapping;
+
+    /**
+     * Creates a new copy creator based on a {@link ECopyMode} and some optional custom copy mechanisms.
+     *
+     * @param pMode         the copy mode
+     * @param pCustomCopies some optional custom copy mechanisms
+     */
+    private _BeanValueCopyCreator(ECopyMode pMode, CustomFieldCopy<?>[] pCustomCopies)
     {
-      return pOptionalCopyCreator
-          .map(pCreator -> pCreator.apply(pValue))
-          .orElse(pField.copyValue(pValue, pMode, pCustomCopies));
+      mode = pMode;
+      customCopies = pCustomCopies;
+      fieldCustomCopyMapping = Arrays.stream(pCustomCopies)
+          .collect(Collectors.toMap(CustomFieldCopy::getField, CustomFieldCopy::getCopyCreator));
     }
-    catch (BeanCopyNotSupportedException pE)
+
+    /**
+     * Creates a copy of a certain field value.
+     *
+     * @param pField  the bean field to copy the value of
+     * @param pValue  the value to copy
+     * @param <VALUE> the generic type of the field value
+     * @return the copied value
+     */
+    <VALUE> VALUE copyFieldValue(IField<VALUE> pField, VALUE pValue)
     {
-      throw new BeanCopyException(pE);
+      if (!mode.shouldCopyDeep())
+        return pValue;
+
+      try
+      {
+        //noinspection unchecked
+        return (VALUE) Optional.ofNullable(fieldCustomCopyMapping.get(pField))
+            .map(pCreator -> pCreator.apply(pValue))
+            .orElse(pField.copyValue(pValue, mode, customCopies));
+      }
+      catch (BeanCopyNotSupportedException pE)
+      {
+        throw new BeanCopyException(pE);
+      }
     }
   }
 
   /**
-   * Creates a map from the array of {@link CustomFieldCopy}.
-   *
-   * @param pCustomCopies the custom field copy mechanisms
-   * @return the map based on the array
+   * Creates copies of non bean values.
    */
-  private static Map<IField<?>, Function> _createCustomCopiesMap(CustomFieldCopy[] pCustomCopies)
+  private static class _NonBeanValueCopyCreator
   {
-    return Stream.of(pCustomCopies)
-        .collect(Collectors.toMap(CustomFieldCopy::getField, CustomFieldCopy::getCopyCreator));
+    private final ECopyMode mode;
+
+    /**
+     * Creates a new copy creator based on a {@link ECopyMode}.
+     *
+     * @param pMode the copy mode
+     */
+    private _NonBeanValueCopyCreator(ECopyMode pMode)
+    {
+      mode = pMode;
+    }
+
+    /**
+     * Creates a copy of a certain value based on a declared field.
+     *
+     * @param pDeclaredField the declared field to copy the value of
+     * @param pValue         the value to copy
+     * @return the copied value
+     */
+    Object copyValue(Field pDeclaredField, Object pValue)
+    {
+      if (!mode.shouldCopyDeep())
+        return pValue;
+
+      final Class<?> dataType = pDeclaredField.getType();
+      final Type genericType = pDeclaredField.getGenericType();
+      final Type[] genericTypes = genericType instanceof ParameterizedType ?
+          ((ParameterizedType) genericType).getActualTypeArguments() : new Type[0];
+      try
+      {
+        return SneakyCopyUtils.createDeepCopy(pValue, dataType, genericTypes);
+      }
+      catch (CopyUnsupportedException pE)
+      {
+        throw new BeanCopyException("Unable to create a deep copy of a non bean field: " + pDeclaredField, pE);
+      }
+    }
   }
 }
