@@ -57,9 +57,9 @@ public class SneakyCopyUtilsTest
     final _FirstClass original1 = new _FirstClass();
     final _SecondClass original2 = new _SecondClass();
     final _ThirdClass original3 = new _ThirdClass();
-    _checkCopy(original1, _createCopy(original1, pDeep), pDeep);
-    _checkCopy(original2, _createCopy(original2, pDeep), pDeep);
-    _checkCopy(original3, _createCopy(original3, pDeep), pDeep);
+    _checkCopy(original1, _createCopy(original1, pDeep), pDeep, "first class");
+    _checkCopy(original2, _createCopy(original2, pDeep), pDeep, "second class");
+    _checkCopy(original3, _createCopy(original3, pDeep), pDeep, "third class");
   }
 
   /**
@@ -81,20 +81,21 @@ public class SneakyCopyUtilsTest
    * Checks if a copy is correct.
    * Also includes deep values of the instances to check.
    *
-   * @param pOriginal the original instance
-   * @param pCopy     the copied instance
-   * @param pDeep     <tt>true</tt> if it is a deep copy
-   * @param <VALUE>   the type of the instances to check
+   * @param pOriginal    the original instance
+   * @param pCopy        the copied instance
+   * @param pDeep        <tt>true</tt> if it is a deep copy
+   * @param pValueOrigin describes where the value came from
+   * @param <VALUE>      the type of the instances to check
    */
-  private static <VALUE> void _checkCopy(VALUE pOriginal, VALUE pCopy, boolean pDeep) throws IllegalAccessException
+  private static <VALUE> void _checkCopy(VALUE pOriginal, VALUE pCopy, boolean pDeep, String pValueOrigin) throws IllegalAccessException
   {
-    _assertCopySuccessful(pOriginal, pCopy);
+    _assertCopySuccessful(pOriginal, pCopy, pValueOrigin);
     if (pDeep && pOriginal != null)
     {
       final Class<?> type = pOriginal.getClass();
       if (!_isPrimitiveOrEnumOrTypeOrString(type) && !Collection.class.isAssignableFrom(type) && !Map.class.isAssignableFrom(type))
         for (Field field : reflectDeclaredFields(type))
-          _checkCopy(field.get(pOriginal), field.get(pCopy), true);
+          _checkCopy(field.get(pOriginal), field.get(pCopy), true, "field: " + field.getName());
     }
 
   }
@@ -104,11 +105,12 @@ public class SneakyCopyUtilsTest
    * There will be a special treatment for primitive, enum, string and class types. They should not be copied.
    * Also collection and map types are tested for their content.
    *
-   * @param pOriginal the original value
-   * @param pCopy     the copied value
-   * @param <VALUE>   the type of the values
+   * @param pOriginal    the original value
+   * @param pCopy        the copied value
+   * @param pValueOrigin describes where the value came from
+   * @param <VALUE>      the type of the values
    */
-  private static <VALUE> void _assertCopySuccessful(VALUE pOriginal, VALUE pCopy) throws IllegalAccessException
+  private static <VALUE> void _assertCopySuccessful(VALUE pOriginal, VALUE pCopy, String pValueOrigin) throws IllegalAccessException
   {
     if (pOriginal == null && pCopy == null)
       return;
@@ -124,7 +126,8 @@ public class SneakyCopyUtilsTest
     else if (pOriginal instanceof Map)
       _assertMapCopySuccessful((Map<?, ?>) pOriginal, (Map<?, ?>) pCopy);
     else
-      assertNotSame(pOriginal, pCopy, "type: " + pOriginal.getClass().getName() + ", original: " + pOriginal + ", copy: " + pCopy);
+      assertNotSame(pOriginal, pCopy, "origin: " + pValueOrigin + ", type: " + pOriginal.getClass().getName() + ", original: " +
+          pOriginal + ", copy: " + pCopy);
   }
 
   /**
@@ -138,7 +141,7 @@ public class SneakyCopyUtilsTest
     assertNotSame(pOriginal, pCopy);
     assertEquals(pOriginal.length, pCopy.length);
     for (int i = 0; i < pOriginal.length; i++)
-      _checkCopy(pOriginal[i], pCopy[i], true);
+      _checkCopy(pOriginal[i], pCopy[i], true, "array: " + Arrays.toString(pOriginal));
   }
 
   /**
@@ -159,7 +162,7 @@ public class SneakyCopyUtilsTest
       final Object copy = copyIterator.next();
       if (original != null && copy.getClass() != null)
         assertSame(original.getClass(), copy.getClass());
-      _checkCopy(original, copy, true);
+      _checkCopy(original, copy, true, "collection: " + pOriginal);
     }
   }
 
@@ -183,8 +186,8 @@ public class SneakyCopyUtilsTest
         assertSame(originalEntry.getKey().getClass(), copiedEntry.getKey().getClass());
       if (originalEntry.getValue() != null && copiedEntry.getValue() != null)
         assertSame(originalEntry.getValue().getClass(), copiedEntry.getValue().getClass());
-      _checkCopy(originalEntry.getKey(), copiedEntry.getKey(), true);
-      _checkCopy(originalEntry.getValue(), copiedEntry.getValue(), true);
+      _checkCopy(originalEntry.getKey(), copiedEntry.getKey(), true, "map-key: " + pOriginal);
+      _checkCopy(originalEntry.getValue(), copiedEntry.getValue(), true, "map-value: " + pOriginal);
     }
   }
 
