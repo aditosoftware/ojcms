@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 /**
  * Static utility class providing mechanism to create deep or shallow copies.
@@ -113,9 +114,13 @@ public final class SneakyCopyUtils
       Class<?> current = pTypeToReflect;
       do
       {
-        final List<Field> fields = Arrays.asList(current.getDeclaredFields());
-        fields.forEach(pField -> pField.setAccessible(true));
-        declaredFields.addAll(fields);
+        Stream.of(current.getDeclaredFields())
+            .filter(pField -> !pField.isSynthetic())
+            .forEach(pField -> {
+              if (!pField.isAccessible())
+                pField.setAccessible(true);
+              declaredFields.add(pField);
+            });
       }
       while ((current = current.getSuperclass()) != null);
       return declaredFields;

@@ -160,6 +160,7 @@ public final class BeanReflector
     do
     {
       Stream.of(current.getDeclaredFields())
+          .filter(pField -> !pField.isSynthetic())
           .filter(combinedPredicate)
           .forEach(declaredFields::add);
     }
