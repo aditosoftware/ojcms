@@ -18,4 +18,15 @@ public class BeanCopyException extends OJRuntimeException
   {
     super(pUnsupportedException);
   }
+
+  /**
+   * Creates a copy exception with a detail message and the cause of the exception.
+   *
+   * @param pMessage a detailed message describing the cause of the exception
+   * @param pCause   the cause of the exception
+   */
+  public BeanCopyException(String pMessage, Throwable pCause)
+  {
+    super(pMessage, pCause);
+  }
 }

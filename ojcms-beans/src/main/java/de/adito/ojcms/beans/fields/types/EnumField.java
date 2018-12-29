@@ -4,6 +4,7 @@ import de.adito.ojcms.beans.annotations.GenericBeanField;
 import de.adito.ojcms.beans.annotations.internal.TypeDefaultField;
 import de.adito.ojcms.beans.exceptions.OJInternalException;
 import de.adito.ojcms.beans.fields.serialization.ISerializableField;
+import de.adito.ojcms.beans.fields.util.CustomFieldCopy;
 import de.adito.ojcms.beans.util.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -49,8 +50,8 @@ public class EnumField<ENUM extends Enum> extends AbstractField<ENUM> implements
   }
 
   @Override
-  public ENUM copyValue(ENUM pValue, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
+  public ENUM copyValue(ENUM pEnum, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
   {
-    return pValue;
+    return pEnum;
   }
 }

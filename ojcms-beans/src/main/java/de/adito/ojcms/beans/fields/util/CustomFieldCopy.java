@@ -1,4 +1,4 @@
-package de.adito.ojcms.beans.util;
+package de.adito.ojcms.beans.fields.util;
 
 import de.adito.ojcms.beans.fields.IField;
 
@@ -10,7 +10,7 @@ import java.util.function.UnaryOperator;
  * @param <VALUE> the data type of the bean field to copy values from
  * @author Simon Danner, 14.04.2018
  */
-public class CustomFieldCopy<VALUE>
+public final class CustomFieldCopy<VALUE>
 {
   private final IField<VALUE> field;
   private final UnaryOperator<VALUE> copyCreator;

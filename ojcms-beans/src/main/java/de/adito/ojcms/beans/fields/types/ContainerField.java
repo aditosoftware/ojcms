@@ -3,7 +3,8 @@ package de.adito.ojcms.beans.fields.types;
 import de.adito.ojcms.beans.*;
 import de.adito.ojcms.beans.annotations.*;
 import de.adito.ojcms.beans.annotations.internal.*;
-import de.adito.ojcms.beans.util.*;
+import de.adito.ojcms.beans.fields.util.CustomFieldCopy;
+import de.adito.ojcms.beans.util.ECopyMode;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
@@ -30,6 +31,6 @@ public class ContainerField<BEAN extends IBean<BEAN>> extends AbstractField<IBea
   public IBeanContainer<BEAN> copyValue(IBeanContainer<BEAN> pOriginalContainer, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
   {
     return IBeanContainer.ofStream(pOriginalContainer.getBeanType(), pOriginalContainer.stream()
-        .map(pOriginalBean -> pOriginalBean.createCopy(pMode, pCustomFieldCopies)));
+        .map(pOriginalBean -> pMode.shouldCopyDeep() ? pOriginalBean.createCopy(pMode, pCustomFieldCopies) : pOriginalBean));
   }
 }

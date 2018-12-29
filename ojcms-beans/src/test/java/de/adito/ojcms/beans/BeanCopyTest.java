@@ -54,13 +54,23 @@ class BeanCopyTest
   }
 
   @Test
-  public void testAllFieldCopy()
+  public void testAllFieldShallowCopy()
+  {
+    final Data original = new Data(new Person(), new Person());
+    final Data copy = original.createCopy(ECopyMode.SHALLOW_ALL_FIELDS);
+    assertEquals(original.someNormalList, copy.someNormalList);
+    assertSame(original.getValue(Data.person1).getValue(Person.address).someNormalField,
+               copy.getValue(Data.person1).getValue(Person.address).someNormalField);
+  }
+
+  @Test
+  public void testAllFieldDeepCopy()
   {
     final Data original = new Data(new Person(), new Person());
     final Data copy = original.createCopy(ECopyMode.DEEP_ALL_FIELDS);
     assertEquals(original.someNormalList, copy.someNormalList);
-    assertEquals(original.getValue(Data.person1).getValue(Person.address).someNormalField,
-                 copy.getValue(Data.person1).getValue(Person.address).someNormalField);
+    assertNotSame(original.getValue(Data.person1).getValue(Person.address).someNormalField,
+                  copy.getValue(Data.person1).getValue(Person.address).someNormalField);
   }
 
   /**
@@ -70,18 +80,17 @@ class BeanCopyTest
   {
     public static final BeanField<Person> person1 = OJFields.create(Data.class);
     public static final BeanField<Person> person2 = OJFields.create(Data.class);
-    private List<Integer> someNormalList = new ArrayList<>();
+    private List<Integer> someNormalList = Collections.singletonList(42);
 
     public Data(Person pPerson1, Person pPerson2)
     {
       setValue(person1, pPerson1);
       setValue(person2, pPerson2);
-      someNormalList.add(42);
     }
   }
 
   /**
-   * OJBean for a person with an address property (reference).
+   * Bean for a person with an address property (reference).
    */
   public static class Person extends OJBean<Person>
   {
@@ -96,13 +105,13 @@ class BeanCopyTest
   }
 
   /**
-   * OJBean for an address.
+   * Bean for an address.
    */
   public static class Address extends OJBean<Address>
   {
     public static final TextField city = OJFields.create(Address.class);
     public static final IntegerField postalCode = OJFields.create(Address.class);
-    private final String someNormalField = "value";
+    private final List<String> someNormalField = new ArrayList<>();
 
     public Address()
     {

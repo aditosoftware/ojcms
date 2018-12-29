@@ -3,6 +3,7 @@ package de.adito.ojcms.beans.fields.types;
 import de.adito.ojcms.beans.*;
 import de.adito.ojcms.beans.annotations.GenericBeanField;
 import de.adito.ojcms.beans.annotations.internal.*;
+import de.adito.ojcms.beans.fields.util.CustomFieldCopy;
 import de.adito.ojcms.beans.util.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,8 +27,8 @@ public class BeanField<BEAN extends IBean<BEAN>> extends AbstractField<BEAN>
   }
 
   @Override
-  public BEAN copyValue(BEAN pValue, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
+  public BEAN copyValue(BEAN pBean, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
   {
-    return pValue.createCopy(pMode, pCustomFieldCopies);
+    return pBean.createCopy(pMode, pCustomFieldCopies);
   }
 }

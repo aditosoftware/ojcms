@@ -90,7 +90,7 @@ class BeanReferenceTest
   }
 
   /**
-   * OJBean for a person with an address property (reference).
+   * Bean for a person with an address property (reference).
    */
   public static class Person extends OJBean<Person>
   {
@@ -105,7 +105,7 @@ class BeanReferenceTest
   }
 
   /**
-   * OJBean for an address.
+   * Bean for an address.
    */
   public static class Address extends OJBean<Address>
   {

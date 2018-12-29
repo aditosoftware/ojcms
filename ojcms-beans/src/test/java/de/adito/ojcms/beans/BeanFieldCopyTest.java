@@ -3,6 +3,7 @@ package de.adito.ojcms.beans;
 import de.adito.ojcms.beans.exceptions.copy.BeanCopyNotSupportedException;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.fields.types.*;
+import de.adito.ojcms.beans.fields.util.CustomFieldCopy;
 import de.adito.ojcms.beans.util.*;
 import org.apache.commons.lang3.ClassUtils;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -49,13 +50,13 @@ public class BeanFieldCopyTest
         new _FieldValueWrapper<>(DateField.class, Instant.now()),
         new _FieldValueWrapper<>(DecimalField.class, 5.2),
         new _GenericFieldValueWrapper<>(EnumField.class, TestEnum.HELLO),
-        new _GenericFieldValueWrapper<>(GenericField.class, new Thread()),
+        new _GenericFieldValueWrapper<>(GenericField.class, new _FieldValueWrapper<>(BooleanField.class, true)),
         new _FieldValueWrapper<>(IntegerField.class, 1),
-        //new _GenericFieldValueWrapper<>(ListField.class, new ArrayList<>()),
+        new _GenericFieldValueWrapper<>(ListField.class, Arrays.asList("1", "2", "3")),
         new _FieldValueWrapper<>(LongField.class, 4L),
         new _GenericFieldValueWrapper<>(MapField.class, IMapBean.createFromMap(testMap, Integer.class, (pName, pField) -> {},
                                                                                pKey -> Optional.empty(), false), mapTest),
-        //new _GenericFieldValueWrapper<>(SetField.class, new HashSet<>()),
+        new _GenericFieldValueWrapper<>(SetField.class, new HashSet<>(Arrays.asList("1", "2", "3"))),
         new _FieldValueWrapper<>(ShortField.class, (short) 7),
         new _FieldValueWrapper<>(TextField.class, "testing"));
   }
@@ -77,7 +78,7 @@ public class BeanFieldCopyTest
     }
     catch (BeanCopyNotSupportedException pE)
     {
-      fail(pFieldValueWrapper.fieldType.getName() + " should support a copy mechanism for its value");
+      fail(pFieldValueWrapper.fieldType.getName() + " should support a copy mechanism for its value", pE);
     }
   }
 
@@ -196,6 +197,12 @@ public class BeanFieldCopyTest
     public Optional<Consumer<VALUE>> getOptionalTest()
     {
       return optionalTest;
+    }
+
+    @Override
+    public String toString()
+    {
+      return "fieldType: " + fieldType.getSimpleName();
     }
   }
 }

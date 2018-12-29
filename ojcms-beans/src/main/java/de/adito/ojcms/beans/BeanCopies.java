@@ -5,7 +5,10 @@ import de.adito.ojcms.beans.datasource.*;
 import de.adito.ojcms.beans.exceptions.OJInternalException;
 import de.adito.ojcms.beans.exceptions.copy.*;
 import de.adito.ojcms.beans.fields.IField;
+import de.adito.ojcms.beans.fields.util.CustomFieldCopy;
 import de.adito.ojcms.beans.util.*;
+import de.adito.ojcms.utils.copy.SneakyCopyUtils;
+import de.adito.ojcms.utils.copy.exceptions.CopyUnsupportedException;
 import org.objenesis.*;
 
 import java.lang.reflect.*;
@@ -146,11 +149,20 @@ final class BeanCopies
             {
               if (!pField.isAccessible())
                 pField.setAccessible(true);
-              pField.set(pCopy, pField.get(pOriginal));
+              final Object value = pField.get(pOriginal);
+              final Class<?> dataType = pField.getType();
+              final Type genericType = pField.getGenericType();
+              final Type[] genericTypes = genericType instanceof ParameterizedType ?
+                  ((ParameterizedType) genericType).getActualTypeArguments() : new Type[0];
+              pField.set(pCopy, pMode.shouldCopyDeep() ? SneakyCopyUtils.createDeepCopy(value, dataType, genericTypes) : value);
             }
             catch (IllegalAccessException pE)
             {
               throw new OJInternalException("Unable to set non bean value while copying a bean!", pE);
+            }
+            catch (CopyUnsupportedException pE)
+            {
+              throw new BeanCopyException("Unable to create a deep copy of a non bean field: " + pField, pE);
             }
           });
     return pCopy;

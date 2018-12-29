@@ -6,16 +6,16 @@ import de.adito.ojcms.beans.datasource.*;
 import de.adito.ojcms.beans.exceptions.bean.*;
 import de.adito.ojcms.beans.exceptions.field.*;
 import de.adito.ojcms.beans.fields.IField;
-import de.adito.ojcms.beans.fields.util.FieldValueTuple;
+import de.adito.ojcms.beans.fields.util.*;
 import de.adito.ojcms.beans.references.*;
 import de.adito.ojcms.beans.statistics.IStatisticData;
-import de.adito.ojcms.beans.util.*;
+import de.adito.ojcms.beans.util.ECopyMode;
 import de.adito.ojcms.utils.StringUtility;
 import de.adito.ojcms.utils.readonly.*;
 import org.jetbrains.annotations.*;
 
 import java.util.*;
-import java.util.function.*;
+import java.util.function.UnaryOperator;
 import java.util.stream.*;
 
 import static de.adito.ojcms.beans.BeanCopies.doCreateCopy;

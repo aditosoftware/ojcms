@@ -3,6 +3,7 @@ package de.adito.ojcms.beans.fields.types;
 import de.adito.ojcms.beans.annotations.NeverNull;
 import de.adito.ojcms.beans.annotations.internal.TypeDefaultField;
 import de.adito.ojcms.beans.fields.serialization.ISerializableFieldToString;
+import de.adito.ojcms.beans.fields.util.CustomFieldCopy;
 import de.adito.ojcms.beans.util.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,9 +31,9 @@ public class ShortField extends AbstractField<Short> implements ISerializableFie
   }
 
   @Override
-  public Short copyValue(Short pValue, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
+  public Short copyValue(Short pShort, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
   {
-    return pValue;
+    return pShort;
   }
 
   @Override

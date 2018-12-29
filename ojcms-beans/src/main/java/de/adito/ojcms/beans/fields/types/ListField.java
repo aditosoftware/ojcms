@@ -1,8 +1,9 @@
 package de.adito.ojcms.beans.fields.types;
 
 import de.adito.ojcms.beans.annotations.*;
-import de.adito.ojcms.beans.annotations.internal.*;
+import de.adito.ojcms.beans.annotations.internal.TypeDefaultField;
 import de.adito.ojcms.beans.fields.serialization.ISerializableFieldJson;
+import de.adito.ojcms.beans.fields.util.ISneakyCopyCreatorField;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
@@ -17,7 +18,8 @@ import java.util.*;
 @NeverNull
 @TypeDefaultField(types = List.class)
 @GenericBeanField(genericWrapperType = List.class)
-public class ListField<ELEMENT> extends AbstractField<List<ELEMENT>> implements ISerializableFieldJson<List<ELEMENT>>
+public class ListField<ELEMENT> extends AbstractField<List<ELEMENT>>
+    implements ISerializableFieldJson<List<ELEMENT>>, ISneakyCopyCreatorField<List<ELEMENT>>
 {
   protected ListField(@NotNull Class<List<ELEMENT>> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
   {

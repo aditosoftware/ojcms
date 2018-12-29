@@ -98,13 +98,14 @@ public interface IField<VALUE>
 
   /**
    * Creates a copy of the value of this field.
-   * Optionally {@link CustomFieldCopy} information may be provided to copy certain fields' values in a special way.
+   * Optionally {@link CustomFieldCopy} information may be provided to copy certain field values in a special way.
+   * If the copied value is deep or shallow depends on the {@link ECopyMode}.
    *
    * @param pValue             the value to create the copy from
-   * @param pMode              the copy mode
+   * @param pMode              the copy mode (deep or shallow)
    * @param pCustomFieldCopies a collection of custom copy mechanisms for specific bean fields
    * @return a copy of the field value
-   * @throws UnsupportedOperationException if, it is not possible to create a copy of the specified data type
+   * @throws BeanCopyNotSupportedException if, it is not possible to create a copy of the specified data type
    */
   default VALUE copyValue(VALUE pValue, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies) throws BeanCopyNotSupportedException
   {

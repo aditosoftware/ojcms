@@ -3,6 +3,7 @@ package de.adito.ojcms.beans.fields.types;
 import de.adito.ojcms.beans.annotations.NeverNull;
 import de.adito.ojcms.beans.annotations.internal.TypeDefaultField;
 import de.adito.ojcms.beans.fields.serialization.ISerializableFieldToString;
+import de.adito.ojcms.beans.fields.util.CustomFieldCopy;
 import de.adito.ojcms.beans.util.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,9 +31,9 @@ public class LongField extends AbstractField<Long> implements ISerializableField
   }
 
   @Override
-  public Long copyValue(Long pValue, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
+  public Long copyValue(Long pLong, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
   {
-    return pValue;
+    return pLong;
   }
 
   @Override

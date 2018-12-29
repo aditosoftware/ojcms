@@ -3,7 +3,8 @@ package de.adito.ojcms.beans.fields.types;
 import de.adito.ojcms.beans.annotations.NeverNull;
 import de.adito.ojcms.beans.annotations.internal.TypeDefaultField;
 import de.adito.ojcms.beans.fields.serialization.ISerializableFieldToString;
-import de.adito.ojcms.beans.util.*;
+import de.adito.ojcms.beans.fields.util.CustomFieldCopy;
+import de.adito.ojcms.beans.util.ECopyMode;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
@@ -30,9 +31,9 @@ public class IntegerField extends AbstractField<Integer> implements ISerializabl
   }
 
   @Override
-  public Integer copyValue(Integer pValue, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
+  public Integer copyValue(Integer pInteger, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
   {
-    return pValue;
+    return pInteger;
   }
 
   @Override

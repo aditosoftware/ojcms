@@ -19,12 +19,15 @@ public enum ECopyMode
 
   /**
    * Deep copy, only bean field values will be transferred.
+   * Be aware: Not all generic values may be able to create a deep copy!
    */
   DEEP_ONLY_BEAN_FIELDS(true, false),
 
   /**
    * Deep copy, all field values will be transferred.
-   * Caution: Only bean values will be copied deeply. Normal fields will be copied by referenced still.
+   * Be aware: Not all generic values may be able to create a deep copy!
+   *
+   * Use this mode only in special circumstances where there's no other possibility at all!
    */
   DEEP_ALL_FIELDS(true, true);
 

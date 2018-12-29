@@ -4,6 +4,7 @@ import de.adito.ojcms.beans.*;
 import de.adito.ojcms.beans.annotations.*;
 import de.adito.ojcms.beans.annotations.internal.*;
 import de.adito.ojcms.beans.fields.IField;
+import de.adito.ojcms.beans.fields.util.CustomFieldCopy;
 import de.adito.ojcms.beans.util.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -59,8 +60,8 @@ public class MapField<KEY, VALUE> extends AbstractField<IMapBean<KEY, VALUE>>
   }
 
   @Override
-  public IMapBean<KEY, VALUE> copyValue(IMapBean<KEY, VALUE> pValue, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
+  public IMapBean<KEY, VALUE> copyValue(IMapBean<KEY, VALUE> pMapBean, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
   {
-    return pValue.createCopy(pMode, IMapBean::createCopy, pCustomFieldCopies);
+    return pMapBean.createCopy(pMode, IMapBean::createCopy, pCustomFieldCopies);
   }
 }
