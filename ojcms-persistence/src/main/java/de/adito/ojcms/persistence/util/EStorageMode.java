@@ -1,4 +1,4 @@
-package de.adito.ojcms.persistence;
+package de.adito.ojcms.persistence.util;
 
 /**
  * All possible storage modes for persistent beans within a persistent container.

@@ -4,6 +4,7 @@ import com.squareup.javapoet.*;
 import de.adito.ojcms.beans.*;
 import de.adito.ojcms.beans.exceptions.OJInternalException;
 import de.adito.ojcms.persistence.*;
+import de.adito.ojcms.persistence.util.*;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;

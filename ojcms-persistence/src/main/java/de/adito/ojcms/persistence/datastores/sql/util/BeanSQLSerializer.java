@@ -6,6 +6,7 @@ import de.adito.ojcms.beans.fields.serialization.ISerializableField;
 import de.adito.ojcms.beans.fields.types.*;
 import de.adito.ojcms.beans.fields.util.*;
 import de.adito.ojcms.persistence.*;
+import de.adito.ojcms.persistence.util.EPersistenceMode;
 import de.adito.ojcms.sqlbuilder.definition.*;
 import org.jetbrains.annotations.*;
 

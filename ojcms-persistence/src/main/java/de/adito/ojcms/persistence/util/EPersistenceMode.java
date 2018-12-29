@@ -1,4 +1,4 @@
-package de.adito.ojcms.persistence;
+package de.adito.ojcms.persistence.util;
 
 /**
  * Defines all possible persistence modes for the beans.

@@ -44,6 +44,7 @@ final class BeanCopies
    */
   static <BEAN extends IBean<BEAN>> BEAN doCreateCopy(BEAN pOriginal, ECopyMode pMode, CustomFieldCopy<?>... pCustomCopies)
   {
+    BeanInternalEvents.requestEncapsulatedData(pOriginal); //Check if the data core is present
     //noinspection unchecked
     final Class<BEAN> beanType = (Class<BEAN>) BeanReflector.requiresDeclaredBeanType(pOriginal.getClass());
     final List<IField<?>> fieldOrder = pOriginal.streamFields().collect(Collectors.toList());
@@ -67,6 +68,7 @@ final class BeanCopies
   static <BEAN extends IBean<BEAN>> BEAN doCreateCopy(BEAN pOriginal, ECopyMode pMode, UnaryOperator<BEAN> pCustomConstructorCall,
                                                       CustomFieldCopy<?>... pCustomCopies)
   {
+    BeanInternalEvents.requestEncapsulatedData(pOriginal); //Check if the data core is present
     return _setValues(pOriginal, pCustomConstructorCall.apply(pOriginal), pMode, pCustomCopies);
   }
 

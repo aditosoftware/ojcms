@@ -8,6 +8,7 @@ import de.adito.ojcms.beans.fields.util.IBeanFieldBased;
 import de.adito.ojcms.persistence.*;
 import de.adito.ojcms.persistence.datastores.sql.*;
 import de.adito.ojcms.persistence.datastores.sql.util.DatabaseConstants;
+import de.adito.ojcms.persistence.util.*;
 import de.adito.ojcms.sqlbuilder.definition.column.*;
 
 import java.util.Collection;
@@ -79,10 +80,10 @@ public class BeanColumnDefinition<VALUE> implements IColumnDefinition, IBeanFiel
         DatabaseConstants.ID_COLUMN;
     columnType.foreignKey(IForeignKey.of(tableName, columnName, pConnectionInfo -> {
       if (annotation.mode() == EPersistenceMode.SINGLE)
-        SQLPersistentBean.createBeanTable(pConnectionInfo);
+        SQLPersistentBeanSource.createBeanTable(pConnectionInfo);
       else
         //noinspection unchecked
-        SQLPersistentContainer.createTableForContainer(pConnectionInfo, beanType, tableName);
+        SQLPersistentContainerSource.createTableForContainer(pConnectionInfo, beanType, tableName);
     }));
   }
 

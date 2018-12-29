@@ -13,6 +13,7 @@ import de.adito.ojcms.sqlbuilder.definition.IColumnIdentification;
 import de.adito.ojcms.sqlbuilder.definition.column.*;
 import de.adito.ojcms.sqlbuilder.definition.condition.IWhereCondition;
 import de.adito.ojcms.sqlbuilder.util.*;
+import de.adito.ojcms.utils.StringUtility;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,7 +34,7 @@ import static de.adito.ojcms.sqlbuilder.definition.condition.IWhereCondition.*;
  * @param <BEAN> the type of the bean, that will be created from this persistent bean builder
  * @author Simon Danner, 21.04.2018
  */
-public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IBeanDataSource
+public class SQLPersistentBeanSource<BEAN extends IBean<BEAN>> implements IBeanDataSource
 {
   private static final IColumnIdentification<String> BEAN_ID_COLUMN_IDENTIFICATION =
       IColumnIdentification.of(BEAN_TABLE_BEAN_ID, String.class);
@@ -137,11 +138,11 @@ public class SQLPersistentBean<BEAN extends IBean<BEAN>> implements IBeanDataSou
    * @param pConnectionInfo    the database connection information
    * @param pDataStoreSupplier a supplier for persistent beans and containers
    */
-  public SQLPersistentBean(String pBeanId, Class<BEAN> pBeanType, DBConnectionInfo pConnectionInfo, Supplier<BeanDataStore> pDataStoreSupplier)
+  public SQLPersistentBeanSource(String pBeanId, Class<BEAN> pBeanType, DBConnectionInfo pConnectionInfo, Supplier<BeanDataStore> pDataStoreSupplier)
   {
-    beanIdCondition = isEqual(BEAN_ID_COLUMN_IDENTIFICATION, pBeanId);
-    columns = _createColumnMap(pBeanType);
-    builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionInfo.getDatabaseType(), ID_COLUMN)
+    beanIdCondition = isEqual(BEAN_ID_COLUMN_IDENTIFICATION, StringUtility.requireNotEmpty(pBeanId, "bean persistence id"));
+    columns = _createColumnMap(Objects.requireNonNull(pBeanType));
+    builder = OJSQLBuilderFactory.newSQLBuilder(Objects.requireNonNull(pConnectionInfo).getDatabaseType(), ID_COLUMN)
         .forSingleTable(BEAN_TABLE_NAME)
         .withClosingAndRenewingConnection(pConnectionInfo)
         .withCustomSerializer(new BeanSQLSerializer(pDataStoreSupplier))

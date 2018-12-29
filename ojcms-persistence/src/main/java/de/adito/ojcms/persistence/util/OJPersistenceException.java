@@ -1,4 +1,4 @@
-package de.adito.ojcms.persistence;
+package de.adito.ojcms.persistence.util;
 
 import de.adito.ojcms.beans.IBean;
 

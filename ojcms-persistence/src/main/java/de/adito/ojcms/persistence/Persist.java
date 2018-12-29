@@ -1,6 +1,7 @@
 package de.adito.ojcms.persistence;
 
 import de.adito.ojcms.beans.annotations.ObserveCreation;
+import de.adito.ojcms.persistence.util.*;
 
 import java.lang.annotation.*;
 

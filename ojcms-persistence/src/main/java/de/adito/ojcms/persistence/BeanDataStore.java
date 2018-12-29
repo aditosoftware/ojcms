@@ -5,6 +5,7 @@ import de.adito.ojcms.beans.datasource.IBeanContainerDataSource;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.fields.util.FieldValueTuple;
 import de.adito.ojcms.persistence.datastores.IPersistentSourcesStore;
+import de.adito.ojcms.persistence.util.OJPersistenceException;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
