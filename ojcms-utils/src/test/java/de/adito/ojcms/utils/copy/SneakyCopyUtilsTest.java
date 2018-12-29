@@ -214,7 +214,7 @@ public class SneakyCopyUtilsTest
     private final List<_SecondClass> complexList = Arrays.asList(new _SecondClass(), new _SecondClass());
     private final Class<_FirstClass> classType = _FirstClass.class;
     private final Map<String, _SecondClass> someMap = new HashMap<>();
-    private final int[] primitiveArray = new int[]{1, 2, 3};
+    private final boolean[] primitiveArray = new boolean[]{true, false, false};
     private final _ThirdClass[] complexArray = new _ThirdClass[]{new _ThirdClass(), new _ThirdClass()};
 
     private _FirstClass()
