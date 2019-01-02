@@ -8,7 +8,7 @@ import org.junit.jupiter.api.*;
 import java.time.*;
 import java.util.Optional;
 
-import static de.adito.ojcms.beans.base.reactive.ReactiveTest.observe;
+import static de.adito.ojcms.beans.base.reactive.ReactiveUtil.observe;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**

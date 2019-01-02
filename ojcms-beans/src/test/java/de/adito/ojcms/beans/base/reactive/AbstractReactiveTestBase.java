@@ -19,7 +19,7 @@ import java.util.function.Consumer;
  * @param <TEST>     the runtime type of the reactive test
  * @author Simon Danner, 02.01.2019
  */
-abstract class AbstractReactiveTest<BASE, OBSERVED, TEST extends AbstractReactiveTest<BASE, OBSERVED, TEST>>
+abstract class AbstractReactiveTestBase<BASE, OBSERVED, TEST extends AbstractReactiveTestBase<BASE, OBSERVED, TEST>>
 {
   protected final BASE base;
   private final TestObserver<OBSERVED> testObserver = TestObserver.create();
@@ -31,7 +31,7 @@ abstract class AbstractReactiveTest<BASE, OBSERVED, TEST extends AbstractReactiv
    * @param pBase       the base instance the test is based on (may produce the observable)
    * @param pObservable the observable to make assertions on
    */
-  protected AbstractReactiveTest(BASE pBase, Observable<OBSERVED> pObservable)
+  protected AbstractReactiveTestBase(BASE pBase, Observable<OBSERVED> pObservable)
   {
     base = pBase;
     pObservable.subscribe(testObserver);
@@ -80,7 +80,7 @@ abstract class AbstractReactiveTest<BASE, OBSERVED, TEST extends AbstractReactiv
    * @param pOtherTest the other reactive test to include the assertions from
    * @return the test instance itself to enable a pipelining mechanism
    */
-  public TEST assertMultiple(AbstractReactiveTest<BASE, OBSERVED, TEST> pOtherTest)
+  public TEST assertMultiple(AbstractReactiveTestBase<BASE, OBSERVED, TEST> pOtherTest)
   {
     assertions.addAll(pOtherTest.assertions);
     //noinspection unchecked

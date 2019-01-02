@@ -9,7 +9,7 @@ import io.reactivex.Observable;
  * @param <OBSERVED> the type of the observed values
  * @author Simon Danner, 02.01.2019
  */
-public class StaticReactiveTest<OBSERVED> extends AbstractReactiveTest<Void, OBSERVED, StaticReactiveTest<OBSERVED>>
+public class StaticReactiveUtil<OBSERVED> extends AbstractReactiveTestBase<Void, OBSERVED, StaticReactiveUtil<OBSERVED>>
 {
   /**
    * Creates a new test definition based on an {@link Observable}.
@@ -21,9 +21,9 @@ public class StaticReactiveTest<OBSERVED> extends AbstractReactiveTest<Void, OBS
    * @param <OBSERVED>  the type of the observed values
    * @return the reactive test definition
    */
-  public static <OBSERVED> StaticReactiveTest<OBSERVED> observe(Observable<OBSERVED> pObservable)
+  public static <OBSERVED> StaticReactiveUtil<OBSERVED> observe(Observable<OBSERVED> pObservable)
   {
-    return new StaticReactiveTest<>(pObservable);
+    return new StaticReactiveUtil<>(pObservable);
   }
 
   /**
@@ -31,7 +31,7 @@ public class StaticReactiveTest<OBSERVED> extends AbstractReactiveTest<Void, OBS
    *
    * @param pObservable the observable to make assertions on
    */
-  private StaticReactiveTest(Observable<OBSERVED> pObservable)
+  private StaticReactiveUtil(Observable<OBSERVED> pObservable)
   {
     super(null, pObservable);
   }

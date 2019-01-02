@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.lang.annotation.*;
 
 import static de.adito.ojcms.beans.BeanCreationEvents.*;
-import static de.adito.ojcms.beans.base.reactive.StaticReactiveTest.observe;
+import static de.adito.ojcms.beans.base.reactive.StaticReactiveUtil.observe;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**

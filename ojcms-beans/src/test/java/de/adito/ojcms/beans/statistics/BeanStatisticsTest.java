@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
-import static de.adito.ojcms.beans.base.reactive.ReactiveTest.observe;
+import static de.adito.ojcms.beans.base.reactive.ReactiveUtil.observe;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**

@@ -13,7 +13,7 @@ import java.util.function.*;
  * @param <OBSERVED> the type of the observed values
  * @author Simon Danner, 02.01.2019
  */
-public class ReactiveTest<BASE, OBSERVED> extends AbstractReactiveTest<BASE, OBSERVED, ReactiveTest<BASE, OBSERVED>>
+public class ReactiveUtil<BASE, OBSERVED> extends AbstractReactiveTestBase<BASE, OBSERVED, ReactiveUtil<BASE, OBSERVED>>
 {
   /**
    * Creates a new test definition starting with a base instance and a function to resolve the observable of the instance.
@@ -27,9 +27,9 @@ public class ReactiveTest<BASE, OBSERVED> extends AbstractReactiveTest<BASE, OBS
    * @param <OBSERVED>          the type of the observed values
    * @return the reactive test definition
    */
-  public static <BASE, OBSERVED> ReactiveTest<BASE, OBSERVED> observe(BASE pBase, Function<BASE, Observable<OBSERVED>> pObservableResolver)
+  public static <BASE, OBSERVED> ReactiveUtil<BASE, OBSERVED> observe(BASE pBase, Function<BASE, Observable<OBSERVED>> pObservableResolver)
   {
-    return new ReactiveTest<>(pBase, pObservableResolver.apply(pBase));
+    return new ReactiveUtil<>(pBase, pObservableResolver.apply(pBase));
   }
 
   /**
@@ -38,7 +38,7 @@ public class ReactiveTest<BASE, OBSERVED> extends AbstractReactiveTest<BASE, OBS
    * @param pBase       the base instance the test is based on (may produce the observable)
    * @param pObservable the observable to make assertions on
    */
-  private ReactiveTest(BASE pBase, Observable<OBSERVED> pObservable)
+  private ReactiveUtil(BASE pBase, Observable<OBSERVED> pObservable)
   {
     super(pBase, pObservable);
   }
@@ -49,7 +49,7 @@ public class ReactiveTest<BASE, OBSERVED> extends AbstractReactiveTest<BASE, OBS
    * @param pPreparation the configuration as consumer of the base instance
    * @return the test instance itself to enable a pipelining mechanism
    */
-  public ReactiveTest<BASE, OBSERVED> prepare(Consumer<BASE> pPreparation)
+  public ReactiveUtil<BASE, OBSERVED> prepare(Consumer<BASE> pPreparation)
   {
     pPreparation.accept(base);
     return this;

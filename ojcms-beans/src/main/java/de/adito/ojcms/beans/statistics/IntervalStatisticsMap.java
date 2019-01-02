@@ -54,7 +54,8 @@ class IntervalStatisticsMap<ENTRY> extends LinkedHashMap<Long, ENTRY>
       final long start = lastTimestamp + interval;
       final long totalDiff = pTimeStamp - start;
       final long overflow = totalDiff % interval;
-      lastTimestamp = pTimeStamp + overflow;
+      //If there is a overflow the last timestamp lies above the timestamp of the entry
+      lastTimestamp = pTimeStamp + (overflow == 0 ? 0 : interval - overflow);
       //Add a entry for each interval between the last timestamp and the new one
       LongStream.iterate(start, pTime -> pTime + interval)
           //Add two entries, if the last entry surpasses the last entry of the changes
