@@ -3,8 +3,7 @@ package de.adito.ojcms.beans.statistics;
 import de.adito.ojcms.beans.reactive.events.NewStatisticEntry;
 import io.reactivex.Observable;
 
-import java.util.*;
-import java.util.function.LongFunction;
+import java.util.Map;
 
 /**
  * Statistic data of bean elements.
@@ -50,27 +49,18 @@ public interface IStatisticData<ENTRY>
    * This creates time based entries from the first entry of changed statistic data until the very last.
    * Be aware that this could result in a large set of data and may reach memory limits, if the interval is not chosen properly.
    *
-   * The entries of the resulting map will be updated automatically, if a change of an according value happens.
+   * This map is represented as an observable because the map may update when new statistic data is added.
+   * If such an addition happens the observable informs about the update.
    *
-   * @return a map that holds a timestamp as key and an associated value as value (interval based)
+   * @param pInterval the interval of the timestamps (in ms)
+   * @return an observable map that holds a timestamp as key and an associated value as value (interval based)
    */
-  default Map<Long, ENTRY> getIntervalStatistics(int pInterval)
+  default Observable<Map<Long, ENTRY>> getIntervalStatistics(int pInterval)
   {
-    if (size() == 0)
-      return Collections.emptyMap();
-
-    final Map<Long, ENTRY> changes = getChangedDataStatistics();
-    final LinkedList<Long> timestamps = new LinkedList<>(changes.keySet());
-    final long firstTimestamp = timestamps.getFirst();
-    final long lastTimestamp = timestamps.getLast();
-    //Resolves the value for a timestamp (removes all outdated timestamps from the list -> the first entry will be current timestamp)
-    final LongFunction<ENTRY> valueResolver = pTimestamp -> {
-      while (timestamps.size() > 1 && timestamps.get(1) <= pTimestamp)
-        timestamps.removeFirst();
-      return changes.get(timestamps.getFirst());
-    };
-
-    return new IntervalStatisticsMap<>(pInterval, valueResolver, firstTimestamp, lastTimestamp, this);
+    final IntervalStatisticsMap<ENTRY> map = new IntervalStatisticsMap<>(pInterval, getChangedDataStatistics());
+    return observeStatistics()
+        .map(pNewEntry -> map.newEntry(pNewEntry.getTimestamp(), pNewEntry.getValue()))
+        .startWith(map);
   }
 
   /**

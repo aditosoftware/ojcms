@@ -2,15 +2,16 @@ package de.adito.ojcms.beans.statistics;
 
 import de.adito.ojcms.beans.*;
 import de.adito.ojcms.beans.annotations.Statistics;
-import de.adito.ojcms.beans.base.AbstractOnNextCallCountTest;
 import de.adito.ojcms.beans.exceptions.OJInternalException;
 import de.adito.ojcms.beans.fields.types.TextField;
+import io.reactivex.Observable;
 import org.junit.jupiter.api.*;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
+import static de.adito.ojcms.beans.base.reactive.ReactiveTest.observe;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -19,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * @author Simon Danner, 16.07.2018
  */
-class BeanStatisticsTest extends AbstractOnNextCallCountTest
+class BeanStatisticsTest
 {
   private static final int FIELD_STATISTICS_LIMIT = 10;
   private SomeBean bean;
@@ -68,8 +69,10 @@ class BeanStatisticsTest extends AbstractOnNextCallCountTest
   {
     assertNotNull(statisticData);
     final AtomicInteger index = new AtomicInteger();
-    observeWithCallCheck(statisticData.observeStatistics(), 10, pEntry -> assertEquals("value" + index.getAndIncrement(), pEntry.getValue()));
-    IntStream.range(0, 10).forEach(pIndex -> bean.setValue(SomeBean.field, "value" + pIndex));
+    observe(statisticData, IStatisticData::observeStatistics)
+        .assertCallCount(10)
+        .assertOnEveryValue(pNewEntry -> assertEquals("value" + index.getAndIncrement(), pNewEntry.getValue()))
+        .whenDoing(pStatistics -> IntStream.range(0, 10).forEach(pIndex -> bean.setValue(SomeBean.field, "value" + pIndex)));
   }
 
   @Test
@@ -81,15 +84,31 @@ class BeanStatisticsTest extends AbstractOnNextCallCountTest
     final LinkedList<Long> timestamps = new LinkedList<>(statisticData.getChangedDataStatistics().keySet());
     final long totalTimestampDiff = timestamps.getLast() - timestamps.getFirst();
     final int expectedEntryCount = (int) totalTimestampDiff / interval + (totalTimestampDiff % interval == 0 ? 1 : 2);
-    final Map<Long, String> intervalStatistics = statisticData.getIntervalStatistics(interval);
-    final int actualEntrySize = intervalStatistics.size();
+
+    final Observable<Map<Long, String>> intervalStatistics = statisticData.getIntervalStatistics(interval);
+    final Map<Long, String> test = intervalStatistics.blockingFirst();
+    final int actualEntrySize = test.size();
     assertEquals(expectedEntryCount, actualEntrySize);
-    //wait a short time and add an entry, for which a statistic entry will be added
-    Thread.sleep(10); //NOSONAR
+
     final String newEntry = "someEntry";
-    bean.setValue(SomeBean.field, newEntry);
-    assertTrue(actualEntrySize < intervalStatistics.size());
-    assertEquals(newEntry, intervalStatistics.get(new LinkedList<>(intervalStatistics.keySet()).getLast()));
+    observe(statisticData, pData -> pData.getIntervalStatistics(interval))
+        .assertCallCount(2)
+        .assertOnEveryValue(pUpdatedMap -> {
+          assertTrue(actualEntrySize < pUpdatedMap.size());
+          assertEquals(newEntry, pUpdatedMap.get(new LinkedList<>(pUpdatedMap.keySet()).getLast()));
+        })
+        .whenDoing(pData -> {
+          //wait a short time and add an entry
+          try
+          {
+            Thread.sleep(10); //NOSONAR
+          }
+          catch (InterruptedException pE)
+          {
+            throw new OJInternalException(pE);
+          }
+          bean.setValue(SomeBean.field, newEntry);
+        });
   }
 
   @Test
@@ -99,7 +118,7 @@ class BeanStatisticsTest extends AbstractOnNextCallCountTest
     assertNotNull(statisticData);
     statisticData.destroy();
     assertEquals(0, statisticData.size());
-    assertEquals(0, statisticData.getIntervalStatistics(5).size());
+    assertTrue(statisticData.getIntervalStatistics(5).blockingFirst().isEmpty());
   }
 
   @Test

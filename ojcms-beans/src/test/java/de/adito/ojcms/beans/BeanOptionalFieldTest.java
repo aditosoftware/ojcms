@@ -1,7 +1,6 @@
 package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.annotations.OptionalField;
-import de.adito.ojcms.beans.base.AbstractOnNextCallCountTest;
 import de.adito.ojcms.beans.fields.types.*;
 import de.adito.ojcms.beans.fields.util.FieldValueTuple;
 import org.junit.jupiter.api.*;
@@ -9,6 +8,7 @@ import org.junit.jupiter.api.*;
 import java.time.*;
 import java.util.Optional;
 
+import static de.adito.ojcms.beans.base.reactive.ReactiveTest.observe;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * @author Simon Danner, 30.07.2018
  */
-public class BeanOptionalFieldTest extends AbstractOnNextCallCountTest
+public class BeanOptionalFieldTest
 {
   private static final String DEFAULT_STRING_VALUE = "optional";
   private SomeBean bean;
@@ -49,10 +49,12 @@ public class BeanOptionalFieldTest extends AbstractOnNextCallCountTest
   @Test
   public void testFieldObservers()
   {
-    justCallCheck(bean.observeFieldAdditions(), 2);
-    justCallCheck(bean.observeFieldRemovals(), 1);
-    bean.setValue(SomeBean.optionalField1, 1);
-    bean.setValue(SomeBean.normalField, "test");
+    observe(bean, IBean::observeFieldAdditions)
+        .assertCallCount(2)
+        .whenDoing(pBean -> pBean.setValue(SomeBean.optionalField1, 1));
+    observe(bean, IBean::observeFieldRemovals)
+        .assertCallCount(1)
+        .whenDoing(pBean -> pBean.setValue(SomeBean.normalField, "test"));
   }
 
   /**

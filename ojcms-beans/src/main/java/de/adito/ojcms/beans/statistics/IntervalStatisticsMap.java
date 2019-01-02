@@ -1,13 +1,13 @@
 package de.adito.ojcms.beans.statistics;
 
-import java.util.LinkedHashMap;
-import java.util.function.LongFunction;
+import de.adito.ojcms.beans.exceptions.OJInternalException;
+
+import java.util.*;
 import java.util.stream.LongStream;
 
 /**
- * Linked map implementation for interval based statistic data.
+ * Linked hash map implementation for interval based statistic data.
  * The entries will be added from the first change timestamp of the statistics until the last for every interval.
- * For further changes a observer will add interval based entries until the timestamp of the new change.
  *
  * @param <ENTRY> the data type of the statistic entry values
  * @author Simon Danner, 28.07.2018
@@ -15,54 +15,55 @@ import java.util.stream.LongStream;
 @SuppressWarnings("squid:S2160")
 class IntervalStatisticsMap<ENTRY> extends LinkedHashMap<Long, ENTRY>
 {
-  private final transient int interval;
-  private transient LongFunction<ENTRY> valueResolver;
-  private transient long firstTimestamp;
+  private final transient int interval; //ms
   private transient long lastTimestamp;
+  private transient ENTRY lastValue;
 
   /**
-   * Creates a new interval based statistic map.
-   * Adds the initial entries and registers an observer for new statistic entries to update automatically.
+   * Creates a new interval based statistic map and adds the initial entries.
    *
-   * @param pInterval       the interval for the statistics
-   * @param pValueResolver  a function to resolve the according value for a timestamp
-   * @param pFirstTimestamp the first timestamp of the value changes
-   * @param pLastTimestamp  the last timestamp of the value changes
-   * @param pStatisticData  the statistic data itself to register the observer
+   * @param pInterval the interval for the statistics (in ms)
+   * @param pChanges  the initial changes of the statistic data
    */
-  IntervalStatisticsMap(int pInterval, LongFunction<ENTRY> pValueResolver, long pFirstTimestamp, long pLastTimestamp,
-                        IStatisticData<ENTRY> pStatisticData)
+  IntervalStatisticsMap(int pInterval, Map<Long, ENTRY> pChanges)
   {
     interval = pInterval;
-    valueResolver = pValueResolver;
-    firstTimestamp = pFirstTimestamp;
-    lastTimestamp = pLastTimestamp;
-    //Add initial entries and register observer for future changes
-    _addEntries();
-    pStatisticData.observeStatistics()
-        .subscribe(pEvent -> {
-          final ENTRY lastValue = valueResolver.apply(lastTimestamp);
-          firstTimestamp = lastTimestamp + interval;
-          lastTimestamp = pEvent.getTimestamp();
-          //The last value before or the new value, when the time is reached
-          valueResolver = pTime -> pTime < lastTimestamp ? lastValue : pEvent.getValue();
-          if (lastTimestamp >= firstTimestamp)
-            _addEntries();
-        });
+    pChanges.forEach(this::newEntry);
   }
 
   /**
-   * Adds intervals from the current first timestamp until the last in the given interval.
-   * The according values will be retrieved from the value resolver function.
+   * A new entry/change has been added to the statistic data.
+   * Adds new entries for each interval between the last timestamp and the new one.
+   *
+   * @param pTimeStamp the timestamp of the new entry
+   * @param pEntry     the new entry
+   * @return the interval map itself to enable a pipelining mechanism
    */
-  private void _addEntries()
+  Map<Long, ENTRY> newEntry(Long pTimeStamp, ENTRY pEntry)
   {
-    final long totalDiff = lastTimestamp - firstTimestamp;
-    LongStream.iterate(firstTimestamp, pTimeStamp -> pTimeStamp + interval)
-        //Add two entries, if the last entry surpasses the last entry of the changes
-        .limit(totalDiff / interval + (totalDiff % interval == 0 ? 1 : 2))
-        .boxed()
-        .forEach(pTimestamp -> put(pTimestamp, valueResolver.apply(pTimestamp)));
-  }
+    if (lastTimestamp > pTimeStamp)
+      throw new OJInternalException("The timestamp of a new statistic entry can never be before the previous one!");
 
+    if (isEmpty())
+    {
+      put(pTimeStamp, pEntry);
+      lastTimestamp = pTimeStamp;
+    }
+    else
+    {
+      final long start = lastTimestamp + interval;
+      final long totalDiff = pTimeStamp - start;
+      final long overflow = totalDiff % interval;
+      lastTimestamp = pTimeStamp + overflow;
+      //Add a entry for each interval between the last timestamp and the new one
+      LongStream.iterate(start, pTime -> pTime + interval)
+          //Add two entries, if the last entry surpasses the last entry of the changes
+          .limit(totalDiff / interval + (overflow == 0 ? 1 : 2))
+          .boxed()
+          .forEach(pTime -> put(pTime, pTime < pTimeStamp ? lastValue : pEntry));
+    }
+
+    lastValue = pEntry;
+    return this;
+  }
 }

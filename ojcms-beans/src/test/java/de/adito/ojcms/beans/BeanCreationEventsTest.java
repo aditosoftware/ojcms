@@ -1,13 +1,13 @@
 package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.annotations.*;
-import de.adito.ojcms.beans.base.AbstractOnNextCallCountTest;
 import de.adito.ojcms.beans.exceptions.bean.BeanCreationNotObservableException;
 import org.junit.jupiter.api.Test;
 
 import java.lang.annotation.*;
 
 import static de.adito.ojcms.beans.BeanCreationEvents.*;
+import static de.adito.ojcms.beans.base.reactive.StaticReactiveTest.observe;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -15,25 +15,29 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * @author Simon Danner, 27.12.2018
  */
-public class BeanCreationEventsTest extends AbstractOnNextCallCountTest
+public class BeanCreationEventsTest
 {
   @Test
   public void testObserveByBeanType()
   {
-    justCallCheck(observeCreationByBeanType(SomeBean.class), 1);
-    new SomeBean();
-    justCallCheck(observeCreationByBeanType(AnotherBean.class), 1);
-    new AnotherBean();
+    observe(observeCreationByBeanType(SomeBean.class))
+        .assertCallCount(1)
+        .whenDoing(SomeBean::new);
+    observe(observeCreationByBeanType(AnotherBean.class))
+        .assertCallCount(1)
+        .whenDoing(AnotherBean::new);
     assertThrows(BeanCreationNotObservableException.class, () -> observeCreationByBeanType(BeanWithoutAnnotation.class));
   }
 
   @Test
   public void testObserveByAnnotationType()
   {
-    justCallCheck(observeCreationByAnnotationType(ObserveCreation.class), 1);
-    new SomeBean();
-    justCallCheck(observeCreationByAnnotationType(SomeAnnotation.class), 1);
-    new AnotherBean();
+    observe(observeCreationByAnnotationType(ObserveCreation.class))
+        .assertCallCount(1)
+        .whenDoing(SomeBean::new);
+    observe(observeCreationByAnnotationType(SomeAnnotation.class))
+        .assertCallCount(1)
+        .whenDoing(AnotherBean::new);
     assertThrows(BeanCreationNotObservableException.class, () -> observeCreationByAnnotationType(Private.class));
   }
 
