@@ -26,9 +26,9 @@ public class MapField<KEY, VALUE> extends AbstractField<IMapBean<KEY, VALUE>>
 {
   private final Map<KEY, IField<?>> fieldCache = new ConcurrentHashMap<>();
 
-  protected MapField(@NotNull Class<IMapBean<KEY, VALUE>> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
+  protected MapField(Class<IMapBean<KEY, VALUE>> pType, @NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional)
   {
-    super(pType, pName, pAnnotations);
+    super(pType, pName, pAnnotations, pIsOptional);
   }
 
   /**

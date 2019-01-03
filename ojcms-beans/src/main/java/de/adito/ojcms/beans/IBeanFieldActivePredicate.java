@@ -1,7 +1,8 @@
 package de.adito.ojcms.beans;
 
-import de.adito.ojcms.beans.annotations.OptionalField;
 import de.adito.ojcms.beans.fields.IField;
+
+import java.util.function.BiPredicate;
 
 /**
  * Determines, if an optional bean field is active at a certain time.
@@ -11,6 +12,7 @@ import de.adito.ojcms.beans.fields.IField;
  * This leads to a very comfortable way to use this interface, especially if implemented as lambda expression.
  * For example, the bean interface may simply implement this interface as the following: "return () -> (BEAN) this;"
  *
+ * @param <BEAN> the runtime type of the bean this field active condition is for
  * @author Simon Danner, 18.08.2017
  */
 interface IBeanFieldActivePredicate<BEAN extends IBean<BEAN>>
@@ -26,17 +28,19 @@ interface IBeanFieldActivePredicate<BEAN extends IBean<BEAN>>
    * Determines, if an optional bean field is active at this moment.
    * If the field is not marked as optional, it will be treated as active.
    *
-   * @param pField the bean field
+   * @param pField  the bean field
+   * @param <VALUE> the data type of the bean field
    * @return <tt>true</tt>, if the field is not optional or active, according the a given condition.
    */
-  default boolean isOptionalActive(IField<?> pField)
+  default <VALUE> boolean isOptionalActive(IField<VALUE> pField)
   {
     if (!pField.isOptional())
       return true;
 
     //noinspection unchecked
-    final OptionalField.IActiveCondition<BEAN> condition = pField.getAdditionalInformationOrThrow(OptionalField.ACTIVE_CONDITION);
+    final BiPredicate<BEAN, VALUE> condition = pField.getAdditionalInformationOrThrow(BeanFieldFactory.OPTIONAL_FIELD_INFO);
     assert condition != null;
-    return condition.test(getBean());
+    final BEAN bean = getBean();
+    return condition.test(bean, bean.getValue(pField));
   }
 }

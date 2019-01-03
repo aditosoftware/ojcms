@@ -21,9 +21,9 @@ import java.util.*;
 @GenericBeanField
 public class EnumField<ENUM extends Enum> extends AbstractField<ENUM> implements ISerializableField<ENUM>
 {
-  protected EnumField(@NotNull Class<ENUM> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
+  protected EnumField(Class<ENUM> pType, @NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional)
   {
-    super(pType, pName, pAnnotations);
+    super(pType, pName, pAnnotations, pIsOptional);
   }
 
   @Override

@@ -19,9 +19,9 @@ import java.util.Collection;
 @TypeDefaultField(types = Boolean.class)
 public class BooleanField extends AbstractField<Boolean> implements ISerializableFieldToString<Boolean>
 {
-  protected BooleanField(@NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
+  protected BooleanField(@NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional)
   {
-    super(Boolean.class, pName, pAnnotations);
+    super(Boolean.class, pName, pAnnotations, pIsOptional);
   }
 
   @Override

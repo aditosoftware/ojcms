@@ -23,7 +23,8 @@ abstract class AbstractField<VALUE> implements IField<VALUE>
 {
   private final Class<VALUE> dataType;
   private final String name;
-  private final Collection<Annotation> annotations;
+  private final Set<Annotation> annotations;
+  private final boolean isOptional;
   private final Map<Class, Function<?, VALUE>> toConverters = new HashMap<>(); //Access should only be read wise after the field's creation
   private final Map<Class, Function<VALUE, ?>> fromConverters = new HashMap<>();
   private final Map<IAdditionalFieldInfo, Object> additionalInformation = new ConcurrentHashMap<>();
@@ -35,12 +36,14 @@ abstract class AbstractField<VALUE> implements IField<VALUE>
    * @param pDataType    the inner data type of this field
    * @param pName        the name of this field
    * @param pAnnotations a collection of annotations of this field
+   * @param pIsOptional  <tt>true</tt> if the field is optional
    */
-  protected AbstractField(@NotNull Class<VALUE> pDataType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
+  protected AbstractField(Class<VALUE> pDataType, @NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional)
   {
     dataType = Objects.requireNonNull(pDataType);
     name = StringUtility.requireNotEmpty(pName, "name");
-    annotations = Objects.requireNonNull(pAnnotations);
+    annotations = new HashSet<>(Objects.requireNonNull(pAnnotations));
+    isOptional = pIsOptional;
   }
 
   @Override
@@ -122,7 +125,7 @@ abstract class AbstractField<VALUE> implements IField<VALUE>
   @Override
   public boolean isOptional()
   {
-    return hasAnnotation(OptionalField.class);
+    return isOptional;
   }
 
   @Override
@@ -138,6 +141,7 @@ abstract class AbstractField<VALUE> implements IField<VALUE>
         "dataType=" + dataType +
         ", name='" + name + '\'' +
         ", annotations=" + annotations +
+        ", isOptional=" + isOptional +
         ", additionalInformation=" + additionalInformation +
         '}';
   }

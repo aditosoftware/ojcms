@@ -21,9 +21,9 @@ import java.util.*;
 public class SetField<ELEMENT> extends AbstractField<Set<ELEMENT>>
     implements ISerializableFieldJson<Set<ELEMENT>>, ISneakyCopyCreatorField<Set<ELEMENT>>
 {
-  protected SetField(@NotNull Class<Set<ELEMENT>> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
+  protected SetField(Class<Set<ELEMENT>> pType, @NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional)
   {
-    super(pType, pName, pAnnotations);
+    super(pType, pName, pAnnotations, pIsOptional);
   }
 
   @Override

@@ -19,9 +19,9 @@ import java.util.Collection;
 @TypeDefaultField(types = Short.class)
 public class ShortField extends AbstractField<Short> implements ISerializableFieldToString<Short>
 {
-  protected ShortField(@NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
+  protected ShortField(@NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional)
   {
-    super(Short.class, pName, pAnnotations);
+    super(Short.class, pName, pAnnotations, pIsOptional);
   }
 
   @Override

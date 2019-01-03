@@ -63,10 +63,10 @@ public class BeanOptionalFieldTest
   public static class SomeBean extends OJBean<SomeBean>
   {
     public static final TextField normalField = OJFields.create(SomeBean.class);
-    @OptionalField(_Condition1.class)
-    public static final IntegerField optionalField1 = OJFields.create(SomeBean.class);
-    @OptionalField(_Condition2.class)
-    public static final DateField optionalField2 = OJFields.create(SomeBean.class);
+    @OptionalField
+    public static final IntegerField optionalField1 = OJFields.createOptional(SomeBean.class, (pBean, pValue) -> pValue == 1);
+    @OptionalField
+    public static final DateField optionalField2 = OJFields.createOptional(SomeBean.class, (pBean, pValue) -> _isFieldActive(pBean));
 
     public SomeBean()
     {
@@ -76,29 +76,14 @@ public class BeanOptionalFieldTest
     }
 
     /**
-     * A condition for an optional field.
-     * The field will only be active, if the value of the int field is 0.
+     * Active condition for the second field.
+     *
+     * @param pBean the bean the field belongs to
+     * @return <tt>true</tt> if the field should be active
      */
-    private static class _Condition1 implements OptionalField.IActiveCondition<SomeBean>
+    private static boolean _isFieldActive(SomeBean pBean)
     {
-      @Override
-      public boolean test(SomeBean pSomeBean)
-      {
-        return pSomeBean.getValue(optionalField1) == 1;
-      }
-    }
-
-    /**
-     * A condition for an optional field.
-     * The field will only be active, if the value of the int field is 0 and the value of the normal field contains a certain string.
-     */
-    private static class _Condition2 implements OptionalField.IActiveCondition<SomeBean>
-    {
-      @Override
-      public boolean test(SomeBean pSomeBean)
-      {
-        return DEFAULT_STRING_VALUE.equals(pSomeBean.getValue(normalField)) && pSomeBean.getValue(optionalField1) == 1;
-      }
+      return DEFAULT_STRING_VALUE.equals(pBean.getValue(normalField)) && pBean.getValue(optionalField1) == 1;
     }
   }
 }

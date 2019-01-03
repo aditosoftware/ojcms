@@ -22,9 +22,9 @@ import java.util.Collection;
 @GenericBeanField(genericWrapperType = IBeanContainer.class)
 public class ContainerField<BEAN extends IBean<BEAN>> extends AbstractField<IBeanContainer<BEAN>>
 {
-  protected ContainerField(@NotNull Class<IBeanContainer<BEAN>> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
+  protected ContainerField(Class<IBeanContainer<BEAN>> pType, @NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional)
   {
-    super(pType, pName, pAnnotations);
+    super(pType, pName, pAnnotations, pIsOptional);
   }
 
   @Override

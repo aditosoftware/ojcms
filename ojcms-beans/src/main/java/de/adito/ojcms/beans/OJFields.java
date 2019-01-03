@@ -9,7 +9,7 @@ import de.adito.ojcms.beans.util.BeanReflector;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 /**
  * Static entry point to create bean fields.
@@ -31,13 +31,52 @@ public final class OJFields
    * This method takes care about the whole initialization of the fields. (name, type, annotations, etc.)
    *
    * @param pBeanType the bean type to which the created field should belong to
-   * @param <BEAN>    the generic type of the parameter above
-   *                  (is here based on the concrete {@link OJBean} class rather than on the interface, so it can not be a transformed bean type)
+   * @param <BEAN>    the generic type of the bean the field is for
+   *                  (is here based on  {@link OJBean} rather than on the interface, so it can not be a transformed bean type)
+   * @param <VALUE>   the data type of the field to create
    * @param <FIELD>   the generic type of the field that will be created
    * @return the newly created field instance
    */
-  @SuppressWarnings("unchecked")
-  public static <BEAN extends OJBean<BEAN>, FIELD extends IField> FIELD create(Class<BEAN> pBeanType)
+  public static <BEAN extends OJBean<BEAN>, VALUE, FIELD extends IField<VALUE>> FIELD create(Class<BEAN> pBeanType)
+  {
+    return _createField(pBeanType, Optional.empty());
+  }
+
+  /**
+   * Takes a look at all static bean fields of a certain bean type and creates the first not initialized field automatically.
+   * In this way all bean fields can be created through this method.
+   * Usage: "public static final TextField name = OJFields.createOptional(CLASSNAME.class);"
+   * This method takes care about the whole initialization of the fields. (name, type, annotations, etc.)
+   *
+   * Use this method to create optional bean fields. These field are only active when a certain predicate is positive.
+   *
+   * @param pBeanType        the bean type to which the created field should belong to
+   * @param pActiveCondition the condition determining the active state of the bean field
+   * @param <BEAN>           the generic type of the bean the field is for
+   *                         (is here based on  {@link OJBean} rather than on the interface, so it can not be a transformed bean type)
+   * @param <VALUE>          the data type of the field to create
+   * @param <FIELD>          the generic type of the field that will be created
+   * @return the newly created field instance
+   */
+  public static <BEAN extends OJBean<BEAN>, VALUE, FIELD extends IField<VALUE>> FIELD createOptional(Class<BEAN> pBeanType,
+                                                                                                     BiPredicate<BEAN, VALUE> pActiveCondition)
+  {
+    return _createField(pBeanType, Optional.of(pActiveCondition));
+  }
+
+  /**
+   * Takes a look at all static bean fields of a certain bean type and creates the first not initialized field automatically.
+   *
+   * @param pBeanType        the bean type to which the created field should belong to
+   * @param pActiveCondition an optional active condition determining the active state of the bean field
+   * @param <BEAN>           the generic type of the bean the field is for
+   *                         (is here based on  {@link OJBean} rather than on the interface, so it can not be a transformed bean type)
+   * @param <VALUE>          the data type of the field to create
+   * @param <FIELD>          the generic type of the field that will be created
+   * @return the newly created field instance
+   */
+  private static <BEAN extends OJBean<BEAN>, VALUE, FIELD extends IField<VALUE>> FIELD _createField(Class<BEAN> pBeanType,
+                                                                                                    Optional<BiPredicate<BEAN, VALUE>> pActiveCondition)
   {
     final Field declaredFieldToCreate = BeanReflector.reflectDeclaredBeanFields(pBeanType).stream()
         .filter(pField -> {
@@ -53,11 +92,12 @@ public final class OJFields
         .findAny()
         .orElseThrow(() -> new BeanFieldCreationException(pBeanType));
 
+    //noinspection unchecked
     final Class<FIELD> beanFieldType = (Class<FIELD>) declaredFieldToCreate.getType();
     final Supplier<Class<?>> genericTypeSupplier = _genericTypeSupplier(declaredFieldToCreate, beanFieldType);
     final String fieldName = declaredFieldToCreate.getName();
     final List<Annotation> annotations = Arrays.asList(declaredFieldToCreate.getAnnotations());
-    return BeanFieldFactory.createField(beanFieldType, genericTypeSupplier, fieldName, annotations);
+    return BeanFieldFactory.createField(beanFieldType, genericTypeSupplier, fieldName, annotations, pActiveCondition);
   }
 
   /**

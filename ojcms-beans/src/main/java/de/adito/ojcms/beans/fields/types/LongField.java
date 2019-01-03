@@ -19,9 +19,9 @@ import java.util.Collection;
 @TypeDefaultField(types = Long.class)
 public class LongField extends AbstractField<Long> implements ISerializableFieldToString<Long>
 {
-  public LongField(@NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
+  public LongField(@NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional)
   {
-    super(Long.class, pName, pAnnotations);
+    super(Long.class, pName, pAnnotations, pIsOptional);
   }
 
   @Override

@@ -29,9 +29,12 @@ public interface IModifiableBean<BEAN extends IModifiableBean<BEAN>> extends IBe
    * @param pFieldType   the new field's data type
    * @param pName        the new field's name
    * @param pAnnotations the new field's annotations
+   * @param <VALUE>      the data type of the field to add
+   * @param <FIELD>      the runtime type of the field to add/create
    * @return the created field instance
    */
-  default <FIELD extends IField> BeanFieldAdder<FIELD> fieldAdder(Class<FIELD> pFieldType, String pName, Collection<Annotation> pAnnotations)
+  default <VALUE, FIELD extends IField<VALUE>> BeanFieldAdder<BEAN, VALUE, FIELD> fieldAdder(Class<FIELD> pFieldType, String pName,
+                                                                                             Collection<Annotation> pAnnotations)
   {
     final IEncapsulatedBeanData encapsulated = requestEncapsulatedData(this);
     if (encapsulated.streamFields().anyMatch(pField -> pField.getName().equals(pName)))

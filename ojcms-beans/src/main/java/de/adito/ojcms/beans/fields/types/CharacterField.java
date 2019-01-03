@@ -19,9 +19,9 @@ import java.util.Collection;
 @TypeDefaultField(types = Character.class)
 public class CharacterField extends AbstractField<Character> implements ISerializableFieldToString<Character>
 {
-  protected CharacterField(@NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
+  protected CharacterField(@NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional)
   {
-    super(Character.class, pName, pAnnotations);
+    super(Character.class, pName, pAnnotations, pIsOptional);
   }
 
   @Override

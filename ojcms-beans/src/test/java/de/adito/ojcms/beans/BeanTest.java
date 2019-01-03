@@ -27,6 +27,7 @@ class BeanTest
 {
   private static final String VALUE = "value";
   private static final String PRIVATE_VALUE = "privateValue";
+  private static final String TEXT_FIELD_NAME = "testTextField";
 
   private SomeBean bean;
 
@@ -39,8 +40,7 @@ class BeanTest
   @Test
   public void testGetValueNotExistingField()
   {
-    final TextField nonExistingField = BeanFieldFactory.createField(TextField.class, "test", Collections.emptyList());
-    assertThrows(BeanFieldDoesNotExistException.class, () -> bean.getValue(nonExistingField));
+    assertThrows(BeanFieldDoesNotExistException.class, () -> bean.getValue(_createTextField()));
   }
 
   @Test
@@ -80,7 +80,7 @@ class BeanTest
   @Test
   public void testSetValueNotExistingField()
   {
-    final TextField nonExistingField = BeanFieldFactory.createField(TextField.class, "test", Collections.emptyList());
+    final TextField nonExistingField = _createTextField();
     assertThrows(BeanFieldDoesNotExistException.class, () -> bean.setValue(nonExistingField, "test"));
   }
 
@@ -126,8 +126,7 @@ class BeanTest
   @Test
   public void testFieldIndexNotExistingField()
   {
-    final TextField nonExistingField = BeanFieldFactory.createField(TextField.class, "test", Collections.emptyList());
-    assertEquals(-1, bean.getFieldIndex(nonExistingField));
+    assertEquals(-1, bean.getFieldIndex(_createTextField()));
   }
 
   @Test
@@ -190,6 +189,16 @@ class BeanTest
   {
     final Integer deepValue = bean.resolveDeepValue(DeeperBean.deepValue, SomeBean.deepField, DeepBean.deeperField);
     assertSame(DeeperBean.DEEP_VALUE, deepValue);
+  }
+
+  /**
+   * Creates a new bean text field.
+   *
+   * @return the newly created field instance
+   */
+  private static TextField _createTextField()
+  {
+    return BeanFieldFactory.createField(TextField.class, TEXT_FIELD_NAME, Collections.emptySet(), Optional.empty());
   }
 
   /**
@@ -262,9 +271,9 @@ class BeanTest
     public static final String DEFAULT_VALUE = "default";
     public static final String INITIAL_VALUE = "initial";
 
-    protected SpecialTextField(@NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
+    protected SpecialTextField(@NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional)
     {
-      super(pName, pAnnotations);
+      super(pName, pAnnotations, pIsOptional);
     }
 
     @Override

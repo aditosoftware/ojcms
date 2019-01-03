@@ -21,9 +21,9 @@ import java.util.Collection;
 @GenericBeanField
 public class BeanField<BEAN extends IBean<BEAN>> extends AbstractField<BEAN>
 {
-  protected BeanField(@NotNull Class<BEAN> pType, @NotNull String pName, @NotNull Collection<Annotation> pAnnotations)
+  protected BeanField(Class<BEAN> pType, @NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional)
   {
-    super(pType, pName, pAnnotations);
+    super(pType, pName, pAnnotations, pIsOptional);
   }
 
   @Override

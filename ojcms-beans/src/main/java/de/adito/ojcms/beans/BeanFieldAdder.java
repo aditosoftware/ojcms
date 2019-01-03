@@ -10,16 +10,19 @@ import java.util.function.*;
 /**
  * Utility to add bean fields.
  *
+ * @param <BEAN>  the runtime type of the bean the field is for
+ * @param <VALUE> the data type of the field to add
  * @param <FIELD> the runtime type of the field to add/create
  * @author Simon Danner, 25.12.2018
  */
-public final class BeanFieldAdder<FIELD extends IField>
+public final class BeanFieldAdder<BEAN extends IBean<BEAN>, VALUE, FIELD extends IField<VALUE>>
 {
   private final ObjIntConsumer<FIELD> addFunction;
   private final IntSupplier fieldCountSupplier;
   private final Class<FIELD> beanFieldType;
   private final String fieldName;
   private final Collection<Annotation> annotations;
+  private Optional<BiPredicate<BEAN, VALUE>> activeCondition = Optional.empty();
   private Class<?> genericType;
 
   /**
@@ -31,8 +34,8 @@ public final class BeanFieldAdder<FIELD extends IField>
    * @param pFieldName          the name of the field to create
    * @param pAnnotations        the annotations of the field to create
    */
-  BeanFieldAdder(ObjIntConsumer<FIELD> pAddFunction, IntSupplier pFieldCountSupplier, Class<FIELD> pBeanFieldType,
-                 String pFieldName, Collection<Annotation> pAnnotations)
+  BeanFieldAdder(ObjIntConsumer<FIELD> pAddFunction, IntSupplier pFieldCountSupplier, Class<FIELD> pBeanFieldType, String pFieldName,
+                 Collection<Annotation> pAnnotations)
   {
     addFunction = Objects.requireNonNull(pAddFunction);
     fieldCountSupplier = Objects.requireNonNull(pFieldCountSupplier);
@@ -48,9 +51,21 @@ public final class BeanFieldAdder<FIELD extends IField>
    * @param pGenericType the generic type of the field to add
    * @return the bean field adder itself to enable a pipelining mechanism
    */
-  public BeanFieldAdder<FIELD> withGenericType(Class<?> pGenericType)
+  public BeanFieldAdder<BEAN, VALUE, FIELD> withGenericType(Class<?> pGenericType)
   {
     genericType = pGenericType;
+    return this;
+  }
+
+  /**
+   * Declares the field as optional field to be active under a certain predicate only.
+   *
+   * @param pActiveCondition the condition to determine the active state of the field
+   * @return the bean field adder itself to enable a pipelining mechanism
+   */
+  public BeanFieldAdder<BEAN, VALUE, FIELD> optionalField(BiPredicate<BEAN, VALUE> pActiveCondition)
+  {
+    activeCondition = Optional.of(pActiveCondition);
     return this;
   }
 
@@ -72,7 +87,7 @@ public final class BeanFieldAdder<FIELD extends IField>
    */
   public FIELD addAtIndex(int pIndex)
   {
-    final FIELD field = BeanFieldFactory.createField(beanFieldType, () -> genericType, fieldName, annotations);
+    final FIELD field = BeanFieldFactory.createField(beanFieldType, () -> genericType, fieldName, annotations, activeCondition);
     addFunction.accept(field, pIndex);
     return field;
   }

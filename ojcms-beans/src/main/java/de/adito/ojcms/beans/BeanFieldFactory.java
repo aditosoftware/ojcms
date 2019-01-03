@@ -1,13 +1,14 @@
 package de.adito.ojcms.beans;
 
-import de.adito.ojcms.beans.annotations.*;
+import de.adito.ojcms.beans.annotations.GenericBeanField;
 import de.adito.ojcms.beans.exceptions.OJInternalException;
 import de.adito.ojcms.beans.fields.IField;
+import de.adito.ojcms.beans.fields.util.IAdditionalFieldInfo;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 /**
  * A static factory to create bean fields.
@@ -18,6 +19,8 @@ import java.util.function.Supplier;
  */
 final class BeanFieldFactory
 {
+  static final IAdditionalFieldInfo<BiPredicate> OPTIONAL_FIELD_INFO = () -> BiPredicate.class;
+
   private BeanFieldFactory()
   {
   }
@@ -25,15 +28,20 @@ final class BeanFieldFactory
   /**
    * Creates a new bean field based on a certain type und some initial data.
    *
-   * @param pFieldType   the field's type
-   * @param pName        the field's name
-   * @param pAnnotations the field's annotations
-   * @param <FIELD>      the generic field type
+   * @param pFieldType       the field's type
+   * @param pName            the field's name
+   * @param pAnnotations     the field's annotations
+   * @param pActiveCondition an optional condition for optional bean fields (determines the active state of the field)
+   * @param <BEAN>           the generic type of the bean the field is for
+   * @param <VALUE>          the data type of the field to create
+   * @param <FIELD>          the generic field type
    * @return the newly created field
    */
-  static <FIELD extends IField> FIELD createField(Class<FIELD> pFieldType, String pName, Collection<Annotation> pAnnotations)
+  static <BEAN extends IBean<BEAN>, VALUE, FIELD extends IField<VALUE>> FIELD createField(Class<FIELD> pFieldType, String pName,
+                                                                                          Collection<Annotation> pAnnotations,
+                                                                                          Optional<BiPredicate<BEAN, VALUE>> pActiveCondition)
   {
-    return createField(pFieldType, () -> null, pName, pAnnotations);
+    return createField(pFieldType, () -> null, pName, pAnnotations, pActiveCondition);
   }
 
   /**
@@ -46,24 +54,36 @@ final class BeanFieldFactory
    *                             see {@link de.adito.ojcms.beans.annotations.GenericBeanField}
    * @param pName                the field's name
    * @param pAnnotations         the field's annotations
+   * @param pActiveCondition     an optional condition for optional bean fields (determines the active state of the field)
+   * @param <BEAN>               the generic type of the bean the field is for
+   * @param <VALUE>              the data type of the field to create
    * @param <FIELD>              the generic field type
    * @return the newly created field
    */
-  static <FIELD extends IField> FIELD createField(Class<FIELD> pFieldType, Supplier<Class<?>> pGenericTypeSupplier,
-                                                                String pName, Collection<Annotation> pAnnotations)
+  static <BEAN extends IBean<BEAN>, VALUE, FIELD extends IField<VALUE>> FIELD createField(Class<FIELD> pFieldType,
+                                                                                          Supplier<Class<?>> pGenericTypeSupplier,
+                                                                                          String pName, Collection<Annotation> pAnnotations,
+                                                                                          Optional<BiPredicate<BEAN, VALUE>> pActiveCondition)
   {
     try
     {
       final Optional<Class<?>> optionalGenericType = _getGenericType(pFieldType, pGenericTypeSupplier);
-      final Class[] constructorArgTypes = optionalGenericType.map(pType -> new Class[]{Class.class, String.class, Collection.class})
-          .orElseGet(() -> new Class[]{String.class, Collection.class});
-      final Object[] constructorArgs = optionalGenericType.map(pClass -> new Object[]{pClass, pName, pAnnotations})
-          .orElseGet(() -> new Object[]{pName, pAnnotations});
-      final Constructor<FIELD> constructor = pFieldType.getDeclaredConstructor(constructorArgTypes);
+      final boolean isOptional = pActiveCondition.isPresent();
+      //Constructor argument distinction between generic and non generic values (generic types provide their type additionally)
+      final Class[] constructorArgumentTypes = optionalGenericType
+          .map(pType -> new Class[]{Class.class, String.class, Collection.class, boolean.class})
+          .orElseGet(() -> new Class[]{String.class, Collection.class, boolean.class});
+      final Object[] constructorArguments = optionalGenericType
+          .map(pClass -> new Object[]{pClass, pName, pAnnotations, isOptional})
+          .orElseGet(() -> new Object[]{pName, pAnnotations, isOptional});
+      //Create the field by using the reflected constructor
+      final Constructor<FIELD> constructor = pFieldType.getDeclaredConstructor(constructorArgumentTypes);
       if (!constructor.isAccessible())
         constructor.setAccessible(true);
-      final FIELD field = constructor.newInstance(constructorArgs);
-      _checkOptionalField(field);
+      final FIELD field = constructor.newInstance(constructorArguments);
+      //Add the optional condition as field info to determine the state of the field later on
+      if (isOptional)
+        field.addAdditionalInformation(OPTIONAL_FIELD_INFO, pActiveCondition.get());
       return field;
     }
     catch (NoSuchMethodException | InstantiationException | InvocationTargetException | IllegalAccessException pE)
@@ -89,26 +109,5 @@ final class BeanFieldFactory
 
     final Class<?> wrapperType = pFieldType.getAnnotation(GenericBeanField.class).genericWrapperType();
     return wrapperType != void.class ? Optional.of(wrapperType) : Optional.ofNullable(pGenericTypeSupplier.get());
-  }
-
-  /**
-   * Checks, if a bean field is marked (via {@link OptionalField}) as optional field.
-   * In this case the condition, which is defined through the annotation, will be stored as an additional information at the field.
-   * So this information can be used later to determine if the field is active at any moment.
-   *
-   * @param pField the bean field to check
-   */
-  private static void _checkOptionalField(IField<?> pField) throws IllegalAccessException, InstantiationException, NoSuchMethodException,
-      InvocationTargetException
-  {
-    if (!pField.isOptional())
-      return;
-
-    final OptionalField optional = pField.getAnnotationOrThrow(OptionalField.class);
-    final Constructor<? extends OptionalField.IActiveCondition> constructor = optional.value().getDeclaredConstructor();
-    if (!constructor.isAccessible())
-      constructor.setAccessible(true);
-    final OptionalField.IActiveCondition<?> activeCondition = constructor.newInstance();
-    pField.addAdditionalInformation(OptionalField.ACTIVE_CONDITION, activeCondition);
   }
 }

@@ -4,7 +4,7 @@ import de.adito.ojcms.beans.exceptions.copy.BeanCopyNotSupportedException;
 import de.adito.ojcms.beans.fields.IField;
 import de.adito.ojcms.beans.fields.types.*;
 import de.adito.ojcms.beans.fields.util.CustomFieldCopy;
-import de.adito.ojcms.beans.util.*;
+import de.adito.ojcms.beans.util.ECopyMode;
 import org.apache.commons.lang3.ClassUtils;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -67,7 +67,7 @@ public class BeanFieldCopyTest
   {
     assertNotNull(pFieldValueWrapper.value);
     final IField<VALUE> field = BeanFieldFactory.createField(pFieldValueWrapper.fieldType, pFieldValueWrapper::getGenericFieldType,
-                                                             "test", Collections.emptySet());
+                                                             "test", Collections.emptySet(), Optional.empty());
     try
     {
       final VALUE copiedValue = field.copyValue(pFieldValueWrapper.value, ECopyMode.DEEP_ONLY_BEAN_FIELDS);

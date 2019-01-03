@@ -8,8 +8,8 @@ import de.adito.ojcms.beans.fields.types.*;
 import org.junit.jupiter.api.*;
 
 import java.lang.annotation.Annotation;
-import java.util.Collections;
-import java.util.function.Consumer;
+import java.util.*;
+import java.util.function.*;
 import java.util.stream.IntStream;
 
 import static de.adito.ojcms.beans.base.reactive.ReactiveUtil.observe;
@@ -50,27 +50,13 @@ class BeanObserverTest
   @Test
   public void testAdditionAtTheEnd()
   {
-    final DecimalField fieldToAdd = BeanFieldFactory.createField(DecimalField.class, "fieldX", Collections.emptyList());
-    observe(bean, IBean::observeFieldAdditions)
-        .assertCallCount(1)
-        .assertOnEveryValue(pChange -> {
-          assertSame(fieldToAdd, pChange.getField());
-          assertEquals(2, pChange.getSource().getFieldIndex(pChange.getField()));
-        })
-        .whenDoing(pBean -> pBean.addField(fieldToAdd));
+    _testAddition((pField, pBean) -> pBean.addField(pField), 2);
   }
 
   @Test
   public void testAdditionAtACertainIndex()
   {
-    final DecimalField fieldToAdd = BeanFieldFactory.createField(DecimalField.class, "fieldX", Collections.emptyList());
-    observe(bean, IBean::observeFieldAdditions)
-        .assertCallCount(1)
-        .assertOnEveryValue(pChange -> {
-          assertSame(fieldToAdd, pChange.getField());
-          assertEquals(0, pChange.getSource().getFieldIndex(pChange.getField()));
-        })
-        .whenDoing(pBean -> pBean.addFieldAtIndex(fieldToAdd, 0));
+    _testAddition((pField, pBean) -> pBean.addFieldAtIndex(pField, 0), 0);
   }
 
   @Test
@@ -199,13 +185,32 @@ class BeanObserverTest
   }
 
   /**
+   * Tests the addition of a bean field.
+   * It will check the added field and the correct index of the field.
+   *
+   * @param pAdder         an action the add the field to the bean based on a created field instance and the bean to add the field to
+   * @param pExpectedIndex the expected index of the added field
+   */
+  private void _testAddition(BiConsumer<IField<?>, SomeBean> pAdder, int pExpectedIndex)
+  {
+    final DecimalField fieldToAdd = BeanFieldFactory.createField(DecimalField.class, "fieldX", Collections.emptyList(), Optional.empty());
+    observe(bean, IBean::observeFieldAdditions)
+        .assertCallCount(1)
+        .assertOnEveryValue(pChange -> {
+          assertSame(fieldToAdd, pChange.getField());
+          assertEquals(pExpectedIndex, pChange.getSource().getFieldIndex(pChange.getField()));
+        })
+        .whenDoing(pBean -> pAdder.accept(fieldToAdd, pBean));
+  }
+
+  /**
    * Tests the removal of a bean field.
    * It will check the old value and the deleted field.
    *
-   * @param pCaller            a consumer of a bean to delete a field from that bean
+   * @param pRemover           a consumer of a bean to delete a field from that bean
    * @param pExpectedCallCount the expected number of onNext-calls
    */
-  private void _testRemoval(Consumer<SomeBean> pCaller, int pExpectedCallCount)
+  private void _testRemoval(Consumer<SomeBean> pRemover, int pExpectedCallCount)
   {
     observe(bean, IBean::observeFieldRemovals)
         .assertCallCount(pExpectedCallCount)
@@ -217,7 +222,7 @@ class BeanObserverTest
           else
             fail("unknown field");
         })
-        .whenDoing(pCaller);
+        .whenDoing(pRemover);
   }
 
   /**
