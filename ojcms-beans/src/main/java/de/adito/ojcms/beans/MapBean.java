@@ -8,6 +8,7 @@ import de.adito.ojcms.beans.fields.util.FieldValueTuple;
 import de.adito.ojcms.utils.IndexBasedIterator;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
@@ -29,7 +30,7 @@ final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMapB
   private final Class<? extends IField> fieldType; //the field type may differ from the generic type due to value converters
   private final Supplier<Class<?>> genericFieldTypeSupplier;
   private final Class<VALUE> valueType;
-  private final boolean isDetail;
+  private final Collection<Annotation> annotationsForField;
 
   private final Map<KEY, IField<?>> keyFieldMapping;
   private final Map<IField<?>, KEY> fieldKeyMapping;
@@ -58,7 +59,7 @@ final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMapB
     fieldType = IField.getFieldTypeFromDataType(pValueType);
     genericFieldTypeSupplier = () -> fieldType.isAnnotationPresent(GenericBeanField.class) ? pValueType : null;
     valueType = pValueType;
-    isDetail = pIsDetail;
+    annotationsForField = _getAnnotationsForField(pIsDetail);
     keyFieldMapping = new HashMap<>();
     fieldKeyMapping = new HashMap<>();
     fieldCache = pFieldCache;
@@ -82,7 +83,7 @@ final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMapB
     fieldType = pExistingMapBean.fieldType;
     genericFieldTypeSupplier = pExistingMapBean.genericFieldTypeSupplier;
     valueType = pExistingMapBean.valueType;
-    isDetail = pExistingMapBean.isDetail;
+    annotationsForField = pExistingMapBean.annotationsForField;
     keyFieldMapping = new HashMap<>(pExistingMapBean.keyFieldMapping);
     fieldKeyMapping = new HashMap<>(pExistingMapBean.fieldKeyMapping);
     fieldCache = pExistingMapBean.fieldCache;
@@ -136,14 +137,33 @@ final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMapB
         .orElseGet(() ->
                    {
                      //noinspection unchecked,RedundantCast
-                     final IField<?> field = BeanFieldFactory.createField((Class<IField>) fieldType, genericFieldTypeSupplier, Objects.toString(pKey),
-                                                                          Collections.singleton(Detail.INSTANCE), Optional.empty());
+                     final IField<?> field = BeanFieldFactory.createField((Class<IField>) fieldType, genericFieldTypeSupplier,
+                                                                          Objects.toString(pKey), annotationsForField, Optional.empty());
                      fieldCacheCallback.accept(pKey, field);
                      return field;
                    });
     keyFieldMapping.put(pKey, newField);
     fieldKeyMapping.put(newField, pKey);
     return newField;
+  }
+
+  /**
+   * The annotations for the bean fields to create.
+   * If the map bean should be treated as {@link Detail} an annotation will be added.
+   *
+   * @param pIsDetail <tt>true</tt> if the map bean is treated as detail
+   * @return a collection of annotations for the bean fields to create
+   */
+  private static Collection<Annotation> _getAnnotationsForField(boolean pIsDetail)
+  {
+    return pIsDetail ? Collections.singleton(new Detail()
+    {
+      @Override
+      public Class<? extends Annotation> annotationType()
+      {
+        return Detail.class;
+      }
+    }) : Collections.emptySet();
   }
 
   @Override
