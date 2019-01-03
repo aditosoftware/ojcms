@@ -154,6 +154,7 @@ final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMapB
    * @param pIsDetail <tt>true</tt> if the map bean is treated as detail
    * @return a collection of annotations for the bean fields to create
    */
+  @SuppressWarnings("squid:S1604")
   private static Collection<Annotation> _getAnnotationsForField(boolean pIsDetail)
   {
     return pIsDetail ? Collections.singleton(new Detail()
