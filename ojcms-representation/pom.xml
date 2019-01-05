@@ -11,10 +11,6 @@
   </parent>
 
   <artifactId>ojcms-representation</artifactId>
-  <version>${version.ojcms}</version>
-
-  <dependencies>
-
-  </dependencies>
+  <version>1.0-SNAPSHOT</version>
 
 </project>

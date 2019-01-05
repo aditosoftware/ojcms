@@ -11,7 +11,7 @@
   </parent>
 
   <artifactId>ojcms-persistence</artifactId>
-  <version>${version.ojcms}</version>
+  <version>1.0-SNAPSHOT</version>
 
   <dependencies>
 
