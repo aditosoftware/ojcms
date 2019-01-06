@@ -1,10 +1,10 @@
 package de.adito.ojcms.persistence.datastores.sql.util;
 
 import de.adito.ojcms.beans.*;
-import de.adito.ojcms.beans.fields.IField;
-import de.adito.ojcms.beans.fields.serialization.ISerializableField;
-import de.adito.ojcms.beans.fields.types.*;
-import de.adito.ojcms.beans.fields.util.*;
+import de.adito.ojcms.beans.literals.fields.IField;
+import de.adito.ojcms.beans.literals.fields.serialization.ISerializableField;
+import de.adito.ojcms.beans.literals.fields.types.*;
+import de.adito.ojcms.beans.literals.fields.util.*;
 import de.adito.ojcms.persistence.*;
 import de.adito.ojcms.persistence.util.EPersistenceMode;
 import de.adito.ojcms.sqlbuilder.definition.*;

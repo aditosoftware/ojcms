@@ -1,6 +1,6 @@
 package de.adito.ojcms.beans.datasource;
 
-import de.adito.ojcms.beans.fields.IField;
+import de.adito.ojcms.beans.literals.fields.IField;
 
 /**
  * Data source for a bean.

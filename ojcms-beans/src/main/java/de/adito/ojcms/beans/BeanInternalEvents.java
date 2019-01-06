@@ -6,7 +6,7 @@ import de.adito.ojcms.beans.datasource.IDataSource;
 import de.adito.ojcms.beans.exceptions.MissingDataCoreException;
 import de.adito.ojcms.beans.exceptions.bean.*;
 import de.adito.ojcms.beans.exceptions.field.BeanFieldDoesNotExistException;
-import de.adito.ojcms.beans.fields.IField;
+import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.beans.reactive.events.*;
 import de.adito.ojcms.beans.statistics.IStatisticData;
 import de.adito.ojcms.beans.util.BeanReflector;

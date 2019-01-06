@@ -3,7 +3,7 @@ package de.adito.ojcms.beans.util;
 import de.adito.ojcms.beans.*;
 import de.adito.ojcms.beans.exceptions.OJInternalException;
 import de.adito.ojcms.beans.exceptions.bean.NoDeclaredBeanTypeException;
-import de.adito.ojcms.beans.fields.IField;
+import de.adito.ojcms.beans.literals.fields.IField;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;

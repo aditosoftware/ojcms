@@ -1,7 +1,7 @@
 package de.adito.ojcms.persistence.datastores.sql.definition;
 
-import de.adito.ojcms.beans.fields.IField;
-import de.adito.ojcms.beans.fields.util.IBeanFieldBased;
+import de.adito.ojcms.beans.literals.fields.IField;
+import de.adito.ojcms.beans.literals.fields.util.IBeanFieldBased;
 import de.adito.ojcms.sqlbuilder.definition.IColumnIdentification;
 
 import java.util.*;

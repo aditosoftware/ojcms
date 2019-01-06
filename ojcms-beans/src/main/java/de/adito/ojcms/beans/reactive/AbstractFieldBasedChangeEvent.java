@@ -1,7 +1,7 @@
 package de.adito.ojcms.beans.reactive;
 
 import de.adito.ojcms.beans.*;
-import de.adito.ojcms.beans.fields.IField;
+import de.adito.ojcms.beans.literals.fields.IField;
 
 /**
  * An abstract change event that is based on a bean and an associated field.

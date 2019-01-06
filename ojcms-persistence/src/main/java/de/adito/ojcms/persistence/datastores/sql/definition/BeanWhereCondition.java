@@ -1,7 +1,7 @@
 package de.adito.ojcms.persistence.datastores.sql.definition;
 
 import de.adito.ojcms.beans.IBean;
-import de.adito.ojcms.beans.fields.util.FieldValueTuple;
+import de.adito.ojcms.beans.literals.fields.util.FieldValueTuple;
 import de.adito.ojcms.sqlbuilder.definition.condition.*;
 
 import java.util.Objects;

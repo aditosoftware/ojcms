@@ -1,7 +1,7 @@
 package de.adito.ojcms.beans.exceptions.field;
 
 import de.adito.ojcms.beans.exceptions.OJRuntimeException;
-import de.adito.ojcms.beans.fields.IField;
+import de.adito.ojcms.beans.literals.fields.IField;
 
 import java.util.List;
 import java.util.stream.Collectors;

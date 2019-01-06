@@ -3,8 +3,8 @@ package de.adito.ojcms.beans;
 import de.adito.ojcms.beans.annotations.Private;
 import de.adito.ojcms.beans.datasource.IBeanDataSource;
 import de.adito.ojcms.beans.exceptions.field.BeanFieldDuplicateException;
-import de.adito.ojcms.beans.fields.IField;
-import de.adito.ojcms.beans.fields.types.*;
+import de.adito.ojcms.beans.literals.fields.IField;
+import de.adito.ojcms.beans.literals.fields.types.*;
 import org.junit.jupiter.api.*;
 
 import java.lang.annotation.Annotation;

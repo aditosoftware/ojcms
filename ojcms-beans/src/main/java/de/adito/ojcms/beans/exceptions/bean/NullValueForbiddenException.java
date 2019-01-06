@@ -1,7 +1,7 @@
 package de.adito.ojcms.beans.exceptions.bean;
 
 import de.adito.ojcms.beans.exceptions.OJRuntimeException;
-import de.adito.ojcms.beans.fields.IField;
+import de.adito.ojcms.beans.literals.fields.IField;
 
 /**
  * Thrown, if a null value is set or requested for a bean field annotated by {@link de.adito.ojcms.beans.annotations.NeverNull}.

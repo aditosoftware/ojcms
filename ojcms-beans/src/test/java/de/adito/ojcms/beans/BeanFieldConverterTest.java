@@ -1,7 +1,7 @@
 package de.adito.ojcms.beans;
 
-import de.adito.ojcms.beans.fields.IField;
-import de.adito.ojcms.beans.fields.types.DateField;
+import de.adito.ojcms.beans.literals.fields.IField;
+import de.adito.ojcms.beans.literals.fields.types.DateField;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;

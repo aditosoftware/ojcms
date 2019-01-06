@@ -2,7 +2,7 @@ package de.adito.ojcms.persistence.datastores.sql;
 
 import de.adito.ojcms.beans.IBean;
 import de.adito.ojcms.beans.datasource.*;
-import de.adito.ojcms.beans.fields.IField;
+import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.beans.util.BeanReflector;
 import de.adito.ojcms.persistence.*;
 import de.adito.ojcms.persistence.datastores.sql.definition.*;

@@ -2,7 +2,7 @@ package de.adito.ojcms.beans.references;
 
 import de.adito.ojcms.beans.IBean;
 import de.adito.ojcms.beans.exceptions.OJRuntimeException;
-import de.adito.ojcms.beans.fields.IField;
+import de.adito.ojcms.beans.literals.fields.IField;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;

@@ -1,7 +1,7 @@
 package de.adito.ojcms.persistence.datastores.sql.definition;
 
 import de.adito.ojcms.beans.IBean;
-import de.adito.ojcms.beans.fields.util.*;
+import de.adito.ojcms.beans.literals.fields.util.*;
 import de.adito.ojcms.sqlbuilder.definition.*;
 
 import java.lang.reflect.Array;

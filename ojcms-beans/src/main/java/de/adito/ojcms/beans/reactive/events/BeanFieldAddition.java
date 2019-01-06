@@ -1,7 +1,7 @@
 package de.adito.ojcms.beans.reactive.events;
 
 import de.adito.ojcms.beans.IBean;
-import de.adito.ojcms.beans.fields.IField;
+import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.beans.reactive.AbstractFieldBasedChangeEvent;
 
 /**

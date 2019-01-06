@@ -2,7 +2,7 @@ package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
 import de.adito.ojcms.beans.exceptions.field.BeanFieldDuplicateException;
-import de.adito.ojcms.beans.fields.IField;
+import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.beans.reactive.events.*;
 
 import java.lang.annotation.Annotation;

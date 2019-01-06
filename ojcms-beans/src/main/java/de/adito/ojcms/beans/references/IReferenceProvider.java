@@ -1,7 +1,7 @@
 package de.adito.ojcms.beans.references;
 
 import de.adito.ojcms.beans.IBean;
-import de.adito.ojcms.beans.fields.IField;
+import de.adito.ojcms.beans.literals.fields.IField;
 
 import java.util.Set;
 import java.util.stream.Collectors;

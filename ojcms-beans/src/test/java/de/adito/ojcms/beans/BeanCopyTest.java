@@ -1,6 +1,6 @@
 package de.adito.ojcms.beans;
 
-import de.adito.ojcms.beans.fields.types.*;
+import de.adito.ojcms.beans.literals.fields.types.*;
 import de.adito.ojcms.beans.util.ECopyMode;
 import org.junit.jupiter.api.Test;
 

@@ -1,7 +1,7 @@
 package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.exceptions.OJInternalException;
-import de.adito.ojcms.beans.fields.types.BeanField;
+import de.adito.ojcms.beans.literals.fields.types.BeanField;
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;

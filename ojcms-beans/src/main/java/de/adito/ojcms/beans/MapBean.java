@@ -3,8 +3,8 @@ package de.adito.ojcms.beans;
 import de.adito.ojcms.beans.annotations.*;
 import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
 import de.adito.ojcms.beans.datasource.MapBasedBeanDataSource;
-import de.adito.ojcms.beans.fields.IField;
-import de.adito.ojcms.beans.fields.util.FieldValueTuple;
+import de.adito.ojcms.beans.literals.fields.IField;
+import de.adito.ojcms.beans.literals.fields.util.FieldValueTuple;
 import de.adito.ojcms.utils.IndexBasedIterator;
 import org.jetbrains.annotations.NotNull;
 

@@ -3,7 +3,7 @@ package de.adito.ojcms.beans;
 import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
 import de.adito.ojcms.beans.datasource.*;
 import de.adito.ojcms.beans.exceptions.*;
-import de.adito.ojcms.beans.fields.IField;
+import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.beans.reactive.events.*;
 import de.adito.ojcms.beans.references.*;
 import de.adito.ojcms.beans.statistics.IStatisticData;

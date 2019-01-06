@@ -3,7 +3,7 @@ package de.adito.ojcms.beans;
 import de.adito.ojcms.beans.annotations.internal.EncapsulatedData;
 import de.adito.ojcms.beans.datasource.IDataSource;
 import de.adito.ojcms.beans.exceptions.OJInternalException;
-import de.adito.ojcms.beans.fields.IField;
+import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.beans.reactive.IEvent;
 import de.adito.ojcms.beans.references.BeanReference;
 import io.reactivex.Observable;

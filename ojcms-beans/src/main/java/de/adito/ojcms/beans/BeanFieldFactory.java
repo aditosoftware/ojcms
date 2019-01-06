@@ -2,8 +2,8 @@ package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.annotations.GenericBeanField;
 import de.adito.ojcms.beans.exceptions.OJInternalException;
-import de.adito.ojcms.beans.fields.IField;
-import de.adito.ojcms.beans.fields.util.IAdditionalFieldInfo;
+import de.adito.ojcms.beans.literals.fields.IField;
+import de.adito.ojcms.beans.literals.IAdditionalMemberInfo;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -19,7 +19,7 @@ import java.util.function.*;
  */
 final class BeanFieldFactory
 {
-  static final IAdditionalFieldInfo<BiPredicate> OPTIONAL_FIELD_INFO = () -> BiPredicate.class;
+  static final IAdditionalMemberInfo<BiPredicate> OPTIONAL_FIELD_INFO = () -> BiPredicate.class;
 
   private BeanFieldFactory()
   {

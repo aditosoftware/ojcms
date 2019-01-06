@@ -3,7 +3,7 @@ package de.adito.ojcms.beans.statistics;
 import de.adito.ojcms.beans.*;
 import de.adito.ojcms.beans.annotations.Statistics;
 import de.adito.ojcms.beans.exceptions.OJInternalException;
-import de.adito.ojcms.beans.fields.types.TextField;
+import de.adito.ojcms.beans.literals.fields.types.TextField;
 import io.reactivex.Observable;
 import org.junit.jupiter.api.*;
 

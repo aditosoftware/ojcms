@@ -1,8 +1,8 @@
 package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.annotations.OptionalField;
-import de.adito.ojcms.beans.fields.types.*;
-import de.adito.ojcms.beans.fields.util.FieldValueTuple;
+import de.adito.ojcms.beans.literals.fields.types.*;
+import de.adito.ojcms.beans.literals.fields.util.FieldValueTuple;
 import org.junit.jupiter.api.*;
 
 import java.time.*;

@@ -1,8 +1,8 @@
 package de.adito.ojcms.beans.references;
 
 import de.adito.ojcms.beans.*;
-import de.adito.ojcms.beans.fields.IField;
-import de.adito.ojcms.beans.fields.types.*;
+import de.adito.ojcms.beans.literals.fields.IField;
+import de.adito.ojcms.beans.literals.fields.types.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;

@@ -5,8 +5,8 @@ import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
 import de.adito.ojcms.beans.datasource.*;
 import de.adito.ojcms.beans.exceptions.bean.*;
 import de.adito.ojcms.beans.exceptions.field.*;
-import de.adito.ojcms.beans.fields.IField;
-import de.adito.ojcms.beans.fields.util.*;
+import de.adito.ojcms.beans.literals.fields.IField;
+import de.adito.ojcms.beans.literals.fields.util.*;
 import de.adito.ojcms.beans.references.*;
 import de.adito.ojcms.beans.statistics.IStatisticData;
 import de.adito.ojcms.beans.util.ECopyMode;
@@ -304,7 +304,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
   }
 
   /**
-   * Resolves a deep bean within this bean's children. (references created via {@link de.adito.ojcms.beans.fields.types.BeanField}
+   * Resolves a deep bean within this bean's children. (references created via {@link de.adito.ojcms.beans.literals.fields.types.BeanField}
    * The bean will be resolved based on a chain of bean fields, which lead the way to the deep bean.
    *
    * @param pChain the chain of bean fields that leads the way to the deep bean value
@@ -317,7 +317,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
   }
 
   /**
-   * Resolves a deep bean within this bean's children. (references created via {@link de.adito.ojcms.beans.fields.types.BeanField}
+   * Resolves a deep bean within this bean's children. (references created via {@link de.adito.ojcms.beans.literals.fields.types.BeanField}
    * The bean will be resolved based on a chain of bean fields, which lead the way to the deep bean.
    *
    * @param pChain the chain of bean fields that leads the way to the deep bean value
@@ -341,7 +341,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
   }
 
   /**
-   * Resolves a deep value within this bean's children. (references created via {@link de.adito.ojcms.beans.fields.types.BeanField}
+   * Resolves a deep value within this bean's children. (references created via {@link de.adito.ojcms.beans.literals.fields.types.BeanField}
    * The starting point is this bean, from which a chain of bean fields lead to the certain field to retrieve the deep value from.
    *
    * @param pDeepField the deep field to resolve the value to
@@ -356,7 +356,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
   }
 
   /**
-   * Resolves a deep value within this bean's children. (references created via {@link de.adito.ojcms.beans.fields.types.BeanField}
+   * Resolves a deep value within this bean's children. (references created via {@link de.adito.ojcms.beans.literals.fields.types.BeanField}
    * The starting point is this bean, from which a chain of bean fields lead to the certain field to retrieve the deep value from.
    *
    * @param pDeepField the deep field to resolve the value to

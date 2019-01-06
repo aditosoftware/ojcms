@@ -1,9 +1,9 @@
 package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.exceptions.copy.BeanCopyNotSupportedException;
-import de.adito.ojcms.beans.fields.IField;
-import de.adito.ojcms.beans.fields.types.*;
-import de.adito.ojcms.beans.fields.util.CustomFieldCopy;
+import de.adito.ojcms.beans.literals.fields.IField;
+import de.adito.ojcms.beans.literals.fields.types.*;
+import de.adito.ojcms.beans.literals.fields.util.CustomFieldCopy;
 import de.adito.ojcms.beans.util.ECopyMode;
 import org.apache.commons.lang3.ClassUtils;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -103,7 +103,7 @@ public class BeanFieldCopyTest
   }
 
   /**
-   * A field value wrapper for field types with a generic data value like {@link de.adito.ojcms.beans.fields.types.BeanField}.
+   * A field value wrapper for field types with a generic data value like {@link de.adito.ojcms.beans.literals.fields.types.BeanField}.
    *
    * @param <VALUE> the data type of the bean field
    */

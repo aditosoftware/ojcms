@@ -1,6 +1,6 @@
 package de.adito.ojcms.beans.exceptions.copy;
 
-import de.adito.ojcms.beans.fields.IField;
+import de.adito.ojcms.beans.literals.fields.IField;
 
 /**
  * Exception for a bean field that does not support a copy mechanism for its value.

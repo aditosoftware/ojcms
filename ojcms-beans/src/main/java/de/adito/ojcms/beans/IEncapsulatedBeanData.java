@@ -2,8 +2,8 @@ package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.annotations.internal.EncapsulatedData;
 import de.adito.ojcms.beans.datasource.IBeanDataSource;
-import de.adito.ojcms.beans.fields.IField;
-import de.adito.ojcms.beans.fields.util.FieldValueTuple;
+import de.adito.ojcms.beans.literals.fields.IField;
+import de.adito.ojcms.beans.literals.fields.util.FieldValueTuple;
 import de.adito.ojcms.beans.statistics.IStatisticData;
 
 import java.util.Map;

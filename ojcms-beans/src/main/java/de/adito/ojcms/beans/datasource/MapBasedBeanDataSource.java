@@ -2,8 +2,8 @@ package de.adito.ojcms.beans.datasource;
 
 import de.adito.ojcms.beans.IBean;
 import de.adito.ojcms.beans.exceptions.OJInternalException;
-import de.adito.ojcms.beans.fields.IField;
-import de.adito.ojcms.beans.fields.util.FieldValueTuple;
+import de.adito.ojcms.beans.literals.fields.IField;
+import de.adito.ojcms.beans.literals.fields.util.FieldValueTuple;
 
 import java.util.*;
 

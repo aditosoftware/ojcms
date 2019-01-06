@@ -2,9 +2,9 @@ package de.adito.ojcms.persistence.datastores.sql.definition;
 
 import de.adito.ojcms.beans.IBean;
 import de.adito.ojcms.beans.annotations.Identifier;
-import de.adito.ojcms.beans.fields.IField;
-import de.adito.ojcms.beans.fields.types.BeanField;
-import de.adito.ojcms.beans.fields.util.IBeanFieldBased;
+import de.adito.ojcms.beans.literals.fields.IField;
+import de.adito.ojcms.beans.literals.fields.types.BeanField;
+import de.adito.ojcms.beans.literals.fields.util.IBeanFieldBased;
 import de.adito.ojcms.persistence.*;
 import de.adito.ojcms.persistence.datastores.sql.*;
 import de.adito.ojcms.persistence.datastores.sql.util.DatabaseConstants;

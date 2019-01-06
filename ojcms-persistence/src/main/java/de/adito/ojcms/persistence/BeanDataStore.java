@@ -2,8 +2,8 @@ package de.adito.ojcms.persistence;
 
 import de.adito.ojcms.beans.*;
 import de.adito.ojcms.beans.datasource.IBeanContainerDataSource;
-import de.adito.ojcms.beans.fields.IField;
-import de.adito.ojcms.beans.fields.util.FieldValueTuple;
+import de.adito.ojcms.beans.literals.fields.IField;
+import de.adito.ojcms.beans.literals.fields.util.FieldValueTuple;
 import de.adito.ojcms.persistence.datastores.IPersistentSourcesStore;
 import de.adito.ojcms.persistence.util.OJPersistenceException;
 

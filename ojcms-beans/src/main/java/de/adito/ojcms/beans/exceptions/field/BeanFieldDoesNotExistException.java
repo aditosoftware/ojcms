@@ -2,7 +2,7 @@ package de.adito.ojcms.beans.exceptions.field;
 
 import de.adito.ojcms.beans.IBean;
 import de.adito.ojcms.beans.exceptions.OJRuntimeException;
-import de.adito.ojcms.beans.fields.IField;
+import de.adito.ojcms.beans.literals.fields.IField;
 
 /**
  * Thrown, when a bean field is not existing at a certain bean.

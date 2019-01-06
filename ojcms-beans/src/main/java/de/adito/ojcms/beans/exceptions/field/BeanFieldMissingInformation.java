@@ -1,7 +1,7 @@
 package de.adito.ojcms.beans.exceptions.field;
 
 import de.adito.ojcms.beans.exceptions.OJRuntimeException;
-import de.adito.ojcms.beans.fields.util.IAdditionalFieldInfo;
+import de.adito.ojcms.beans.literals.IAdditionalMemberInfo;
 
 import java.lang.annotation.Annotation;
 
@@ -23,11 +23,11 @@ public class BeanFieldMissingInformation extends OJRuntimeException
   }
 
   /**
-   * Creates a new missing information exception for a certain {@link IAdditionalFieldInfo}.
+   * Creates a new missing information exception for a certain {@link IAdditionalMemberInfo}.
    *
    * @param pFieldInfoIdentifier the missing field information identifier
    */
-  public BeanFieldMissingInformation(IAdditionalFieldInfo<?> pFieldInfoIdentifier)
+  public BeanFieldMissingInformation(IAdditionalMemberInfo<?> pFieldInfoIdentifier)
   {
     super("Additional information of type " + pFieldInfoIdentifier.getDataType().getName() + " is not present at this field!");
   }
