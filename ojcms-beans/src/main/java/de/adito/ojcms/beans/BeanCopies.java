@@ -139,7 +139,7 @@ final class BeanCopies
   {
     final _BeanValueCopyCreator beanValueCopyCreator = new _BeanValueCopyCreator(pMode, pCustomCopies);
     //noinspection unchecked,RedundantCast
-    pCopy.streamFields()
+    pOriginal.streamFields()
         .forEach(pField -> pCopy.setValue((IField) pField, beanValueCopyCreator.copyFieldValue((IField) pField, pOriginal.getValue(pField))));
     //If required set non bean values as well
     if (pMode.shouldCopyAllFields())
