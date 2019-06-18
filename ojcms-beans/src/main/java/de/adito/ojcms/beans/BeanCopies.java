@@ -16,6 +16,8 @@ import java.util.*;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
+import static de.adito.ojcms.beans.BeanInternalEvents.requestEncapsulatedData;
+
 /**
  * Utility class for bean copies.
  * A copy can be created from every bean. The API user has to define what {@link ECopyMode} should be used for the copy.
@@ -44,7 +46,7 @@ final class BeanCopies
    */
   static <BEAN extends IBean<BEAN>> BEAN doCreateCopy(BEAN pOriginal, ECopyMode pMode, CustomFieldCopy<?>... pCustomCopies)
   {
-    BeanInternalEvents.requestEncapsulatedData(pOriginal); //Check if the data core is present
+    requestEncapsulatedData(pOriginal); //Check if the data core is present
     //noinspection unchecked
     final Class<BEAN> beanType = (Class<BEAN>) BeanReflector.requiresDeclaredBeanType(pOriginal.getClass());
     final List<IField<?>> fieldOrder = pOriginal.streamFields().collect(Collectors.toList());
@@ -68,7 +70,7 @@ final class BeanCopies
   static <BEAN extends IBean<BEAN>> BEAN doCreateCopy(BEAN pOriginal, ECopyMode pMode, UnaryOperator<BEAN> pCustomConstructorCall,
                                                       CustomFieldCopy<?>... pCustomCopies)
   {
-    BeanInternalEvents.requestEncapsulatedData(pOriginal); //Check if the data core is present
+    requestEncapsulatedData(pOriginal); //Check if the data core is present
     return _setValues(pOriginal, pCustomConstructorCall.apply(pOriginal), pMode, pCustomCopies);
   }
 
@@ -85,7 +87,6 @@ final class BeanCopies
     try
     {
       final BEAN bean = pBeanType.getDeclaredConstructor().newInstance();
-      bean.setEncapsulatedDataSource(new MapBasedBeanDataSource(pFieldOrder));
       return Optional.of(bean);
     }
     catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException pE)
@@ -139,7 +140,7 @@ final class BeanCopies
   {
     final _BeanValueCopyCreator beanValueCopyCreator = new _BeanValueCopyCreator(pMode, pCustomCopies);
     //noinspection unchecked,RedundantCast
-    pCopy.streamFields()
+    requestEncapsulatedData(pOriginal).streamFields()
         .forEach(pField -> pCopy.setValue((IField) pField, beanValueCopyCreator.copyFieldValue((IField) pField, pOriginal.getValue(pField))));
     //If required set non bean values as well
     if (pMode.shouldCopyAllFields())

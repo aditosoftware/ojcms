@@ -1,5 +1,6 @@
 package de.adito.ojcms.beans;
 
+import de.adito.ojcms.beans.annotations.OptionalField;
 import de.adito.ojcms.beans.literals.fields.types.*;
 import de.adito.ojcms.beans.util.ECopyMode;
 import org.junit.jupiter.api.Test;
@@ -73,6 +74,21 @@ class BeanCopyTest
                   copy.getValue(Data.person1).getValue(Person.address).someNormalField);
   }
 
+  @Test
+  public void testCopyWithOptionalField()
+  {
+    final House original = new House();
+    original.setValue(House.hasBasement, true);
+    original.setValue(House.isBasementUnderGround, true);
+    original.setValue(House.someBoringInfo, "info");
+    original.setValue(House.anotherBoringInfo, "info");
+
+    final House copy = original.createCopy(ECopyMode.SHALLOW_ONLY_BEAN_FIELDS);
+
+    assertEquals(3, copy.streamFields().count());
+    assertTrue(copy.getValue(House.isBasementUnderGround));
+  }
+
   /**
    * Some data POJO that manages a person registry.
    */
@@ -118,5 +134,17 @@ class BeanCopyTest
       setValue(city, UUID.randomUUID().toString());
       setValue(postalCode, 11111);
     }
+  }
+
+  public static class House extends OJBean<House>
+  {
+    public static final BooleanField hasBasement = OJFields.create(House.class);
+    @OptionalField
+    public static final BooleanField isBasementUnderGround = OJFields.createOptional(House.class,
+                                                                                     ((pHouse, pValue) -> pHouse.getValue(hasBasement)));
+    @OptionalField
+    public static final TextField someBoringInfo = OJFields.createOptional(House.class, ((pHouse, pValue) -> pValue != null));
+    @OptionalField
+    public static final TextField anotherBoringInfo = OJFields.createOptional(House.class, ((pHouse, pValue) -> pValue == null));
   }
 }
