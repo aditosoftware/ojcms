@@ -2,8 +2,8 @@ package de.adito.ojcms.beans.literals.fields.types;
 
 import de.adito.ojcms.beans.annotations.*;
 import de.adito.ojcms.beans.exceptions.OJRuntimeException;
-import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.beans.literals.IAdditionalMemberInfo;
+import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.utils.StringUtility;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,6 +25,7 @@ abstract class AbstractField<VALUE> implements IField<VALUE>
   private final String name;
   private final Set<Annotation> annotations;
   private final boolean isOptional;
+  private final boolean isPrivate;
   private final Map<Class, Function<?, VALUE>> toConverters = new HashMap<>(); //Access should only be read wise after the field's creation
   private final Map<Class, Function<VALUE, ?>> fromConverters = new HashMap<>();
   private final Map<IAdditionalMemberInfo, Object> additionalInformation = new ConcurrentHashMap<>();
@@ -38,12 +39,14 @@ abstract class AbstractField<VALUE> implements IField<VALUE>
    * @param pAnnotations a collection of annotations of this field
    * @param pIsOptional  <tt>true</tt> if the field is optional
    */
-  protected AbstractField(Class<VALUE> pDataType, @NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional)
+  protected AbstractField(Class<VALUE> pDataType, @NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional,
+                          boolean pIsPrivate)
   {
     dataType = Objects.requireNonNull(pDataType);
     name = StringUtility.requireNotEmpty(pName, "name");
     annotations = new HashSet<>(Objects.requireNonNull(pAnnotations));
     isOptional = pIsOptional;
+    isPrivate = pIsPrivate;
   }
 
   @Override
@@ -113,7 +116,7 @@ abstract class AbstractField<VALUE> implements IField<VALUE>
   @Override
   public boolean isPrivate()
   {
-    return hasAnnotation(Private.class);
+    return isPrivate;
   }
 
   @Override

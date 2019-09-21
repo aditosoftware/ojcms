@@ -8,10 +8,7 @@ import de.adito.ojcms.beans.literals.fields.util.FieldValueTuple;
 import de.adito.ojcms.beans.util.BeanReflector;
 
 import java.util.*;
-import java.util.logging.*;
 import java.util.stream.Collectors;
-
-import static de.adito.ojcms.beans.BeanInternalEvents.*;
 
 /**
  * The default implementing abstract class of the bean interface.
@@ -20,14 +17,13 @@ import static de.adito.ojcms.beans.BeanInternalEvents.*;
  * This class should be extended by any bean type of the application.
  * It may also be extended by another base class, if more base data is necessary.
  *
- * It also provides the possibility to read and change private data via protected methods.
- * This can be used to enable the typical behaviour of any Java POJO.
- *
  * A specific bean of the application defines its fields static to allow access without reflection.
  * Here is an example:
  * "public class SomeBean extends OJBean<SomeBean> {
  * public static final TextField someField = BeanFieldFactory.create(SomeBean.class)"
  * }"
+ *
+ * Use the private access modifier to use the field only internally.
  *
  * It's important to use the static field factory to create the fields.
  * So all initial data is stored in the field instance automatically.
@@ -43,7 +39,6 @@ import static de.adito.ojcms.beans.BeanInternalEvents.*;
 public abstract class OJBean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
 {
   static final String ENCAPSULATED_DATA_FIELD_NAME = "encapsulatedData";
-  private static final Logger LOGGER = Logger.getLogger(OJBean.class.getName());
   private final IEncapsulatedBeanData encapsulatedData;
 
   //Initial check for the constant value that is holding the encapsulated data field name
@@ -88,32 +83,6 @@ public abstract class OJBean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
   }
 
   /**
-   * Returns the value of a private bean field.
-   *
-   * @param pField  the field to which the value should be returned
-   * @param <VALUE> the data type of the field
-   * @return the field's value
-   */
-  protected <VALUE> VALUE getPrivateValue(IField<VALUE> pField)
-  {
-    _checkNotPrivateAndWarn(pField);
-    return requestValue(this, pField, EAccessRule.PRIVATE_ACCESS_GRANTED);
-  }
-
-  /**
-   * Sets the value of a private bean field.
-   *
-   * @param pField  the field for which the value should be set
-   * @param pValue  the new value
-   * @param <VALUE> the data type of the field
-   */
-  protected <VALUE> void setPrivateValue(IField<VALUE> pField, VALUE pValue)
-  {
-    _checkNotPrivateAndWarn(pField);
-    setValueAndPropagate(toRuntimeBean(this), pField, pValue, EAccessRule.PRIVATE_ACCESS_GRANTED);
-  }
-
-  /**
    * Checks for duplicate field definitions for this bean type and fires the creation of this bean.
    */
   private void _checkForDuplicateFieldsAndFireCreation()
@@ -135,20 +104,6 @@ public abstract class OJBean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
       throw new BeanFieldDuplicateException(duplicates);
   }
 
-  /**
-   * Checks if the field the value should be set or retrieved for is really private.
-   * Otherwise the public methods of {@link IBean} should be used.
-   * A misconfiguration will only result in a logger warning.
-   *
-   * @param pField  the field to check
-   * @param <VALUE> the generic data type of the field
-   */
-  private static <VALUE> void _checkNotPrivateAndWarn(IField<VALUE> pField)
-  {
-    if (!pField.isPrivate())
-      LOGGER.log(Level.WARNING, "The field '" + pField.getName() + "' is not private. Use the public method to get/set the value instead!");
-  }
-
   @Override
   public String toString()
   {
@@ -168,6 +123,7 @@ public abstract class OJBean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
     final Set<FieldValueTuple<?>> identifiers = getIdentifiers();
     if (identifiers.isEmpty())
       return false;
+
     final OJBean<BEAN> other = (OJBean<BEAN>) pOther;
     return identifiers.stream()
         .allMatch(pIdentifier -> Objects.equals(pIdentifier.getValue(), other.getValue(pIdentifier.getField())));

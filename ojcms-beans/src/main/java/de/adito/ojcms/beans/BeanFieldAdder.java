@@ -87,7 +87,7 @@ public final class BeanFieldAdder<BEAN extends IBean<BEAN>, VALUE, FIELD extends
    */
   public FIELD addAtIndex(int pIndex)
   {
-    final FIELD field = BeanFieldFactory.createField(beanFieldType, () -> genericType, fieldName, annotations, activeCondition);
+    final FIELD field = BeanFieldFactory.createField(beanFieldType, () -> genericType, fieldName, false, annotations, activeCondition);
     addFunction.accept(field, pIndex);
     return field;
   }

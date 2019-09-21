@@ -67,7 +67,7 @@ public class BeanFieldCopyTest
   {
     assertNotNull(pFieldValueWrapper.value);
     final IField<VALUE> field = BeanFieldFactory.createField(pFieldValueWrapper.fieldType, pFieldValueWrapper::getGenericFieldType,
-                                                             "test", Collections.emptySet(), Optional.empty());
+                                                             "test", false, Collections.emptySet(), Optional.empty());
     try
     {
       final VALUE copiedValue = field.copyValue(pFieldValueWrapper.value, ECopyMode.DEEP_ONLY_BEAN_FIELDS);

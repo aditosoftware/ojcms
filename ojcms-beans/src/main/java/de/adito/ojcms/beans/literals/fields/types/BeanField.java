@@ -4,7 +4,7 @@ import de.adito.ojcms.beans.*;
 import de.adito.ojcms.beans.annotations.GenericBeanField;
 import de.adito.ojcms.beans.annotations.internal.*;
 import de.adito.ojcms.beans.literals.fields.util.CustomFieldCopy;
-import de.adito.ojcms.beans.util.*;
+import de.adito.ojcms.beans.util.ECopyMode;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
@@ -21,9 +21,10 @@ import java.util.Collection;
 @GenericBeanField
 public class BeanField<BEAN extends IBean<BEAN>> extends AbstractField<BEAN>
 {
-  protected BeanField(Class<BEAN> pType, @NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional)
+  protected BeanField(Class<BEAN> pType, @NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional,
+                      boolean pIsPrivate)
   {
-    super(pType, pName, pAnnotations, pIsOptional);
+    super(pType, pName, pAnnotations, pIsOptional, pIsPrivate);
   }
 
   @Override

@@ -21,9 +21,10 @@ import java.util.*;
 public class ListField<ELEMENT> extends AbstractField<List<ELEMENT>>
     implements ISerializableFieldJson<List<ELEMENT>>, ISneakyCopyCreatorField<List<ELEMENT>>
 {
-  protected ListField(Class<List<ELEMENT>> pType, @NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional)
+  protected ListField(Class<List<ELEMENT>> pType, @NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional,
+                      boolean pIsPrivate)
   {
-    super(pType, pName, pAnnotations, pIsOptional);
+    super(pType, pName, pAnnotations, pIsOptional, pIsPrivate);
   }
 
   @Override

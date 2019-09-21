@@ -17,9 +17,9 @@ import java.util.Collection;
 @TypeDefaultField(types = String.class)
 public class TextField extends AbstractField<String> implements ISerializableFieldToString<String>
 {
-  protected TextField(@NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional)
+  protected TextField(@NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional, boolean pIsPrivate)
   {
-    super(String.class, pName, pAnnotations, pIsOptional);
+    super(String.class, pName, pAnnotations, pIsOptional, pIsPrivate);
   }
 
   @Override

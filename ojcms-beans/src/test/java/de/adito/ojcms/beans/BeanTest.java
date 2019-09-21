@@ -3,7 +3,7 @@ package de.adito.ojcms.beans;
 import de.adito.ojcms.beans.annotations.*;
 import de.adito.ojcms.beans.base.IEqualsHashCodeChecker;
 import de.adito.ojcms.beans.datasource.IBeanDataSource;
-import de.adito.ojcms.beans.exceptions.bean.*;
+import de.adito.ojcms.beans.exceptions.bean.NullValueForbiddenException;
 import de.adito.ojcms.beans.exceptions.field.BeanFieldDoesNotExistException;
 import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.beans.literals.fields.types.*;
@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class BeanTest
 {
   private static final String VALUE = "value";
-  private static final String PRIVATE_VALUE = "privateValue";
+  private static final String OTHER_VALUE = "otherValue";
   private static final String TEXT_FIELD_NAME = "testTextField";
 
   private SomeBean bean;
@@ -44,21 +44,9 @@ class BeanTest
   }
 
   @Test
-  public void testGetValuePrivateField()
-  {
-    assertThrows(BeanIllegalAccessException.class, () -> bean.getValue(SomeBean.somePrivateField));
-  }
-
-  @Test
   public void testGetValueSuccess()
   {
     assertEquals(VALUE, bean.getValue(SomeBean.specialTextField));
-  }
-
-  @Test
-  public void testGetPrivateValueSuccess()
-  {
-    assertEquals(PRIVATE_VALUE, bean.getSomePrivateValue());
   }
 
   @Test
@@ -74,7 +62,6 @@ class BeanTest
     bean.setEncapsulatedDataSource(new _NullReturningBeanDataSource());
     assertThrows(NullValueForbiddenException.class, () -> bean.getValue(SomeBean.specialTextField)); //Field type annotated
     assertThrows(NullValueForbiddenException.class, () -> bean.getValue(SomeBean.numberField)); //Number field type annotated naturally
-    assertThrows(NullValueForbiddenException.class, () -> bean.getPrivateValue(SomeBean.somePrivateField)); //Field instance annotated
   }
 
   @Test
@@ -85,30 +72,22 @@ class BeanTest
   }
 
   @Test
-  public void testSetValuePrivateField()
-  {
-    assertThrows(BeanIllegalAccessException.class, () -> bean.setValue(SomeBean.somePrivateField, "test"));
-  }
-
-  @Test
   public void testSetNullValueForbidden()
   {
     assertThrows(NullValueForbiddenException.class, () -> bean.setValue(SomeBean.specialTextField, null)); //Field type annotated
     assertThrows(NullValueForbiddenException.class, () -> bean.setValue(SomeBean.numberField, null)); //Number field type annotated naturally
-    assertThrows(NullValueForbiddenException.class, () -> bean.setPrivateValue(SomeBean.somePrivateField, null)); //Field instance annotated
   }
 
   @Test
   public void testClear()
   {
     bean.clear();
-    bean.stream().forEach(pTuple -> assertEquals(pTuple.getField().getInitialValue(), pTuple.getValue()));
-  }
 
-  @Test
-  public void testHasFieldPrivate()
-  {
-    assertThrows(BeanIllegalAccessException.class, () -> bean.hasField(SomeBean.somePrivateField));
+    assertEquals(OTHER_VALUE, bean.getValue(SomeBean.someOtherField)); //Should not have been cleared because of @NeverNull
+
+    bean.stream()
+        .filter(pTuple -> !pTuple.getField().hasAnnotation(NeverNull.class))
+        .forEach(pTuple -> assertEquals(pTuple.getField().getInitialValue(), pTuple.getValue()));
   }
 
   @Test
@@ -120,19 +99,13 @@ class BeanTest
   @Test
   public void testFieldCount()
   {
-    assertEquals(3, bean.getFieldCount());
+    assertEquals(4, bean.getFieldCount());
   }
 
   @Test
   public void testFieldIndexNotExistingField()
   {
     assertEquals(-1, bean.getFieldIndex(_createTextField()));
-  }
-
-  @Test
-  public void testFieldIndexPrivateField()
-  {
-    assertThrows(BeanIllegalAccessException.class, () -> bean.getFieldIndex(SomeBean.somePrivateField));
   }
 
   @Test
@@ -158,7 +131,7 @@ class BeanTest
     final SomeBean anotherBean = new SomeBean();
     final IEqualsHashCodeChecker equalsHashCodeChecker = IEqualsHashCodeChecker.create(bean, anotherBean);
     equalsHashCodeChecker.makeAssertion(true);
-    anotherBean.setPrivateValue(SomeBean.somePrivateField, "differentValue"); //This should not affect the behaviour
+    anotherBean.setValue(SomeBean.someOtherField, "differentValue"); //This should not affect the behaviour
     equalsHashCodeChecker.makeAssertion(true);
     anotherBean.setValue(SomeBean.numberField, 111);
     equalsHashCodeChecker.makeAssertion(false);
@@ -191,6 +164,21 @@ class BeanTest
     assertSame(DeeperBean.DEEP_VALUE, deepValue);
   }
 
+  @Test
+  public void testPrivatelyDeclaredField()
+  {
+    final BeanWithPrivateField bean = new BeanWithPrivateField();
+
+    assertEquals(BeanWithPrivateField.EXPECTED_VALUE, bean.getPrivateValue());
+
+    assertEquals(0, bean.streamFields().count());
+    assertEquals(0, bean.stream().count());
+
+    //After a clear the value should still be set, because private fields are not affected
+    bean.clear();
+    assertEquals(BeanWithPrivateField.EXPECTED_VALUE, bean.getPrivateValue());
+  }
+
   /**
    * Creates a new bean text field.
    *
@@ -198,7 +186,7 @@ class BeanTest
    */
   private static TextField _createTextField()
   {
-    return BeanFieldFactory.createField(TextField.class, TEXT_FIELD_NAME, Collections.emptySet(), Optional.empty());
+    return BeanFieldFactory.createField(TextField.class, TEXT_FIELD_NAME, false, Collections.emptySet(), Optional.empty());
   }
 
   /**
@@ -211,27 +199,17 @@ class BeanTest
     @Identifier
     public static final IntegerField numberField = OJFields.create(SomeBean.class);
     @NeverNull
-    @Private
-    public static final TextField somePrivateField = OJFields.create(SomeBean.class);
+    public static final TextField someOtherField = OJFields.create(SomeBean.class);
     public static final BeanField<DeepBean> deepField = OJFields.create(SomeBean.class);
 
     public SomeBean()
     {
       setValue(specialTextField, VALUE);
       setValue(numberField, 42);
-      setPrivateValue(somePrivateField, PRIVATE_VALUE);
+      setValue(someOtherField, OTHER_VALUE);
       setValue(deepField, new DeepBean());
     }
 
-    /**
-     * A private value.
-     *
-     * @return the value of the private value
-     */
-    public String getSomePrivateValue()
-    {
-      return getPrivateValue(somePrivateField);
-    }
   }
 
   /**
@@ -271,9 +249,9 @@ class BeanTest
     public static final String DEFAULT_VALUE = "default";
     public static final String INITIAL_VALUE = "initial";
 
-    protected SpecialTextField(@NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional)
+    protected SpecialTextField(@NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional, boolean pIsPrivate)
     {
-      super(pName, pAnnotations, pIsOptional);
+      super(pName, pAnnotations, pIsOptional, pIsPrivate);
     }
 
     @Override
@@ -286,6 +264,25 @@ class BeanTest
     public String getInitialValue()
     {
       return INITIAL_VALUE;
+    }
+  }
+
+  /**
+   * A bean with one privately declared field.
+   */
+  public static class BeanWithPrivateField extends OJBean<BeanWithPrivateField>
+  {
+    static final int EXPECTED_VALUE = 5;
+    private static final IntegerField privateField = OJFields.create(BeanWithPrivateField.class);
+
+    public BeanWithPrivateField()
+    {
+      setValue(privateField, EXPECTED_VALUE);
+    }
+
+    public int getPrivateValue()
+    {
+      return getValue(privateField);
     }
   }
 

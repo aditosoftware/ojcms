@@ -5,12 +5,12 @@ import de.adito.ojcms.beans.annotations.internal.TypeDefaultField;
 import de.adito.ojcms.beans.exceptions.OJInternalException;
 import de.adito.ojcms.beans.literals.fields.serialization.ISerializableField;
 import de.adito.ojcms.beans.literals.fields.util.CustomFieldCopy;
-import de.adito.ojcms.beans.util.*;
+import de.adito.ojcms.beans.util.ECopyMode;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import java.util.*;
+import java.util.Collection;
 
 /**
  * A bean field for an enumeration type.
@@ -21,9 +21,9 @@ import java.util.*;
 @GenericBeanField
 public class EnumField<ENUM extends Enum> extends AbstractField<ENUM> implements ISerializableField<ENUM>
 {
-  protected EnumField(Class<ENUM> pType, @NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional)
+  protected EnumField(Class<ENUM> pType, @NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional, boolean pIsPrivate)
   {
-    super(pType, pName, pAnnotations, pIsOptional);
+    super(pType, pName, pAnnotations, pIsOptional, pIsPrivate);
   }
 
   @Override

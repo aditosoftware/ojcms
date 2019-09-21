@@ -4,7 +4,7 @@ import de.adito.ojcms.beans.annotations.NeverNull;
 import de.adito.ojcms.beans.annotations.internal.*;
 import de.adito.ojcms.beans.datasource.IDataSource;
 import de.adito.ojcms.beans.exceptions.MissingDataCoreException;
-import de.adito.ojcms.beans.exceptions.bean.*;
+import de.adito.ojcms.beans.exceptions.bean.NullValueForbiddenException;
 import de.adito.ojcms.beans.exceptions.field.BeanFieldDoesNotExistException;
 import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.beans.reactive.events.*;
@@ -15,7 +15,7 @@ import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
 
-import static java.util.Objects.*;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Utility methods for internal bean events concerning the encapsulated data cores.
@@ -69,21 +69,16 @@ final class BeanInternalEvents
 
   /**
    * A data value for a certain bean field is requested.
-   * This method takes care of correct access rules and proper values to return.
    *
-   * @param pBean       the bean to get the value from
-   * @param pField      the bean field to get the value from
-   * @param pAccessRule the access rule for private fields
-   * @param <VALUE>     the data type of the field and the value to retrieve
+   * @param pBean   the bean to get the value from
+   * @param pField  the bean field to get the value from
+   * @param <VALUE> the data type of the field and the value to retrieve
    * @return the value for the bean field
    * @throws BeanFieldDoesNotExistException if the bean field does not exist at the bean
-   * @throws BeanIllegalAccessException     if access the bean field's data is not allowed
    * @throws NullValueForbiddenException    if a null value would have been returned, but the field is marked as {@link NeverNull}
    */
-  static <VALUE> VALUE requestValue(IBean<?> pBean, IField<VALUE> pField, EAccessRule pAccessRule)
+  static <VALUE> VALUE requestValue(IBean<?> pBean, IField<VALUE> pField)
   {
-    if (pAccessRule == EAccessRule.PRIVATE_ACCESS_FORBIDDEN && requireNonNull(pField).isPrivate())
-      throw new BeanIllegalAccessException(pBean, pField);
     final VALUE value = requestEncapsulatedDataForField(pBean, pField).getValue(pField);
     //Check if null is allowed
     if (value == null && (pField.hasAnnotation(NeverNull.class) || pField.getClass().isAnnotationPresent(NeverNull.class)))
@@ -96,24 +91,17 @@ final class BeanInternalEvents
    * This may influence the active state of an optional field or create/remove a reference, which will be adjusted here.
    * This method uses the encapsulated data core only, so any special behaviour of optional fields, etc. won't matter.
    *
-   * @param pBean       the bean from which a value has been changed
-   * @param pField      the bean field from which the value has been changed
-   * @param pNewValue   the new value to set
-   * @param pAccessRule the access rule for private fields
-   * @param <BEAN>      the generic bean type
-   * @param <VALUE>     the data type of the bean field
+   * @param pBean     the bean from which a value has been changed
+   * @param pField    the bean field from which the value has been changed
+   * @param pNewValue the new value to set
+   * @param <BEAN>    the generic bean type
+   * @param <VALUE>   the data type of the bean field
    * @throws BeanFieldDoesNotExistException if the bean field does not exist at the bean
-   * @throws BeanIllegalAccessException     if access the bean field's data is not allowed
    * @throws NullValueForbiddenException    if a null value would have been returned, but the field is marked as {@link NeverNull}
    */
   @SuppressWarnings("unchecked")
-  static <BEAN extends IBean<BEAN>, VALUE> void setValueAndPropagate(BEAN pBean, IField<VALUE> pField, VALUE pNewValue,
-                                                                     EAccessRule pAccessRule)
+  static <BEAN extends IBean<BEAN>, VALUE> void setValueAndPropagate(BEAN pBean, IField<VALUE> pField, VALUE pNewValue)
   {
-    //Check for access violation
-    if (requireNonNull(pAccessRule) == EAccessRule.PRIVATE_ACCESS_FORBIDDEN && requireNonNull(pField).isPrivate())
-      throw new BeanIllegalAccessException(pBean, pField);
-
     //Check if null values are allowed
     if (pNewValue == null && (pField.hasAnnotation(NeverNull.class) || pField.getClass().isAnnotationPresent(NeverNull.class)))
       throw new NullValueForbiddenException(pField);
@@ -287,13 +275,5 @@ final class BeanInternalEvents
   private static <BEAN extends IBean<BEAN>> void _tryAddStatisticEntry(IBeanContainer<BEAN> pContainer)
   {
     pContainer.getStatisticData().ifPresent(pData -> pData.addEntry(pContainer.size()));
-  }
-
-  /**
-   * Access rules for private fields.
-   */
-  enum EAccessRule
-  {
-    PRIVATE_ACCESS_FORBIDDEN, PRIVATE_ACCESS_GRANTED
   }
 }

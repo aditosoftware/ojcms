@@ -82,6 +82,8 @@ public final class OJFields
         .filter(pField -> {
           try
           {
+            if (!pField.isAccessible())
+              pField.setAccessible(true);
             return pField.get(null) == null;
           }
           catch (IllegalAccessException pE)
@@ -97,7 +99,9 @@ public final class OJFields
     final Supplier<Class<?>> genericTypeSupplier = _genericTypeSupplier(declaredFieldToCreate, beanFieldType);
     final String fieldName = declaredFieldToCreate.getName();
     final List<Annotation> annotations = Arrays.asList(declaredFieldToCreate.getAnnotations());
-    return BeanFieldFactory.createField(beanFieldType, genericTypeSupplier, fieldName, annotations, pActiveCondition);
+    final boolean isPrivate = Modifier.isPrivate(declaredFieldToCreate.getModifiers());
+
+    return BeanFieldFactory.createField(beanFieldType, genericTypeSupplier, fieldName, isPrivate, annotations, pActiveCondition);
   }
 
   /**

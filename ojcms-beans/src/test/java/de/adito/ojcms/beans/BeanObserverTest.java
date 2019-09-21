@@ -1,6 +1,6 @@
 package de.adito.ojcms.beans;
 
-import de.adito.ojcms.beans.annotations.Private;
+import de.adito.ojcms.beans.annotations.Detail;
 import de.adito.ojcms.beans.datasource.IBeanDataSource;
 import de.adito.ojcms.beans.exceptions.field.BeanFieldDuplicateException;
 import de.adito.ojcms.beans.literals.fields.IField;
@@ -63,12 +63,12 @@ class BeanObserverTest
   public void testCreationAndAddition()
   {
     final String fieldName = "fieldName";
-    final Private annotation = new Private()
+    final Detail annotation = new Detail()
     {
       @Override
       public Class<? extends Annotation> annotationType()
       {
-        return Private.class;
+        return Detail.class;
       }
     };
 
@@ -77,7 +77,7 @@ class BeanObserverTest
         .assertOnEveryValue(pChange -> {
           assertEquals(fieldName, pChange.getField().getName());
           assertEquals(String.class, pChange.getField().getDataType());
-          assertTrue(pChange.getField().hasAnnotation(Private.class));
+          assertTrue(pChange.getField().hasAnnotation(Detail.class));
         })
         .whenDoing(pBean -> pBean.fieldAdder(TextField.class, fieldName, Collections.singleton(annotation)).addAtTheEnd());
   }
@@ -193,7 +193,9 @@ class BeanObserverTest
    */
   private void _testAddition(BiConsumer<IField<?>, SomeBean> pAdder, int pExpectedIndex)
   {
-    final DecimalField fieldToAdd = BeanFieldFactory.createField(DecimalField.class, "fieldX", Collections.emptyList(), Optional.empty());
+    final DecimalField fieldToAdd = BeanFieldFactory.createField(DecimalField.class, "fieldX", false,
+                                                                 Collections.emptyList(), Optional.empty());
+
     observe(bean, IBean::observeFieldAdditions)
         .assertCallCount(1)
         .assertOnEveryValue(pChange -> {

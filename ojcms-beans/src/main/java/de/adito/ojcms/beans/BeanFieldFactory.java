@@ -2,8 +2,8 @@ package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.annotations.GenericBeanField;
 import de.adito.ojcms.beans.exceptions.OJInternalException;
-import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.beans.literals.IAdditionalMemberInfo;
+import de.adito.ojcms.beans.literals.fields.IField;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -30,6 +30,7 @@ final class BeanFieldFactory
    *
    * @param pFieldType       the field's type
    * @param pName            the field's name
+   * @param pIsPrivate       determines if the field is declared privately
    * @param pAnnotations     the field's annotations
    * @param pActiveCondition an optional condition for optional bean fields (determines the active state of the field)
    * @param <BEAN>           the generic type of the bean the field is for
@@ -38,10 +39,10 @@ final class BeanFieldFactory
    * @return the newly created field
    */
   static <BEAN extends IBean<BEAN>, VALUE, FIELD extends IField<VALUE>> FIELD createField(Class<FIELD> pFieldType, String pName,
-                                                                                          Collection<Annotation> pAnnotations,
+                                                                                          boolean pIsPrivate, Collection<Annotation> pAnnotations,
                                                                                           Optional<BiPredicate<BEAN, VALUE>> pActiveCondition)
   {
-    return createField(pFieldType, () -> null, pName, pAnnotations, pActiveCondition);
+    return createField(pFieldType, () -> null, pName, pIsPrivate, pAnnotations, pActiveCondition);
   }
 
   /**
@@ -53,6 +54,7 @@ final class BeanFieldFactory
    *                             this is necessary if fields use an generic type as the field's data value directly.
    *                             see {@link de.adito.ojcms.beans.annotations.GenericBeanField}
    * @param pName                the field's name
+   * @param pIsPrivate           determines if the field is declared privately
    * @param pAnnotations         the field's annotations
    * @param pActiveCondition     an optional condition for optional bean fields (determines the active state of the field)
    * @param <BEAN>               the generic type of the bean the field is for
@@ -62,7 +64,8 @@ final class BeanFieldFactory
    */
   static <BEAN extends IBean<BEAN>, VALUE, FIELD extends IField<VALUE>> FIELD createField(Class<FIELD> pFieldType,
                                                                                           Supplier<Class<?>> pGenericTypeSupplier,
-                                                                                          String pName, Collection<Annotation> pAnnotations,
+                                                                                          String pName, boolean pIsPrivate,
+                                                                                          Collection<Annotation> pAnnotations,
                                                                                           Optional<BiPredicate<BEAN, VALUE>> pActiveCondition)
   {
     try
@@ -71,11 +74,11 @@ final class BeanFieldFactory
       final boolean isOptional = pActiveCondition.isPresent();
       //Constructor argument distinction between generic and non generic values (generic types provide their type additionally)
       final Class[] constructorArgumentTypes = optionalGenericType
-          .map(pType -> new Class[]{Class.class, String.class, Collection.class, boolean.class})
-          .orElseGet(() -> new Class[]{String.class, Collection.class, boolean.class});
+          .map(pType -> new Class[]{Class.class, String.class, Collection.class, boolean.class, boolean.class})
+          .orElseGet(() -> new Class[]{String.class, Collection.class, boolean.class, boolean.class});
       final Object[] constructorArguments = optionalGenericType
-          .map(pClass -> new Object[]{pClass, pName, pAnnotations, isOptional})
-          .orElseGet(() -> new Object[]{pName, pAnnotations, isOptional});
+          .map(pClass -> new Object[]{pClass, pName, pAnnotations, isOptional, pIsPrivate})
+          .orElseGet(() -> new Object[]{pName, pAnnotations, isOptional, pIsPrivate});
       //Create the field by using the reflected constructor
       final Constructor<FIELD> constructor = pFieldType.getDeclaredConstructor(constructorArgumentTypes);
       if (!constructor.isAccessible())

@@ -81,10 +81,10 @@ public final class BeanReflector
   /**
    * Performs an action if a certain annotation type is present.
    *
-   * @param pType the type that might be annotated
+   * @param pType           the type that might be annotated
    * @param pAnnotationType the annotation type to check
-   * @param pAction the action to perform (based on the annotation)
-   * @param <ANNOTATION> the generic type of the annotation
+   * @param pAction         the action to perform (based on the annotation)
+   * @param <ANNOTATION>    the generic type of the annotation
    */
   public static <ANNOTATION extends Annotation> void doIfAnnotationPresent(Class<?> pType, Class<ANNOTATION> pAnnotationType,
                                                                            Consumer<ANNOTATION> pAction)
@@ -125,7 +125,6 @@ public final class BeanReflector
   {
     return _getDeclaredFields(pBeanType,
                               pField -> Modifier.isStatic(pField.getModifiers()),
-                              pField -> Modifier.isPublic(pField.getModifiers()),
                               pField -> IField.class.isAssignableFrom(pField.getType()));
   }
 

@@ -47,30 +47,26 @@ public interface IBean<BEAN extends IBean<BEAN>>
 {
   /**
    * The value for a bean field.
-   * This method can only be called if the field has no private access modifier {@link de.adito.ojcms.beans.annotations.Private}.
    *
    * @param pField  the bean field
    * @param <VALUE> the field's data type
    * @return the value for the bean field
    * @throws BeanFieldDoesNotExistException if the bean field does not exist at the bean
-   * @throws BeanIllegalAccessException     if access to the bean field's data is not allowed
    * @throws NullValueForbiddenException    if a null value would have been returned, but the field is marked as {@link NeverNull}
    */
   default <VALUE> VALUE getValue(IField<VALUE> pField)
   {
-    return requestValue(this, pField, EAccessRule.PRIVATE_ACCESS_FORBIDDEN);
+    return requestValue(this, pField);
   }
 
   /**
    * The value for a bean field.
    * If the current value is the initial value of the field, the default value of the field will be returned.
-   * This method can only be called if the field has no private access modifier {@link de.adito.ojcms.beans.annotations.Private}.
    *
    * @param pField  the bean field
    * @param <VALUE> the field's data type
    * @return the value for the bean field or the field's default value if null
    * @throws BeanFieldDoesNotExistException if the bean field does not exist at the bean
-   * @throws BeanIllegalAccessException     if access to the bean field's data is not allowed
    * @throws NullValueForbiddenException    if a null value would have been returned, but the field is marked as {@link NeverNull}
    */
   default <VALUE> VALUE getValueOrDefault(IField<VALUE> pField)
@@ -83,7 +79,6 @@ public interface IBean<BEAN extends IBean<BEAN>>
    * The value for a bean field.
    * Here it's possible to define a type to which the value should be transformed before it is returned.
    * The associated field must be able to provide a matching converter.
-   * This method can only be called if the field has no private access modifier {@link de.adito.ojcms.beans.annotations.Private}.
    *
    * @param pField       the bean field
    * @param pConvertType the type to which the value should be converted
@@ -91,7 +86,6 @@ public interface IBean<BEAN extends IBean<BEAN>>
    * @param <TARGET>     the generic type to convert to
    * @return the converted value for the bean field
    * @throws BeanFieldDoesNotExistException      if the bean field does not exist at the bean
-   * @throws BeanIllegalAccessException          if access to the bean field's data is not allowed
    * @throws NullValueForbiddenException         if a null value would have been returned, but the field is marked as {@link NeverNull}
    * @throws ValueConversionUnsupportedException if the conversion is not possible
    */
@@ -109,19 +103,17 @@ public interface IBean<BEAN extends IBean<BEAN>>
   /**
    * Sets a value for a bean field.
    * If the new value is different from the old value, events will be propagated.
-   * This method can only be called if the field has no private access modifier {@link de.adito.ojcms.beans.annotations.Private}.
    *
    * @param pField  the bean field for which the value should be set
    * @param pValue  the new value
    * @param <VALUE> the field's data type
    * @throws BeanFieldDoesNotExistException if the bean field does not exist at the bean
-   * @throws BeanIllegalAccessException     if access to the bean field's data is not allowed
    * @throws NullValueForbiddenException    if a null value would have been returned, but the field is marked as {@link NeverNull}
    */
   @WriteOperation
   default <VALUE> void setValue(IField<VALUE> pField, VALUE pValue)
   {
-    setValueAndPropagate(toRuntimeBean(this), pField, pValue, EAccessRule.PRIVATE_ACCESS_FORBIDDEN);
+    setValueAndPropagate(toRuntimeBean(this), pField, pValue);
   }
 
   /**
@@ -130,14 +122,12 @@ public interface IBean<BEAN extends IBean<BEAN>>
    * In this case, a converter, provided by the field, will be used to convert the value beforehand.
    * If there is no matching converter, a runtime exception will be thrown.
    * If the new value is different from the old value, events will be propagated.
-   * This method can only be called if the field has no private access modifier {@link de.adito.ojcms.beans.annotations.Private}.
    *
    * @param pField          the bean field for which the value should be set
    * @param pValueToConvert the new value that possibly has to be transformed beforehand
    * @param <VALUE>         he field's data type
    * @param <SOURCE>        the value's type before its conversion
    * @throws BeanFieldDoesNotExistException      if the bean field does not exist at the bean
-   * @throws BeanIllegalAccessException          if access to the bean field's data is not allowed
    * @throws NullValueForbiddenException         if a null value would have been returned, but the field is marked as {@link NeverNull}
    * @throws ValueConversionUnsupportedException if the conversion is not possible
    */
@@ -159,6 +149,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
 
   /**
    * Clears the values of all public field's of this bean back to the initial value of every field.
+   * The clear operation ignores fields with a null initial value value and annotated by {@link NeverNull}.
    */
   @WriteOperation
   default void clear()
@@ -166,6 +157,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
     //noinspection unchecked
     streamFields()
         .filter(pField -> !pField.isPrivate())
+        .filter(pField -> pField.getInitialValue() != null || !pField.hasAnnotation(NeverNull.class))
         .forEach(pField -> setValue((IField) pField, pField.getInitialValue()));
   }
 
@@ -181,16 +173,12 @@ public interface IBean<BEAN extends IBean<BEAN>>
 
   /**
    * Determines, if this bean has a certain field.
-   * Ignores private fields.
    *
    * @param pField the bean field to check
    * @return <tt>true</tt> if the field is present
-   * @throws BeanIllegalAccessException if access to the bean field's data is not allowed
    */
   default boolean hasField(IField<?> pField)
   {
-    if (requireNonNull(pField).isPrivate())
-      throw new BeanIllegalAccessException(this, pField);
     return requestEncapsulatedData(this).containsField(pField);
   }
 
@@ -208,7 +196,6 @@ public interface IBean<BEAN extends IBean<BEAN>>
   /**
    * The index of a bean field.
    * The index depends on the order of the defined fields generally.
-   * Ignores private fields.
    *
    * @param pField  the bean field
    * @param <VALUE> the field's data type
@@ -216,8 +203,6 @@ public interface IBean<BEAN extends IBean<BEAN>>
    */
   default <VALUE> int getFieldIndex(IField<VALUE> pField)
   {
-    if (requireNonNull(pField).isPrivate())
-      throw new BeanIllegalAccessException(this, pField);
     return streamFields()
         .collect(Collectors.toList())
         .indexOf(pField);

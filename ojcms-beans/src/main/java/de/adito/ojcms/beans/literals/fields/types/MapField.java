@@ -2,10 +2,10 @@ package de.adito.ojcms.beans.literals.fields.types;
 
 import de.adito.ojcms.beans.*;
 import de.adito.ojcms.beans.annotations.*;
-import de.adito.ojcms.beans.annotations.internal.*;
+import de.adito.ojcms.beans.annotations.internal.TypeDefaultField;
 import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.beans.literals.fields.util.CustomFieldCopy;
-import de.adito.ojcms.beans.util.*;
+import de.adito.ojcms.beans.util.ECopyMode;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
@@ -26,9 +26,10 @@ public class MapField<KEY, VALUE> extends AbstractField<IMapBean<KEY, VALUE>>
 {
   private final Map<KEY, IField<?>> fieldCache = new ConcurrentHashMap<>();
 
-  protected MapField(Class<IMapBean<KEY, VALUE>> pType, @NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional)
+  protected MapField(Class<IMapBean<KEY, VALUE>> pType, @NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional,
+                     boolean pIsPrivate)
   {
-    super(pType, pName, pAnnotations, pIsOptional);
+    super(pType, pName, pAnnotations, pIsOptional, pIsPrivate);
   }
 
   /**

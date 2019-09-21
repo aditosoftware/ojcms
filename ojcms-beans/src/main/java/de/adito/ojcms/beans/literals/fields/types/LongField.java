@@ -4,7 +4,7 @@ import de.adito.ojcms.beans.annotations.NeverNull;
 import de.adito.ojcms.beans.annotations.internal.TypeDefaultField;
 import de.adito.ojcms.beans.literals.fields.serialization.ISerializableFieldToString;
 import de.adito.ojcms.beans.literals.fields.util.CustomFieldCopy;
-import de.adito.ojcms.beans.util.*;
+import de.adito.ojcms.beans.util.ECopyMode;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
@@ -19,9 +19,9 @@ import java.util.Collection;
 @TypeDefaultField(types = Long.class)
 public class LongField extends AbstractField<Long> implements ISerializableFieldToString<Long>
 {
-  public LongField(@NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional)
+  public LongField(@NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional, boolean pIsPrivate)
   {
-    super(Long.class, pName, pAnnotations, pIsOptional);
+    super(Long.class, pName, pAnnotations, pIsOptional, pIsPrivate);
   }
 
   @Override

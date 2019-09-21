@@ -19,9 +19,9 @@ import java.util.Collection;
 @TypeDefaultField(types = Integer.class)
 public class IntegerField extends AbstractField<Integer> implements ISerializableFieldToString<Integer>
 {
-  protected IntegerField(@NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional)
+  protected IntegerField(@NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional, boolean pIsPrivate)
   {
-    super(Integer.class, pName, pAnnotations, pIsOptional);
+    super(Integer.class, pName, pAnnotations, pIsOptional, pIsPrivate);
   }
 
   @Override

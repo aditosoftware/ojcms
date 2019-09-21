@@ -35,10 +35,12 @@ public class BeanCreationEventsTest
     observe(observeCreationByAnnotationType(ObserveCreation.class))
         .assertCallCount(1)
         .whenDoing(SomeBean::new);
+
     observe(observeCreationByAnnotationType(SomeAnnotation.class))
         .assertCallCount(1)
         .whenDoing(AnotherBean::new);
-    assertThrows(BeanCreationNotObservableException.class, () -> observeCreationByAnnotationType(Private.class));
+
+    assertThrows(BeanCreationNotObservableException.class, () -> observeCreationByAnnotationType(Detail.class));
   }
 
   @Test

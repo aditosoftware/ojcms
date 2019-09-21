@@ -22,9 +22,10 @@ public class GenericField<VALUE> extends AbstractField<VALUE> implements ISerial
   //open for testing purposes
   static Logger LOGGER = Logger.getLogger(GenericField.class.getName()); //NOSONAR
 
-  protected GenericField(Class<VALUE> pType, @NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional)
+  protected GenericField(Class<VALUE> pType, @NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional,
+                         boolean pIsPrivate)
   {
-    super(_checkGenericType(pType), pName, pAnnotations, pIsOptional);
+    super(_checkGenericType(pType), pName, pAnnotations, pIsOptional, pIsPrivate);
   }
 
   /**
