@@ -382,6 +382,43 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
   }
 
   /**
+   * Tries to find exactly one bean within the container that has a specific value for a certain field.
+   * If there are more beans matching the field's value, a runtime exception will be thrown.
+   *
+   * @param pField       the bean field to match the value to find with
+   * @param pValueToFind the value of the field to filter for
+   * @param <VALUE>      the data type of the bean field to filter for
+   * @return an optional single bean that matches the field's value
+   */
+  default <VALUE> Optional<BEAN> findOneByFieldValue(IField<VALUE> pField, VALUE pValueToFind)
+  {
+    final List<BEAN> result = findByFieldValue(pField, pValueToFind);
+
+    if (result.isEmpty())
+      return Optional.empty();
+
+    if (result.size() > 1)
+      throw new OJRuntimeException("More than one bean found for field " + pField.getName() + " and value " + pValueToFind);
+
+    return Optional.of(result.get(0));
+  }
+
+  /**
+   * Finds all beans within the container that have a specific value for a certain field.
+   *
+   * @param pField       the bean field to match the value with
+   * @param pValueToFind the value of the field to filter for
+   * @param <VALUE>      the data type of the bean field to filter for
+   * @return a list of filtered beans (may be empty if no bean matches the requested field value)
+   */
+  default <VALUE> List<BEAN> findByFieldValue(IField<VALUE> pField, VALUE pValueToFind)
+  {
+    return stream()
+        .filter(pBean -> Objects.equals(pBean.getValue(pField), pValueToFind))
+        .collect(Collectors.toList());
+  }
+
+  /**
    * Sorts this bean container according to a given comparator.
    *
    * @param pComparator the comparator

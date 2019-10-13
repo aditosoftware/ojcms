@@ -2,6 +2,7 @@ package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.annotations.Identifier;
 import de.adito.ojcms.beans.base.IEqualsHashCodeChecker;
+import de.adito.ojcms.beans.exceptions.OJRuntimeException;
 import de.adito.ojcms.beans.exceptions.container.BeanContainerLimitReachedException;
 import de.adito.ojcms.beans.literals.fields.types.*;
 import org.jetbrains.annotations.NotNull;
@@ -115,10 +116,10 @@ class BeanContainerTest
   {
     final SomeBean bean1 = new SomeBean();
     final SomeBean bean2 = new SomeBean();
-    bean1.setValue(SomeBean.someField, 0);
-    bean2.setValue(SomeBean.someField, 1);
+    bean1.setValue(SomeBean.SOME_FIELD, 0);
+    bean2.setValue(SomeBean.SOME_FIELD, 1);
     container.addMultiple(Arrays.asList(bean1, bean2));
-    container.removeBeanIf(pBean -> pBean.getValue(SomeBean.someField) == 0);
+    container.removeBeanIf(pBean -> pBean.getValue(SomeBean.SOME_FIELD) == 0);
     assertEquals(1, container.size());
     assertSame(bean2, container.getBean(0));
   }
@@ -179,9 +180,9 @@ class BeanContainerTest
     //Test behaviour for equals
     final SomeBean anotherBean = new SomeBean(43);
     assertFalse(container.contains(anotherBean));
-    anotherBean.setValue(SomeBean.someField, 42);
+    anotherBean.setValue(SomeBean.SOME_FIELD, 42);
     assertTrue(container.contains(anotherBean));
-    anotherBean.setValue(SomeBean.anotherField, "differentValue");
+    anotherBean.setValue(SomeBean.ANOTHER_FIELD, "differentValue");
     assertTrue(container.contains(anotherBean));
   }
 
@@ -193,7 +194,7 @@ class BeanContainerTest
     final IBeanContainer<SomeBean> container = IBeanContainer.ofStreamNotEmpty(stream);
     container.sort(Comparator.reverseOrder());
     IntStream.range(0, 5)
-        .forEach(pIndex -> assertSame(4 - pIndex, container.getBean(pIndex).getValue(SomeBean.someField)));
+        .forEach(pIndex -> assertSame(4 - pIndex, container.getBean(pIndex).getValue(SomeBean.SOME_FIELD)));
   }
 
   @Test
@@ -233,7 +234,7 @@ class BeanContainerTest
     final SomeBean bean2 = new SomeBean(2);
     final SomeBean bean3 = new SomeBean(1);
     container.addMultiple(Arrays.asList(bean1, bean2, bean3));
-    final Set<Integer> distinctValues = container.getDistinctValuesFromField(SomeBean.someField);
+    final Set<Integer> distinctValues = container.getDistinctValuesFromField(SomeBean.SOME_FIELD);
     assertEquals(2, distinctValues.size());
     assertTrue(distinctValues.contains(1));
     assertTrue(distinctValues.contains(2));
@@ -254,8 +255,54 @@ class BeanContainerTest
       otherContainer.addBean(new SomeBean());
     });
     equalsHashCodeChecker.makeAssertion(true);
-    container.getBean(3).setValue(SomeBean.someField, 9999);
+    container.getBean(3).setValue(SomeBean.SOME_FIELD, 9999);
     equalsHashCodeChecker.makeAssertion(false);
+  }
+
+  @Test
+  public void testFindOneByFieldValue_MoreThanOneResult()
+  {
+    container.addBean(new SomeBean(1));
+    container.addBean(new SomeBean(1));
+
+    assertThrows(OJRuntimeException.class, () -> container.findOneByFieldValue(SomeBean.SOME_FIELD, 1));
+  }
+
+  @Test
+  public void testFindOneByFieldValue()
+  {
+    final Optional<SomeBean> resultForEmptyContainer = container.findOneByFieldValue(SomeBean.SOME_FIELD, 0);
+    assertFalse(resultForEmptyContainer.isPresent());
+
+    final SomeBean firstBean = new SomeBean(0);
+    container.addBean(firstBean);
+    container.addBean(new SomeBean(1));
+    container.addBean(new SomeBean(2));
+
+    final Optional<SomeBean> result = container.findOneByFieldValue(SomeBean.SOME_FIELD, 0);
+    assertTrue(result.isPresent());
+    assertSame(firstBean, result.get());
+
+    final Optional<SomeBean> resultEmpty = container.findOneByFieldValue(SomeBean.SOME_FIELD, 3);
+    assertFalse(resultEmpty.isPresent());
+  }
+
+  @Test
+  public void testFindByFieldValue()
+  {
+    final List<SomeBean> resultForEmptyContainer = container.findByFieldValue(SomeBean.SOME_FIELD, 0);
+    assertTrue(resultForEmptyContainer.isEmpty());
+
+    final SomeBean firstBean = new SomeBean(0);
+    final SomeBean thirdBean = new SomeBean(0);
+    container.addBean(firstBean);
+    container.addBean(new SomeBean(1));
+    container.addBean(thirdBean);
+
+    final List<SomeBean> result = container.findByFieldValue(SomeBean.SOME_FIELD, 0);
+    assertEquals(2, result.size());
+    assertSame(firstBean, result.get(0));
+    assertSame(thirdBean, result.get(1));
   }
 
   /**
@@ -264,8 +311,8 @@ class BeanContainerTest
   public static class SomeBean extends OJBean<SomeBean> implements Comparable<SomeBean>
   {
     @Identifier
-    public static final IntegerField someField = OJFields.create(SomeBean.class);
-    public static final TextField anotherField = OJFields.create(SomeBean.class);
+    public static final IntegerField SOME_FIELD = OJFields.create(SomeBean.class);
+    public static final TextField ANOTHER_FIELD = OJFields.create(SomeBean.class);
 
     public SomeBean()
     {
@@ -274,14 +321,14 @@ class BeanContainerTest
 
     public SomeBean(int pValue)
     {
-      setValue(someField, pValue);
-      setValue(anotherField, "anotherValue");
+      setValue(SOME_FIELD, pValue);
+      setValue(ANOTHER_FIELD, "anotherValue");
     }
 
     @Override
     public int compareTo(@NotNull SomeBean pBean)
     {
-      return getValue(someField) - pBean.getValue(someField);
+      return getValue(SOME_FIELD) - pBean.getValue(SOME_FIELD);
     }
   }
 }
