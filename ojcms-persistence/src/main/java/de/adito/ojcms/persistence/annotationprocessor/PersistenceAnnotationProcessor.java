@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
  *
  * @author Simon Danner, 26.02.2018
  */
-@SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes("de.adito.ojcms.persistence.Persist")
 public class PersistenceAnnotationProcessor extends AbstractProcessor
 {
@@ -70,6 +69,12 @@ public class PersistenceAnnotationProcessor extends AbstractProcessor
     if (!containers.isEmpty())
       _createClass(CONTAINER_CLASS_NAME, containers, true);
     return true;
+  }
+
+  @Override
+  public SourceVersion getSupportedSourceVersion()
+  {
+    return SourceVersion.latest();
   }
 
   /**
