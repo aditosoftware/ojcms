@@ -24,6 +24,7 @@ abstract class AbstractReactiveTestBase<BASE, OBSERVED, TEST extends AbstractRea
   protected final BASE base;
   private final TestObserver<OBSERVED> testObserver = TestObserver.create();
   private final List<Consumer<TestObserver<OBSERVED>>> assertions = new ArrayList<>();
+  private final List<Consumer<OBSERVED>> onNextAssertions = new ArrayList<>();
 
   /**
    * Creates the reactive test.
@@ -56,7 +57,9 @@ abstract class AbstractReactiveTestBase<BASE, OBSERVED, TEST extends AbstractRea
    */
   public TEST assertOnEveryValue(Consumer<OBSERVED> pValueAssertion)
   {
-    return assertThat(pObserver -> pObserver.values().forEach(pValueAssertion));
+    onNextAssertions.add(pValueAssertion);
+    //noinspection unchecked
+    return (TEST) this;
   }
 
   /**
@@ -94,7 +97,25 @@ abstract class AbstractReactiveTestBase<BASE, OBSERVED, TEST extends AbstractRea
    */
   protected void whenDoing(Consumer<BASE> pAction)
   {
-    pAction.accept(base);
-    assertions.forEach(pAssertion -> pAssertion.accept(testObserver));
+    try
+    {
+      pAction.accept(base);
+
+      try
+      {
+        Thread.sleep(50); //Wait a little bit, there may be events happening asynchronously
+      }
+      catch (InterruptedException pE)
+      {
+        throw new AssertionError(pE);
+      }
+
+      assertions.forEach(pAssertion -> pAssertion.accept(testObserver));
+      testObserver.values().forEach(value -> onNextAssertions.forEach(assertion -> assertion.accept(value)));
+    }
+    finally
+    {
+      testObserver.dispose();
+    }
   }
 }

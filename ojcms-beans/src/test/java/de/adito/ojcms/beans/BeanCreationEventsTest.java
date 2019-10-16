@@ -2,6 +2,7 @@ package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.annotations.*;
 import de.adito.ojcms.beans.exceptions.bean.BeanCreationNotObservableException;
+import de.adito.ojcms.beans.literals.fields.types.IntegerField;
 import org.junit.jupiter.api.Test;
 
 import java.lang.annotation.*;
@@ -51,12 +52,26 @@ public class BeanCreationEventsTest
     assertFalse(hasObservableAnnotation(BeanWithoutAnnotation.class));
   }
 
+  @Test
+  public void testObserveCreationIsAfterBeanConstruction()
+  {
+    observe(observeCreationByBeanType(SomeBean.class))
+        .assertOnEveryValue(pNewBean -> assertEquals(10, pNewBean.getValue(SomeBean.SOME_FIELD)))
+        .whenDoing(SomeBean::new);
+  }
+
   /**
    * A bean type using {@link ObserveCreation} directly.
    */
   @ObserveCreation
   public static class SomeBean extends OJBean<SomeBean>
   {
+    public static final IntegerField SOME_FIELD = OJFields.create(SomeBean.class);
+
+    public SomeBean()
+    {
+      setValue(SOME_FIELD, 10);
+    }
   }
 
   /**

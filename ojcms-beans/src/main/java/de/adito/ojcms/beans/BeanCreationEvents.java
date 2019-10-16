@@ -4,6 +4,7 @@ import de.adito.ojcms.beans.annotations.ObserveCreation;
 import de.adito.ojcms.beans.exceptions.bean.BeanCreationNotObservableException;
 import de.adito.ojcms.beans.reactive.events.BeanCreationEvent;
 import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 
 import java.lang.annotation.Annotation;
@@ -38,7 +39,8 @@ public final class BeanCreationEvents
   {
     _getObservableAnnotation(pBeanType); //check, if annotation is present
     //noinspection unchecked
-    return (Observable<BEAN>) PUBLISHERS_BY_TYPE.computeIfAbsent(pBeanType, pType -> PublishSubject.create());
+    return (Observable<BEAN>) PUBLISHERS_BY_TYPE.computeIfAbsent(pBeanType, pType -> PublishSubject.create())
+        .observeOn(Schedulers.newThread());
   }
 
   /**
