@@ -120,6 +120,12 @@ abstract class AbstractField<VALUE> implements IField<VALUE>
   }
 
   @Override
+  public boolean isValueFinal()
+  {
+    return hasAnnotation(Final.class) || hasAnnotation(FinalNeverNull.class);
+  }
+
+  @Override
   public boolean isIdentifier()
   {
     return hasAnnotation(Identifier.class);
@@ -129,6 +135,12 @@ abstract class AbstractField<VALUE> implements IField<VALUE>
   public boolean isOptional()
   {
     return isOptional;
+  }
+
+  @Override
+  public boolean mustNeverBeNull()
+  {
+    return hasAnnotation(NeverNull.class) || hasAnnotation(FinalNeverNull.class) || getClass().isAnnotationPresent(NeverNull.class);
   }
 
   @Override
@@ -143,8 +155,11 @@ abstract class AbstractField<VALUE> implements IField<VALUE>
     return getClass().getSimpleName() + "{" +
         "dataType=" + dataType +
         ", name='" + name + '\'' +
-        ", annotations=" + annotations +
+        ", isPrivate=" + isPrivate +
         ", isOptional=" + isOptional +
+        ", isFinal=" + isValueFinal() +
+        ", neverNull=" + mustNeverBeNull() +
+        ", annotations=" + annotations +
         ", additionalInformation=" + additionalInformation +
         '}';
   }

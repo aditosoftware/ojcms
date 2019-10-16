@@ -78,6 +78,14 @@ interface IEncapsulatedBeanData extends IEncapsulatedData<FieldValueTuple<?>, IB
   IField<?> getFieldAtIndex(int pIndex);
 
   /**
+   * Determines if the value of a field has been set once. Even setting the default value or null leads to a positive result.
+   *
+   * @param pField the field to check for a value change
+   * @return <tt>true</tt> if the value of the field has been set once
+   */
+  boolean hasFieldValueBeenSet(IField<?> pField);
+
+  /**
    * A map of the statistic data of this core.
    * The data is grouped by the bean fields.
    *

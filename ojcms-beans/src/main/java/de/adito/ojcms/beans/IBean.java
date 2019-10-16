@@ -149,7 +149,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
 
   /**
    * Clears the values of all public field's of this bean back to the initial value of every field.
-   * The clear operation ignores fields with a null initial value value and annotated by {@link NeverNull}.
+   * The clear operation ignores final fields and fields with a null initial value and annotated by {@link NeverNull}.
    */
   @WriteOperation
   default void clear()
@@ -157,7 +157,8 @@ public interface IBean<BEAN extends IBean<BEAN>>
     //noinspection unchecked
     streamFields()
         .filter(pField -> !pField.isPrivate())
-        .filter(pField -> pField.getInitialValue() != null || !pField.hasAnnotation(NeverNull.class))
+        .filter(pField -> !pField.isValueFinal())
+        .filter(pField -> pField.getInitialValue() != null || !pField.mustNeverBeNull())
         .forEach(pField -> setValue((IField) pField, pField.getInitialValue()));
   }
 

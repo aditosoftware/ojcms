@@ -126,6 +126,13 @@ public interface IField<VALUE> extends IMemberLiteral
   <TARGET> Optional<Function<VALUE, TARGET>> getFromConverter(Class<TARGET> pTargetType);
 
   /**
+   * Determines if the field's value is final.
+   *
+   * @return <tt>true</tt> if the field is final
+   */
+  boolean isValueFinal();
+
+  /**
    * Determines, if this field is an identifier.
    *
    * @return <tt>true</tt>, if this field is an identifier
@@ -139,6 +146,13 @@ public interface IField<VALUE> extends IMemberLiteral
    * @return <tt>true</tt>, if this field is optional and is only present under a certain condition
    */
   boolean isOptional();
+
+  /**
+   * Determines if the field's value must never be null.
+   *
+   * @return <tt>true</tt> if the value must never be null
+   */
+  boolean mustNeverBeNull();
 
   /**
    * Determines, if this field is marked as detail.

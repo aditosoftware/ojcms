@@ -3,7 +3,7 @@ package de.adito.ojcms.beans;
 import de.adito.ojcms.beans.annotations.*;
 import de.adito.ojcms.beans.base.IEqualsHashCodeChecker;
 import de.adito.ojcms.beans.datasource.IBeanDataSource;
-import de.adito.ojcms.beans.exceptions.bean.NullValueForbiddenException;
+import de.adito.ojcms.beans.exceptions.bean.*;
 import de.adito.ojcms.beans.exceptions.field.BeanFieldDoesNotExistException;
 import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.beans.literals.fields.types.*;
@@ -60,8 +60,12 @@ class BeanTest
   public void testGetNullValueForbidden()
   {
     bean.setEncapsulatedDataSource(new _NullReturningBeanDataSource());
+
     assertThrows(NullValueForbiddenException.class, () -> bean.getValue(SomeBean.specialTextField)); //Field type annotated
     assertThrows(NullValueForbiddenException.class, () -> bean.getValue(SomeBean.numberField)); //Number field type annotated naturally
+    assertThrows(NullValueForbiddenException.class, () -> bean.getValue(SomeBean.someOtherField));
+    //Should also throw with @FinalNeverNull
+    assertThrows(NullValueForbiddenException.class, () -> bean.getValue(SomeBean.someOtherFinalField));
   }
 
   @Test
@@ -76,6 +80,21 @@ class BeanTest
   {
     assertThrows(NullValueForbiddenException.class, () -> bean.setValue(SomeBean.specialTextField, null)); //Field type annotated
     assertThrows(NullValueForbiddenException.class, () -> bean.setValue(SomeBean.numberField, null)); //Number field type annotated naturally
+    assertThrows(NullValueForbiddenException.class, () -> bean.setValue(SomeBean.someOtherField, null));
+    //Should also throw with @FinalNeverNull
+    assertThrows(NullValueForbiddenException.class, () -> bean.setValue(SomeBean.someOtherFinalField, null));
+  }
+
+  @Test
+  public void testFinalField()
+  {
+    assertThrows(FieldIsFinalException.class, () -> bean.setValue(SomeBean.finalNumberField, 99));
+
+    bean.setValue(SomeBean.anotherFinalField, null); //Event setting null should lead to an exception afterwards
+    assertThrows(FieldIsFinalException.class, () -> bean.setValue(SomeBean.anotherFinalField, "text"));
+
+    //Test combined annotation as well
+    assertThrows(FieldIsFinalException.class, () -> bean.setValue(SomeBean.someOtherFinalField, "change"));
   }
 
   @Test
@@ -86,7 +105,7 @@ class BeanTest
     assertEquals(OTHER_VALUE, bean.getValue(SomeBean.someOtherField)); //Should not have been cleared because of @NeverNull
 
     bean.stream()
-        .filter(pTuple -> !pTuple.getField().hasAnnotation(NeverNull.class))
+        .filter(pTuple -> !pTuple.getField().mustNeverBeNull())
         .forEach(pTuple -> assertEquals(pTuple.getField().getInitialValue(), pTuple.getValue()));
   }
 
@@ -99,7 +118,7 @@ class BeanTest
   @Test
   public void testFieldCount()
   {
-    assertEquals(4, bean.getFieldCount());
+    assertEquals(7, bean.getFieldCount());
   }
 
   @Test
@@ -200,14 +219,22 @@ class BeanTest
     public static final IntegerField numberField = OJFields.create(SomeBean.class);
     @NeverNull
     public static final TextField someOtherField = OJFields.create(SomeBean.class);
+    @FinalNeverNull
+    public static final TextField someOtherFinalField = OJFields.create(SomeBean.class);
     public static final BeanField<DeepBean> deepField = OJFields.create(SomeBean.class);
+    @Final
+    public static final IntegerField finalNumberField = OJFields.create(SomeBean.class);
+    @Final
+    public static final TextField anotherFinalField = OJFields.create(SomeBean.class); //No initial value
 
     public SomeBean()
     {
       setValue(specialTextField, VALUE);
       setValue(numberField, 42);
       setValue(someOtherField, OTHER_VALUE);
+      setValue(someOtherFinalField, OTHER_VALUE);
       setValue(deepField, new DeepBean());
+      setValue(finalNumberField, 5);
     }
 
   }

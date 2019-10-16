@@ -4,7 +4,7 @@ import de.adito.ojcms.beans.annotations.NeverNull;
 import de.adito.ojcms.beans.annotations.internal.*;
 import de.adito.ojcms.beans.datasource.IDataSource;
 import de.adito.ojcms.beans.exceptions.MissingDataCoreException;
-import de.adito.ojcms.beans.exceptions.bean.NullValueForbiddenException;
+import de.adito.ojcms.beans.exceptions.bean.*;
 import de.adito.ojcms.beans.exceptions.field.BeanFieldDoesNotExistException;
 import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.beans.reactive.events.*;
@@ -80,9 +80,11 @@ final class BeanInternalEvents
   static <VALUE> VALUE requestValue(IBean<?> pBean, IField<VALUE> pField)
   {
     final VALUE value = requestEncapsulatedDataForField(pBean, pField).getValue(pField);
+
     //Check if null is allowed
-    if (value == null && (pField.hasAnnotation(NeverNull.class) || pField.getClass().isAnnotationPresent(NeverNull.class)))
+    if (value == null && (pField.mustNeverBeNull()))
       throw new NullValueForbiddenException(pField);
+
     return value;
   }
 
@@ -102,16 +104,13 @@ final class BeanInternalEvents
   @SuppressWarnings("unchecked")
   static <BEAN extends IBean<BEAN>, VALUE> void setValueAndPropagate(BEAN pBean, IField<VALUE> pField, VALUE pNewValue)
   {
-    //Check if null values are allowed
-    if (pNewValue == null && (pField.hasAnnotation(NeverNull.class) || pField.getClass().isAnnotationPresent(NeverNull.class)))
+    if (pNewValue == null && pField.mustNeverBeNull())
       throw new NullValueForbiddenException(pField);
 
     final IEncapsulatedBeanData encapsulatedData = requestEncapsulatedDataForField(pBean, pField);
 
-    //If the old value is the same as the new one, we have nothing to do
-    final VALUE oldValue = encapsulatedData.getValue(pField);
-    if (Objects.equals(oldValue, pNewValue))
-      return;
+    if (pField.isValueFinal() && encapsulatedData.hasFieldValueBeenSet(pField))
+      throw new FieldIsFinalException(pField);
 
     //We have to check the states of the optional fields and then change the value with a following propagation of the change
     final IBeanFieldActivePredicate<BEAN> fieldActiveSupplier = pBean.getFieldActivePredicate();
@@ -120,13 +119,21 @@ final class BeanInternalEvents
         .filter(pBeanField -> pBeanField.isOptional() && fieldActiveSupplier.isOptionalActive(pBeanField))
         .collect(Collectors.toList());
 
-    encapsulatedData.setValue(pField, pNewValue); //Set the new value in the data core
+    final VALUE oldValue = encapsulatedData.getValue(pField); //Store old value for later comparison
+
+    //Set the new value even if it has not changed to mark the field's value as 'set once' in the data core
+    encapsulatedData.setValue(pField, pNewValue);
+
+    //If the old value is the same as the new one, we have nothing more to do
+    if (Objects.equals(oldValue, pNewValue))
+      return;
 
     //Find newly activated optional fields and fire them as added fields
     encapsulatedData.streamFields()
         .filter(pBeanField -> pBeanField.isOptional() && fieldActiveSupplier.isOptionalActive(pBeanField))
         .filter(pActiveField -> !optionalActiveFields.remove(pActiveField))
         .forEach(pNewActiveField -> propagateChange(new BeanFieldAddition<>(pBean, pNewActiveField)));
+
     //Fire the remaining as removed fields
     optionalActiveFields.stream()
         .map(pBeforeActiveField -> (IField) pBeforeActiveField)

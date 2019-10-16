@@ -26,6 +26,7 @@ class EncapsulatedBeanData extends AbstractEncapsulatedData<FieldValueTuple<?>, 
   private final List<IField<?>> fieldOrder;
   private final Map<IField<?>, IStatisticData<?>> statisticData;
   private final IndexChecker indexChecker = IndexChecker.create(this::getFieldCount);
+  private final Set<IField<?>> fieldsThatSetSomeValue = new HashSet<>();
 
   /**
    * Creates the encapsulated bean data core.
@@ -49,7 +50,11 @@ class EncapsulatedBeanData extends AbstractEncapsulatedData<FieldValueTuple<?>, 
   @Override
   public <VALUE> void setValue(IField<VALUE> pField, VALUE pValue)
   {
-    _ifFieldExists(pField, pCheckedField -> getDatasource().setValue(pCheckedField, pValue, false));
+    _ifFieldExists(pField, pCheckedField ->
+    {
+      getDatasource().setValue(pCheckedField, pValue, false);
+      fieldsThatSetSomeValue.add(pCheckedField);
+    });
   }
 
   @Override
@@ -86,6 +91,12 @@ class EncapsulatedBeanData extends AbstractEncapsulatedData<FieldValueTuple<?>, 
   public IField<?> getFieldAtIndex(int pIndex)
   {
     return fieldOrder.get(indexChecker.check(pIndex));
+  }
+
+  @Override
+  public boolean hasFieldValueBeenSet(IField<?> pField)
+  {
+    return fieldsThatSetSomeValue.contains(pField);
   }
 
   @Override
