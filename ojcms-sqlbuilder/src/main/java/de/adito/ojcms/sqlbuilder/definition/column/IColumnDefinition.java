@@ -1,7 +1,7 @@
 package de.adito.ojcms.sqlbuilder.definition.column;
 
-import de.adito.ojcms.sqlbuilder.definition.EDatabaseType;
 import de.adito.ojcms.sqlbuilder.format.IStatementFormat;
+import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 import de.adito.ojcms.sqlbuilder.util.OJDatabaseException;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,9 +32,9 @@ public interface IColumnDefinition extends IStatementFormat
   IColumnType getColumnType();
 
   @Override
-  default String toStatementFormat(EDatabaseType pDatabaseType, String pIdColumnName)
+  default String toStatementFormat(IDatabasePlatform pPlatform, String pIdColumnName)
   {
-    return getColumnName().toUpperCase() + " " + getColumnType().toStatementFormat(pDatabaseType, pIdColumnName);
+    return getColumnName().toUpperCase() + " " + getColumnType().toStatementFormat(pPlatform, pIdColumnName);
   }
 
   /**

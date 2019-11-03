@@ -1,6 +1,7 @@
 package de.adito.ojcms.sqlbuilder.definition;
 
 import de.adito.ojcms.sqlbuilder.format.IPreparedStatementFormat;
+import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 
 import java.util.*;
 import java.util.function.Function;
@@ -29,7 +30,7 @@ public interface IColumnValueTuple<VALUE> extends IPreparedStatementFormat
   VALUE getValue();
 
   @Override
-  default String toStatementFormat(EDatabaseType pDatabaseType, String pIdColumnName)
+  default String toStatementFormat(IDatabasePlatform pPlatform, String pIdColumnName)
   {
     return getColumn().getColumnName().toUpperCase() + " = ?";
   }

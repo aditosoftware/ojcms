@@ -1,6 +1,6 @@
 package de.adito.ojcms.sqlbuilder.format;
 
-import de.adito.ojcms.sqlbuilder.definition.EDatabaseType;
+import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 
 /**
  * Enumerates all types of statement formatters.
@@ -28,12 +28,12 @@ public enum EFormatter
   /**
    * Creates an instance of a statement formatter from this type.
    *
-   * @param pDatabaseType the database type to use for the statements
+   * @param pPlatform     the database platform to use for the statements
    * @param pIdColumnName a global id column name for the statements
    * @return an instance a of statement formatter
    */
-  public StatementFormatter create(EDatabaseType pDatabaseType, String pIdColumnName)
+  public StatementFormatter create(IDatabasePlatform pPlatform, String pIdColumnName)
   {
-    return new StatementFormatter(pDatabaseType, pIdColumnName, name(), tableNamePrefix);
+    return new StatementFormatter(pPlatform, pIdColumnName, name(), tableNamePrefix);
   }
 }

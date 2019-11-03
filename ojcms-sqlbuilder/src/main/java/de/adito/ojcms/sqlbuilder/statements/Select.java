@@ -2,6 +2,7 @@ package de.adito.ojcms.sqlbuilder.statements;
 
 import de.adito.ojcms.sqlbuilder.*;
 import de.adito.ojcms.sqlbuilder.definition.*;
+import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 import de.adito.ojcms.sqlbuilder.result.*;
 
 import java.sql.ResultSet;
@@ -19,14 +20,14 @@ public class Select extends AbstractSelect<Select>
    *
    * @param pStatementExecutor the executor for this statement
    * @param pBuilder           the builder that created this statement to use other kinds of statements for a concrete statement
-   * @param pDatabaseType      the database type used for this statement
+   * @param pPlatform          the database platform used for this statement
    * @param pSerializer        the value serializer
    * @param pIdColumnName      the id column name
    */
-  public Select(IStatementExecutor<ResultSet> pStatementExecutor, AbstractSQLBuilder pBuilder, EDatabaseType pDatabaseType,
+  public Select(IStatementExecutor<ResultSet> pStatementExecutor, AbstractSQLBuilder pBuilder, IDatabasePlatform pPlatform,
                 IValueSerializer pSerializer, String pIdColumnName)
   {
-    super(pStatementExecutor, pBuilder, pDatabaseType, pSerializer, pIdColumnName);
+    super(pStatementExecutor, pBuilder, pPlatform, pSerializer, pIdColumnName);
   }
 
   /**

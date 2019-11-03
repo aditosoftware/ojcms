@@ -2,6 +2,7 @@ package de.adito.ojcms.sqlbuilder.definition.condition;
 
 import de.adito.ojcms.sqlbuilder.definition.*;
 import de.adito.ojcms.sqlbuilder.format.IPreparedStatementFormat;
+import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 
 import java.util.Collection;
 import java.util.function.*;
@@ -28,7 +29,7 @@ public interface IWhereCondition<VALUE> extends IColumnValueTuple<VALUE>, IPrepa
   }
 
   @Override
-  default String toStatementFormat(EDatabaseType pDatabaseType, String pIdColumnName)
+  default String toStatementFormat(IDatabasePlatform pPlatform, String pIdColumnName)
   {
     return getColumn().getColumnName().toUpperCase() + " " + getOperator().getLiteral() + " ?";
   }

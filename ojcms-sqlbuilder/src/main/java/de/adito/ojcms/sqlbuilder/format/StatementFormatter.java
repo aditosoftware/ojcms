@@ -2,6 +2,7 @@ package de.adito.ojcms.sqlbuilder.format;
 
 import de.adito.ojcms.sqlbuilder.definition.*;
 import de.adito.ojcms.sqlbuilder.definition.condition.*;
+import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -27,7 +28,7 @@ public final class StatementFormatter
   //These strings will not be followed by a whitespace
   private static final Set<String> NO_WHITESPACE = new HashSet<>(Arrays.asList("(", System.lineSeparator()));
 
-  private final EDatabaseType databaseType;
+  private final IDatabasePlatform databasePlatform;
   private final String idColumnName;
   private final _Builder builder;
   private final String tableNamePrefix;
@@ -36,14 +37,14 @@ public final class StatementFormatter
   /**
    * Creates a new statement formatter.
    *
-   * @param pDatabaseType    the database type used for the statements
-   * @param pIdColumnName    the global id column name used for the statements
-   * @param pStatementName   the name of the statement (SELECT, INSERT, etc)
-   * @param pTableNamePrefix the table name prefix of the statement type (e.g. 'FROM' for SELECT)
+   * @param pDatabasePlatform the database platform used for the statements
+   * @param pIdColumnName     the global id column name used for the statements
+   * @param pStatementName    the name of the statement (SELECT, INSERT, etc)
+   * @param pTableNamePrefix  the table name prefix of the statement type (e.g. 'FROM' for SELECT)
    */
-  StatementFormatter(EDatabaseType pDatabaseType, String pIdColumnName, String pStatementName, String pTableNamePrefix)
+  StatementFormatter(IDatabasePlatform pDatabasePlatform, String pIdColumnName, String pStatementName, String pTableNamePrefix)
   {
-    databaseType = pDatabaseType;
+    databasePlatform = pDatabasePlatform;
     idColumnName = pIdColumnName;
     tableNamePrefix = pTableNamePrefix;
     builder = new _Builder(pStatementName);
@@ -54,13 +55,13 @@ public final class StatementFormatter
    * This method checks, if the statement format is negatable and adds 'NOT' accordingly.
    *
    * @param pFormat       the statement format to transform
-   * @param pDatabaseType the database type used for the statements
+   * @param pPlatform     the database platform used for the statements
    * @param pIdColumnName the global id column name used for the statements
    * @return the statement in its string format
    */
-  public static String toFormat(IStatementFormat pFormat, EDatabaseType pDatabaseType, String pIdColumnName)
+  public static String toFormat(IStatementFormat pFormat, IDatabasePlatform pPlatform, String pIdColumnName)
   {
-    final String format = pFormat.toStatementFormat(pDatabaseType, pIdColumnName);
+    final String format = pFormat.toStatementFormat(pPlatform, pIdColumnName);
     return pFormat instanceof INegatable && ((INegatable) pFormat).isNegated() ? EFormatConstant.NOT.toStatementFormat(format) : format;
   }
 
@@ -193,7 +194,7 @@ public final class StatementFormatter
    */
   public StatementFormatter appendMultiple(Stream<? extends IStatementFormat> pFormatStream, ESeparator... pSeparators)
   {
-    return _appendMultiple(pFormatStream.map(pFormat -> toFormat(pFormat, databaseType, idColumnName)), pSeparators);
+    return _appendMultiple(pFormatStream.map(pFormat -> toFormat(pFormat, databasePlatform, idColumnName)), pSeparators);
   }
 
   /**
@@ -208,7 +209,7 @@ public final class StatementFormatter
   {
     return _appendMultiple(pFormatStream.map(pFormat -> {
       arguments.addAll(pFormat.getArguments(idColumnName));
-      return toFormat(pFormat, databaseType, idColumnName);
+      return toFormat(pFormat, databasePlatform, idColumnName);
     }), pSeparators);
   }
 
@@ -311,7 +312,7 @@ public final class StatementFormatter
    */
   private StatementFormatter _appendFormat(IStatementFormat pFormat)
   {
-    return builder.appendWithWhitespace(toFormat(pFormat, databaseType, idColumnName));
+    return builder.appendWithWhitespace(toFormat(pFormat, databasePlatform, idColumnName));
   }
 
   /**

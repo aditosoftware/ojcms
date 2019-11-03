@@ -12,8 +12,8 @@ import de.adito.ojcms.sqlbuilder.*;
 import de.adito.ojcms.sqlbuilder.definition.IColumnIdentification;
 import de.adito.ojcms.sqlbuilder.definition.column.*;
 import de.adito.ojcms.sqlbuilder.definition.condition.IWhereCondition;
-import de.adito.ojcms.sqlbuilder.util.*;
-import de.adito.ojcms.utils.StringUtility;
+import de.adito.ojcms.sqlbuilder.platform.connection.IDatabaseConnectionSupplier;
+import de.adito.ojcms.sqlbuilder.util.OJDatabaseException;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -22,6 +22,8 @@ import java.util.stream.IntStream;
 
 import static de.adito.ojcms.persistence.datastores.sql.util.DatabaseConstants.*;
 import static de.adito.ojcms.sqlbuilder.definition.condition.IWhereCondition.*;
+import static de.adito.ojcms.utils.StringUtility.requireNotEmpty;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Implementation of a persistent bean data source that is used to create a bean instance later on.
@@ -47,16 +49,17 @@ public class SQLPersistentBeanSource<BEAN extends IBean<BEAN>> implements IBeanD
   /**
    * Determines, if the data source for a single bean is existing in the database.
    *
-   * @param pConnectionInfo the database connection information
-   * @param pBeanId         the persistence id of the bean data source to check
+   * @param pConnectionSupplier the platform specific database connection supplier
+   * @param pBeanId             the persistence id of the bean data source to check
    * @return <tt>true</tt> if the data source is existing
    */
-  public static boolean isDataSourceExisting(DBConnectionInfo pConnectionInfo, String pBeanId)
+  public static boolean isDataSourceExisting(IDatabaseConnectionSupplier pConnectionSupplier, String pBeanId)
   {
-    final OJSQLBuilderForTable builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionInfo.getDatabaseType(), ID_COLUMN)
+    final OJSQLBuilderForTable builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionSupplier.getPlatform(), ID_COLUMN)
         .forSingleTable(BEAN_TABLE_NAME)
-        .withClosingAndRenewingConnection(pConnectionInfo)
+        .withClosingAndRenewingConnection(pConnectionSupplier)
         .create();
+
     return _doesRowForBeanExist(builder, pBeanId);
   }
 
@@ -77,14 +80,14 @@ public class SQLPersistentBeanSource<BEAN extends IBean<BEAN>> implements IBeanD
   /**
    * Removes all obsolete single bean data sources from the database table and removes columns, if necessary.
    *
-   * @param pConnectionInfo           the database connection information
+   * @param pConnectionSupplier       the platform specific database connection supplier
    * @param pStillExistingSingleBeans a collection of still existing single beans
    */
-  public static void removeObsoletes(DBConnectionInfo pConnectionInfo, Collection<IBean<?>> pStillExistingSingleBeans)
+  public static void removeObsoletes(IDatabaseConnectionSupplier pConnectionSupplier, Collection<IBean<?>> pStillExistingSingleBeans)
   {
-    final OJSQLBuilderForTable builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionInfo.getDatabaseType(), ID_COLUMN)
+    final OJSQLBuilderForTable builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionSupplier.getPlatform(), ID_COLUMN)
         .forSingleTable(BEAN_TABLE_NAME)
-        .withClosingAndRenewingConnection(pConnectionInfo)
+        .withClosingAndRenewingConnection(pConnectionSupplier)
         .create();
     builder.doDelete(pDelete -> pDelete
         .where(not(in(BEAN_ID_COLUMN_IDENTIFICATION, pStillExistingSingleBeans.stream()
@@ -106,14 +109,15 @@ public class SQLPersistentBeanSource<BEAN extends IBean<BEAN>> implements IBeanD
    * Creates the single bean data source database table, if it is not existing yet.
    * This static entry point is necessary, because the table may have to be present before the usage of a single bean. (e.g. for foreign keys)
    *
-   * @param pConnectionInfo the database connection information
+   * @param pConnectionSupplier the platform specific database connection supplier
    */
-  public static void createBeanTable(DBConnectionInfo pConnectionInfo)
+  public static void createBeanTable(IDatabaseConnectionSupplier pConnectionSupplier)
   {
-    final OJSQLBuilderForTable builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionInfo.getDatabaseType(), ID_COLUMN)
+    final OJSQLBuilderForTable builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionSupplier.getPlatform(), ID_COLUMN)
         .forSingleTable(BEAN_TABLE_NAME)
-        .withClosingAndRenewingConnection(pConnectionInfo)
+        .withClosingAndRenewingConnection(pConnectionSupplier)
         .create();
+
     _createTableIfNotExisting(builder);
   }
 
@@ -133,20 +137,21 @@ public class SQLPersistentBeanSource<BEAN extends IBean<BEAN>> implements IBeanD
   /**
    * Creates a persistent bean data source.
    *
-   * @param pBeanId            the persistence id of the bean
-   * @param pBeanType          the runtime bean type for which this source is for
-   * @param pConnectionInfo    the database connection information
-   * @param pDataStoreSupplier a supplier for persistent beans and containers
+   * @param pBeanId             the persistence id of the bean
+   * @param pBeanType           the runtime bean type for which this source is for
+   * @param pConnectionSupplier the platform specific database connection supplier
+   * @param pDataStoreSupplier  a supplier for persistent beans and containers
    */
-  public SQLPersistentBeanSource(String pBeanId, Class<BEAN> pBeanType, DBConnectionInfo pConnectionInfo, Supplier<BeanDataStore> pDataStoreSupplier)
+  public SQLPersistentBeanSource(String pBeanId, Class<BEAN> pBeanType, IDatabaseConnectionSupplier pConnectionSupplier, Supplier<BeanDataStore> pDataStoreSupplier)
   {
-    beanIdCondition = isEqual(BEAN_ID_COLUMN_IDENTIFICATION, StringUtility.requireNotEmpty(pBeanId, "bean persistence id"));
-    columns = _createColumnMap(Objects.requireNonNull(pBeanType));
-    builder = OJSQLBuilderFactory.newSQLBuilder(Objects.requireNonNull(pConnectionInfo).getDatabaseType(), ID_COLUMN)
+    beanIdCondition = isEqual(BEAN_ID_COLUMN_IDENTIFICATION, requireNotEmpty(pBeanId, "bean persistence id"));
+    columns = _createColumnMap(requireNonNull(pBeanType));
+    builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionSupplier.getPlatform(), ID_COLUMN)
         .forSingleTable(BEAN_TABLE_NAME)
-        .withClosingAndRenewingConnection(pConnectionInfo)
+        .withClosingAndRenewingConnection(pConnectionSupplier)
         .withCustomSerializer(new BeanSQLSerializer(pDataStoreSupplier))
         .create();
+
     _createTableIfNotExisting(builder);
     _checkColumnSize();
     _ifRowForBeanIsMissingCreate();

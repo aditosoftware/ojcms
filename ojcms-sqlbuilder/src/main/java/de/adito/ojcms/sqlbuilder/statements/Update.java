@@ -3,13 +3,14 @@ package de.adito.ojcms.sqlbuilder.statements;
 import de.adito.ojcms.sqlbuilder.*;
 import de.adito.ojcms.sqlbuilder.definition.*;
 import de.adito.ojcms.sqlbuilder.definition.condition.WhereModifiers;
-import de.adito.ojcms.sqlbuilder.format.*;
+import de.adito.ojcms.sqlbuilder.format.StatementFormatter;
+import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 
 import java.util.*;
 
-import static de.adito.ojcms.sqlbuilder.format.EFormatConstant.*;
-import static de.adito.ojcms.sqlbuilder.format.EFormatter.*;
-import static de.adito.ojcms.sqlbuilder.format.ESeparator.*;
+import static de.adito.ojcms.sqlbuilder.format.EFormatConstant.SET;
+import static de.adito.ojcms.sqlbuilder.format.EFormatter.UPDATE;
+import static de.adito.ojcms.sqlbuilder.format.ESeparator.COMMA_WITH_WHITESPACE;
 
 /**
  * An update statement.
@@ -26,14 +27,14 @@ public class Update extends AbstractSQLStatement<WhereModifiers, Void, Void, Upd
    *
    * @param pStatementExecutor the executor for this statement
    * @param pBuilder           the builder that created this statement to use other kinds of statements for a concrete statement
-   * @param pDatabaseType      the database type used for this statement
+   * @param pPlatform          the database platform used for this statement
    * @param pSerializer        the value serializer
    * @param pIdColumnName      the id column name
    */
-  public Update(IStatementExecutor<Void> pStatementExecutor, AbstractSQLBuilder pBuilder, EDatabaseType pDatabaseType,
+  public Update(IStatementExecutor<Void> pStatementExecutor, AbstractSQLBuilder pBuilder, IDatabasePlatform pPlatform,
                 IValueSerializer pSerializer, String pIdColumnName)
   {
-    super(pStatementExecutor, pBuilder, pDatabaseType, pSerializer, new WhereModifiers(), pIdColumnName);
+    super(pStatementExecutor, pBuilder, pPlatform, pSerializer, new WhereModifiers(), pIdColumnName);
   }
 
   /**
@@ -96,7 +97,7 @@ public class Update extends AbstractSQLStatement<WhereModifiers, Void, Void, Upd
   {
     if (!changes.isEmpty() || !updateOldValues.isEmpty())
     {
-      final StatementFormatter statement = UPDATE.create(databaseType, idColumnIdentification.getColumnName())
+      final StatementFormatter statement = UPDATE.create(databasePlatform, idColumnIdentification.getColumnName())
           .appendTableName(getTableName())
           .appendConstant(SET)
           .conditional(!changes.isEmpty(), pFormatter -> pFormatter.appendMultiplePrepared(changes.stream(), COMMA_WITH_WHITESPACE))

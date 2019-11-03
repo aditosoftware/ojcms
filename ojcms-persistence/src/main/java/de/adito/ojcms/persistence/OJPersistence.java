@@ -1,11 +1,12 @@
 package de.adito.ojcms.persistence;
 
 import de.adito.ojcms.beans.*;
-import de.adito.ojcms.persistence.datastores.*;
+import de.adito.ojcms.persistence.datastores.IPersistentSourcesStore;
 import de.adito.ojcms.persistence.util.*;
+import de.adito.ojcms.sqlbuilder.platform.connection.*;
 
-import java.util.*;
-import java.util.function.Function;
+import java.util.Collection;
+import java.util.function.*;
 import java.util.stream.*;
 
 /**
@@ -26,12 +27,14 @@ public final class OJPersistence
    * Configures the persistence framework.
    * If the configuration is not given, the framework is not enabled.
    *
-   * @param pDataStoreSupplier a function that supplies a persistent data store created by {@link PersistentDataSourcesFactory}
+   * @param pConnectionSupplierResolver a function to resolve a database connection supplier from {@link ConnectionSupplierFactory}
    */
-  public static void configure(Function<PersistentDataSourcesFactory, IPersistentSourcesStore> pDataStoreSupplier)
+  public static void configure(Function<ConnectionSupplierFactory, IDatabaseConnectionSupplier> pConnectionSupplierResolver)
   {
-    final PersistentDataSourcesFactory factory = new PersistentDataSourcesFactory(() -> beanDataStore);
-    beanDataStore = new BeanDataStore(Objects.requireNonNull(pDataStoreSupplier).apply(factory));
+    final Supplier<BeanDataStore> storeSupplier = () -> beanDataStore;
+    final IDatabaseConnectionSupplier connectionSupplier = pConnectionSupplierResolver.apply(new ConnectionSupplierFactory());
+
+    beanDataStore = new BeanDataStore(IPersistentSourcesStore.forSQLDatabase(storeSupplier, connectionSupplier));
     _observeBeanCreations(); //For automatic container addition mode
   }
 
@@ -87,8 +90,10 @@ public final class OJPersistence
     BeanCreationEvents.observeCreationByAnnotationType(Persist.class).subscribe(pCreationEvent -> {
       final Persist annotation = pCreationEvent.getCreationAnnotation();
       final IBean<?> createdBean = pCreationEvent.getCreatedBean();
+
       if (annotation.mode() == EPersistenceMode.SINGLE || annotation.storageMode() == EStorageMode.MANUAL)
         return;
+
       final IBeanContainer container = beanDataStore.getContainerByPersistenceId(annotation.containerId(), createdBean.getClass());
       container.addBean(createdBean);
     });

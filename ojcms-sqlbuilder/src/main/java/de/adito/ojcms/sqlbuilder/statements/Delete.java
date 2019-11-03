@@ -1,16 +1,17 @@
 package de.adito.ojcms.sqlbuilder.statements;
 
 import de.adito.ojcms.sqlbuilder.*;
-import de.adito.ojcms.sqlbuilder.definition.*;
+import de.adito.ojcms.sqlbuilder.definition.IValueSerializer;
 import de.adito.ojcms.sqlbuilder.definition.condition.*;
-import de.adito.ojcms.sqlbuilder.format.*;
+import de.adito.ojcms.sqlbuilder.format.StatementFormatter;
+import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static de.adito.ojcms.sqlbuilder.definition.ENumericOperation.*;
+import static de.adito.ojcms.sqlbuilder.definition.ENumericOperation.SUBTRACT;
 import static de.adito.ojcms.sqlbuilder.definition.condition.IWhereOperator.*;
-import static de.adito.ojcms.sqlbuilder.format.EFormatter.*;
+import static de.adito.ojcms.sqlbuilder.format.EFormatter.DELETE;
 
 /**
  * A delete statement.
@@ -24,14 +25,14 @@ public class Delete extends AbstractSQLStatement<WhereModifiers, Boolean, Boolea
    *
    * @param pStatementExecutor the executor for this statement
    * @param pBuilder           the builder that created this statement to use other kinds of statements for a concrete statement
-   * @param pDatabaseType      the database type used for this statement
+   * @param pPlatform          the database platform used for this statement
    * @param pSerializer        the value serializer
    * @param pIdColumnName      the id column name
    */
-  public Delete(IStatementExecutor<Boolean> pStatementExecutor, AbstractSQLBuilder pBuilder, EDatabaseType pDatabaseType,
+  public Delete(IStatementExecutor<Boolean> pStatementExecutor, AbstractSQLBuilder pBuilder, IDatabasePlatform pPlatform,
                 IValueSerializer pSerializer, String pIdColumnName)
   {
-    super(pStatementExecutor, pBuilder, pDatabaseType, pSerializer, new WhereModifiers(), pIdColumnName);
+    super(pStatementExecutor, pBuilder, pPlatform, pSerializer, new WhereModifiers(), pIdColumnName);
   }
 
   /**
@@ -48,7 +49,7 @@ public class Delete extends AbstractSQLStatement<WhereModifiers, Boolean, Boolea
   protected Boolean doQuery()
   {
     _IdArranger idArranger = new _IdArranger(); //Store ids to delete before the deletion
-    final StatementFormatter deleteStatement = DELETE.create(databaseType, idColumnIdentification.getColumnName())
+    final StatementFormatter deleteStatement = DELETE.create(databasePlatform, idColumnIdentification.getColumnName())
         .appendTableName(getTableName())
         .appendWhereCondition(modifiers);
     final Boolean result = executeStatement(deleteStatement);

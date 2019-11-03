@@ -1,7 +1,10 @@
 package de.adito.ojcms.sqlbuilder;
 
 import de.adito.ojcms.sqlbuilder.definition.*;
-import de.adito.ojcms.sqlbuilder.util.DBConnectionInfo;
+import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
+import de.adito.ojcms.sqlbuilder.platform.connection.*;
+
+import java.util.function.Function;
 
 /**
  * Factory for the SQL statement builders {@link OJSQLBuilder} and {@link OJSQLBuilderForTable}.
@@ -22,13 +25,13 @@ public final class OJSQLBuilderFactory
    * If a SQL builder for a single database table is necessary,
    * {@link Builder#forSingleTable(String)} can be used to create an {@link OJSQLBuilderForTable}
    *
-   * @param pDatabaseType       the type of the database to use for the builder
+   * @param pPlatform           the database platform to use for the builder
    * @param pGlobalIdColumnName a global name for all id columns for this builder
    * @return a builder to configure the SQL statement builder
    */
-  public static Builder newSQLBuilder(EDatabaseType pDatabaseType, String pGlobalIdColumnName)
+  public static Builder newSQLBuilder(IDatabasePlatform pPlatform, String pGlobalIdColumnName)
   {
-    return new Builder(pDatabaseType, pGlobalIdColumnName);
+    return new Builder(pPlatform, pGlobalIdColumnName);
   }
 
   /**
@@ -43,8 +46,8 @@ public final class OJSQLBuilderFactory
    */
   public static Builder newSQLBuilder(AbstractSQLBuilder pExistingBuilder)
   {
-    final Builder builder = newSQLBuilder(pExistingBuilder.getDatabaseType(), pExistingBuilder.getIdColumnName());
-    builder.connectionInfo = pExistingBuilder.getConnectionInfo();
+    final Builder builder = newSQLBuilder(pExistingBuilder.getDatabasePlatform(), pExistingBuilder.getIdColumnName());
+    builder.connectionSupplier = pExistingBuilder.getPlatformConnectionSupplier();
     builder.closeConnectionAfterStatement = pExistingBuilder.closeAfterStatement();
     builder.serializer = pExistingBuilder.getSerializer();
     return builder;
@@ -58,12 +61,12 @@ public final class OJSQLBuilderFactory
     /**
      * Creates a new builder with the required information.
      *
-     * @param pDatabaseType the type of the database to use for the builder
+     * @param pPlatform     the database platform to use for the builder
      * @param pIdColumnName a global name for all id columns for this builder
      */
-    private Builder(EDatabaseType pDatabaseType, String pIdColumnName)
+    private Builder(IDatabasePlatform pPlatform, String pIdColumnName)
     {
-      super(pDatabaseType, pIdColumnName);
+      super(pPlatform, pIdColumnName);
     }
 
     /**
@@ -91,7 +94,7 @@ public final class OJSQLBuilderFactory
     @Override
     public OJSQLBuilder create()
     {
-      return new OJSQLBuilder(databaseType, connectionInfo, closeConnectionAfterStatement, serializer, idColumnName);
+      return new OJSQLBuilder(databasePlatform, connectionSupplier, closeConnectionAfterStatement, serializer, idColumnName);
     }
   }
 
@@ -129,7 +132,8 @@ public final class OJSQLBuilderFactory
     @Override
     public OJSQLBuilderForTable create()
     {
-      return new OJSQLBuilderForTable(databaseType, connectionInfo, closeConnectionAfterStatement, serializer, tableName, idColumnName);
+      return new OJSQLBuilderForTable(databasePlatform, connectionSupplier, closeConnectionAfterStatement, serializer, tableName,
+                                      idColumnName);
     }
   }
 
@@ -141,21 +145,21 @@ public final class OJSQLBuilderFactory
    */
   private abstract static class _AbstractBuilder<SQLBUILDER extends AbstractSQLBuilder, BUILDER extends _AbstractBuilder<SQLBUILDER, BUILDER>>
   {
-    protected final EDatabaseType databaseType;
+    protected final IDatabasePlatform databasePlatform;
     protected final String idColumnName;
-    protected DBConnectionInfo connectionInfo;
+    protected IDatabaseConnectionSupplier connectionSupplier;
     protected IValueSerializer serializer = new DefaultValueSerializer();
     protected boolean closeConnectionAfterStatement = true;
 
     /**
      * Creates a new builder.
      *
-     * @param pDatabaseType       the type of the database to use for the builder
+     * @param pPlatform           the database platform to use for the builder
      * @param pGlobalIdColumnName a global name for all id columns for this builder
      */
-    private _AbstractBuilder(EDatabaseType pDatabaseType, String pGlobalIdColumnName)
+    private _AbstractBuilder(IDatabasePlatform pPlatform, String pGlobalIdColumnName)
     {
-      databaseType = pDatabaseType;
+      databasePlatform = pPlatform;
       idColumnName = pGlobalIdColumnName;
     }
 
@@ -166,9 +170,9 @@ public final class OJSQLBuilderFactory
      */
     private _AbstractBuilder(_AbstractBuilder<?, ?> pOther)
     {
-      databaseType = pOther.databaseType;
+      databasePlatform = pOther.databasePlatform;
       idColumnName = pOther.idColumnName;
-      connectionInfo = pOther.connectionInfo;
+      connectionSupplier = pOther.connectionSupplier;
       serializer = pOther.serializer;
       closeConnectionAfterStatement = pOther.closeConnectionAfterStatement;
     }
@@ -177,12 +181,24 @@ public final class OJSQLBuilderFactory
      * Configures the builder to hold permanent database connection.
      * This connection will not be closed and used for all statements from the final builder.
      *
-     * @param pConnectionInfo information for the database connection
+     * @param pConnSupplierResolver a function the resolve a db connection supplier from a factory for platform dependent instances
      * @return the builder itself to enable a pipelining mechanism
      */
-    public BUILDER withPermanentConnection(DBConnectionInfo pConnectionInfo)
+    public BUILDER withPermanentConnection(Function<ConnectionSupplierFactory, IDatabaseConnectionSupplier> pConnSupplierResolver)
     {
-      connectionInfo = pConnectionInfo;
+      return withPermanentConnection(pConnSupplierResolver.apply(new ConnectionSupplierFactory()));
+    }
+
+    /**
+     * Configures the builder to hold permanent database connection.
+     * This connection will not be closed and used for all statements from the final builder.
+     *
+     * @param pConnectionSupplier a platform dependent supplier for database connections
+     * @return the builder itself to enable a pipelining mechanism
+     */
+    public BUILDER withPermanentConnection(IDatabaseConnectionSupplier pConnectionSupplier)
+    {
+      connectionSupplier = pConnectionSupplier;
       closeConnectionAfterStatement = false;
       //noinspection unchecked
       return (BUILDER) this;
@@ -193,12 +209,25 @@ public final class OJSQLBuilderFactory
      * An used connection will be closed after every execution of a SQL statement.
      * The connections are based on several connection information.
      *
-     * @param pConnectionInfo information for the database connection
+     * @param pConnSupplierResolver a function the resolve a db connection supplier from a factory for platform dependent instances
      * @return the builder itself to enable a pipelining mechanism
      */
-    public BUILDER withClosingAndRenewingConnection(DBConnectionInfo pConnectionInfo)
+    public BUILDER withClosingAndRenewingConnection(Function<ConnectionSupplierFactory, IDatabaseConnectionSupplier> pConnSupplierResolver)
     {
-      connectionInfo = pConnectionInfo;
+      return withClosingAndRenewingConnection(pConnSupplierResolver.apply(new ConnectionSupplierFactory()));
+    }
+
+    /**
+     * Configures the builder to obtain a new connection to the database for every statement.
+     * An used connection will be closed after every execution of a SQL statement.
+     * The connections are based on several connection information.
+     *
+     * @param pConnectionSupplier a platform dependent supplier for database connections
+     * @return the builder itself to enable a pipelining mechanism
+     */
+    public BUILDER withClosingAndRenewingConnection(IDatabaseConnectionSupplier pConnectionSupplier)
+    {
+      connectionSupplier = pConnectionSupplier;
       //noinspection unchecked
       return (BUILDER) this;
     }

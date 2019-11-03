@@ -2,6 +2,7 @@ package de.adito.ojcms.sqlbuilder.definition.condition;
 
 import de.adito.ojcms.sqlbuilder.definition.*;
 import de.adito.ojcms.sqlbuilder.format.IPreparedStatementFormat;
+import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 
 import java.util.*;
 
@@ -32,9 +33,9 @@ class OperatorWithId extends AbstractNegatable<OperatorWithId> implements IPrepa
   }
 
   @Override
-  public String toStatementFormat(EDatabaseType pDatabaseType, String pIdColumnName)
+  public String toStatementFormat(IDatabasePlatform pPlatform, String pIdColumnName)
   {
-    return IWhereCondition.of(_getIdentification(pIdColumnName), id, operator).toStatementFormat(pDatabaseType, pIdColumnName);
+    return IWhereCondition.of(_getIdentification(pIdColumnName), id, operator).toStatementFormat(pPlatform, pIdColumnName);
   }
 
   @Override

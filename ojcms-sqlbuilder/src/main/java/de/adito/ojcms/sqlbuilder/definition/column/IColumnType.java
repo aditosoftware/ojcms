@@ -1,7 +1,7 @@
 package de.adito.ojcms.sqlbuilder.definition.column;
 
-import de.adito.ojcms.sqlbuilder.definition.EDatabaseType;
 import de.adito.ojcms.sqlbuilder.format.IStatementFormat;
+import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 
 import java.util.Optional;
 import java.util.stream.*;
@@ -23,12 +23,12 @@ public interface IColumnType extends IStatementFormat, Iterable<EColumnModifier>
   EColumnType getType();
 
   @Override
-  default String toStatementFormat(EDatabaseType pDatabaseType, String pIdColumnName)
+  default String toStatementFormat(IDatabasePlatform pPlatform, String pIdColumnName)
   {
     final String modifiers = streamModifiers()
-        .map(pModifier -> pModifier.toStatementFormat(pDatabaseType, pIdColumnName))
+        .map(pModifier -> pModifier.toStatementFormat(pPlatform, pIdColumnName))
         .collect(Collectors.joining(" "));
-    return pDatabaseType.columnTypeToStatementFormat(this) + (modifiers.isEmpty() ? "" : " " + modifiers);
+    return pPlatform.columnTypeToStatementFormat(this) + (modifiers.isEmpty() ? "" : " " + modifiers);
   }
 
   /**

@@ -2,6 +2,7 @@ package de.adito.ojcms.sqlbuilder.definition.condition;
 
 import de.adito.ojcms.sqlbuilder.definition.*;
 import de.adito.ojcms.sqlbuilder.format.*;
+import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 import de.adito.ojcms.sqlbuilder.util.OJDatabaseException;
 
 import java.util.*;
@@ -38,7 +39,7 @@ class InConditionImpl<VALUE> extends ConditionImpl<VALUE>
   }
 
   @Override
-  public String toStatementFormat(EDatabaseType pDatabaseType, String pIdColumnName)
+  public String toStatementFormat(IDatabasePlatform pPlatform, String pIdColumnName)
   {
     return getColumn().getColumnName().toUpperCase() + " " + EFormatConstant.IN.toStatementFormat(
         StatementFormatter.join(IntStream.range(0, values.size()).mapToObj(pIndex -> "?"), ESeparator.COMMA_WITH_WHITESPACE));

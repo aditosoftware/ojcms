@@ -2,6 +2,7 @@ package de.adito.ojcms.sqlbuilder;
 
 import de.adito.ojcms.sqlbuilder.definition.*;
 import de.adito.ojcms.sqlbuilder.format.*;
+import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 import de.adito.ojcms.sqlbuilder.result.Result;
 import de.adito.ojcms.sqlbuilder.util.*;
 
@@ -29,14 +30,14 @@ public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>> exte
    *
    * @param pStatementExecutor the executor for the statement
    * @param pBuilder           the builder that created this statement to use other kinds of statements for a concrete statement
-   * @param pDatabaseType      the database type used for this select statement
+   * @param pPlatform          the database platform used for this select statement
    * @param pSerializer        the value serializer
    * @param pIdColumnName      the name of the id column
    */
-  protected AbstractSelect(IStatementExecutor<ResultSet> pStatementExecutor, AbstractSQLBuilder pBuilder, EDatabaseType pDatabaseType,
+  protected AbstractSelect(IStatementExecutor<ResultSet> pStatementExecutor, AbstractSQLBuilder pBuilder, IDatabasePlatform pPlatform,
                            IValueSerializer pSerializer, String pIdColumnName)
   {
-    super(pStatementExecutor, pBuilder, pDatabaseType, pSerializer, new SelectModifiers(), pIdColumnName);
+    super(pStatementExecutor, pBuilder, pPlatform, pSerializer, new SelectModifiers(), pIdColumnName);
   }
 
   /**
@@ -152,7 +153,8 @@ public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>> exte
   {
     final Supplier<String> columnSupplier = () -> StatementFormatter.join(columnsToSelect.stream().map(IColumnIdentification::getColumnName),
                                                                           COMMA_WITH_WHITESPACE);
-    final StatementFormatter statement = EFormatter.SELECT.create(databaseType, idColumnIdentification.getColumnName())
+
+    final StatementFormatter statement = EFormatter.SELECT.create(databasePlatform, idColumnIdentification.getColumnName())
         .conditional(modifiers.distinct(), pFormat -> pFormat.appendConstant(DISTINCT))
         .conditionalOrElse(modifiers.count(),
                            //with count
@@ -169,6 +171,7 @@ public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>> exte
                                                                 pInner -> pInner.appendMultiple(columnsToSelect.stream(), COMMA_WITH_WHITESPACE)))
         .appendTableName(getTableName())
         .appendWhereCondition(modifiers);
+
     return executeStatement(statement);
   }
 }

@@ -74,10 +74,12 @@ public class BeanColumnDefinition<VALUE> implements IColumnDefinition, IBeanFiel
     final Class<? extends IBean> beanType = (Class<? extends IBean>) beanField.getDataType();
     if (!beanType.isAnnotationPresent(Persist.class))
       throw new OJPersistenceException(beanType);
+
     final Persist annotation = beanType.getAnnotation(Persist.class);
     final String tableName = annotation.mode() == EPersistenceMode.SINGLE ? DatabaseConstants.BEAN_TABLE_NAME : annotation.containerId();
     final String columnName = annotation.mode() == EPersistenceMode.SINGLE ? DatabaseConstants.BEAN_TABLE_BEAN_ID :
         DatabaseConstants.ID_COLUMN;
+
     columnType.foreignKey(IForeignKey.of(tableName, columnName, pConnectionInfo -> {
       if (annotation.mode() == EPersistenceMode.SINGLE)
         SQLPersistentBeanSource.createBeanTable(pConnectionInfo);

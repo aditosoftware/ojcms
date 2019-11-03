@@ -2,10 +2,12 @@ package de.adito.ojcms.persistence.datastores;
 
 import de.adito.ojcms.beans.IBean;
 import de.adito.ojcms.beans.datasource.*;
-import de.adito.ojcms.persistence.Persist;
+import de.adito.ojcms.persistence.*;
+import de.adito.ojcms.persistence.datastores.sql.*;
+import de.adito.ojcms.sqlbuilder.platform.connection.IDatabaseConnectionSupplier;
 
 import java.util.Collection;
-import java.util.function.Function;
+import java.util.function.*;
 
 /**
  * A store for persistent bean data sources.
@@ -22,6 +24,23 @@ import java.util.function.Function;
  */
 public interface IPersistentSourcesStore
 {
+  /**
+   * Creates a SQL based store for persistent bean data sources.
+   *
+   * @param pStoreSupplier      a supplier for the {@link BeanDataStore}
+   * @param pConnectionSupplier a platform dependent supplier for new database connections
+   * @return the SQL based bean data sources store
+   */
+  static IPersistentSourcesStore forSQLDatabase(Supplier<BeanDataStore> pStoreSupplier, IDatabaseConnectionSupplier pConnectionSupplier)
+  {
+    //noinspection unchecked
+    return new CachingPersistentDataSources((pID, pBeanType) -> new SQLPersistentBeanSource(pID, pBeanType, pConnectionSupplier, pStoreSupplier),
+                                            pId -> SQLPersistentBeanSource.isDataSourceExisting(pConnectionSupplier, pId),
+                                            (pId, pBeanType) -> new SQLPersistentContainerSource(pBeanType, pConnectionSupplier, pId, pStoreSupplier),
+                                            pExistingSingleBeans -> SQLPersistentBeanSource.removeObsoletes(pConnectionSupplier, pExistingSingleBeans),
+                                            pExistingContainerIds -> SQLPersistentContainerSource.removeObsoletes(pConnectionSupplier, pExistingContainerIds));
+  }
+
   /**
    * A persistent bean data source for a certain persistence id.
    *

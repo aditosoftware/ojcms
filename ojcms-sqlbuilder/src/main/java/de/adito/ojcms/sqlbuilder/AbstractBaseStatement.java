@@ -2,6 +2,7 @@ package de.adito.ojcms.sqlbuilder;
 
 import de.adito.ojcms.sqlbuilder.definition.*;
 import de.adito.ojcms.sqlbuilder.format.StatementFormatter;
+import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 import de.adito.ojcms.utils.StringUtility;
 
 import java.io.IOException;
@@ -10,7 +11,7 @@ import java.io.IOException;
  * Abstract base class for every database statement.
  * It mainly provides a method the execute the statements finally.
  * For this purpose a {@link IStatementExecutor} is necessary to send statements to the database.
- * Furthermore the table name to execute the statements at and the database type are also stored here.
+ * Furthermore the table name to execute the statements at and the database platform are also stored here.
  *
  * @param <RESULT>    the generic result type of the executor (e.g. {@link java.sql.ResultSet}
  * @param <STATEMENT> the final concrete type of this statement
@@ -20,7 +21,7 @@ public abstract class AbstractBaseStatement<RESULT, STATEMENT extends AbstractBa
 {
   private final IStatementExecutor<RESULT> executor;
   protected final AbstractSQLBuilder builder;
-  protected final EDatabaseType databaseType;
+  protected final IDatabasePlatform databasePlatform;
   protected final IValueSerializer serializer;
   protected final IColumnIdentification<Integer> idColumnIdentification;
   private String tableName;
@@ -30,16 +31,16 @@ public abstract class AbstractBaseStatement<RESULT, STATEMENT extends AbstractBa
    *
    * @param pExecutor     the executor for the statements
    * @param pBuilder      the builder that created this statement to use other kinds of statements for a concrete statement
-   * @param pDatabaseType the database type used for this statement
+   * @param pPlatform     the database platform used for this statement
    * @param pSerializer   the value serializer
    * @param pIdColumnName the name of the global id column
    */
-  protected AbstractBaseStatement(IStatementExecutor<RESULT> pExecutor, AbstractSQLBuilder pBuilder, EDatabaseType pDatabaseType,
+  protected AbstractBaseStatement(IStatementExecutor<RESULT> pExecutor, AbstractSQLBuilder pBuilder, IDatabasePlatform pPlatform,
                                   IValueSerializer pSerializer, String pIdColumnName)
   {
     executor = pExecutor;
     builder = pBuilder;
-    databaseType = pDatabaseType;
+    databasePlatform = pPlatform;
     serializer = pSerializer;
     idColumnIdentification = IColumnIdentification.of(pIdColumnName.toUpperCase(), Integer.class);
   }

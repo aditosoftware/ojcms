@@ -1,6 +1,7 @@
 package de.adito.ojcms.sqlbuilder.definition;
 
 import de.adito.ojcms.sqlbuilder.format.IStatementFormat;
+import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 
 import java.util.Collection;
 import java.util.function.Function;
@@ -37,7 +38,7 @@ public interface INumericValueAdaption<NUMBER extends Number> extends IStatement
   NUMBER getNumber();
 
   @Override
-  default String toStatementFormat(EDatabaseType pDatabaseType, String pIdColumnName)
+  default String toStatementFormat(IDatabasePlatform pPlatform, String pIdColumnName)
   {
     return getColumn().getColumnName() + " = " + getColumn().getColumnName() + " " + getOperation().getLiteral() + " " + getNumber();
   }

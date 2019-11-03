@@ -1,6 +1,6 @@
 package de.adito.ojcms.sqlbuilder.definition.column;
 
-import de.adito.ojcms.sqlbuilder.util.DBConnectionInfo;
+import de.adito.ojcms.sqlbuilder.platform.connection.IDatabaseConnectionSupplier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -31,9 +31,9 @@ public interface IForeignKey
    * Creates the referenced table, if necessary.
    * This mechanism may be used, if it cannot be guaranteed in which order tables must be created.
    *
-   * @param pConnectionInfo connection information for the database
+   * @param pConnectionSupplier a database connection supplier
    */
-  default void createReferencedTable(DBConnectionInfo pConnectionInfo)
+  default void createReferencedTable(IDatabaseConnectionSupplier pConnectionSupplier)
   {
   }
 
@@ -57,7 +57,7 @@ public interface IForeignKey
    * @param pReferencedTableCreator an optional creator for the referenced table
    * @return a foreign key instance
    */
-  static IForeignKey of(String pTableName, String pColumnName, @Nullable Consumer<DBConnectionInfo> pReferencedTableCreator)
+  static IForeignKey of(String pTableName, String pColumnName, @Nullable Consumer<IDatabaseConnectionSupplier> pReferencedTableCreator)
   {
     return of(pTableName, Collections.singleton(pColumnName), pReferencedTableCreator);
   }
@@ -82,7 +82,8 @@ public interface IForeignKey
    * @param pReferencedTableCreator an optional creator for the referenced table
    * @return a foreign key instance
    */
-  static IForeignKey of(String pTableName, Collection<String> pColumnNames, @Nullable Consumer<DBConnectionInfo> pReferencedTableCreator)
+  static IForeignKey of(String pTableName, Collection<String> pColumnNames,
+                        @Nullable Consumer<IDatabaseConnectionSupplier> pReferencedTableCreator)
   {
     return new IForeignKey()
     {
@@ -99,10 +100,10 @@ public interface IForeignKey
       }
 
       @Override
-      public void createReferencedTable(DBConnectionInfo pConnectionInfo)
+      public void createReferencedTable(IDatabaseConnectionSupplier pConnectionSupplier)
       {
         if (pReferencedTableCreator != null)
-          pReferencedTableCreator.accept(pConnectionInfo);
+          pReferencedTableCreator.accept(pConnectionSupplier);
       }
     };
   }

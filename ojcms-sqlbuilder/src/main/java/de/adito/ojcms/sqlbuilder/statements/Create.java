@@ -1,16 +1,17 @@
 package de.adito.ojcms.sqlbuilder.statements;
 
 import de.adito.ojcms.sqlbuilder.*;
-import de.adito.ojcms.sqlbuilder.definition.*;
+import de.adito.ojcms.sqlbuilder.definition.IValueSerializer;
 import de.adito.ojcms.sqlbuilder.definition.column.*;
-import de.adito.ojcms.sqlbuilder.format.*;
+import de.adito.ojcms.sqlbuilder.format.StatementFormatter;
+import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 import de.adito.ojcms.sqlbuilder.util.OJDatabaseException;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.adito.ojcms.sqlbuilder.format.EFormatConstant.*;
-import static de.adito.ojcms.sqlbuilder.format.EFormatter.*;
+import static de.adito.ojcms.sqlbuilder.format.EFormatter.CREATE;
 import static de.adito.ojcms.sqlbuilder.format.ESeparator.*;
 
 /**
@@ -28,14 +29,14 @@ public class Create extends AbstractBaseStatement<Void, Create>
    *
    * @param pStatementExecutor the executor for this statement
    * @param pBuilder           the builder that created this statement to use other kinds of statements for a concrete statement
-   * @param pDatabaseType      the database type used for this statement
+   * @param pPlatform          the database platform used for this statement
    * @param pSerializer        the value serializer
    * @param pIdColumnName      the name of the id column for this table
    */
-  public Create(IStatementExecutor<Void> pStatementExecutor, AbstractSQLBuilder pBuilder, EDatabaseType pDatabaseType,
+  public Create(IStatementExecutor<Void> pStatementExecutor, AbstractSQLBuilder pBuilder, IDatabasePlatform pPlatform,
                 IValueSerializer pSerializer, String pIdColumnName)
   {
-    super(pStatementExecutor, pBuilder, pDatabaseType, pSerializer, pIdColumnName);
+    super(pStatementExecutor, pBuilder, pPlatform, pSerializer, pIdColumnName);
     idColumnDefinition = IColumnDefinition.of(pIdColumnName.toUpperCase(),
                                               EColumnType.INT.create().primaryKey().modifiers(EColumnModifier.NOT_NULL));
   }
@@ -84,7 +85,7 @@ public class Create extends AbstractBaseStatement<Void, Create>
     if (columns.isEmpty())
       throw new OJDatabaseException("At least one column must be defined to create a table!");
 
-    final StatementFormatter statement = CREATE.create(databaseType, idColumnDefinition.getColumnName())
+    final StatementFormatter statement = CREATE.create(databasePlatform, idColumnDefinition.getColumnName())
         .appendTableName(getTableName())
         .openBracket()
         .appendMultiple(columns.stream(), COMMA, NEW_LINE)
@@ -128,7 +129,7 @@ public class Create extends AbstractBaseStatement<Void, Create>
     final OJSQLBuilder tableChecker = OJSQLBuilderFactory.newSQLBuilder(builder).create();
     foreignKeyMapping.forEach((pColumn, pReference) -> {
       if (!tableChecker.hasTable(pReference.getTableName()))
-        pReference.createReferencedTable(tableChecker.getConnectionInfo()); //Create referenced table, if necessary
+        pReference.createReferencedTable(tableChecker.getPlatformConnectionSupplier()); //Create referenced table, if necessary
       pFormatter.appendSeparator(COMMA, NEW_LINE);
       pFormatter.appendConstant(FOREIGN_KEY, pColumn, pReference.getTableName(),
                                 String.join(", ", pReference.getColumnNames()));

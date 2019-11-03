@@ -2,8 +2,9 @@ package de.adito.ojcms.sqlbuilder;
 
 import de.adito.ojcms.sqlbuilder.definition.*;
 import de.adito.ojcms.sqlbuilder.definition.column.IColumnDefinition;
+import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
+import de.adito.ojcms.sqlbuilder.platform.connection.IDatabaseConnectionSupplier;
 import de.adito.ojcms.sqlbuilder.statements.Create;
-import de.adito.ojcms.sqlbuilder.util.DBConnectionInfo;
 import de.adito.ojcms.utils.StringUtility;
 
 import java.util.function.Consumer;
@@ -22,17 +23,17 @@ public final class OJSQLBuilderForTable extends AbstractSQLBuilder
   /**
    * Creates a new builder.
    *
-   * @param pDatabaseType        the database type to use for this builder
-   * @param pConnectionInfo      the database connection information
+   * @param pPlatform            the database platform to use for this builder
+   * @param pConnectionSupplier  the database platform based connection supplier
    * @param pCloseAfterStatement <tt>true</tt>, if the connection should be closed after executing one statement
    * @param pSerializer          the value serializer
    * @param pTableName           the name of the table to use for this builder
    * @param pIdColumnName        a global id column name for this builder instance
    */
-  OJSQLBuilderForTable(EDatabaseType pDatabaseType, DBConnectionInfo pConnectionInfo, boolean pCloseAfterStatement,
+  OJSQLBuilderForTable(IDatabasePlatform pPlatform, IDatabaseConnectionSupplier pConnectionSupplier, boolean pCloseAfterStatement,
                        IValueSerializer pSerializer, String pTableName, String pIdColumnName)
   {
-    super(pDatabaseType, pConnectionInfo, pCloseAfterStatement, pSerializer, pIdColumnName);
+    super(pPlatform, pConnectionSupplier, pCloseAfterStatement, pSerializer, pIdColumnName);
     tableName = StringUtility.requireNotEmpty(pTableName, "table name");
   }
 

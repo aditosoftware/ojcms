@@ -2,14 +2,18 @@ package de.adito.ojcms.sqlbuilder;
 
 import de.adito.ojcms.sqlbuilder.definition.*;
 import de.adito.ojcms.sqlbuilder.definition.column.IColumnDefinition;
+import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
+import de.adito.ojcms.sqlbuilder.platform.connection.IDatabaseConnectionSupplier;
 import de.adito.ojcms.sqlbuilder.statements.*;
-import de.adito.ojcms.sqlbuilder.util.*;
+import de.adito.ojcms.sqlbuilder.util.OJDatabaseException;
 import de.adito.ojcms.utils.StringUtility;
 
 import java.io.IOException;
 import java.sql.*;
 import java.util.*;
 import java.util.function.*;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Abstract base class for the SQL builder.
@@ -19,8 +23,8 @@ import java.util.function.*;
  */
 public abstract class AbstractSQLBuilder
 {
-  private final EDatabaseType databaseType;
-  private final DBConnectionInfo connectionInfo;
+  private final IDatabasePlatform platform;
+  private final IDatabaseConnectionSupplier platformConnectionSupplier;
   private final boolean closeAfterStatement;
   private final Supplier<Connection> connectionSupplier;
   private final IValueSerializer serializer;
@@ -29,22 +33,23 @@ public abstract class AbstractSQLBuilder
   /**
    * Creates a new builder.
    *
-   * @param pDatabaseType        the database type to use for this builder
-   * @param pConnectionInfo      the database connection information
-   * @param pCloseAfterStatement <tt>true</tt>, if the connection should be closed after executing one statement
-   * @param pSerializer          a value serializer
-   * @param pIdColumnName        a global id column name for this builder instance
+   * @param pPlatform                   the database platform to use for this builder
+   * @param pPlatformConnectionSupplier the platform specific connection supplier
+   * @param pCloseAfterStatement        <tt>true</tt>, if the connection should be closed after executing one statement
+   * @param pSerializer                 a value serializer
+   * @param pIdColumnName               a global id column name for this builder instance
    */
-  protected AbstractSQLBuilder(EDatabaseType pDatabaseType, DBConnectionInfo pConnectionInfo, boolean pCloseAfterStatement,
-                               IValueSerializer pSerializer, String pIdColumnName)
+  protected AbstractSQLBuilder(IDatabasePlatform pPlatform, IDatabaseConnectionSupplier pPlatformConnectionSupplier,
+                               boolean pCloseAfterStatement, IValueSerializer pSerializer, String pIdColumnName)
   {
-    databaseType = Objects.requireNonNull(pDatabaseType);
-    connectionInfo = Objects.requireNonNull(pConnectionInfo);
+    platform = requireNonNull(pPlatform);
+    platformConnectionSupplier = requireNonNull(pPlatformConnectionSupplier);
     closeAfterStatement = pCloseAfterStatement;
     connectionSupplier = _createConnectionSupplier();
-    serializer = Objects.requireNonNull(pSerializer);
+    serializer = requireNonNull(pSerializer);
     idColumnName = StringUtility.requireNotEmpty(pIdColumnName, "id column name");
-    databaseType.initDriver();
+
+    platform.initDriver();
   }
 
   /**
@@ -54,7 +59,7 @@ public abstract class AbstractSQLBuilder
    */
   public void doCreate(Consumer<Create> pCreateStatement)
   {
-    final Create statement = new Create(_createNoResultExecutor(), this, databaseType, serializer, idColumnName);
+    final Create statement = new Create(_createNoResultExecutor(), this, platform, serializer, idColumnName);
     _execute(configureStatementBeforeExecution(statement), pCreateStatement);
   }
 
@@ -65,7 +70,7 @@ public abstract class AbstractSQLBuilder
    */
   public void doInsert(Consumer<Insert> pInsertStatement)
   {
-    final Insert statement = new Insert(_createNoResultExecutor(), this, databaseType, serializer, idColumnName);
+    final Insert statement = new Insert(_createNoResultExecutor(), this, platform, serializer, idColumnName);
     _execute(configureStatementBeforeExecution(statement), pInsertStatement);
   }
 
@@ -76,7 +81,7 @@ public abstract class AbstractSQLBuilder
    */
   public void doUpdate(Consumer<Update> pUpdateStatement)
   {
-    final Update statement = new Update(_createNoResultExecutor(), this, databaseType, serializer, idColumnName);
+    final Update statement = new Update(_createNoResultExecutor(), this, platform, serializer, idColumnName);
     _execute(configureStatementBeforeExecution(statement), pUpdateStatement);
   }
 
@@ -87,7 +92,7 @@ public abstract class AbstractSQLBuilder
    */
   public boolean doDelete(Function<Delete, Boolean> pDeleteStatement) //NOSONAR
   {
-    final Delete statement = new Delete(_createSuccessfulExecutor(), this, databaseType, serializer, idColumnName);
+    final Delete statement = new Delete(_createSuccessfulExecutor(), this, platform, serializer, idColumnName);
     return _query(configureStatementBeforeExecution(statement), pDeleteStatement);
   }
 
@@ -100,7 +105,7 @@ public abstract class AbstractSQLBuilder
    */
   public <RESULT> RESULT doSelect(Function<Select, RESULT> pSelectQuery)
   {
-    final Select statement = new Select(_createResultExecutor(), this, databaseType, serializer, idColumnName);
+    final Select statement = new Select(_createResultExecutor(), this, platform, serializer, idColumnName);
     return _query(configureStatementBeforeExecution(statement), pSelectQuery);
   }
 
@@ -116,7 +121,9 @@ public abstract class AbstractSQLBuilder
    */
   public <VALUE, RESULT> RESULT doSelectOne(IColumnIdentification<VALUE> pColumnToSelect, Function<SingleSelect<VALUE>, RESULT> pSelectQuery)
   {
-    final SingleSelect<VALUE> select = new SingleSelect<>(_createResultExecutor(), this, databaseType, serializer, idColumnName, pColumnToSelect);
+    final SingleSelect<VALUE> select = new SingleSelect<>(_createResultExecutor(), this, platform, serializer,
+                                                          idColumnName, pColumnToSelect);
+
     return _query(configureStatementBeforeExecution(select), pSelectQuery);
   }
 
@@ -130,8 +137,9 @@ public abstract class AbstractSQLBuilder
   public <RESULT> RESULT doSelectId(Function<SingleSelect<Integer>, RESULT> pSelectQuery)
   {
     final IColumnIdentification<Integer> idColumnIdentification = IColumnIdentification.of(idColumnName, Integer.class);
-    final SingleSelect<Integer> select = new SingleSelect<>(_createResultExecutor(), this, databaseType, serializer, idColumnName,
+    final SingleSelect<Integer> select = new SingleSelect<>(_createResultExecutor(), this, platform, serializer, idColumnName,
                                                             idColumnIdentification);
+
     return _query(configureStatementBeforeExecution(select), pSelectQuery);
   }
 
@@ -167,7 +175,8 @@ public abstract class AbstractSQLBuilder
    */
   protected void addColumn(String pTableName, IColumnDefinition pColumnDefinition)
   {
-    _executeNoResultStatement("ALTER TABLE " + pTableName + " ADD " + pColumnDefinition.toStatementFormat(databaseType, idColumnName));
+    _executeNoResultStatement("ALTER TABLE " + pTableName + " ADD " + pColumnDefinition.toStatementFormat(platform,
+                                                                                                          idColumnName));
   }
 
   /**
@@ -178,7 +187,7 @@ public abstract class AbstractSQLBuilder
    */
   protected void removeColumn(String pTableName, IColumnIdentification<?> pColumn)
   {
-    _executeNoResultStatement("ALTER TABLE " + pTableName + " DROP COLUMN " + pColumn.toStatementFormat(databaseType, idColumnName));
+    _executeNoResultStatement("ALTER TABLE " + pTableName + " DROP COLUMN " + pColumn.toStatementFormat(platform, idColumnName));
   }
 
   /**
@@ -217,7 +226,7 @@ public abstract class AbstractSQLBuilder
       while (tables.next())
       {
         final String name = tables.getString(3);
-        if (!name.startsWith(databaseType.getSystemTablesPrefix())) //Exclude system tables
+        if (!name.startsWith(platform.getSystemTablePrefix())) //Exclude system tables
           names.add(tables.getString(3));
       }
       return names;
@@ -254,23 +263,23 @@ public abstract class AbstractSQLBuilder
   }
 
   /**
-   * The database type of the builder.
+   * The database platform of the builder.
    *
-   * @return a database type
+   * @return a database platform
    */
-  EDatabaseType getDatabaseType()
+  IDatabasePlatform getDatabasePlatform()
   {
-    return databaseType;
+    return platform;
   }
 
   /**
-   * The database connection information of the builder.
+   * The platform specific connection supplier of the builder.
    *
-   * @return the database connection information
+   * @return the platform specific connection supplier
    */
-  public DBConnectionInfo getConnectionInfo()
+  public IDatabaseConnectionSupplier getPlatformConnectionSupplier()
   {
-    return connectionInfo;
+    return platformConnectionSupplier;
   }
 
   /**
@@ -313,8 +322,9 @@ public abstract class AbstractSQLBuilder
   private Supplier<Connection> _createConnectionSupplier()
   {
     if (closeAfterStatement)
-      return connectionInfo::createConnection;
-    final Connection permanentConnection = connectionInfo.createConnection(); //NOSONAR
+      return platformConnectionSupplier::createNewConnection;
+
+    final Connection permanentConnection = platformConnectionSupplier.createNewConnection(); //NOSONAR
     return () -> permanentConnection;
   }
 

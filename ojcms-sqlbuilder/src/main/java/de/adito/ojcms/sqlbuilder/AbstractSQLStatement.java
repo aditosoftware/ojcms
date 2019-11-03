@@ -1,7 +1,8 @@
 package de.adito.ojcms.sqlbuilder;
 
-import de.adito.ojcms.sqlbuilder.definition.*;
+import de.adito.ojcms.sqlbuilder.definition.IValueSerializer;
 import de.adito.ojcms.sqlbuilder.definition.condition.*;
+import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 import org.jetbrains.annotations.*;
 
 import java.util.Objects;
@@ -26,15 +27,15 @@ public abstract class AbstractSQLStatement<MODIFIERS extends WhereModifiers, RES
    *
    * @param pStatementExecutor the executor for this statement
    * @param pBuilder           the builder that created this statement to use other kinds of statements for a concrete statement
-   * @param pDatabaseType      the database type used for this statement
+   * @param pPlatform          the database platform used for this statement
    * @param pSerializer        the value serializer
    * @param pModifiers         the modifiers for this statement
    * @param pIdColumnName      the id column name
    */
-  public AbstractSQLStatement(IStatementExecutor<INNERRESULT> pStatementExecutor, AbstractSQLBuilder pBuilder, EDatabaseType pDatabaseType,
+  public AbstractSQLStatement(IStatementExecutor<INNERRESULT> pStatementExecutor, AbstractSQLBuilder pBuilder, IDatabasePlatform pPlatform,
                               IValueSerializer pSerializer, MODIFIERS pModifiers, String pIdColumnName)
   {
-    super(pStatementExecutor, pBuilder, pDatabaseType, pSerializer, pIdColumnName);
+    super(pStatementExecutor, pBuilder, pPlatform, pSerializer, pIdColumnName);
     modifiers = pModifiers;
   }
 

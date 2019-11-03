@@ -1,7 +1,7 @@
 package de.adito.ojcms.sqlbuilder.definition.condition;
 
-import de.adito.ojcms.sqlbuilder.definition.EDatabaseType;
 import de.adito.ojcms.sqlbuilder.format.*;
+import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -32,10 +32,10 @@ abstract class AbstractStatementConcatenation<NEGATE extends IMultipleCondition<
   }
 
   @Override
-  public String toStatementFormat(EDatabaseType pDatabaseType, String pIdColumnName)
+  public String toStatementFormat(IDatabasePlatform pPlatform, String pIdColumnName)
   {
     return stream()
-        .map(pCondition -> StatementFormatter.toFormat(pCondition, pDatabaseType, pIdColumnName) + " " +
+        .map(pCondition -> StatementFormatter.toFormat(pCondition, pPlatform, pIdColumnName) + " " +
             (hasConcatenation(pCondition) ? getConcatenationType(pCondition).name() + " " : ""))
         .collect(Collectors.joining());
   }

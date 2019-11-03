@@ -11,8 +11,9 @@ import de.adito.ojcms.persistence.util.EStorageMode;
 import de.adito.ojcms.sqlbuilder.*;
 import de.adito.ojcms.sqlbuilder.definition.ENumericOperation;
 import de.adito.ojcms.sqlbuilder.definition.condition.IWhereCondition;
+import de.adito.ojcms.sqlbuilder.platform.connection.IDatabaseConnectionSupplier;
 import de.adito.ojcms.sqlbuilder.statements.SingleSelect;
-import de.adito.ojcms.sqlbuilder.util.*;
+import de.adito.ojcms.sqlbuilder.util.OJDatabaseException;
 import de.adito.ojcms.utils.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -44,14 +45,15 @@ public class SQLPersistentContainerSource<BEAN extends IBean<BEAN>> implements I
   /**
    * Removes all obsolete bean container database tables.
    *
-   * @param pConnectionInfo            the database connection information
+   * @param pConnectionSupplier        the platform specific database connection supplier
    * @param pStillExistingContainerIds the ids of all still existing containers
    */
-  public static void removeObsoletes(DBConnectionInfo pConnectionInfo, Collection<String> pStillExistingContainerIds)
+  public static void removeObsoletes(IDatabaseConnectionSupplier pConnectionSupplier, Collection<String> pStillExistingContainerIds)
   {
-    final OJSQLBuilder builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionInfo.getDatabaseType(), ID_COLUMN)
-        .withClosingAndRenewingConnection(pConnectionInfo)
+    final OJSQLBuilder builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionSupplier.getPlatform(), ID_COLUMN)
+        .withClosingAndRenewingConnection(pConnectionSupplier)
         .create();
+
     final List<String> allTables = builder.getAllTableNames();
     allTables.removeAll(pStillExistingContainerIds);
     allTables.forEach(builder::dropTable);
@@ -61,17 +63,18 @@ public class SQLPersistentContainerSource<BEAN extends IBean<BEAN>> implements I
    * Creates a container database table, if it is not existing yet.
    * This static entry point is necessary, because the table may have to be present before the usage of this container. (e.g. for foreign keys)
    *
-   * @param pConnectionInfo the database connection information
-   * @param pBeanType       the bean type of the container
-   * @param pTableName      the database table name
+   * @param pConnectionSupplier the platform specific database connection supplier
+   * @param pBeanType           the bean type of the container
+   * @param pTableName          the database table name
    */
-  public static <BEAN extends IBean<BEAN>> void createTableForContainer(DBConnectionInfo pConnectionInfo, Class<BEAN> pBeanType,
+  public static <BEAN extends IBean<BEAN>> void createTableForContainer(IDatabaseConnectionSupplier pConnectionSupplier, Class<BEAN> pBeanType,
                                                                         String pTableName)
   {
-    final OJSQLBuilderForTable builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionInfo.getDatabaseType(), ID_COLUMN)
+    final OJSQLBuilderForTable builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionSupplier.getPlatform(), ID_COLUMN)
         .forSingleTable(pTableName)
-        .withClosingAndRenewingConnection(pConnectionInfo)
+        .withClosingAndRenewingConnection(pConnectionSupplier)
         .create();
+
     _createTableIfNotExisting(builder, BeanColumnIdentification.ofMultiple(BeanReflector.reflectBeanFields(pBeanType)));
   }
 
@@ -93,22 +96,24 @@ public class SQLPersistentContainerSource<BEAN extends IBean<BEAN>> implements I
   /**
    * Creates a new data source for a bean container.
    *
-   * @param pBeanType          the type of the beans in the container
-   * @param pConnectionInfo    the database connection information
-   * @param pTableName         the name of the database table that represents this container source
-   * @param pDataStoreSupplier a supplier for persistent beans and containers
+   * @param pBeanType           the type of the beans in the container
+   * @param pConnectionSupplier the database platform specific connection supplier
+   * @param pTableName          the name of the database table that represents this container source
+   * @param pDataStoreSupplier  a supplier for persistent beans and containers
    */
-  public SQLPersistentContainerSource(Class<BEAN> pBeanType, DBConnectionInfo pConnectionInfo, String pTableName,
+  public SQLPersistentContainerSource(Class<BEAN> pBeanType, IDatabaseConnectionSupplier pConnectionSupplier, String pTableName,
                                       Supplier<BeanDataStore> pDataStoreSupplier)
   {
     beanType = Objects.requireNonNull(pBeanType);
     isAutomaticAdditionMode = pBeanType.getAnnotation(Persist.class).storageMode() == EStorageMode.AUTOMATIC;
     final List<BeanColumnIdentification<?>> columns = BeanColumnIdentification.ofMultiple(BeanReflector.reflectBeanFields(beanType));
-    builder = OJSQLBuilderFactory.newSQLBuilder(Objects.requireNonNull(pConnectionInfo).getDatabaseType(), ID_COLUMN)
+
+    builder = OJSQLBuilderFactory.newSQLBuilder(pConnectionSupplier.getPlatform(), ID_COLUMN)
         .forSingleTable(StringUtility.requireNotEmpty(pTableName, "table name"))
-        .withClosingAndRenewingConnection(pConnectionInfo)
+        .withClosingAndRenewingConnection(pConnectionSupplier)
         .withCustomSerializer(new BeanSQLSerializer(pDataStoreSupplier))
         .create();
+
     _createTableIfNotExisting(builder, columns);
   }
 

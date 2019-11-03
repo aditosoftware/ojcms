@@ -2,6 +2,7 @@ package de.adito.ojcms.sqlbuilder.statements;
 
 import de.adito.ojcms.sqlbuilder.*;
 import de.adito.ojcms.sqlbuilder.definition.*;
+import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 import de.adito.ojcms.sqlbuilder.result.SingleColumnResult;
 import de.adito.ojcms.sqlbuilder.util.OJDatabaseException;
 import de.adito.ojcms.utils.OptionalNullable;
@@ -23,14 +24,14 @@ public class SingleSelect<VALUE> extends AbstractSelect<SingleSelect<VALUE>>
    *
    * @param pStatementExecutor the executor for this statement
    * @param pBuilder           the builder that created this statement to use other kinds of statements for a concrete statement
-   * @param pDatabaseType      the database type used for this statement
+   * @param pPlatform          the database platform used for this statement
    * @param pSerializer        the value serializer
    * @param pIdColumnName      the name of the id column
    */
-  public SingleSelect(IStatementExecutor<ResultSet> pStatementExecutor, AbstractSQLBuilder pBuilder, EDatabaseType pDatabaseType,
+  public SingleSelect(IStatementExecutor<ResultSet> pStatementExecutor, AbstractSQLBuilder pBuilder, IDatabasePlatform pPlatform,
                       IValueSerializer pSerializer, String pIdColumnName, IColumnIdentification<VALUE> pColumnToSelect)
   {
-    super(pStatementExecutor, pBuilder, pDatabaseType, pSerializer, pIdColumnName);
+    super(pStatementExecutor, pBuilder, pPlatform, pSerializer, pIdColumnName);
     column = pColumnToSelect;
     addColumns(column);
   }
@@ -56,6 +57,7 @@ public class SingleSelect<VALUE> extends AbstractSelect<SingleSelect<VALUE>>
   {
     if (column == null)
       throw new OJDatabaseException("A column must be selected to use a single select statement!");
+
     return new SingleColumnResult<>(column, doQuery());
   }
 }

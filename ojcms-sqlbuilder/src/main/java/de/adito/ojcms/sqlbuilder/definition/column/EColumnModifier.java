@@ -1,7 +1,7 @@
 package de.adito.ojcms.sqlbuilder.definition.column;
 
-import de.adito.ojcms.sqlbuilder.definition.EDatabaseType;
 import de.adito.ojcms.sqlbuilder.format.IStatementFormat;
+import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 
 /**
  * All possible database column modifiers.
@@ -25,7 +25,7 @@ public enum EColumnModifier implements IStatementFormat
   }
 
   @Override
-  public String toStatementFormat(EDatabaseType pDatabaseType, String pIdColumnName)
+  public String toStatementFormat(IDatabasePlatform pPlatform, String pIdColumnName)
   {
     return descriptor;
   }

@@ -2,16 +2,17 @@ package de.adito.ojcms.sqlbuilder.statements;
 
 import de.adito.ojcms.sqlbuilder.*;
 import de.adito.ojcms.sqlbuilder.definition.*;
-import de.adito.ojcms.sqlbuilder.format.*;
+import de.adito.ojcms.sqlbuilder.format.StatementFormatter;
+import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 import de.adito.ojcms.sqlbuilder.util.OJDatabaseException;
 
 import java.util.*;
 
-import static de.adito.ojcms.sqlbuilder.definition.ENumericOperation.*;
+import static de.adito.ojcms.sqlbuilder.definition.ENumericOperation.ADD;
 import static de.adito.ojcms.sqlbuilder.definition.condition.IWhereOperator.greaterThanOrEqual;
-import static de.adito.ojcms.sqlbuilder.format.EFormatConstant.*;
-import static de.adito.ojcms.sqlbuilder.format.EFormatter.*;
-import static de.adito.ojcms.sqlbuilder.format.ESeparator.*;
+import static de.adito.ojcms.sqlbuilder.format.EFormatConstant.VALUES;
+import static de.adito.ojcms.sqlbuilder.format.EFormatter.INSERT;
+import static de.adito.ojcms.sqlbuilder.format.ESeparator.COMMA_WITH_WHITESPACE;
 
 /**
  * An insert statement.
@@ -27,14 +28,14 @@ public class Insert extends AbstractBaseStatement<Void, Insert>
    *
    * @param pStatementExecutor the executor for this statement
    * @param pBuilder           the builder that created this statement to use other kinds of statements for a concrete statement
-   * @param pDatabaseType      the database type used for this statement
+   * @param pPlatform          the database platform used for this statement
    * @param pSerializer        the value serializer
    * @param pIdColumnName      the name of the id column
    */
-  public Insert(IStatementExecutor<Void> pStatementExecutor, AbstractSQLBuilder pBuilder, EDatabaseType pDatabaseType,
+  public Insert(IStatementExecutor<Void> pStatementExecutor, AbstractSQLBuilder pBuilder, IDatabasePlatform pPlatform,
                 IValueSerializer pSerializer, String pIdColumnName)
   {
-    super(pStatementExecutor, pBuilder, pDatabaseType, pSerializer, pIdColumnName);
+    super(pStatementExecutor, pBuilder, pPlatform, pSerializer, pIdColumnName);
   }
 
   /**
@@ -91,7 +92,7 @@ public class Insert extends AbstractBaseStatement<Void, Insert>
           .adaptId(ADD, 1)
           .whereId(greaterThanOrEqual(), ((IColumnValueTuple<Integer>) values.get(0)).getValue())
           .update());
-    final StatementFormatter statement = INSERT.create(databaseType, idColumnIdentification.getColumnName())
+    final StatementFormatter statement = INSERT.create(databasePlatform, idColumnIdentification.getColumnName())
         .appendTableName(getTableName())
         .openBracket()
         .appendEnumeration(values.stream().map(pTuple -> pTuple.getColumn().getColumnName().toUpperCase()),

@@ -51,14 +51,18 @@ public final class BeanDataStore
     return (BEAN) beanCache.computeIfAbsent(pPersistenceId, pId -> {
       final BEAN bean = newPersistentBeanInstance(pBeanType);
       Set<FieldValueTuple<?>> initializedTuples = null;
+
       //If the bean wasn't existing before, store tuples that where initialized by the default constructor
       if (!dataSources.isSingleBeanSourceExisting(pPersistenceId))
         initializedTuples = bean.stream()
             .filter(pTuple -> !pTuple.isInitialValue())
             .collect(Collectors.toSet());
+
       bean.setEncapsulatedDataSource(dataSources.getSingleBeanDataSource(pPersistenceId, pBeanType));
+
       if (initializedTuples != null)
         initializedTuples.forEach(pTuple -> bean.setValue((IField) pTuple.getField(), pTuple.getValue()));
+
       return bean;
     });
   }
