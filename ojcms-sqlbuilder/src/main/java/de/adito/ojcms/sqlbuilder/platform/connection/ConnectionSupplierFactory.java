@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * @author Simon Danner, 03.11.2019
  */
+@SuppressWarnings("MethodMayBeStatic")
 public final class ConnectionSupplierFactory
 {
   /**
@@ -36,7 +37,6 @@ public final class ConnectionSupplierFactory
    * @param pPassword     an optional password for the connection
    * @return he created database connection supplier
    */
-  @SuppressWarnings("MethodMayBeStatic")
   public IDatabaseConnectionSupplier forExternalDatabase(EExternalDatabasePlatform pPlatform, String pHost, int pPort, String pDatabaseName,
                                                          @Nullable String pUserName, @Nullable String pPassword)
   {
@@ -50,7 +50,7 @@ public final class ConnectionSupplierFactory
    * @param pEmbeddedPlatform the embedded platform of choice
    * @return the created connection supplier for the embedded database
    */
-  public static IDatabaseConnectionSupplier forEmbeddedDatabase(EEmbeddedDatabasePlatform pEmbeddedPlatform)
+  public IDatabaseConnectionSupplier forEmbeddedDatabase(EEmbeddedDatabasePlatform pEmbeddedPlatform)
   {
     return new EmbeddedConnectionProvider(pEmbeddedPlatform.getPlatform());
   }
