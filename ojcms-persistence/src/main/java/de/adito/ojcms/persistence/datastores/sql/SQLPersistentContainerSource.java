@@ -131,10 +131,12 @@ public class SQLPersistentContainerSource<BEAN extends IBean<BEAN>> implements I
           return;
         }
       }
+
     builder.doInsert(pInsert -> pInsert
         .atIndex(pIndex)
         .values(BeanColumnValueTuple.ofBean(pBean))
         .insert());
+
     beanCache.put(pIndex, _injectPersistentSource(pBean, pIndex));
   }
 
@@ -154,6 +156,7 @@ public class SQLPersistentContainerSource<BEAN extends IBean<BEAN>> implements I
   {
     final BEAN removed = getBean(indexChecker.check(pIndex));
     removed.useDefaultEncapsulatedDataSource(); //Use default data sources to allow existence after the removal
+
     _removeByIndex(pIndex);
     return removed;
   }
@@ -177,6 +180,7 @@ public class SQLPersistentContainerSource<BEAN extends IBean<BEAN>> implements I
           if (conditions.length == 0)
             throw new OJDatabaseException("A bean instance not created by this container can only be used for a index-of or contains search," +
                                               " if there are bean fields marked as @Identifier!");
+
           return builder.doSelectId(pSelect -> pSelect
               .where(conditions)
               .firstResult()
@@ -193,17 +197,19 @@ public class SQLPersistentContainerSource<BEAN extends IBean<BEAN>> implements I
   @Override
   public void sort(Comparator<BEAN> pComparator)
   {
-    final List<BEAN> original = StreamSupport.stream(spliterator(), false)
-        .collect(Collectors.toList());
+    final List<BEAN> original = StreamSupport.stream(spliterator(), false).collect(Collectors.toList());
     final AtomicInteger index = new AtomicInteger();
+
     //Mapping: old index -> new index (based on the new order)
     //noinspection RedundantStreamOptionalCall
     final Map<Integer, Integer> newIndexMapping = original.stream()
         .sorted(pComparator)
         .collect(Collectors.toMap(original::indexOf, pSortedBean -> index.getAndIncrement()));
+
     //Update ids in the database and rebuild cache
     final Map<Integer, _BeanData> oldCache = beanCache;
     beanCache = new HashMap<>();
+
     newIndexMapping.forEach((pOldIndex, pNewIndex) -> {
       //Set all ids in the database to the negative new index
       builder.doUpdate(pUpdate -> pUpdate
@@ -212,6 +218,7 @@ public class SQLPersistentContainerSource<BEAN extends IBean<BEAN>> implements I
           .update());
       beanCache.put(pNewIndex, oldCache.get(pOldIndex).setIndex(pNewIndex));
     });
+
     //Make all ids positive again
     builder.doUpdate(pUpdate -> pUpdate
         .adaptId(ENumericOperation.MULTIPLY, -1)
@@ -253,8 +260,10 @@ public class SQLPersistentContainerSource<BEAN extends IBean<BEAN>> implements I
   {
     if (!isAutomaticAdditionMode)
       return BeanDataStore.newPersistentBeanInstance(beanType);
+
     shouldQueueAdditions = true;
     final BEAN instance = BeanDataStore.newPersistentBeanInstance(beanType);
+
     synchronized (additionQueue)
     {
       additionQueue.remove(instance);

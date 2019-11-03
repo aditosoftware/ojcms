@@ -7,6 +7,7 @@ import de.adito.ojcms.beans.literals.fields.util.FieldValueTuple;
 import de.adito.ojcms.persistence.datastores.IPersistentSourcesStore;
 import de.adito.ojcms.persistence.util.OJPersistenceException;
 
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -138,11 +139,17 @@ public final class BeanDataStore
     {
       if (!pBeanType.isAnnotationPresent(Persist.class))
         throw new OJPersistenceException(pBeanType);
-      return pBeanType.newInstance();
+
+      final Constructor<BEAN> defaultConstructor = pBeanType.getDeclaredConstructor();
+      if (!defaultConstructor.isAccessible())
+        defaultConstructor.setAccessible(true);
+
+      return defaultConstructor.newInstance();
     }
-    catch (InstantiationException | IllegalAccessException pE)
+    catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException pE)
     {
-      throw new OJPersistenceException("The persistent bean type '" + pBeanType.getName() + "' must define a default constructor!");
+      throw new OJPersistenceException("The persistent bean type '" + pBeanType.getName() + "' must define a default constructor" +
+                                           " (can be private)!", pE);
     }
   }
 }

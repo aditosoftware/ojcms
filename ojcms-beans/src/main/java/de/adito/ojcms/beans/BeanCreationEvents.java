@@ -55,7 +55,8 @@ public final class BeanCreationEvents
     if (!_isObservableAnnotation(pAnnotationType))
       throw new BeanCreationNotObservableException(pAnnotationType.getName() + " is not a valid creation observer annotation.");
     //noinspection unchecked
-    return (Observable<BeanCreationEvent<ANNOTATION>>) PUBLISHERS_BY_ANNOTATION.computeIfAbsent(pAnnotationType, pType -> PublishSubject.create());
+    return (Observable<BeanCreationEvent<ANNOTATION>>) PUBLISHERS_BY_ANNOTATION.computeIfAbsent(pAnnotationType, pType -> PublishSubject.create())
+        .observeOn(Schedulers.newThread());
   }
 
   /**
