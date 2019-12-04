@@ -4,6 +4,7 @@ import de.adito.ojcms.beans.annotations.internal.RequiresEncapsulatedAccess;
 import de.adito.ojcms.beans.datasource.*;
 import de.adito.ojcms.beans.exceptions.*;
 import de.adito.ojcms.beans.literals.fields.IField;
+import de.adito.ojcms.beans.literals.fields.util.FieldValueTuple;
 import de.adito.ojcms.beans.reactive.events.*;
 import de.adito.ojcms.beans.references.*;
 import de.adito.ojcms.beans.statistics.IStatisticData;
@@ -392,15 +393,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    */
   default <VALUE> Optional<BEAN> findOneByFieldValue(IField<VALUE> pField, VALUE pValueToFind)
   {
-    final List<BEAN> result = findByFieldValue(pField, pValueToFind);
-
-    if (result.isEmpty())
-      return Optional.empty();
-
-    if (result.size() > 1)
-      throw new OJRuntimeException("More than one bean found for field " + pField.getName() + " and value " + pValueToFind);
-
-    return Optional.of(result.get(0));
+    return findOneByFieldValues(new FieldValueTuple<>(pField, pValueToFind));
   }
 
   /**
@@ -413,8 +406,45 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    */
   default <VALUE> List<BEAN> findByFieldValue(IField<VALUE> pField, VALUE pValueToFind)
   {
+    return findByFieldValues(new FieldValueTuple<>(pField, pValueToFind));
+  }
+
+  /**
+   * Tries to find exactly one bean within the container having specific values for certain fields.
+   * If there are more beans matching the field value tuples, a runtime exception will be thrown.
+   *
+   * @param pFieldValueTuples the field value tuples defining the search conditions
+   * @return an optional single bean that matches the field value tuples
+   */
+  default Optional<BEAN> findOneByFieldValues(FieldValueTuple<?>... pFieldValueTuples)
+  {
+    final List<BEAN> result = findByFieldValues(pFieldValueTuples);
+
+    if (result.isEmpty())
+      return Optional.empty();
+
+    if (result.size() > 1)
+      throw new OJRuntimeException("More than one bean found for field values tuples: " + Arrays.toString(pFieldValueTuples));
+
+    return Optional.of(result.get(0));
+  }
+
+  /**
+   * Finds all beans within the container having specific values for certain fields. Returns an empty list if no tuple is provided.
+   *
+   * @param pFieldValueTuples the field value tuples defining the search conditions
+   * @return a list of filtered beans (may be empty if no bean matches the requested field value)
+   */
+  default List<BEAN> findByFieldValues(FieldValueTuple<?>... pFieldValueTuples)
+  {
+    if (pFieldValueTuples.length == 0)
+      return Collections.emptyList();
+
+    final Predicate<BEAN> combinedPredicate = pBean -> Stream.of(pFieldValueTuples)
+        .allMatch(pTuple -> Objects.equals(pBean.getValue(pTuple.getField()), pTuple.getValue()));
+
     return stream()
-        .filter(pBean -> Objects.equals(pBean.getValue(pField), pValueToFind))
+        .filter(combinedPredicate)
         .collect(Collectors.toList());
   }
 

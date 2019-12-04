@@ -5,6 +5,7 @@ import de.adito.ojcms.beans.base.IEqualsHashCodeChecker;
 import de.adito.ojcms.beans.exceptions.OJRuntimeException;
 import de.adito.ojcms.beans.exceptions.container.BeanContainerLimitReachedException;
 import de.adito.ojcms.beans.literals.fields.types.*;
+import de.adito.ojcms.beans.literals.fields.util.FieldValueTuple;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 
@@ -303,6 +304,76 @@ class BeanContainerTest
     assertEquals(2, result.size());
     assertSame(firstBean, result.get(0));
     assertSame(thirdBean, result.get(1));
+  }
+
+  @Test
+  public void findOneByFieldValues()
+  {
+    final Optional<SomeBean> resultEmptyContainer = container.findOneByFieldValues();
+    assertFalse(resultEmptyContainer.isPresent());
+
+    container.addBean(new SomeBean(0));
+    container.addBean(new SomeBean(1));
+
+    final Optional<SomeBean> resultNoTuple = container.findOneByFieldValues();
+    assertFalse(resultNoTuple.isPresent());
+
+    final Optional<SomeBean> oneResult = container.findOneByFieldValues(new FieldValueTuple<>(SomeBean.SOME_FIELD, 0));
+    assertTrue(oneResult.isPresent());
+    assertSame(container.getBean(0), oneResult.get());
+
+    final Optional<SomeBean> noResult = container.findOneByFieldValues(new FieldValueTuple<>(SomeBean.SOME_FIELD, 7));
+    assertFalse(noResult.isPresent());
+
+    final Optional<SomeBean> oneResultTwoTuples = container.findOneByFieldValues(new FieldValueTuple<>(SomeBean.SOME_FIELD, 1),
+                                                                                 new FieldValueTuple<>(SomeBean.ANOTHER_FIELD, "anotherValue"));
+    assertTrue(oneResultTwoTuples.isPresent());
+    assertSame(container.getBean(1), oneResultTwoTuples.get());
+
+    assertThrows(OJRuntimeException.class, () ->
+        container.findOneByFieldValues(new FieldValueTuple<>(SomeBean.ANOTHER_FIELD, "anotherValue")));
+  }
+
+  @Test
+  public void testFindByFieldValues()
+  {
+    final List<SomeBean> resultEmptyContainerNoTuple = container.findByFieldValues();
+    assertTrue(resultEmptyContainerNoTuple.isEmpty());
+
+    final SomeBean firstBean = new SomeBean(0);
+    final SomeBean secondBean = new SomeBean(2);
+    secondBean.setValue(SomeBean.ANOTHER_FIELD, "testValue");
+    container.addBean(firstBean);
+    container.addBean(secondBean);
+
+    final List<SomeBean> resultNoTuple = container.findByFieldValues();
+    assertTrue(resultNoTuple.isEmpty());
+
+    final List<SomeBean> resultOneTuple = container.findByFieldValues(new FieldValueTuple<>(SomeBean.SOME_FIELD, 0));
+    assertEquals(1, resultOneTuple.size());
+    assertSame(firstBean, resultOneTuple.get(0));
+
+    final List<SomeBean> badResultOneTuple = container.findByFieldValues(new FieldValueTuple<>(SomeBean.SOME_FIELD, 1));
+    assertTrue(badResultOneTuple.isEmpty());
+
+
+    final List<SomeBean> resultTwoTuple = container.findByFieldValues(new FieldValueTuple<>(SomeBean.SOME_FIELD, 2),
+                                                                      new FieldValueTuple<>(SomeBean.ANOTHER_FIELD, "testValue"));
+    assertEquals(1, resultOneTuple.size());
+    assertSame(secondBean, resultTwoTuple.get(0));
+
+    final List<SomeBean> badResultTwoTuple = container.findByFieldValues(new FieldValueTuple<>(SomeBean.SOME_FIELD, 2),
+                                                                         new FieldValueTuple<>(SomeBean.ANOTHER_FIELD, "anotherValue"));
+    assertTrue(badResultTwoTuple.isEmpty());
+
+    final SomeBean thirdBean = new SomeBean(0);
+    container.addBean(thirdBean);
+
+    final List<SomeBean> twoResultsTwoTuple = container.findByFieldValues(new FieldValueTuple<>(SomeBean.SOME_FIELD, 0),
+                                                                          new FieldValueTuple<>(SomeBean.ANOTHER_FIELD, "anotherValue"));
+    assertEquals(2, twoResultsTwoTuple.size());
+    assertSame(firstBean, twoResultsTwoTuple.get(0));
+    assertSame(thirdBean, twoResultsTwoTuple.get(1));
   }
 
   /**

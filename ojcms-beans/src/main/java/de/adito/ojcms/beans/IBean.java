@@ -154,7 +154,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
   @WriteOperation
   default void clear()
   {
-    //noinspection unchecked
+    //noinspection unchecked,rawtypes
     streamFields()
         .filter(pField -> !pField.isPrivate())
         .filter(pField -> !pField.isValueFinal())
