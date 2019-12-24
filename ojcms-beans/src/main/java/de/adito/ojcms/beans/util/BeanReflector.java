@@ -152,7 +152,7 @@ public final class BeanReflector
   @SafeVarargs
   private static List<Field> _getDeclaredFields(Class<? extends IBean> pBeanType, Predicate<Field>... pFieldPredicates)
   {
-    Class current = requiresDeclaredBeanType(pBeanType);
+    Class<?> current = requiresDeclaredBeanType(pBeanType);
     final List<Field> declaredFields = new ArrayList<>();
     final Predicate<Field> combinedPredicate = pField -> Stream.of(pFieldPredicates)
         .allMatch(pPredicate -> pPredicate.test(pField));

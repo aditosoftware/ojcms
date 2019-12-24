@@ -29,13 +29,13 @@ public class PersistenceAnnotationProcessor extends AbstractProcessor
 {
   private static final String BEAN_BASE_TYPE = OJBean.class.getName();
   private static final String BASE_PATH = "de.adito.ojcms.persistence";
-  private static final Class RETRIEVER_CLASS = OJPersistence.class;
+  private static final Class<OJPersistence> RETRIEVER_CLASS = OJPersistence.class;
   private static final String RETRIEVER_METHOD = "dataStore()";
   private static final String BEAN_CLASS_NAME = "OJBeans";
   private static final String CONTAINER_CLASS_NAME = "OJContainers";
   private static final Function<Boolean, String> DATA_STORE_METHOD = pIsContainer -> pIsContainer ? "getContainerByPersistenceId" :
       "getBeanByPersistenceId";
-  private static final Class ARRAYS_CLASS = Arrays.class;
+  private static final Class<Arrays> ARRAYS_CLASS = Arrays.class;
   private static final String AS_LIST_METHOD = "asList";
   private static final Function<Boolean, String> OBSOLETE_REMOVER = pIsContainer -> pIsContainer ? "removeObsoleteBeanContainers" :
       "removeObsoleteSingleBeans";

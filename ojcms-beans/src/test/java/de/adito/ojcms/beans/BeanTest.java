@@ -198,6 +198,17 @@ class BeanTest
     assertEquals(BeanWithPrivateField.EXPECTED_VALUE, bean.getPrivateValue());
   }
 
+  @Test
+  public void testBeanInheritance()
+  {
+    final ConcreteBeanType bean = new ConcreteBeanType();
+    bean.setValue(ConcreteBeanType.SOME_BASE_FIELD, 5);
+    bean.setValue(ConcreteBeanType.SOME_SPECIAL_FIELD, 42);
+
+    assertEquals(5, bean.getValue(ConcreteBeanType.SOME_BASE_FIELD));
+    assertEquals(42, bean.getValue(ConcreteBeanType.SOME_SPECIAL_FIELD));
+  }
+
   /**
    * Creates a new bean text field.
    *
@@ -311,6 +322,16 @@ class BeanTest
     {
       return getValue(privateField);
     }
+  }
+
+  public static abstract class AbstractBaseBeanType<BEAN extends AbstractBaseBeanType<BEAN>> extends OJBean<BEAN>
+  {
+    public static final IntegerField SOME_BASE_FIELD = OJFields.create(AbstractBaseBeanType.class);
+  }
+
+  public static class ConcreteBeanType extends AbstractBaseBeanType<ConcreteBeanType>
+  {
+    public static final IntegerField SOME_SPECIAL_FIELD = OJFields.create(ConcreteBeanType.class);
   }
 
   /**

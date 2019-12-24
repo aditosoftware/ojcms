@@ -33,7 +33,6 @@ final class BeanFieldFactory
    * @param pIsPrivate       determines if the field is declared privately
    * @param pAnnotations     the field's annotations
    * @param pActiveCondition an optional condition for optional bean fields (determines the active state of the field)
-   * @param <BEAN>           the generic type of the bean the field is for
    * @param <VALUE>          the data type of the field to create
    * @param <FIELD>          the generic field type
    * @return the newly created field
@@ -62,11 +61,11 @@ final class BeanFieldFactory
    * @param <FIELD>              the generic field type
    * @return the newly created field
    */
-  static <BEAN extends IBean<BEAN>, VALUE, FIELD extends IField<VALUE>> FIELD createField(Class<FIELD> pFieldType,
-                                                                                          Supplier<Class<?>> pGenericTypeSupplier,
-                                                                                          String pName, boolean pIsPrivate,
-                                                                                          Collection<Annotation> pAnnotations,
-                                                                                          Optional<BiPredicate<BEAN, VALUE>> pActiveCondition)
+  static <BEAN extends IBean<?>, VALUE, FIELD extends IField<VALUE>> FIELD createField(Class<FIELD> pFieldType,
+                                                                                       Supplier<Class<?>> pGenericTypeSupplier,
+                                                                                       String pName, boolean pIsPrivate,
+                                                                                       Collection<Annotation> pAnnotations,
+                                                                                       Optional<BiPredicate<BEAN, VALUE>> pActiveCondition)
   {
     try
     {

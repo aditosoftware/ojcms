@@ -92,7 +92,7 @@ public class BeanSQLSerializer extends DefaultValueSerializer
 
     if (pField instanceof BeanField)
       //noinspection unchecked
-      return (VALUE) _dereferenceBean((Class<? extends IBean>) pField.getDataType(), pSerialString);
+      return (VALUE) _dereferenceBean((Class<? extends IBean<?>>) pField.getDataType(), pSerialString);
 
     if (pField instanceof ContainerField)
       //noinspection unchecked
@@ -114,6 +114,7 @@ public class BeanSQLSerializer extends DefaultValueSerializer
    */
   private String _referenceBean(@NotNull IBean<?> pBean)
   {
+    //noinspection rawtypes
     final Class<? extends IBean> beanType = pBean.getClass();
     if (!beanType.isAnnotationPresent(Persist.class))
       throw new BeanSerializationException("Bean references within a persistent bean must always refer to another persistent bean!");
@@ -142,7 +143,7 @@ public class BeanSQLSerializer extends DefaultValueSerializer
    * @param pSerialString the serial reference string
    * @return the dereferenced bean
    */
-  private IBean<?> _dereferenceBean(Class<? extends IBean> pBeanType, @NotNull String pSerialString)
+  private IBean<?> _dereferenceBean(@SuppressWarnings("rawtypes") Class<? extends IBean> pBeanType, @NotNull String pSerialString)
   {
     assert pBeanType.isAnnotationPresent(Persist.class);
     final Persist annotation = pBeanType.getAnnotation(Persist.class);
@@ -165,7 +166,7 @@ public class BeanSQLSerializer extends DefaultValueSerializer
       throw new BeanSerializationException("Corrupted bean container reference: " + pSerialString);
     try
     {
-      //noinspection unchecked
+      //noinspection unchecked,rawtypes
       return beanDataStoreSupplier.get().getContainerByPersistenceId(parts[0], (Class<? extends IBean>) Class.forName(parts[0]));
     }
     catch (ClassNotFoundException pE)

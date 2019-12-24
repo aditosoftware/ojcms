@@ -70,7 +70,7 @@ public class BeanColumnDefinition<VALUE> implements IColumnDefinition, IBeanFiel
     if (!(beanField instanceof BeanField))
       return;
 
-    //noinspection unchecked
+    //noinspection unchecked,rawtypes
     final Class<? extends IBean> beanType = (Class<? extends IBean>) beanField.getDataType();
     if (!beanType.isAnnotationPresent(Persist.class))
       throw new OJPersistenceException(beanType);

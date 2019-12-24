@@ -83,8 +83,8 @@ public class BeanWhereCondition<VALUE> extends BeanColumnValueTuple<VALUE> imple
    */
   public static BeanWhereCondition<?>[] ofBean(IBean<?> pBean, Function<FieldValueTuple<?>, IWhereOperator> pOperatorResolver)
   {
-    //noinspection unchecked
-    return ofMultiple(pBean.stream(), BeanWhereCondition.class, pBeanTuple -> new BeanWhereCondition(pBeanTuple, pOperatorResolver.apply(pBeanTuple)));
+    return ofMultiple(pBean.stream(), BeanWhereCondition.class, pBeanTuple ->
+        new BeanWhereCondition<>(pBeanTuple, pOperatorResolver.apply(pBeanTuple)));
   }
 
   /**
@@ -96,8 +96,7 @@ public class BeanWhereCondition<VALUE> extends BeanColumnValueTuple<VALUE> imple
    */
   public static BeanWhereCondition<?>[] ofBeanIdentifiers(IBean<?> pBean, Function<FieldValueTuple<?>, IWhereOperator> pOperatorResolver)
   {
-    //noinspection unchecked
     return ofMultiple(pBean.getIdentifiers().stream(), BeanWhereCondition.class,
-                      pBeanTuple -> new BeanWhereCondition(pBeanTuple, pOperatorResolver.apply(pBeanTuple)));
+                      pBeanTuple -> new BeanWhereCondition<>(pBeanTuple, pOperatorResolver.apply(pBeanTuple)));
   }
 }

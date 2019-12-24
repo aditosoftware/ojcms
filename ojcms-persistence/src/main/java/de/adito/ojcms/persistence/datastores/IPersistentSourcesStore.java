@@ -33,7 +33,7 @@ public interface IPersistentSourcesStore
    */
   static IPersistentSourcesStore forSQLDatabase(Supplier<BeanDataStore> pStoreSupplier, IDatabaseConnectionSupplier pConnectionSupplier)
   {
-    //noinspection unchecked
+    //noinspection unchecked,rawtypes
     return new CachingPersistentDataSources((pID, pBeanType) -> new SQLPersistentBeanSource(pID, pBeanType, pConnectionSupplier, pStoreSupplier),
                                             pId -> SQLPersistentBeanSource.isDataSourceExisting(pConnectionSupplier, pId),
                                             (pId, pBeanType) -> new SQLPersistentContainerSource(pBeanType, pConnectionSupplier, pId, pStoreSupplier),

@@ -37,7 +37,7 @@ public final class OJFields
    * @param <FIELD>   the generic type of the field that will be created
    * @return the newly created field instance
    */
-  public static <BEAN extends OJBean<BEAN>, VALUE, FIELD extends IField<VALUE>> FIELD create(Class<BEAN> pBeanType)
+  public static <BEAN extends OJBean<?>, VALUE, FIELD extends IField<VALUE>> FIELD create(Class<BEAN> pBeanType)
   {
     return _createField(pBeanType, Optional.empty());
   }
@@ -58,8 +58,8 @@ public final class OJFields
    * @param <FIELD>          the generic type of the field that will be created
    * @return the newly created field instance
    */
-  public static <BEAN extends OJBean<BEAN>, VALUE, FIELD extends IField<VALUE>> FIELD createOptional(Class<BEAN> pBeanType,
-                                                                                                     BiPredicate<BEAN, VALUE> pActiveCondition)
+  public static <BEAN extends OJBean<?>, VALUE, FIELD extends IField<VALUE>> FIELD createOptional(Class<BEAN> pBeanType,
+                                                                                                  BiPredicate<BEAN, VALUE> pActiveCondition)
   {
     return _createField(pBeanType, Optional.of(pActiveCondition));
   }
@@ -75,8 +75,8 @@ public final class OJFields
    * @param <FIELD>          the generic type of the field that will be created
    * @return the newly created field instance
    */
-  private static <BEAN extends OJBean<BEAN>, VALUE, FIELD extends IField<VALUE>> FIELD _createField(Class<BEAN> pBeanType,
-                                                                                                    Optional<BiPredicate<BEAN, VALUE>> pActiveCondition)
+  private static <BEAN extends OJBean<?>, VALUE, FIELD extends IField<VALUE>> FIELD _createField(Class<BEAN> pBeanType,
+                                                                                                 Optional<BiPredicate<BEAN, VALUE>> pActiveCondition)
   {
     final Field declaredFieldToCreate = BeanReflector.reflectDeclaredBeanFields(pBeanType).stream()
         .filter(pField -> {
@@ -115,7 +115,7 @@ public final class OJFields
    * @param <FIELD>        the type of the bean field as generic
    * @return an optional generic type of the field instance
    */
-  private static <FIELD extends IField> Supplier<Class<?>> _genericTypeSupplier(Field pDeclaredField, Class<FIELD> pBeanFieldType)
+  private static <FIELD extends IField<?>> Supplier<Class<?>> _genericTypeSupplier(Field pDeclaredField, Class<FIELD> pBeanFieldType)
   {
     return () -> {
       try
