@@ -62,6 +62,7 @@
     <module>ojcms-persistence</module>
     <module>ojcms-representation</module>
     <module>ojcms-sqlbuilder</module>
+    <module>ojcms-transactions</module>
     <module>ojcms-utils</module>
   </modules>
 
