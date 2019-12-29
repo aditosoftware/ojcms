@@ -57,6 +57,8 @@
 
   <modules>
     <module>ojcms-beans</module>
+    <module>ojcms-cdi</module>
+    <module>ojcms-cdi-testutils</module>
     <module>ojcms-persistence</module>
     <module>ojcms-representation</module>
     <module>ojcms-sqlbuilder</module>
@@ -79,14 +81,14 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
-      <version>5.4.0-M1</version>
+      <version>5.6.0-M1</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-params</artifactId>
-      <version>5.4.0-M1</version>
+      <version>5.6.0-M1</version>
       <scope>test</scope>
     </dependency>
 
@@ -99,8 +101,8 @@
 
     <dependency>
       <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <version>2.23.4</version>
+      <artifactId>mockito-all</artifactId>
+      <version>1.9.5</version>
       <scope>test</scope>
     </dependency>
 

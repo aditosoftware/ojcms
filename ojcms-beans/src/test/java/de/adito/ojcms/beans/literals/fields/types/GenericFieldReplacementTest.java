@@ -57,7 +57,7 @@ public class GenericFieldReplacementTest
    */
   private void _checkLogging(Class<?> pGenericType, boolean pShouldLog)
   {
-    clearInvocations(mockedLogger);
+    reset(mockedLogger);
     new GenericField<>(pGenericType, "testName", Collections.emptyList(), false, false);
     verify(mockedLogger, times(pShouldLog ? 1 : 0)).warning(anyString());
   }
