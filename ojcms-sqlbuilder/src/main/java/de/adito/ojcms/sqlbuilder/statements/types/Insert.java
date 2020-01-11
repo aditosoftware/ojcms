@@ -1,9 +1,11 @@
-package de.adito.ojcms.sqlbuilder.statements;
+package de.adito.ojcms.sqlbuilder.statements.types;
 
 import de.adito.ojcms.sqlbuilder.*;
-import de.adito.ojcms.sqlbuilder.definition.*;
+import de.adito.ojcms.sqlbuilder.definition.IColumnValueTuple;
+import de.adito.ojcms.sqlbuilder.executors.IStatementExecutor;
 import de.adito.ojcms.sqlbuilder.format.StatementFormatter;
 import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
+import de.adito.ojcms.sqlbuilder.serialization.IValueSerializer;
 import de.adito.ojcms.sqlbuilder.util.OJDatabaseException;
 
 import java.util.*;
@@ -19,7 +21,7 @@ import static de.adito.ojcms.sqlbuilder.format.ESeparator.COMMA_WITH_WHITESPACE;
  *
  * @author Simon Danner, 26.04.2018
  */
-public class Insert extends AbstractBaseStatement<Void, Insert>
+public class Insert extends AbstractSQLStatement<Void, Insert>
 {
   private final List<IColumnValueTuple<?>> values = new ArrayList<>();
 
@@ -89,9 +91,11 @@ public class Insert extends AbstractBaseStatement<Void, Insert>
     if (values.get(0).getColumn() == idColumnIdentification)
       //noinspection unchecked
       builder.doUpdate(pUpdate -> pUpdate
+          .table(getTableName())
           .adaptId(ADD, 1)
           .whereId(greaterThanOrEqual(), ((IColumnValueTuple<Integer>) values.get(0)).getValue())
           .update());
+
     final StatementFormatter statement = INSERT.create(databasePlatform, idColumnIdentification.getColumnName())
         .appendTableName(getTableName())
         .openBracket()

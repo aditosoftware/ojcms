@@ -1,4 +1,6 @@
-package de.adito.ojcms.sqlbuilder;
+package de.adito.ojcms.sqlbuilder.executors;
+
+import de.adito.ojcms.sqlbuilder.serialization.ISerialValue;
 
 import java.io.Closeable;
 import java.util.*;
@@ -19,7 +21,7 @@ public interface IStatementExecutor<RESULT> extends Closeable
    * @param pArgs         arguments for prepared statements
    * @return the result of the execution
    */
-  RESULT executeStatement(String pSQLStatement, List<String> pArgs);
+  RESULT executeStatement(String pSQLStatement, List<ISerialValue> pArgs);
 
   /**
    * Executes a SQL statement.
@@ -28,7 +30,7 @@ public interface IStatementExecutor<RESULT> extends Closeable
    * @param pArgs         arguments for prepared statements
    * @return the result of the execution
    */
-  default RESULT executeStatement(String pSQLStatement, String... pArgs)
+  default RESULT executeStatement(String pSQLStatement, ISerialValue... pArgs)
   {
     return executeStatement(pSQLStatement, Arrays.asList(pArgs));
   }

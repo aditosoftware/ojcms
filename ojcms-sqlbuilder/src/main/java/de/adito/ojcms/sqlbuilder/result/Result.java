@@ -1,6 +1,7 @@
 package de.adito.ojcms.sqlbuilder.result;
 
-import de.adito.ojcms.sqlbuilder.definition.IValueSerializer;
+import de.adito.ojcms.sqlbuilder.definition.IColumnIdentification;
+import de.adito.ojcms.sqlbuilder.serialization.IValueSerializer;
 import de.adito.ojcms.sqlbuilder.util.OJDatabaseException;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,26 +11,32 @@ import java.util.stream.*;
 
 /**
  * The result of a select statement.
- * This result can only be used once, because it is based on an open database connection
- * and a cursor, which is moved through a {@link ResultSet}.
+ * This result can only be used once, because it is based on an open database connection and a cursor moving through a {@link ResultSet}.
  * Either use {@link #getFirst()} or {@link #iterator()} / {@link #stream()}.
  *
  * @author Simon Danner, 26.04.2018
  */
 public final class Result implements Iterable<ResultRow>
 {
+  private final List<IColumnIdentification<?>> selectedColumns;
   private final IValueSerializer serializer;
   private final ResultSet resultSet;
+  private final IColumnIdentification<Integer> idColumnIdentification;
   private boolean used = false;
 
   /**
    * Creates a new result.
    *
-   * @param pSerializer a value serializer
-   * @param pResult     the result set from the query
+   * @param pSelectedColumns        the selected columns of the select statement
+   * @param pIdColumnIdentification the column identification of the id column
+   * @param pSerializer             the value serializer
+   * @param pResult                 the result set from the query
    */
-  public Result(IValueSerializer pSerializer, ResultSet pResult)
+  public Result(List<IColumnIdentification<?>> pSelectedColumns, IColumnIdentification<Integer> pIdColumnIdentification,
+                IValueSerializer pSerializer, ResultSet pResult)
   {
+    selectedColumns = pSelectedColumns;
+    idColumnIdentification = pIdColumnIdentification;
     serializer = pSerializer;
     resultSet = pResult;
   }
@@ -41,10 +48,12 @@ public final class Result implements Iterable<ResultRow>
    */
   public Optional<ResultRow> getFirst()
   {
-    _checkUsage();
     try
     {
-      return resultSet.next() ? Optional.of(new ResultRow(serializer, resultSet)) : Optional.empty();
+      _checkUsage();
+      return resultSet.next() ?
+          Optional.of(new ResultRow(selectedColumns, idColumnIdentification, serializer, resultSet)) :
+          Optional.empty();
     }
     catch (SQLException pE)
     {
@@ -57,6 +66,7 @@ public final class Result implements Iterable<ResultRow>
   public Iterator<ResultRow> iterator()
   {
     _checkUsage();
+
     return new Iterator<ResultRow>()
     {
       private boolean lookedAhead;
@@ -85,8 +95,9 @@ public final class Result implements Iterable<ResultRow>
       {
         if (!hasNext())
           throw new NoSuchElementException();
+
         lookedAhead = false;
-        return new ResultRow(serializer, resultSet);
+        return new ResultRow(selectedColumns, idColumnIdentification, serializer, resultSet);
       }
     };
   }

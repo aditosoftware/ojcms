@@ -1,10 +1,8 @@
 package de.adito.ojcms.sqlbuilder;
 
-import de.adito.ojcms.sqlbuilder.definition.*;
+import de.adito.ojcms.sqlbuilder.definition.IColumnIdentification;
 import de.adito.ojcms.sqlbuilder.definition.column.IColumnDefinition;
-import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
-import de.adito.ojcms.sqlbuilder.platform.connection.IDatabaseConnectionSupplier;
-import de.adito.ojcms.sqlbuilder.statements.Create;
+import de.adito.ojcms.sqlbuilder.statements.types.Create;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -15,70 +13,71 @@ import java.util.function.Consumer;
  * This builder can be used for multiple database tables.
  * This builder can be configured via {@link OJSQLBuilderFactory}.
  *
- * @author Simon Danner, 15.05.2018
+ * @author Simon Danner, 01.01.2020
  */
-public final class OJSQLBuilder extends AbstractSQLBuilder
+public interface OJSQLBuilder extends IBaseBuilder
 {
   /**
-   * Creates a new builder.
+   * Drops a table from the database.
    *
-   * @param pPlatform            the database platform to use for this builder
-   * @param pConnectionSupplier  the database platform based connection supplier
-   * @param pCloseAfterStatement <tt>true</tt>, if the connection should be closed after executing one statement
-   * @param pSerializer          the value serializer
-   * @param pIdColumnName        a global id column name for this builder instance
+   * @param pTableName the name of the table to drop
+   * @return <tt>true</tt>, if the table was dropped successfully
    */
-  OJSQLBuilder(IDatabasePlatform pPlatform, IDatabaseConnectionSupplier pConnectionSupplier, boolean pCloseAfterStatement,
-               IValueSerializer pSerializer, String pIdColumnName)
-  {
-    super(pPlatform, pConnectionSupplier, pCloseAfterStatement, pSerializer, pIdColumnName);
-  }
+  boolean dropTable(String pTableName);
 
-  @Override
-  public boolean dropTable(String pTableName)
-  {
-    return super.dropTable(pTableName);
-  }
+  /**
+   * Adds a column to a database table.
+   *
+   * @param pTableName        the name of the table to add the column
+   * @param pColumnDefinition information about the new column
+   */
+  void addColumn(String pTableName, IColumnDefinition pColumnDefinition);
 
-  @Override
-  public void addColumn(String pTableName, IColumnDefinition pColumnDefinition)
-  {
-    super.addColumn(pTableName, pColumnDefinition);
-  }
+  /**
+   * Removes a column from a database table.
+   *
+   * @param pTableName the name of the table to remove the column from
+   * @param pColumn    the column to remove
+   */
+  void removeColumn(String pTableName, IColumnIdentification<?> pColumn);
 
-  @Override
-  public void removeColumn(String pTableName, IColumnIdentification<?> pColumn)
-  {
-    super.removeColumn(pTableName, pColumn);
-  }
+  /**
+   * Checks, if a certain table exists in the database.
+   *
+   * @param pTableName the name of the table to check
+   * @return <tt>true</tt>, if the table is existing
+   */
+  boolean hasTable(String pTableName);
 
-  @Override
-  public boolean hasTable(String pTableName)
-  {
-    return super.hasTable(pTableName);
-  }
+  /**
+   * Executes a create statement, if a certain table is not existing in the database.
+   *
+   * @param pTableName       the name of the table to check
+   * @param pCreateStatement the create statement to execute (defined in a pipelining mechanism)
+   */
+  void ifTableNotExistingCreate(String pTableName, Consumer<Create> pCreateStatement);
 
-  @Override
-  public void ifTableNotExistingCreate(String pTableName, Consumer<Create> pCreateStatement)
-  {
-    super.ifTableNotExistingCreate(pTableName, pCreateStatement);
-  }
+  /**
+   * All table names of the database.
+   *
+   * @return a list of all table names
+   */
+  List<String> getAllTableNames();
 
-  @Override
-  public List<String> getAllTableNames()
-  {
-    return super.getAllTableNames();
-  }
+  /**
+   * The column count of a certain table.
+   *
+   * @param pTableName the name of the table to retrieve the column count from
+   * @return the number of columns of a database table
+   */
+  int getColumnCount(String pTableName);
 
-  @Override
-  public int getColumnCount(String pTableName)
-  {
-    return super.getColumnCount(pTableName);
-  }
-
-  @Override
-  public boolean hasColumn(String pTableName, String pColumnName)
-  {
-    return super.hasColumn(pTableName, pColumnName);
-  }
+  /**
+   * Determines, if a column name is present at a certain database table.
+   *
+   * @param pTableName  the name of the database table
+   * @param pColumnName the name of the column to check
+   * @return <tt>true</tt> if the column is present
+   */
+  boolean hasColumn(String pTableName, String pColumnName);
 }

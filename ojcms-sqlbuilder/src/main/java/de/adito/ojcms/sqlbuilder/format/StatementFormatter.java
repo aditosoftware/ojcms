@@ -3,6 +3,7 @@ package de.adito.ojcms.sqlbuilder.format;
 import de.adito.ojcms.sqlbuilder.definition.*;
 import de.adito.ojcms.sqlbuilder.definition.condition.*;
 import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
+import de.adito.ojcms.sqlbuilder.serialization.*;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -297,7 +298,7 @@ public final class StatementFormatter
    * @param pSerializer a value serializer to convert the arguments in a serial format for the prepared statements
    * @return a list of serial arguments of the statement created by this formatter
    */
-  public List<String> getSerialArguments(IValueSerializer pSerializer)
+  public List<ISerialValue> getSerialArguments(IValueSerializer pSerializer)
   {
     return arguments.stream()
         .map(pSerializer::toSerial)

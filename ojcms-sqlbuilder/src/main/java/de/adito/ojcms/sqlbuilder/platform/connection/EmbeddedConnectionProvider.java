@@ -14,10 +14,14 @@ import java.sql.*;
 public final class EmbeddedConnectionProvider implements IDatabaseConnectionSupplier
 {
   private final IEmbeddedDatabasePlatform platform;
+  private final boolean inMemory;
+  private final boolean autoCommit;
 
-  public EmbeddedConnectionProvider(IEmbeddedDatabasePlatform pPlatform)
+  public EmbeddedConnectionProvider(IEmbeddedDatabasePlatform pPlatform, boolean pInMemory, boolean pAutoCommit)
   {
     platform = pPlatform;
+    inMemory = pInMemory;
+    autoCommit = pAutoCommit;
   }
 
   @Override
@@ -25,7 +29,9 @@ public final class EmbeddedConnectionProvider implements IDatabaseConnectionSupp
   {
     try
     {
-      return DriverManager.getConnection(platform.getConnectionString());
+      final Connection connection = DriverManager.getConnection(platform.getConnectionString(inMemory));
+      connection.setAutoCommit(autoCommit);
+      return connection;
     }
     catch (SQLException pE)
     {

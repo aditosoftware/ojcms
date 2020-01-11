@@ -1,8 +1,8 @@
 package de.adito.ojcms.sqlbuilder;
 
-import de.adito.ojcms.sqlbuilder.definition.*;
 import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 import de.adito.ojcms.sqlbuilder.platform.connection.*;
+import de.adito.ojcms.sqlbuilder.serialization.*;
 
 import java.util.function.Function;
 
@@ -94,7 +94,7 @@ public final class OJSQLBuilderFactory
     @Override
     public OJSQLBuilder create()
     {
-      return new OJSQLBuilder(databasePlatform, connectionSupplier, closeConnectionAfterStatement, serializer, idColumnName);
+      return new OJSQLBuilderImpl(databasePlatform, connectionSupplier, closeConnectionAfterStatement, serializer, idColumnName);
     }
   }
 
@@ -132,8 +132,8 @@ public final class OJSQLBuilderFactory
     @Override
     public OJSQLBuilderForTable create()
     {
-      return new OJSQLBuilderForTable(databasePlatform, connectionSupplier, closeConnectionAfterStatement, serializer, tableName,
-                                      idColumnName);
+      return new OJSQLBuilderForTableImpl(databasePlatform, connectionSupplier, closeConnectionAfterStatement, serializer, tableName,
+                                          idColumnName);
     }
   }
 
@@ -143,7 +143,7 @@ public final class OJSQLBuilderFactory
    * @param <SQLBUILDER> the type of the final SQL statement builder, which will be created by this builder
    * @param <BUILDER>    the concrete type of this builder (used for pipelining)
    */
-  private abstract static class _AbstractBuilder<SQLBUILDER extends AbstractSQLBuilder, BUILDER extends _AbstractBuilder<SQLBUILDER, BUILDER>>
+  private abstract static class _AbstractBuilder<SQLBUILDER extends IBaseBuilder, BUILDER extends _AbstractBuilder<SQLBUILDER, BUILDER>>
   {
     protected final IDatabasePlatform databasePlatform;
     protected final String idColumnName;
@@ -182,11 +182,13 @@ public final class OJSQLBuilderFactory
      * This connection will not be closed and used for all statements from the final builder.
      *
      * @param pConnSupplierResolver a function the resolve a db connection supplier from a factory for platform dependent instances
+     * @param pAutoCommit           <tt>true</tt> if auto commit should be activated for the connection
      * @return the builder itself to enable a pipelining mechanism
      */
-    public BUILDER withPermanentConnection(Function<ConnectionSupplierFactory, IDatabaseConnectionSupplier> pConnSupplierResolver)
+    public BUILDER withPermanentConnection(Function<ConnectionSupplierFactory, IDatabaseConnectionSupplier> pConnSupplierResolver,
+                                           boolean pAutoCommit)
     {
-      return withPermanentConnection(pConnSupplierResolver.apply(new ConnectionSupplierFactory()));
+      return withPermanentConnection(pConnSupplierResolver.apply(new ConnectionSupplierFactory(pAutoCommit)));
     }
 
     /**
@@ -214,7 +216,7 @@ public final class OJSQLBuilderFactory
      */
     public BUILDER withClosingAndRenewingConnection(Function<ConnectionSupplierFactory, IDatabaseConnectionSupplier> pConnSupplierResolver)
     {
-      return withClosingAndRenewingConnection(pConnSupplierResolver.apply(new ConnectionSupplierFactory()));
+      return withClosingAndRenewingConnection(pConnSupplierResolver.apply(new ConnectionSupplierFactory(true)));
     }
 
     /**

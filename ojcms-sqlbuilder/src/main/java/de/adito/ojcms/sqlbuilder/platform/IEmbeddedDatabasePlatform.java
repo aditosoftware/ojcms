@@ -16,7 +16,8 @@ public interface IEmbeddedDatabasePlatform extends IDatabasePlatform
   /**
    * Provides the JDBC connection string for the database platform.
    *
+   * @param pInMemory <tt>true</tt> if the embedded database should be in memory
    * @return a JDBC connection string
    */
-  String getConnectionString();
+  String getConnectionString(boolean pInMemory);
 }

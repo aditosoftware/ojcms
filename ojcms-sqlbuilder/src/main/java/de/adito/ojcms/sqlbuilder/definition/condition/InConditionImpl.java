@@ -31,9 +31,11 @@ class InConditionImpl<VALUE> extends ConditionImpl<VALUE>
                   Stream<VALUE> pValues)
   {
     super(pColumn, null, () -> ""); //value and operator do not matter
+
     values = pValues
         .map(pValue -> pTupleCreator.apply(pColumn, pValue))
         .collect(Collectors.toList());
+
     if (values.isEmpty())
       throw new OJDatabaseException("The elements of an 'IN'-condition cannot be empty!");
   }

@@ -1,129 +1,100 @@
 package de.adito.ojcms.sqlbuilder;
 
-import de.adito.ojcms.sqlbuilder.definition.IValueSerializer;
-import de.adito.ojcms.sqlbuilder.definition.condition.*;
+import de.adito.ojcms.sqlbuilder.definition.*;
+import de.adito.ojcms.sqlbuilder.executors.IStatementExecutor;
+import de.adito.ojcms.sqlbuilder.format.StatementFormatter;
 import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
-import org.jetbrains.annotations.*;
+import de.adito.ojcms.sqlbuilder.serialization.IValueSerializer;
+import de.adito.ojcms.sqlbuilder.statements.IStatement;
+import de.adito.ojcms.utils.StringUtility;
 
-import java.util.Objects;
-import java.util.stream.Stream;
+import java.io.IOException;
 
 /**
- * An abstract base class for every statement, which is based on a table and allows conditions,
- * which determine, what rows should be affected by the statement. (from + where)
+ * Abstract base class for every database statement.
+ * It mainly provides a method the execute the statements finally.
+ * For this purpose a {@link IStatementExecutor} is necessary to send statements to the database.
+ * Furthermore the table name to execute the statements at and the database platform are also stored here.
  *
- * @param <MODIFIERS>   the type of the modifiers used for this statement
- * @param <RESULT>      the result type of this statement
- * @param <INNERRESULT> the result type of the {@link IStatementExecutor} for this statement
- * @param <STATEMENT>   the concrete final type of the statement
+ * @param <RESULT>    the generic result type of the executor (e.g. {@link java.sql.ResultSet}
+ * @param <STATEMENT> the final concrete type of this statement
+ * @author Simon Danner, 26.04.2018
  */
-public abstract class AbstractSQLStatement<MODIFIERS extends WhereModifiers, RESULT, INNERRESULT,
-    STATEMENT extends AbstractSQLStatement<MODIFIERS, RESULT, INNERRESULT, STATEMENT>> extends AbstractBaseStatement<INNERRESULT, STATEMENT>
+public abstract class AbstractSQLStatement<RESULT, STATEMENT extends AbstractSQLStatement<RESULT, STATEMENT>> implements IStatement
 {
-  protected final MODIFIERS modifiers;
+  private final IStatementExecutor<RESULT> executor;
+  protected final AbstractSQLBuilder builder;
+  protected final IDatabasePlatform databasePlatform;
+  protected final IValueSerializer serializer;
+  protected final IColumnIdentification<Integer> idColumnIdentification;
+  private String tableName;
 
   /**
-   * Creates a new statement.
+   * Creates the base statement.
    *
-   * @param pStatementExecutor the executor for this statement
-   * @param pBuilder           the builder that created this statement to use other kinds of statements for a concrete statement
-   * @param pPlatform          the database platform used for this statement
-   * @param pSerializer        the value serializer
-   * @param pModifiers         the modifiers for this statement
-   * @param pIdColumnName      the id column name
+   * @param pExecutor     the executor for the statements
+   * @param pBuilder      the builder that created this statement to use other kinds of statements for a concrete statement
+   * @param pPlatform     the database platform used for this statement
+   * @param pSerializer   the value serializer
+   * @param pIdColumnName the name of the global id column
    */
-  public AbstractSQLStatement(IStatementExecutor<INNERRESULT> pStatementExecutor, AbstractSQLBuilder pBuilder, IDatabasePlatform pPlatform,
-                              IValueSerializer pSerializer, MODIFIERS pModifiers, String pIdColumnName)
+  protected AbstractSQLStatement(IStatementExecutor<RESULT> pExecutor, AbstractSQLBuilder pBuilder, IDatabasePlatform pPlatform,
+                                 IValueSerializer pSerializer, String pIdColumnName)
   {
-    super(pStatementExecutor, pBuilder, pPlatform, pSerializer, pIdColumnName);
-    modifiers = pModifiers;
+    executor = pExecutor;
+    builder = pBuilder;
+    databasePlatform = pPlatform;
+    serializer = pSerializer;
+    idColumnIdentification = IColumnIdentification.of(pIdColumnName.toUpperCase(), Integer.class);
   }
 
   /**
-   * Executes the statement and returns the result.
+   * Executes a SQL statement.
    *
-   * @return the result of this statement
+   * @param pFormat the statement defined through a formatter
+   * @return the result of the execution
    */
-  protected abstract RESULT doQuery();
-
-  /**
-   * Determines, on which database table this statement should be executed.
-   *
-   * @param pTableName the name of the database table
-   * @return the statement itself to enable a pipelining mechanism
-   */
-  public STATEMENT from(String pTableName)
+  protected RESULT executeStatement(StatementFormatter pFormat)
   {
-    return setTableName(pTableName);
+    return executor.executeStatement(pFormat.getStatement(), pFormat.getSerialArguments(serializer));
   }
 
   /**
-   * Sets the where condition for this statement.
-   * The condition contains any amount of single where conditions, which will be concatenated with "AND".
+   * The table name to use for this statement.
    *
-   * @param pConditions the single conditions to concatenate to a multiple where condition
-   * @return the statement itself to enable a pipelining mechanism
+   * @return a table name of the database
    */
-  public STATEMENT where(IWhereCondition<?>... pConditions)
+  protected String getTableName()
   {
-    if (pConditions == null || pConditions.length == 0)
-      //noinspection unchecked
-      return (STATEMENT) this;
-
-    final IWhereConditions conditions = IWhereConditions.create(pConditions[0]);
-    Stream.of(pConditions)
-        .skip(1)
-        .forEach(conditions::and);
-    return where(conditions);
+    return StringUtility.requireNotEmpty(tableName, "table name");
   }
 
   /**
-   * Sets the where condition for this statement.
-   * The condition might contain multiple, concatenated conditions.
+   * Sets the table name for this statement.
    *
-   * @param pConditions the where condition to set (can be null, then nothing happens)
-   * @return the statement itself to enable a pipelining mechanism
+   * @param pTableName the table name
+   * @return the statement itself
    */
-  public STATEMENT where(@Nullable IWhereConditions pConditions)
+  protected STATEMENT setTableName(String pTableName)
   {
-    modifiers.setWhereCondition(pConditions);
+    tableName = pTableName.toUpperCase();
     //noinspection unchecked
     return (STATEMENT) this;
   }
 
   /**
-   * Configures the statement to only affect one row with a certain row id.
+   * Determines, if the table the statement is based on has an id column.
    *
-   * @param pId the row id
-   * @return the statement itself to enable a pipelining mechanism
+   * @return <tt>true</tt> if the id column is present
    */
-  public STATEMENT whereId(int pId)
+  protected boolean isIdColumnPresent()
   {
-    return whereId(IWhereOperator.isEqual(), pId);
+    return builder.hasColumn(getTableName(), idColumnIdentification.getColumnName());
   }
 
-  /**
-   * Configures the statement to only affect rows with certain ids (based on a where condition).
-   *
-   * @param pWhereOperator the where operator for the id condition
-   * @param pId            the row id for the condition
-   * @return the statement itself to enable a pipelining mechanism
-   */
-  public STATEMENT whereId(@NotNull IWhereOperator pWhereOperator, int pId)
+  @Override
+  public void close() throws IOException
   {
-    return whereId(IWhereConditionsForId.create(Objects.requireNonNull(pWhereOperator), pId));
-  }
-
-  /**
-   * Configures the statement to only affect rows with certain ids (based on a multiple where condition).
-   *
-   * @param pMultipleConditions the multiple id condition (can be null, then nothing happens)
-   * @return the statement itself to enable a pipelining mechanism
-   */
-  public STATEMENT whereId(@Nullable IWhereConditionsForId pMultipleConditions)
-  {
-    modifiers.setWhereIdCondition(pMultipleConditions);
-    //noinspection unchecked
-    return (STATEMENT) this;
+    executor.close();
   }
 }

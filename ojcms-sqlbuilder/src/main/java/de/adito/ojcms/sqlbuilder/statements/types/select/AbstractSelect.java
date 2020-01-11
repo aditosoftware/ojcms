@@ -1,9 +1,13 @@
-package de.adito.ojcms.sqlbuilder;
+package de.adito.ojcms.sqlbuilder.statements.types.select;
 
-import de.adito.ojcms.sqlbuilder.definition.*;
+import de.adito.ojcms.sqlbuilder.AbstractSQLBuilder;
+import de.adito.ojcms.sqlbuilder.definition.IColumnIdentification;
+import de.adito.ojcms.sqlbuilder.executors.IStatementExecutor;
 import de.adito.ojcms.sqlbuilder.format.*;
 import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 import de.adito.ojcms.sqlbuilder.result.Result;
+import de.adito.ojcms.sqlbuilder.serialization.IValueSerializer;
+import de.adito.ojcms.sqlbuilder.statements.AbstractConditionStatement;
 import de.adito.ojcms.sqlbuilder.util.*;
 
 import java.sql.*;
@@ -20,10 +24,9 @@ import static de.adito.ojcms.sqlbuilder.format.ESeparator.COMMA_WITH_WHITESPACE;
  * @param <SELECT> the runtime type of the final select statement
  * @author Simon Danner, 26.04.2018
  */
-public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>> extends AbstractSQLStatement<SelectModifiers, Result, ResultSet, SELECT>
+public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>> extends AbstractConditionStatement<SelectModifiers, Result, ResultSet, SELECT>
 {
   private List<IColumnIdentification<?>> columnsToSelect = new ArrayList<>();
-  private boolean shouldSelectAllColumns = true;
 
   /**
    * Creates a new select statement.
@@ -41,34 +44,44 @@ public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>> exte
   }
 
   /**
+   * Determines, on which database table this statement should be executed.
+   *
+   * @param pTableName the name of the database table
+   * @return the statement itself to enable a pipelining mechanism
+   */
+  public SELECT from(String pTableName)
+  {
+    return setTableName(pTableName);
+  }
+
+  /**
+   * Adds the id column as column to select.
+   *
+   * @return the statement itself to enable a pipelining mechanism
+   */
+  public SELECT withId()
+  {
+    columnsToSelect.add(idColumnIdentification);
+    //noinspection unchecked
+    return (SELECT) this;
+  }
+
+  /**
    * Terminates the statement and returns the amount of rows selected by the statement.
    *
    * @return the number of rows selected
    */
   public int countRows()
   {
+    if (columnsToSelect.isEmpty())
+      withId();
+
     modifiers.setCount(true);
+
     try
     {
       final ResultSet resultSet = _query();
       return resultSet.next() ? resultSet.getInt(StaticConstants.COUNT_AS) : 0;
-    }
-    catch (SQLException pE)
-    {
-      throw new OJDatabaseException(pE);
-    }
-  }
-
-  /**
-   * Terminates the statement and returns the amount columns selected by the statement.
-   *
-   * @return the number of columns selected
-   */
-  public int countColumns()
-  {
-    try
-    {
-      return shouldSelectAllColumns ? _query().getMetaData().getColumnCount() : columnsToSelect.size();
     }
     catch (SQLException pE)
     {
@@ -99,16 +112,6 @@ public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>> exte
   }
 
   /**
-   * The id column identification for this statement.
-   *
-   * @return an id column identification
-   */
-  public IColumnIdentification<Integer> idColumn()
-  {
-    return idColumnIdentification;
-  }
-
-  /**
    * Adds columns to select through the statement. Must be at least one column.
    *
    * @param pColumns the column identifications the select
@@ -118,22 +121,8 @@ public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>> exte
   {
     if (pColumns.length == 0)
       throw new OJDatabaseException("At least one column has to be selected!");
-    columnsToSelect.addAll(Arrays.asList(pColumns));
-    shouldSelectAllColumns = false;
-    //noinspection unchecked
-    return (SELECT) this;
-  }
 
-  /**
-   * Configures the select statement to select all columns of the database table.
-   * This is the default, but it may be used for a better readability.
-   *
-   * @return the select statement itself to enable a pipelining mechanism
-   */
-  protected SELECT selectAllColumns()
-  {
-    columnsToSelect.clear();
-    shouldSelectAllColumns = true;
+    columnsToSelect.addAll(Arrays.asList(pColumns));
     //noinspection unchecked
     return (SELECT) this;
   }
@@ -141,7 +130,7 @@ public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>> exte
   @Override
   protected Result doQuery()
   {
-    return new Result(serializer, _query());
+    return new Result(columnsToSelect, idColumnIdentification, serializer, _query());
   }
 
   /**
@@ -158,17 +147,9 @@ public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>> exte
         .conditional(modifiers.distinct(), pFormat -> pFormat.appendConstant(DISTINCT))
         .conditionalOrElse(modifiers.count(),
                            //with count
-                           pFormat -> pFormat.conditionalOrElse(shouldSelectAllColumns,
-                                                                //use * for all columns
-                                                                pInner -> pInner.appendConstant(COUNT, STAR.toStatementFormat()),
-                                                                //the columns to select are defined
-                                                                pInner -> pInner.appendConstant(COUNT, columnSupplier.get())),
+                           pFormat -> pFormat.appendConstant(COUNT, columnSupplier.get()),
                            //without count
-                           pFormat -> pFormat.conditionalOrElse(shouldSelectAllColumns,
-                                                                //use * for all columns
-                                                                pInner -> pInner.appendConstant(STAR),
-                                                                //the columns to select are defined
-                                                                pInner -> pInner.appendMultiple(columnsToSelect.stream(), COMMA_WITH_WHITESPACE)))
+                           pFormat -> pFormat.appendMultiple(columnsToSelect.stream(), COMMA_WITH_WHITESPACE))
         .appendTableName(getTableName())
         .appendWhereCondition(modifiers);
 

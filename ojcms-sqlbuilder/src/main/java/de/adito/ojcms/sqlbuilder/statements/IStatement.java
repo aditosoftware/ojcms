@@ -1,4 +1,4 @@
-package de.adito.ojcms.sqlbuilder;
+package de.adito.ojcms.sqlbuilder.statements;
 
 import java.io.Closeable;
 

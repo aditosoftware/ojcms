@@ -10,9 +10,10 @@ import de.adito.ojcms.sqlbuilder.platform.IEmbeddedDatabasePlatform;
 public class DerbyEmbeddedPlatform extends AbstractDerbyPlatform implements IEmbeddedDatabasePlatform
 {
   @Override
-  public String getConnectionString()
+  public String getConnectionString(boolean pInMemory)
   {
-    return "jdbc:derby:" + EMBEDDED_DB_NAME + ";create=true";
+    final String host = pInMemory ? "memory:" : "";
+    return "jdbc:derby:" + host + EMBEDDED_DB_NAME + ";create=true";
   }
 
   @Override

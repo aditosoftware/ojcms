@@ -1,10 +1,12 @@
-package de.adito.ojcms.sqlbuilder.statements;
+package de.adito.ojcms.sqlbuilder.statements.types;
 
 import de.adito.ojcms.sqlbuilder.*;
-import de.adito.ojcms.sqlbuilder.definition.IValueSerializer;
+import de.adito.ojcms.sqlbuilder.serialization.IValueSerializer;
 import de.adito.ojcms.sqlbuilder.definition.condition.*;
+import de.adito.ojcms.sqlbuilder.executors.IStatementExecutor;
 import de.adito.ojcms.sqlbuilder.format.StatementFormatter;
 import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
+import de.adito.ojcms.sqlbuilder.statements.AbstractConditionStatement;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -18,7 +20,7 @@ import static de.adito.ojcms.sqlbuilder.format.EFormatter.DELETE;
  *
  * @author Simon Danner, 26.04.2018
  */
-public class Delete extends AbstractSQLStatement<WhereModifiers, Boolean, Boolean, Delete>
+public class Delete extends AbstractConditionStatement<WhereModifiers, Boolean, Boolean, Delete>
 {
   /**
    * Creates a new delete statement.
@@ -33,6 +35,17 @@ public class Delete extends AbstractSQLStatement<WhereModifiers, Boolean, Boolea
                 IValueSerializer pSerializer, String pIdColumnName)
   {
     super(pStatementExecutor, pBuilder, pPlatform, pSerializer, new WhereModifiers(), pIdColumnName);
+  }
+
+  /**
+   * Determines on which database table this statement should be executed.
+   *
+   * @param pTableName the name of the database table
+   * @return the statement itself to enable a pipelining mechanism
+   */
+  public Delete from(String pTableName)
+  {
+    return setTableName(pTableName);
   }
 
   /**
@@ -74,6 +87,7 @@ public class Delete extends AbstractSQLStatement<WhereModifiers, Boolean, Boolea
         deletedIds = Optional.empty();
       else
         deletedIds = Optional.of(builder.doSelectId(pSelect -> pSelect
+            .from(getTableName())
             .whereId(modifiers.getWhereIdCondition().orElse(null))
             .where(modifiers.getWhereCondition().orElse(null))
             .fullResult()
@@ -92,6 +106,7 @@ public class Delete extends AbstractSQLStatement<WhereModifiers, Boolean, Boolea
         {
           final int offset = i;
           builder.doUpdate(pUpdate -> pUpdate
+              .table(getTableName())
               .adaptId(SUBTRACT, offset + 1)
               .whereId(IWhereConditionsForId.create(greaterThan(), pDeletedIds.get(offset))
                            .and(lessThan(), pDeletedIds.get(offset + 1)))
@@ -99,6 +114,7 @@ public class Delete extends AbstractSQLStatement<WhereModifiers, Boolean, Boolea
         }
         //update all rows after the last id to delete
         builder.doUpdate(pUpdate -> pUpdate
+            .table(getTableName())
             .adaptId(SUBTRACT, 1)
             .whereId(greaterThan(), pDeletedIds.get(pDeletedIds.size() - 1))
             .update());

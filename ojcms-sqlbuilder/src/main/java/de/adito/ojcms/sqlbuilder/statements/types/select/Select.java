@@ -1,9 +1,11 @@
-package de.adito.ojcms.sqlbuilder.statements;
+package de.adito.ojcms.sqlbuilder.statements.types.select;
 
-import de.adito.ojcms.sqlbuilder.*;
-import de.adito.ojcms.sqlbuilder.definition.*;
+import de.adito.ojcms.sqlbuilder.AbstractSQLBuilder;
+import de.adito.ojcms.sqlbuilder.definition.IColumnIdentification;
+import de.adito.ojcms.sqlbuilder.executors.IStatementExecutor;
 import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 import de.adito.ojcms.sqlbuilder.result.*;
+import de.adito.ojcms.sqlbuilder.serialization.IValueSerializer;
 
 import java.sql.ResultSet;
 import java.util.Optional;
@@ -39,16 +41,6 @@ public class Select extends AbstractSelect<Select>
   public Select select(IColumnIdentification<?>... pColumns)
   {
     return addColumns(pColumns);
-  }
-
-  /**
-   * Defines the statement to select all columns. This is the default but might be used for better readability.
-   *
-   * @return the select statement itself to enable a pipelining mechanism
-   */
-  public Select selectAll()
-  {
-    return selectAllColumns();
   }
 
   /**

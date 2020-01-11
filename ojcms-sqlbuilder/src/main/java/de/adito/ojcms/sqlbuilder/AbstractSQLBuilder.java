@@ -1,14 +1,15 @@
 package de.adito.ojcms.sqlbuilder;
 
-import de.adito.ojcms.sqlbuilder.definition.*;
+import de.adito.ojcms.sqlbuilder.definition.IColumnIdentification;
 import de.adito.ojcms.sqlbuilder.definition.column.IColumnDefinition;
+import de.adito.ojcms.sqlbuilder.executors.StatementExecution;
 import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 import de.adito.ojcms.sqlbuilder.platform.connection.IDatabaseConnectionSupplier;
-import de.adito.ojcms.sqlbuilder.statements.*;
-import de.adito.ojcms.sqlbuilder.util.OJDatabaseException;
+import de.adito.ojcms.sqlbuilder.serialization.IValueSerializer;
+import de.adito.ojcms.sqlbuilder.statements.types.*;
+import de.adito.ojcms.sqlbuilder.statements.types.select.*;
 import de.adito.ojcms.utils.StringUtility;
 
-import java.io.IOException;
 import java.sql.*;
 import java.util.*;
 import java.util.function.*;
@@ -21,12 +22,11 @@ import static java.util.Objects.requireNonNull;
  *
  * @author Simon Danner, 19.02.2018
  */
-public abstract class AbstractSQLBuilder
+public abstract class AbstractSQLBuilder implements IBaseBuilder
 {
   private final IDatabasePlatform platform;
   private final IDatabaseConnectionSupplier platformConnectionSupplier;
-  private final boolean closeAfterStatement;
-  private final Supplier<Connection> connectionSupplier;
+  private final StatementExecution execution;
   private final IValueSerializer serializer;
   private final String idColumnName; //global id column name for this builder
 
@@ -35,112 +35,80 @@ public abstract class AbstractSQLBuilder
    *
    * @param pPlatform                   the database platform to use for this builder
    * @param pPlatformConnectionSupplier the platform specific connection supplier
-   * @param pCloseAfterStatement        <tt>true</tt>, if the connection should be closed after executing one statement
+   * @param pCloseAfterExecution        <tt>true</tt>, if the connection should be closed after executing one statement
    * @param pSerializer                 a value serializer
    * @param pIdColumnName               a global id column name for this builder instance
    */
   protected AbstractSQLBuilder(IDatabasePlatform pPlatform, IDatabaseConnectionSupplier pPlatformConnectionSupplier,
-                               boolean pCloseAfterStatement, IValueSerializer pSerializer, String pIdColumnName)
+                               boolean pCloseAfterExecution, IValueSerializer pSerializer, String pIdColumnName)
   {
     platform = requireNonNull(pPlatform);
     platformConnectionSupplier = requireNonNull(pPlatformConnectionSupplier);
-    closeAfterStatement = pCloseAfterStatement;
-    connectionSupplier = _createConnectionSupplier();
+    execution = new StatementExecution(_createConnectionSupplier(pCloseAfterExecution), pCloseAfterExecution);
     serializer = requireNonNull(pSerializer);
     idColumnName = StringUtility.requireNotEmpty(pIdColumnName, "id column name");
 
     platform.initDriver();
   }
 
-  /**
-   * Executes a create statement.
-   *
-   * @param pCreateStatement the statement to execute (defined in a pipelining mechanism)
-   */
+  @Override
   public void doCreate(Consumer<Create> pCreateStatement)
   {
-    final Create statement = new Create(_createNoResultExecutor(), this, platform, serializer, idColumnName);
-    _execute(configureStatementBeforeExecution(statement), pCreateStatement);
+    final Create statement = new Create(execution.createVoidExecutor(), this, platform, serializer, idColumnName);
+    execution.execute(configureStatementBeforeExecution(statement), pCreateStatement);
   }
 
-  /**
-   * Executes an insert statement.
-   *
-   * @param pInsertStatement the statement to execute (defined in a pipelining mechanism)
-   */
+  @Override
   public void doInsert(Consumer<Insert> pInsertStatement)
   {
-    final Insert statement = new Insert(_createNoResultExecutor(), this, platform, serializer, idColumnName);
-    _execute(configureStatementBeforeExecution(statement), pInsertStatement);
+    final Insert statement = new Insert(execution.createVoidExecutor(), this, platform, serializer, idColumnName);
+    execution.execute(configureStatementBeforeExecution(statement), pInsertStatement);
   }
 
-  /**
-   * Executes an update statement.
-   *
-   * @param pUpdateStatement the statement to execute (defined in a pipelining mechanism)
-   */
+  @Override
   public void doUpdate(Consumer<Update> pUpdateStatement)
   {
-    final Update statement = new Update(_createNoResultExecutor(), this, platform, serializer, idColumnName);
-    _execute(configureStatementBeforeExecution(statement), pUpdateStatement);
+    final Update statement = new Update(execution.createVoidExecutor(), this, platform, serializer, idColumnName);
+    execution.execute(configureStatementBeforeExecution(statement), pUpdateStatement);
   }
 
-  /**
-   * Executes a delete statement.
-   *
-   * @param pDeleteStatement the statement to execute (defined in a pipelining mechanism)
-   */
+  @Override
   public boolean doDelete(Function<Delete, Boolean> pDeleteStatement) //NOSONAR
   {
-    final Delete statement = new Delete(_createSuccessfulExecutor(), this, platform, serializer, idColumnName);
-    return _query(configureStatementBeforeExecution(statement), pDeleteStatement);
+    final Delete statement = new Delete(execution.createSuccessExecutor(), this, platform, serializer, idColumnName);
+    return execution.query(configureStatementBeforeExecution(statement), pDeleteStatement);
   }
 
-  /**
-   * Creates a new select statement.
-   *
-   * @param pSelectQuery the select query to execute (defined in a pipelining mechanism)
-   * @param <RESULT>     the type of the result
-   * @return the result of the select statement
-   */
+  @Override
   public <RESULT> RESULT doSelect(Function<Select, RESULT> pSelectQuery)
   {
-    final Select statement = new Select(_createResultExecutor(), this, platform, serializer, idColumnName);
-    return _query(configureStatementBeforeExecution(statement), pSelectQuery);
+    final Select statement = new Select(execution.createExecutor(), this, platform, serializer, idColumnName);
+    return execution.query(configureStatementBeforeExecution(statement), pSelectQuery);
   }
 
-  /**
-   * Creates a new single select statement.
-   * This query will select one certain column only.
-   *
-   * @param pColumnToSelect the single column to select
-   * @param pSelectQuery    the select query to execute (defined in a pipelining mechanism)
-   * @param <VALUE>         the data type of the column
-   * @param <RESULT>        the type of the result
-   * @return the result of the select statement
-   */
+  @Override
   public <VALUE, RESULT> RESULT doSelectOne(IColumnIdentification<VALUE> pColumnToSelect, Function<SingleSelect<VALUE>, RESULT> pSelectQuery)
   {
-    final SingleSelect<VALUE> select = new SingleSelect<>(_createResultExecutor(), this, platform, serializer,
+    final SingleSelect<VALUE> select = new SingleSelect<>(execution.createExecutor(), this, platform, serializer,
                                                           idColumnName, pColumnToSelect);
 
-    return _query(configureStatementBeforeExecution(select), pSelectQuery);
+    return execution.query(configureStatementBeforeExecution(select), pSelectQuery);
   }
 
-  /**
-   * Creates a new single select statement to select the id column of a database table.
-   *
-   * @param pSelectQuery the select query to execute (defined in a pipelining mechanism)
-   * @param <RESULT>     the type of the result
-   * @return the result of the select statement
-   */
+  @Override
   public <RESULT> RESULT doSelectId(Function<SingleSelect<Integer>, RESULT> pSelectQuery)
   {
     final IColumnIdentification<Integer> idColumnIdentification = IColumnIdentification.of(idColumnName, Integer.class);
-    final SingleSelect<Integer> select = new SingleSelect<>(_createResultExecutor(), this, platform, serializer, idColumnName,
+    final SingleSelect<Integer> select = new SingleSelect<>(execution.createExecutor(), this, platform, serializer, idColumnName,
                                                             idColumnIdentification);
 
-    return _query(configureStatementBeforeExecution(select), pSelectQuery);
+    return execution.query(configureStatementBeforeExecution(select), pSelectQuery);
+  }
+
+  @Override
+  public IDatabaseConnectionSupplier getPlatformConnectionSupplier()
+  {
+    return platformConnectionSupplier;
   }
 
   /**
@@ -151,7 +119,7 @@ public abstract class AbstractSQLBuilder
    * @param <RESULT>    the generic type of the result of the statement
    * @param <STATEMENT> the runtime type of the statement
    */
-  protected <RESULT, STATEMENT extends AbstractBaseStatement<RESULT, STATEMENT>> STATEMENT configureStatementBeforeExecution(STATEMENT pStatement)
+  protected <RESULT, STATEMENT extends AbstractSQLStatement<RESULT, STATEMENT>> STATEMENT configureStatementBeforeExecution(STATEMENT pStatement)
   {
     return pStatement; //Nothing happens here, may be overwritten in sub classes
   }
@@ -164,7 +132,7 @@ public abstract class AbstractSQLBuilder
    */
   protected boolean dropTable(String pTableName)
   {
-    return _createSuccessfulExecutor().executeStatement("DROP TABLE " + pTableName);
+    return execution.createSuccessExecutor().executeStatement("DROP TABLE " + pTableName);
   }
 
   /**
@@ -175,8 +143,8 @@ public abstract class AbstractSQLBuilder
    */
   protected void addColumn(String pTableName, IColumnDefinition pColumnDefinition)
   {
-    _executeNoResultStatement("ALTER TABLE " + pTableName + " ADD " + pColumnDefinition.toStatementFormat(platform,
-                                                                                                          idColumnName));
+    execution.executeVoidStatement("ALTER TABLE " + pTableName + " ADD " +
+                                       pColumnDefinition.toStatementFormat(platform, idColumnName));
   }
 
   /**
@@ -187,7 +155,8 @@ public abstract class AbstractSQLBuilder
    */
   protected void removeColumn(String pTableName, IColumnIdentification<?> pColumn)
   {
-    _executeNoResultStatement("ALTER TABLE " + pTableName + " DROP COLUMN " + pColumn.toStatementFormat(platform, idColumnName));
+    execution.executeVoidStatement("ALTER TABLE " + pTableName + " DROP COLUMN " +
+                                       pColumn.toStatementFormat(platform, idColumnName));
   }
 
   /**
@@ -210,7 +179,11 @@ public abstract class AbstractSQLBuilder
   protected void ifTableNotExistingCreate(String pTableName, Consumer<Create> pCreateStatement)
   {
     if (!hasTable(pTableName))
-      doCreate(pCreateStatement);
+      doCreate(pCreate ->
+               {
+                 pCreate.tableName(pTableName); //Add table name for convenience
+                 pCreateStatement.accept(pCreate);
+               });
   }
 
   /**
@@ -220,7 +193,7 @@ public abstract class AbstractSQLBuilder
    */
   protected List<String> getAllTableNames()
   {
-    return _retrieveFromMetaData(pMetaData -> {
+    return execution.retrieveFromMetaData(pMetaData -> {
       final List<String> names = new ArrayList<>();
       final ResultSet tables = pMetaData.getTables(null, null, "%", null);
       while (tables.next())
@@ -241,7 +214,7 @@ public abstract class AbstractSQLBuilder
    */
   protected int getColumnCount(String pTableName)
   {
-    return _retrieveFromMetaData(pMetaData -> {
+    return execution.retrieveFromMetaData(pMetaData -> {
       final ResultSet result = pMetaData.getColumns(null, null, pTableName.toUpperCase(), null);
       int count = 0;
       while (result.next())
@@ -259,7 +232,8 @@ public abstract class AbstractSQLBuilder
    */
   protected boolean hasColumn(String pTableName, String pColumnName)
   {
-    return _retrieveFromMetaData(pMetaData -> pMetaData.getColumns(null, null, pTableName.toUpperCase(), pColumnName.toUpperCase()).next());
+    return execution.retrieveFromMetaData(pMetaData -> pMetaData.getColumns(null, null, pTableName.toUpperCase(),
+                                                                            pColumnName.toUpperCase()).next());
   }
 
   /**
@@ -273,23 +247,13 @@ public abstract class AbstractSQLBuilder
   }
 
   /**
-   * The platform specific connection supplier of the builder.
-   *
-   * @return the platform specific connection supplier
-   */
-  public IDatabaseConnectionSupplier getPlatformConnectionSupplier()
-  {
-    return platformConnectionSupplier;
-  }
-
-  /**
    * Determines, if this builder closes database connections after executing a statement.
    *
    * @return <tt>true</tt>, if connections will be closed
    */
   boolean closeAfterStatement()
   {
-    return closeAfterStatement;
+    return execution.isConnectionClosedAfterExecution();
   }
 
   /**
@@ -317,239 +281,15 @@ public abstract class AbstractSQLBuilder
    * If connections should be closed after every statement, a supplier returning new connections on every call will be returned.
    * Otherwise one connection will be created, that is always returned by the resulting supplier.
    *
+   * @param pCloseAfterExecution <tt>true</tt> if SQL connections are closed after every execution
    * @return a connection supplier
    */
-  private Supplier<Connection> _createConnectionSupplier()
+  private Supplier<Connection> _createConnectionSupplier(boolean pCloseAfterExecution)
   {
-    if (closeAfterStatement)
+    if (pCloseAfterExecution)
       return platformConnectionSupplier::createNewConnection;
 
     final Connection permanentConnection = platformConnectionSupplier.createNewConnection(); //NOSONAR
     return () -> permanentConnection;
-  }
-
-  /**
-   * Performs a no result database statement and closes the connection afterwards, if necessary.
-   *
-   * @param pStatement         the initial statement to configure and to execute afterwards
-   * @param pStatementConsumer a consumer of the specific statement to configure it before the execution
-   * @param <STATEMENT>        the type of the specific statement created by the query builder
-   */
-  private <STATEMENT extends AbstractBaseStatement<Void, STATEMENT>> void _execute(STATEMENT pStatement, Consumer<STATEMENT> pStatementConsumer)
-  {
-    pStatementConsumer.accept(pStatement);
-    _tryCloseConnection(pStatement);
-  }
-
-  /**
-   * Performs a database query with a certain result and closes the connection supplier afterwards, if necessary.
-   *
-   * @param pQuery         the initial query to configure and to execute afterwards
-   * @param pQueryConsumer a function that will be provided with the query to configure it before the execution
-   * @param <RESULT>       the type of the result of this query
-   * @param <INNERRESULT>  the type of the result of the specific {@link IStatementExecutor} for this query
-   * @param <QUERY>        the type of the specific query
-   * @return the result determined by the given query
-   * @
-   */
-  private <RESULT, INNERRESULT, QUERY extends AbstractBaseStatement<INNERRESULT, QUERY>> RESULT _query(QUERY pQuery, Function<QUERY, RESULT> pQueryConsumer)
-  {
-    try
-    {
-      return pQueryConsumer.apply(pQuery);
-    }
-    finally
-    {
-      _tryCloseConnection(pQuery);
-    }
-  }
-
-  /**
-   * Executes a SQL statement with no result.
-   * If necessary, the connection will be closed after the execution.
-   *
-   * @param pSQLStatement the SQL statement to execute
-   * @param pArgs         arguments for prepared statements
-   */
-  private void _executeNoResultStatement(String pSQLStatement, String... pArgs)
-  {
-    _executeNoResultStatement(pSQLStatement, Arrays.asList(pArgs));
-  }
-
-  /**
-   * Executes a SQL statement with no result.
-   * If necessary, the connection will be closed after the execution.
-   *
-   * @param pSQLStatement the SQL statement to execute
-   * @param pArgs         arguments for prepared statements
-   */
-  private void _executeNoResultStatement(String pSQLStatement, List<String> pArgs)
-  {
-    final IStatementExecutor<Void> executor = _createNoResultExecutor();
-    executor.executeStatement(pSQLStatement, pArgs);
-    _tryCloseConnection(executor);
-  }
-
-  /**
-   * Creates a statement executor for no result statements.
-   *
-   * @return a statement executor
-   */
-  private IStatementExecutor<Void> _createNoResultExecutor()
-  {
-    return new _StatementExecutor<>(pStatement -> {
-      pStatement.execute();
-      return null;
-    });
-  }
-
-  /**
-   * Creates a statement executor, that will return to a {@link ResultSet}, when executed.
-   *
-   * @return a statement executor
-   */
-  private IStatementExecutor<ResultSet> _createResultExecutor()
-  {
-    return new _StatementExecutor<>(PreparedStatement::executeQuery);
-  }
-
-  /**
-   * Creates a statement executor, that will inform about its successful execution (true/false) as result.
-   *
-   * @return a statement executor
-   */
-  private IStatementExecutor<Boolean> _createSuccessfulExecutor()
-  {
-    return new _StatementExecutor<>(pStatement -> {
-      try
-      {
-        pStatement.execute();
-        return true;
-      }
-      catch (SQLException pE)
-      {
-        return false;
-      }
-    });
-  }
-
-  /**
-   * Retrieves any information of the metadata of a database connection.
-   * The connection will be closed afterwards. Do not keep a reference to the metadata instance.
-   *
-   * @param pResultResolver a function to retrieve the information from the database metadata
-   * @param <RESULT>        the type of the information/result
-   * @return the information from the database metadata
-   */
-  private <RESULT> RESULT _retrieveFromMetaData(_ThrowingFunction<DatabaseMetaData, RESULT, SQLException> pResultResolver)
-  {
-    final Connection connection = connectionSupplier.get();
-    try
-    {
-      return pResultResolver.apply(connection.getMetaData());
-    }
-    catch (SQLException pE)
-    {
-      throw new OJDatabaseException(pE);
-    }
-    finally
-    {
-      _tryCloseConnection(connection);
-    }
-  }
-
-  /**
-   * Tries to close a database connection.
-   *
-   * @param pCloseable the closeable, that represents the connection
-   */
-  private void _tryCloseConnection(AutoCloseable pCloseable)
-  {
-    try
-    {
-      if (closeAfterStatement)
-        pCloseable.close();
-    }
-    catch (Exception pE)
-    {
-      throw new OJDatabaseException(pE, "Unable to close the database connection!");
-    }
-  }
-
-  /**
-   * A function that may throw an exception.
-   *
-   * @param <ARG>       the type of the argument of the function
-   * @param <RESULT>    the type of the result of the function
-   * @param <EXCEPTION> the type of the exception
-   */
-  @FunctionalInterface
-  private interface _ThrowingFunction<ARG, RESULT, EXCEPTION extends Exception>
-  {
-    /**
-     * Returns a result based on one argument.
-     *
-     * @param pArgument the argument
-     * @return the result of this function
-     * @throws EXCEPTION if something went wrong there
-     */
-    RESULT apply(ARG pArgument) throws EXCEPTION;
-  }
-
-  /**
-   * Implementation of a statement executor based on a function, that will be provided with a {@link PreparedStatement}.
-   * The function then should return the result of the statement.
-   *
-   * @param <RESULT> the generic type of the result
-   */
-  private class _StatementExecutor<RESULT> implements IStatementExecutor<RESULT>
-  {
-    private final _ThrowingFunction<PreparedStatement, RESULT, SQLException> executor;
-    private Connection connection;
-    private PreparedStatement statement;
-
-    /**
-     * Creates the executor.
-     *
-     * @param pExecutor the executing function provided with a {@link PreparedStatement}
-     */
-    private _StatementExecutor(_ThrowingFunction<PreparedStatement, RESULT, SQLException> pExecutor)
-    {
-      executor = pExecutor;
-    }
-
-    @Override
-    public RESULT executeStatement(String pSQLStatement, List<String> pArgs)
-    {
-      connection = connectionSupplier.get();
-      try
-      {
-        statement = connection.prepareStatement(pSQLStatement); //NOSONAR
-        int argIndex = 1;
-        for (String arg : pArgs)
-          statement.setString(argIndex++, arg);
-        return executor.apply(statement);
-      }
-      catch (SQLException pE)
-      {
-        throw new OJDatabaseException(pSQLStatement, pE);
-      }
-    }
-
-    @Override
-    public void close() throws IOException
-    {
-      try
-      {
-        if (statement != null)
-          statement.close();
-        if (connection != null)
-          connection.close();
-      }
-      catch (SQLException pE)
-      {
-        throw new IOException(pE);
-      }
-    }
   }
 }

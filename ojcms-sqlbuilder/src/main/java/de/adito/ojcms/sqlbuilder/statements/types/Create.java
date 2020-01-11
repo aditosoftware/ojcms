@@ -1,10 +1,12 @@
-package de.adito.ojcms.sqlbuilder.statements;
+package de.adito.ojcms.sqlbuilder.statements.types;
 
 import de.adito.ojcms.sqlbuilder.*;
-import de.adito.ojcms.sqlbuilder.definition.IValueSerializer;
+import de.adito.ojcms.sqlbuilder.serialization.IValueSerializer;
 import de.adito.ojcms.sqlbuilder.definition.column.*;
+import de.adito.ojcms.sqlbuilder.executors.IStatementExecutor;
 import de.adito.ojcms.sqlbuilder.format.StatementFormatter;
 import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
+import de.adito.ojcms.sqlbuilder.AbstractSQLStatement;
 import de.adito.ojcms.sqlbuilder.util.OJDatabaseException;
 
 import java.util.*;
@@ -19,7 +21,7 @@ import static de.adito.ojcms.sqlbuilder.format.ESeparator.*;
  *
  * @author Simon Danner, 26.04.2018
  */
-public class Create extends AbstractBaseStatement<Void, Create>
+public class Create extends AbstractSQLStatement<Void, Create>
 {
   private final IColumnDefinition idColumnDefinition;
   private final List<IColumnDefinition> columns = new ArrayList<>();
@@ -120,13 +122,15 @@ public class Create extends AbstractBaseStatement<Void, Create>
    */
   private void _foreignKeys(StatementFormatter pFormatter)
   {
-    //noinspection OptionalGetWithoutIsPresent
     final Map<String, IForeignKey> foreignKeyMapping = columns.stream()
         .filter(pColumn -> pColumn.getColumnType().getForeignKey().isPresent())
         .collect(Collectors.toMap(IColumnDefinition::getColumnName, pColumn -> pColumn.getColumnType().getForeignKey().get()));
+
     if (foreignKeyMapping.isEmpty())
       return;
+
     final OJSQLBuilder tableChecker = OJSQLBuilderFactory.newSQLBuilder(builder).create();
+
     foreignKeyMapping.forEach((pColumn, pReference) -> {
       if (!tableChecker.hasTable(pReference.getTableName()))
         pReference.createReferencedTable(tableChecker.getPlatformConnectionSupplier()); //Create referenced table, if necessary

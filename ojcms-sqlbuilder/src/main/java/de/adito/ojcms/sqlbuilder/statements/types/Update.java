@@ -1,10 +1,13 @@
-package de.adito.ojcms.sqlbuilder.statements;
+package de.adito.ojcms.sqlbuilder.statements.types;
 
 import de.adito.ojcms.sqlbuilder.*;
 import de.adito.ojcms.sqlbuilder.definition.*;
 import de.adito.ojcms.sqlbuilder.definition.condition.WhereModifiers;
+import de.adito.ojcms.sqlbuilder.executors.IStatementExecutor;
 import de.adito.ojcms.sqlbuilder.format.StatementFormatter;
 import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
+import de.adito.ojcms.sqlbuilder.serialization.IValueSerializer;
+import de.adito.ojcms.sqlbuilder.statements.AbstractConditionStatement;
 
 import java.util.*;
 
@@ -17,7 +20,7 @@ import static de.adito.ojcms.sqlbuilder.format.ESeparator.COMMA_WITH_WHITESPACE;
  *
  * @author Simon Danner, 26.04.2018
  */
-public class Update extends AbstractSQLStatement<WhereModifiers, Void, Void, Update>
+public class Update extends AbstractConditionStatement<WhereModifiers, Void, Void, Update>
 {
   private final List<IColumnValueTuple<?>> changes = new ArrayList<>();
   private final List<INumericValueAdaption<?>> updateOldValues = new ArrayList<>();
@@ -35,6 +38,17 @@ public class Update extends AbstractSQLStatement<WhereModifiers, Void, Void, Upd
                 IValueSerializer pSerializer, String pIdColumnName)
   {
     super(pStatementExecutor, pBuilder, pPlatform, pSerializer, new WhereModifiers(), pIdColumnName);
+  }
+
+  /**
+   * Determines, on which database table this statement should be executed.
+   *
+   * @param pTableName the name of the database table
+   * @return the statement itself to enable a pipelining mechanism
+   */
+  public Update table(String pTableName)
+  {
+    return setTableName(pTableName);
   }
 
   /**
