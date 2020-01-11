@@ -1,8 +1,6 @@
 package de.adito.ojcms.utils.collections;
 
 import org.hamcrest.Matchers;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.*;
 
 import java.util.*;
 import java.util.stream.*;
@@ -15,31 +13,22 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * @author Simon Danner, 07.03.2018
  */
-class InputSortedElementsTest
+class InputSortedElementsTest extends AbstractInterfaceTest<IInputSortedElements>
 {
-  /**
-   * Defines the argument instances to test.
-   * The tests will be executed for each argument.
-   *
-   * @return a stream of arguments
-   */
-  private static Stream<Arguments> _toTest()
+  @Override
+  protected Stream<IInputSortedElements> getActualInstances()
   {
-    return Stream.of(
-        Arguments.of(new WeakInputSortedContainer<_Person>())
-        //Add other implementation classes here
-    );
+    //Add other implementation classes here
+    return Stream.of(new WeakInputSortedContainer<_Person>());
   }
 
-  @ParameterizedTest
-  @MethodSource("_toTest")
+  @TestAllSubTypes
   void testAddNullFail(IInputSortedElements<_Person> pElementContainer)
   {
     assertThrows(NullPointerException.class, () -> pElementContainer.add(null));
   }
 
-  @ParameterizedTest
-  @MethodSource("_toTest")
+  @TestAllSubTypes
   void testAddDuplicateFail(IInputSortedElements<_Person> pElementContainer)
   {
     final _Person somePerson = new _Person("Some", "Name");
@@ -47,8 +36,7 @@ class InputSortedElementsTest
     assertFalse(pElementContainer.add(somePerson));
   }
 
-  @ParameterizedTest
-  @MethodSource("_toTest")
+  @TestAllSubTypes
   void testAddOneElement(IInputSortedElements<_Person> pElementContainer)
   {
     final _Person addedPerson = _addOne(pElementContainer);
@@ -56,8 +44,7 @@ class InputSortedElementsTest
     assertEquals(pElementContainer.iterator().next(), addedPerson);
   }
 
-  @ParameterizedTest
-  @MethodSource("_toTest")
+  @TestAllSubTypes
   void testAddMultipleElementsOrdered(IInputSortedElements<_Person> pElementContainer)
   {
     final int amount = 10;
@@ -66,15 +53,13 @@ class InputSortedElementsTest
     assertThat(addedPersons, Matchers.contains(pElementContainer.stream().toArray(_Person[]::new)));
   }
 
-  @ParameterizedTest
-  @MethodSource("_toTest")
+  @TestAllSubTypes
   void testRemoveNull(IInputSortedElements<_Person> pElementContainer)
   {
     assertThrows(NullPointerException.class, () -> pElementContainer.add(null));
   }
 
-  @ParameterizedTest
-  @MethodSource("_toTest")
+  @TestAllSubTypes
   void testRemoveElement(IInputSortedElements<_Person> pElementContainer)
   {
     final _Person addedPerson = _addOne(pElementContainer);
@@ -82,8 +67,7 @@ class InputSortedElementsTest
     assertTrue(pElementContainer.isEmpty());
   }
 
-  @ParameterizedTest
-  @MethodSource("_toTest")
+  @TestAllSubTypes
   void testClear(IInputSortedElements<_Person> pElementContainer)
   {
     _addMultiple(pElementContainer, 10);
@@ -91,8 +75,7 @@ class InputSortedElementsTest
     assertTrue(pElementContainer.isEmpty());
   }
 
-  @ParameterizedTest
-  @MethodSource("_toTest")
+  @TestAllSubTypes
   void testSize(IInputSortedElements<_Person> pElementContainer)
   {
     assertEquals(0, pElementContainer.size());
@@ -102,8 +85,7 @@ class InputSortedElementsTest
     assertEquals(10, pElementContainer.size());
   }
 
-  @ParameterizedTest
-  @MethodSource("_toTest")
+  @TestAllSubTypes
   void testIsEmpty(IInputSortedElements<_Person> pElementContainer)
   {
     assertTrue(pElementContainer.isEmpty());
@@ -111,15 +93,13 @@ class InputSortedElementsTest
     assertFalse(pElementContainer.isEmpty());
   }
 
-  @ParameterizedTest
-  @MethodSource("_toTest")
+  @TestAllSubTypes
   void testContainsNull(IInputSortedElements<_Person> pElementContainer)
   {
     assertThrows(NullPointerException.class, () -> pElementContainer.contains(null));
   }
 
-  @ParameterizedTest
-  @MethodSource("_toTest")
+  @TestAllSubTypes
   void testContainsAfterAddition(IInputSortedElements<_Person> pElementContainer)
   {
     _Person testPerson = new _Person("Some", "Name");
@@ -128,8 +108,7 @@ class InputSortedElementsTest
     assertTrue(pElementContainer.contains(testPerson));
   }
 
-  @ParameterizedTest
-  @MethodSource("_toTest")
+  @TestAllSubTypes
   void testContainsEqualsBased(IInputSortedElements<_Person> pElementContainer)
   {
     final _Person testPerson1 = new _Person("Some", "Name");
@@ -138,8 +117,7 @@ class InputSortedElementsTest
     assertTrue(pElementContainer.contains(testPerson2));
   }
 
-  @ParameterizedTest
-  @MethodSource("_toTest")
+  @TestAllSubTypes
   void testStream(IInputSortedElements<_Person> pElementContainer)
   {
     final Iterator<_Person> addedIterator = _addMultiple(pElementContainer, 10).iterator();
@@ -176,7 +154,7 @@ class InputSortedElementsTest
   /**
    * Some POJO for testing.
    */
-  private class _Person
+  private static class _Person
   {
     private final String firstName, lastName;
 

@@ -28,7 +28,7 @@ public final class IndexBasedIterator<ELEMENT> implements Iterator<ELEMENT>
    * Creates a builder to create the index based iterator.
    *
    * @param pElementProvider a function providing an element for a given index
-   * @param pSizeProvider    a function providing an element for a given index
+   * @param pSizeProvider    provider for the size of the collection to iterate
    * @param <ELEMENT>        the elements provided by the iterator
    * @return a builder for the iterator. Use {@link Builder#createIterator()} to create it finally.
    */
