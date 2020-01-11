@@ -1,6 +1,8 @@
 package de.adito.ojcms.cdi;
 
-import javax.enterprise.context.NormalScope;
+import de.adito.ojcms.cdi.context.*;
+
+import javax.enterprise.context.*;
 import java.lang.annotation.Annotation;
 
 /**
@@ -14,9 +16,10 @@ public interface ICdiControl
    * Creates an instances of a specific type. The type must be managed by the CDI container.
    *
    * @param pType the type to create a CDI managed instance of
+   * @param pQualifiers qualifier annotations for the instance to create
    * @return the created instance
    */
-  <T> T createInjected(Class<T> pType);
+  <T> T createInjected(Class<T> pType, Annotation... pQualifiers);
 
   /**
    * Injects an existing instance. An excessive use of this method may hint some bad design. Think about it.

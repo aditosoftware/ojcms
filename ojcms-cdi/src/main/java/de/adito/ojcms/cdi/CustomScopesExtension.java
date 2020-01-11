@@ -1,5 +1,7 @@
 package de.adito.ojcms.cdi;
 
+import de.adito.ojcms.cdi.context.*;
+
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.*;
 

@@ -1,8 +1,9 @@
 package de.adito.ojcms.cdi;
 
+import de.adito.ojcms.cdi.context.*;
 import de.adito.picoservice.IPicoRegistry;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.*;
 import javax.enterprise.context.spi.Context;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.se.*;
@@ -34,6 +35,10 @@ public final class CdiContainer
   @Produces
   @ApplicationScoped
   private static ICdiControl CDI_CONTROL;
+
+  private CdiContainer()
+  {
+  }
 
   /**
    * Boots the CDI container. After a successful startup process {@link ICdiControl} will be available via injection.
@@ -103,9 +108,9 @@ public final class CdiContainer
     }
 
     @Override
-    public <T> T createInjected(Class<T> pType)
+    public <T> T createInjected(Class<T> pType, Annotation... pQualifiers)
     {
-      return container.select(pType).get();
+      return container.select(pType, pQualifiers).get();
     }
 
     @Override

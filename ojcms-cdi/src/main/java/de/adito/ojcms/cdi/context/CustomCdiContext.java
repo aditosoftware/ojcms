@@ -1,4 +1,4 @@
-package de.adito.ojcms.cdi;
+package de.adito.ojcms.cdi.context;
 
 import de.adito.picoservice.PicoService;
 

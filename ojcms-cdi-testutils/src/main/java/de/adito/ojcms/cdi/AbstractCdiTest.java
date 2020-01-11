@@ -1,5 +1,6 @@
 package de.adito.ojcms.cdi;
 
+import de.adito.ojcms.cdi.context.IActiveContext;
 import org.junit.jupiter.api.*;
 
 import java.util.List;
@@ -15,7 +16,7 @@ import java.util.stream.Collectors;
  */
 public abstract class AbstractCdiTest
 {
-  private static ICdiControl cdiControl;
+  protected static ICdiControl cdiControl;
   private List<IActiveContext> customContextList;
 
   @BeforeAll
@@ -44,6 +45,7 @@ public abstract class AbstractCdiTest
   @AfterAll
   public static void stopCdiContainer()
   {
-    cdiControl.shutdown();
+    if (cdiControl != null)
+      cdiControl.shutdown();
   }
 }

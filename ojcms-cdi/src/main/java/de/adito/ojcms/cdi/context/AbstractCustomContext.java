@@ -1,4 +1,4 @@
-package de.adito.ojcms.cdi;
+package de.adito.ojcms.cdi.context;
 
 import de.adito.picoservice.PicoService;
 
@@ -83,8 +83,12 @@ public abstract class AbstractCustomContext implements Context
      */
     <T> T getOrCreate(Contextual<T> pContextual, CreationalContext<T> pCreationalContext)
     {
+      //Avoid computeIfAbsent() because it may lead to concurrent modification when the creation leads to the creation of another bean
+      if (!instances.containsKey(pContextual))
+        instances.put(pContextual, new _ContextualInstance<>(pCreationalContext, pContextual));
+
       //noinspection unchecked
-      return (T) instances.computeIfAbsent(pContextual, pContext -> new _ContextualInstance<>(pCreationalContext, pContextual)).instance;
+      return (T) instances.get(pContextual).instance;
     }
 
     /**

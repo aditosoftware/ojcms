@@ -1,4 +1,6 @@
-package de.adito.ojcms.cdi;
+package de.adito.ojcms.cdi.context;
+
+import de.adito.ojcms.cdi.ICdiControl;
 
 /**
  * Control interface for an {@link AbstractCustomContext}.
