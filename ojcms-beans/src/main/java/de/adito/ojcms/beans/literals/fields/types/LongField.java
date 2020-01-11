@@ -2,7 +2,7 @@ package de.adito.ojcms.beans.literals.fields.types;
 
 import de.adito.ojcms.beans.annotations.NeverNull;
 import de.adito.ojcms.beans.annotations.internal.TypeDefaultField;
-import de.adito.ojcms.beans.literals.fields.serialization.ISerializableFieldToString;
+import de.adito.ojcms.beans.literals.fields.serialization.IAutoSerializableField;
 import de.adito.ojcms.beans.literals.fields.util.CustomFieldCopy;
 import de.adito.ojcms.beans.util.ECopyMode;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +17,7 @@ import java.util.Collection;
  */
 @NeverNull
 @TypeDefaultField(types = Long.class)
-public class LongField extends AbstractField<Long> implements ISerializableFieldToString<Long>
+public class LongField extends AbstractField<Long> implements IAutoSerializableField<Long>
 {
   public LongField(@NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional, boolean pIsPrivate)
   {
@@ -34,11 +34,5 @@ public class LongField extends AbstractField<Long> implements ISerializableField
   public Long copyValue(Long pLong, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
   {
     return pLong;
-  }
-
-  @Override
-  public Long fromPersistent(String pSerialString)
-  {
-    return pSerialString == null ? getDefaultValue() : Long.parseLong(pSerialString);
   }
 }

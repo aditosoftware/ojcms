@@ -1,7 +1,7 @@
 package de.adito.ojcms.beans.literals.fields.types;
 
 import de.adito.ojcms.beans.annotations.internal.TypeDefaultField;
-import de.adito.ojcms.beans.literals.fields.serialization.ISerializableFieldToString;
+import de.adito.ojcms.beans.literals.fields.serialization.ISerializableField;
 import de.adito.ojcms.beans.literals.fields.util.CustomFieldCopy;
 import de.adito.ojcms.beans.util.*;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +18,7 @@ import java.util.*;
  * @author Simon Danner, 23.08.2016
  */
 @TypeDefaultField(types = {Instant.class, Date.class})
-public class DateField extends AbstractField<Instant> implements ISerializableFieldToString<Instant>
+public class DateField extends AbstractField<Instant> implements ISerializableField<Instant, Long>
 {
   protected DateField(@NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional, boolean pIsPrivate)
   {
@@ -43,8 +43,14 @@ public class DateField extends AbstractField<Instant> implements ISerializableFi
   }
 
   @Override
-  public Instant fromPersistent(String pSerialString)
+  public Long toPersistent(Instant pValue)
   {
-    return Instant.parse(pSerialString);
+    return pValue.toEpochMilli();
+  }
+
+  @Override
+  public Instant fromPersistent(Long pSerialValue)
+  {
+    return Instant.ofEpochMilli(pSerialValue);
   }
 }

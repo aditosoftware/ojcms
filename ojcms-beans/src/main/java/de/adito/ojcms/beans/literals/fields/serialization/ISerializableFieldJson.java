@@ -8,7 +8,7 @@ import com.google.gson.Gson;
  * @param <VALUE> the value type of the bean field
  * @author Simon Danner, 07.12.2018
  */
-public interface ISerializableFieldJson<VALUE> extends ISerializableField<VALUE>
+public interface ISerializableFieldJson<VALUE> extends ISerializableField<VALUE, String>
 {
   @Override
   default String toPersistent(VALUE pValue)

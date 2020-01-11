@@ -2,7 +2,7 @@ package de.adito.ojcms.beans.literals.fields.types;
 
 import de.adito.ojcms.beans.annotations.NeverNull;
 import de.adito.ojcms.beans.annotations.internal.TypeDefaultField;
-import de.adito.ojcms.beans.literals.fields.serialization.ISerializableFieldToString;
+import de.adito.ojcms.beans.literals.fields.serialization.IAutoSerializableField;
 import de.adito.ojcms.beans.literals.fields.util.CustomFieldCopy;
 import de.adito.ojcms.beans.util.ECopyMode;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +17,7 @@ import java.util.Collection;
  */
 @NeverNull
 @TypeDefaultField(types = Integer.class)
-public class IntegerField extends AbstractField<Integer> implements ISerializableFieldToString<Integer>
+public class IntegerField extends AbstractField<Integer> implements IAutoSerializableField<Integer>
 {
   protected IntegerField(@NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional, boolean pIsPrivate)
   {
@@ -34,11 +34,5 @@ public class IntegerField extends AbstractField<Integer> implements ISerializabl
   public Integer copyValue(Integer pInteger, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
   {
     return pInteger;
-  }
-
-  @Override
-  public Integer fromPersistent(String pSerialString)
-  {
-    return pSerialString == null ? getDefaultValue() : Integer.parseInt(pSerialString);
   }
 }

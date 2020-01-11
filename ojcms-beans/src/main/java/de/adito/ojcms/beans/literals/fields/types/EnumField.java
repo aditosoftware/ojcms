@@ -19,7 +19,7 @@ import java.util.Collection;
  */
 @TypeDefaultField(types = Enum.class)
 @GenericBeanField
-public class EnumField<ENUM extends Enum> extends AbstractField<ENUM> implements ISerializableField<ENUM>
+public class EnumField<ENUM extends Enum> extends AbstractField<ENUM> implements ISerializableField<ENUM, String>
 {
   protected EnumField(Class<ENUM> pType, @NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional, boolean pIsPrivate)
   {

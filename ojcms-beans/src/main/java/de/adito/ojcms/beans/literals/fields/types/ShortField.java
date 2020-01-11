@@ -2,9 +2,9 @@ package de.adito.ojcms.beans.literals.fields.types;
 
 import de.adito.ojcms.beans.annotations.NeverNull;
 import de.adito.ojcms.beans.annotations.internal.TypeDefaultField;
-import de.adito.ojcms.beans.literals.fields.serialization.ISerializableFieldToString;
+import de.adito.ojcms.beans.literals.fields.serialization.IAutoSerializableField;
 import de.adito.ojcms.beans.literals.fields.util.CustomFieldCopy;
-import de.adito.ojcms.beans.util.*;
+import de.adito.ojcms.beans.util.ECopyMode;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
@@ -17,7 +17,7 @@ import java.util.Collection;
  */
 @NeverNull
 @TypeDefaultField(types = Short.class)
-public class ShortField extends AbstractField<Short> implements ISerializableFieldToString<Short>
+public class ShortField extends AbstractField<Short> implements IAutoSerializableField<Short>
 {
   protected ShortField(@NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional, boolean pIsPrivate)
   {
@@ -34,11 +34,5 @@ public class ShortField extends AbstractField<Short> implements ISerializableFie
   public Short copyValue(Short pShort, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
   {
     return pShort;
-  }
-
-  @Override
-  public Short fromPersistent(String pSerialString)
-  {
-    return pSerialString == null ? getDefaultValue() : Short.parseShort(pSerialString);
   }
 }

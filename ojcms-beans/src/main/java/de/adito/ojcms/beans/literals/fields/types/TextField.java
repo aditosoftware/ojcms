@@ -1,7 +1,7 @@
 package de.adito.ojcms.beans.literals.fields.types;
 
 import de.adito.ojcms.beans.annotations.internal.TypeDefaultField;
-import de.adito.ojcms.beans.literals.fields.serialization.ISerializableFieldToString;
+import de.adito.ojcms.beans.literals.fields.serialization.IAutoSerializableField;
 import de.adito.ojcms.beans.literals.fields.util.CustomFieldCopy;
 import de.adito.ojcms.beans.util.*;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +15,7 @@ import java.util.Collection;
  * @author Simon Danner, 23.08.2016
  */
 @TypeDefaultField(types = String.class)
-public class TextField extends AbstractField<String> implements ISerializableFieldToString<String>
+public class TextField extends AbstractField<String> implements IAutoSerializableField<String>
 {
   protected TextField(@NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional, boolean pIsPrivate)
   {
@@ -32,11 +32,5 @@ public class TextField extends AbstractField<String> implements ISerializableFie
   public String copyValue(String pText, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
   {
     return pText;
-  }
-
-  @Override
-  public String fromPersistent(String pSerialString)
-  {
-    return pSerialString;
   }
 }
