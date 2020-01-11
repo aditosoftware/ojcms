@@ -372,6 +372,17 @@ public interface IBean<BEAN extends IBean<BEAN>>
   }
 
   /**
+   * Converts this bean to a map containing its values mapped by bean fields.
+   *
+   * @return the bean's values as map
+   */
+  default Map<IField<?>, Object> toMap()
+  {
+    //Allow null values
+    return stream().collect(HashMap::new, (pMap, pTuple) -> pMap.put(pTuple.getField(), pTuple.getValue()), HashMap::putAll);
+  }
+
+  /**
    * A stream containing all fields of this bean.
    * Ignores private fields.
    *
@@ -401,11 +412,14 @@ public interface IBean<BEAN extends IBean<BEAN>>
    * Sets the default (map based) data source for this bean.
    * The current values of the bean will be retained in the new data source.
    * May be used to decouple a bean instance from a data source that is based on a database connection for example.
+   *
+   * @return the bean itself
    */
   @WriteOperation
-  default void useDefaultEncapsulatedDataSource()
+  default BEAN useDefaultEncapsulatedDataSource()
   {
     setEncapsulatedDataSource(new MapBasedBeanDataSource(this));
+    return toRuntimeBean(this);
   }
 
   @Override

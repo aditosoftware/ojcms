@@ -211,8 +211,9 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
   @WriteOperation
   default void addBean(BEAN pBean, int pIndex)
   {
+    requireNonNull(pBean, "The addition of null is not allowed for bean containers!");
     IndexChecker.check(() -> size() + 1, pIndex);
-    requestEncapsulatedData(this).addBean(requireNonNull(pBean), pIndex);
+    requestEncapsulatedData(this).addBean(pBean, pIndex);
     beanAdded(this, pBean);
   }
 

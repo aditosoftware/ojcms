@@ -71,7 +71,7 @@ public final class BeanReflector
   public static Class<? extends IBean> requiresDeclaredBeanType(Class<? extends IBean> pBeanType)
   {
     if (!Modifier.isPublic(pBeanType.getModifiers()))
-      throw new NoDeclaredBeanTypeException(pBeanType, "It has to be declared public to create fields!");
+      throw new NoDeclaredBeanTypeException(pBeanType, " It has to be declared public to create fields!");
 
     if (!OJBean.class.isAssignableFrom(pBeanType)) //To make sure it isn't a transformed type
       throw new NoDeclaredBeanTypeException(pBeanType, "Do not use transformed or differently represented bean types!");
