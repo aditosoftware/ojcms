@@ -26,34 +26,25 @@ public interface ITransaction
   int requestContainerSize(String pContainerId);
 
   /**
-   * Requests persistent data of a bean within a container. The bean is identified by its index for this method.
+   * Requests persistent data of a bean for a given key.
    * The exception handling (in case a bean cannot be found within the container etc.) must be defined by the classes implementing the SPI.
    *
-   * @param pIndexBasedKey the index based bean key
-   * @return the requested bean data
+   * @param pKey the key to identify the requested bean
+   * @return the requested persistent bean data
    */
-  BeanData<ContainerIndexKey> requestBeanDataFromContainer(ContainerIndexKey pIndexBasedKey);
+  <KEY extends IBeanKey> PersistentBeanData requestBeanDataByKey(KEY pKey);
 
   /**
-   * Requests persistent data of a bean within a container. The bean is identified by its identifying fields.
-   * The exception handling (in case a bean cannot be found within the container etc.) must be defined by the classes implementing the SPI.
+   * Requests a full container load that provides all persistent bean data. This method mainly exists due to a performance issue
+   * to enable a way to load mass data in one call from a database system for example.
    *
-   * @param pIdentifierKey the key based on fields marked as identifier
-   * @return the requested bean data
+   * @param pContainerId the id of the container to perform the full load for
+   * @return a map containing all bean data mapped by index
    */
-  BeanData<ContainerIndexKey> requestBeanDataFromContainer(ContainerIdentifierKey pIdentifierKey);
+  Map<Integer, PersistentBeanData> requestFullContainerLoad(String pContainerId);
 
   /**
-   * Requests persistent single bean data by its string based id.
-   * The exception handling (in case the single bean is not existing etc.) must be defined by the classes implementing the SPI.
-   *
-   * @param pSingleBeanId the id of the single bean
-   * @return the requested single bean data
-   */
-  BeanData<String> requestSingleBeanData(String pSingleBeanId);
-
-  /**
-   * Registers the addition of a bean in a container within this transaction.
+   * Registers the addition of a bean to a container within this transaction.
    *
    * @param pContainerId the id of the container the bean has been added to
    * @param pIndex       the index of the added bean
@@ -64,34 +55,17 @@ public interface ITransaction
   /**
    * Registers the removal of a bean from a container within this transaction.
    *
-   * @param pIndexBasedKey the index based key that identifies the removed bean
+   * @param pContainerKey the key to identify the removed bean
    */
-  void registerBeanRemoval(ContainerIndexKey pIndexBasedKey);
+  <KEY extends IContainerBeanKey> void registerBeanRemoval(KEY pContainerKey);
 
   /**
-   * Registers the removal of a bean from a container within this transaction.
+   * Registers a value change of a persistent bean within this transaction.
    *
-   * @param pIdentifierKey the identifier fields based key that identifies the removed bean
-   */
-  void registerBeanRemoval(ContainerIdentifierKey pIdentifierKey);
-
-  /**
-   * Registers a value change of a persistent bean within a container within this transaction.
-   *
-   * @param pContainerKey the id of the container that changed bean is located in
+   * @param pKey          the key to identify the changed bean
    * @param pChangedField the changed bean field
    * @param pNewValue     the new value for the field
    * @param <VALUE>       the value type of the changed field
    */
-  <VALUE> void registerBeanValueChange(ContainerIndexKey pContainerKey, IField<VALUE> pChangedField, VALUE pNewValue);
-
-  /**
-   * Registers a value change of single persistent bean within this transaction.
-   *
-   * @param pSingleBeanId the id of the single bean
-   * @param pChangedField the changed bean field
-   * @param pNewValue     the new value for the field
-   * @param <VALUE>       the value type of the changed field
-   */
-  <VALUE> void registerSingleBeanValueChange(String pSingleBeanId, IField<VALUE> pChangedField, VALUE pNewValue);
+  <KEY extends IBeanKey, VALUE> void registerBeanValueChange(KEY pKey, IField<VALUE> pChangedField, VALUE pNewValue);
 }

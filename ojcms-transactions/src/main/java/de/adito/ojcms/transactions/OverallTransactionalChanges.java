@@ -1,6 +1,7 @@
 package de.adito.ojcms.transactions;
 
-import de.adito.ojcms.transactions.api.ContainerIndexKey;
+import de.adito.ojcms.transactions.api.IBeanKey;
+import de.adito.ojcms.transactions.exceptions.ConcurrentTransactionException;
 
 import javax.enterprise.context.ApplicationScoped;
 import java.util.Set;
@@ -20,39 +21,25 @@ class OverallTransactionalChanges
   private final Set<TransactionalChanges> activeTransactionalChanges = ConcurrentHashMap.newKeySet();
 
   /**
-   * Determines if the content of a bean container (size related) is currently changed by an other transaction.
+   * Throws a {@link ConcurrentTransactionException} if a bean container has been modified by another transaction.
    *
    * @param pContainerId   the id of the container to check
    * @param pSelfReference a self reference to the asking changes instance (to exclude its changes)
-   * @return <tt>true</tt> if size related data of the container has been changed by another transaction
    */
-  boolean isContainerDirty(String pContainerId, TransactionalChanges pSelfReference)
+  void throwIfContainerDirty(String pContainerId, TransactionalChanges pSelfReference)
   {
-    return _checkForChange(pChanges -> pChanges.isContainerDirty(pContainerId), pSelfReference);
+    _throwIfChangedInOtherTransaction(pContainerId, pChanges -> pChanges.isContainerDirty(pContainerId), pSelfReference);
   }
 
   /**
-   * Determines if the data of a bean within a container has been changed by another transaction.
+   * Throws a {@link ConcurrentTransactionException} if a bean has been modified by another transaction.
    *
-   * @param pKey           the index based key identifying the bean in the container
+   * @param pKey           the key identifying the bean
    * @param pSelfReference a self reference to the asking changes instance (to exclude its changes)
-   * @return <tt>true</tt> the data of the bean within the container has been changed by another transaction
    */
-  boolean isBeanInContainerDirty(ContainerIndexKey pKey, TransactionalChanges pSelfReference)
+  <KEY extends IBeanKey> void throwIfBeanDirty(KEY pKey, TransactionalChanges pSelfReference)
   {
-    return _checkForChange(pChanges -> pChanges.isBeanInContainerDirty(pKey), pSelfReference);
-  }
-
-  /**
-   * Determines if the data of a single bean has been changed by another transaction.
-   *
-   * @param pKey           the id of the single bean
-   * @param pSelfReference a self reference to the asking changes instance (to exclude its changes)
-   * @return <tt>true</tt> the data of the single bean has been changed by another transaction
-   */
-  boolean isSingleBeanDirty(String pKey, TransactionalChanges pSelfReference)
-  {
-    return _checkForChange(pChanges -> pChanges.isSingleBeanDirty(pKey), pSelfReference);
+    _throwIfChangedInOtherTransaction(pKey, pChanges -> pChanges.isBeanDirty(pKey), pSelfReference);
   }
 
   /**
@@ -76,16 +63,18 @@ class OverallTransactionalChanges
   }
 
   /**
-   * Checks all registered {@link TransactionalChanges} instances (apart from the self reference) for changes based on a predicate.
+   * Checks all registered {@link TransactionalChanges} instances (apart from the self reference) for changes based on a predicate
+   * and throws a {@link ConcurrentTransactionException} if changes have been found.
    *
+   * @param pKey           the key used in the predicate to identify a bean or container
    * @param pPredicate     the predicate to determine if requested data is changed
    * @param pSelfReference a self reference to the asking changes instance (to exclude its changes)
-   * @return <tt>true</tt> if the requested data has been changed by another transaction
    */
-  private boolean _checkForChange(Predicate<TransactionalChanges> pPredicate, TransactionalChanges pSelfReference)
+  private void _throwIfChangedInOtherTransaction(Object pKey, Predicate<TransactionalChanges> pPredicate, TransactionalChanges pSelfReference)
   {
-    return activeTransactionalChanges.stream()
+    if (activeTransactionalChanges.stream()
         .filter(pChanges -> pChanges.equals(pSelfReference))
-        .anyMatch(pPredicate);
+        .anyMatch(pPredicate))
+      throw new ConcurrentTransactionException(pKey);
   }
 }

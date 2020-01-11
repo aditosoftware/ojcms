@@ -1,11 +1,9 @@
 package de.adito.ojcms.transactions;
 
-import de.adito.ojcms.transactions.annotations.TransactionalScoped;
 import de.adito.ojcms.transactions.spi.*;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
-import java.sql.Connection;
 
 import static org.mockito.Mockito.mock;
 
@@ -29,12 +27,5 @@ public class TestCdiProviders
   public static IBeanDataStorage produceStorage()
   {
     return mock(IBeanDataStorage.class);
-  }
-
-  @TransactionalScoped
-  @Produces
-  public static Connection produceConnection()
-  {
-    return mock(Connection.class);
   }
 }

@@ -26,7 +26,7 @@ import static org.mockito.Mockito.*;
 public class BeanTransactionTest extends AbstractCdiTest
 {
   private static final String CONTAINER_ID = "containerId";
-  private static final String SINGLE_BEAN_ID = "singleBeanId";
+  private static final SingleBeanKey SINGLE_BEAN_KEY = new SingleBeanKey("singleBeanId");
   private static final int CONTAINER_SIZE = 7;
   @SuppressWarnings("unchecked")
   private static final IField<Integer> BEAN_FIELD = Mockito.mock(IField.class);
@@ -47,6 +47,7 @@ public class BeanTransactionTest extends AbstractCdiTest
   public void setup()
   {
     beanDataStorageMock = (IBeanDataStorage) ((WeldClientProxy) beanDataStorage).getMetadata().getContextualInstance();
+    reset(beanDataStorageMock);
   }
 
   @Test
@@ -58,29 +59,48 @@ public class BeanTransactionTest extends AbstractCdiTest
   @Test
   public void testContainerBeanDataRequestByIndex()
   {
-    final ContainerIndexKey key = new ContainerIndexKey(CONTAINER_ID, 0);
-    final BeanData<ContainerIndexKey> beanData = transaction.requestBeanDataFromContainer(key);
+    final BeanIndexKey key = new BeanIndexKey(CONTAINER_ID, 0);
+    final PersistentBeanData beanData = transaction.requestBeanDataByKey(key);
 
-    assertEquals(key, beanData.getKey());
+    assertEquals(0, beanData.getIndex());
     _checkBeanData(beanData);
   }
 
   @Test
   public void testContainerBeanDataRequestByIdentifiers()
   {
-    final ContainerIdentifierKey key = new ContainerIdentifierKey(CONTAINER_ID, Collections.emptyMap());
-    final BeanData<ContainerIndexKey> beanData = transaction.requestBeanDataFromContainer(key);
+    final BeanIdentifiersKey key = new BeanIdentifiersKey(CONTAINER_ID, Collections.emptyMap());
+    final PersistentBeanData beanData = transaction.requestBeanDataByKey(key);
 
-    assertEquals(key, beanData.getIdentifierKey(CONTAINER_ID));
+    assertEquals(key, beanData.createIdentifierKey(CONTAINER_ID));
     _checkBeanData(beanData);
   }
 
   @Test
   public void testSingleBeanDataRequest()
   {
-    final BeanData<String> beanData = transaction.requestSingleBeanData(SINGLE_BEAN_ID);
-    assertEquals(SINGLE_BEAN_ID, beanData.getKey());
+    final PersistentBeanData beanData = transaction.requestBeanDataByKey(SINGLE_BEAN_KEY);
     _checkBeanData(beanData);
+  }
+
+  @Test
+  public void testRequestContainerSizeAfterChangeInSameTransaction()
+  {
+    transaction.registerBeanAddition(CONTAINER_ID, 1, Collections.emptyMap());
+    transaction.registerBeanAddition(CONTAINER_ID, 2, Collections.emptyMap());
+    transaction.registerBeanRemoval(new BeanIndexKey(CONTAINER_ID, 0));
+
+    final int size = transaction.requestContainerSize(CONTAINER_ID);
+    assertEquals(CONTAINER_SIZE + 1, size);
+  }
+
+  @Test
+  public void testRequestValueAfterChangeInSameTransaction()
+  {
+    final BeanIndexKey key = new BeanIndexKey(CONTAINER_ID, 0);
+    transaction.registerBeanValueChange(key, BEAN_FIELD, 100);
+    final Object value = transaction.requestBeanDataByKey(key).getData().get(BEAN_FIELD);
+    assertEquals(100, value);
   }
 
   @Test
@@ -90,10 +110,8 @@ public class BeanTransactionTest extends AbstractCdiTest
     transactionManager.commitChanges();
 
     verify(beanDataStorageMock).processAdditionsForContainer(any(), any());
-    verify(beanDataStorageMock).processRemovalsById(any());
-    verify(beanDataStorageMock).processRemovalsByIdentifiers(any());
-    verify(beanDataStorageMock).processChangesForBean(any(), any());
-    verify(beanDataStorageMock).processChangesForSingleBean(any(), any());
+    verify(beanDataStorageMock).processRemovals(any());
+    verify(beanDataStorageMock, times(2)).processChangesForBean(any(), any());
   }
 
   @Test
@@ -101,7 +119,7 @@ public class BeanTransactionTest extends AbstractCdiTest
   {
     _registerChanges();
     transactionManager.rollbackChanges();
-    verifyZeroInteractions(beanDataStorageMock);
+    verify(beanDataStorageMock).rollbackChanges();
   }
 
   @Test
@@ -115,12 +133,12 @@ public class BeanTransactionTest extends AbstractCdiTest
   @Test
   public void testConcurrentModificationOkayInSameTransaction()
   {
-    transaction.registerSingleBeanValueChange(SINGLE_BEAN_ID, BEAN_FIELD, 12);
-    final BeanData<String> beanData = transaction.requestSingleBeanData(SINGLE_BEAN_ID);
-    _checkBeanData(beanData);
+    transaction.registerBeanValueChange(SINGLE_BEAN_KEY, BEAN_FIELD, 12);
+    final PersistentBeanData beanData = transaction.requestBeanDataByKey(SINGLE_BEAN_KEY);
+    assertNotNull(beanData);
   }
 
-  private void _checkBeanData(BeanData<?> pResult)
+  private void _checkBeanData(PersistentBeanData pResult)
   {
     assertEquals(1, pResult.getData().size());
     final Map.Entry<IField<?>, Object> firstEntry = pResult.getData().entrySet().iterator().next();
@@ -131,10 +149,10 @@ public class BeanTransactionTest extends AbstractCdiTest
   private void _registerChanges()
   {
     transaction.registerBeanAddition(CONTAINER_ID, 1, Collections.emptyMap());
-    transaction.registerBeanRemoval(new ContainerIndexKey(CONTAINER_ID, 1));
-    transaction.registerBeanRemoval(new ContainerIdentifierKey(CONTAINER_ID, Collections.emptyMap()));
-    transaction.registerBeanValueChange(new ContainerIndexKey(CONTAINER_ID, 0), BEAN_FIELD, 6);
-    transaction.registerSingleBeanValueChange(SINGLE_BEAN_ID, BEAN_FIELD, 7);
+    transaction.registerBeanRemoval(new BeanIndexKey(CONTAINER_ID, 1));
+    transaction.registerBeanRemoval(new BeanIdentifiersKey(CONTAINER_ID, Collections.emptyMap()));
+    transaction.registerBeanValueChange(new BeanIndexKey(CONTAINER_ID, 0), BEAN_FIELD, 6);
+    transaction.registerBeanValueChange(SINGLE_BEAN_KEY, BEAN_FIELD, 7);
   }
 
   @Alternative
@@ -144,27 +162,21 @@ public class BeanTransactionTest extends AbstractCdiTest
     private static final Map<IField<?>, Object> BEAN_DATA = Collections.singletonMap(BEAN_FIELD, BEAN_VALUE);
 
     @Override
-    public int loadSize(String pContainerId)
+    public int loadContainerSize(String pContainerId)
     {
       return CONTAINER_SIZE;
     }
 
     @Override
-    public BeanData<ContainerIndexKey> loadByIndex(ContainerIndexKey pKey)
+    public <KEY extends IBeanKey> PersistentBeanData loadByKey(KEY pKey)
     {
-      return new BeanData<>(pKey, BEAN_DATA);
+      return new PersistentBeanData(0, BEAN_DATA);
     }
 
     @Override
-    public BeanData<ContainerIndexKey> loadByIdentifiers(ContainerIdentifierKey pKey)
+    public Map<Integer, PersistentBeanData> fullContainerLoad(String pContainerId)
     {
-      return new BeanData<>(new ContainerIndexKey(pKey.getContainerId(), 0), BEAN_DATA);
-    }
-
-    @Override
-    public BeanData<String> loadSingleBean(String pKey)
-    {
-      return new BeanData<>(pKey, BEAN_DATA);
+      return Collections.singletonMap(0, loadByKey(null));
     }
   }
 }

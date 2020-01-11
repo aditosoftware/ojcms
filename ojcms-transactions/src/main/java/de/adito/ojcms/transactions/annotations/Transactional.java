@@ -1,6 +1,6 @@
 package de.adito.ojcms.transactions.annotations;
 
-import de.adito.ojcms.transactions.api.ConcurrentTransactionException;
+import de.adito.ojcms.transactions.exceptions.ConcurrentTransactionException;
 
 import javax.enterprise.util.Nonbinding;
 import javax.interceptor.InterceptorBinding;

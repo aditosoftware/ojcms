@@ -2,7 +2,7 @@ package de.adito.ojcms.transactions;
 
 import de.adito.ojcms.cdi.AbstractCdiTest;
 import de.adito.ojcms.transactions.annotations.*;
-import de.adito.ojcms.transactions.api.*;
+import de.adito.ojcms.transactions.exceptions.*;
 import org.junit.jupiter.api.*;
 
 import javax.enterprise.context.ApplicationScoped;

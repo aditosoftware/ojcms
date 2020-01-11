@@ -1,6 +1,6 @@
 package de.adito.ojcms.transactions;
 
-import de.adito.ojcms.cdi.*;
+import de.adito.ojcms.cdi.context.*;
 import de.adito.ojcms.transactions.annotations.TransactionalScoped;
 
 import java.lang.annotation.Annotation;

@@ -1,4 +1,4 @@
-package de.adito.ojcms.transactions.api;
+package de.adito.ojcms.transactions.exceptions;
 
 /**
  * Indicates that the data of a bean has been modified by another transaction.

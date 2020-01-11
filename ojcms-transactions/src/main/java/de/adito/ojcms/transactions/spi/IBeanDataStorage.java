@@ -1,5 +1,6 @@
 package de.adito.ojcms.transactions.spi;
 
+import de.adito.ojcms.beans.IBean;
 import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.transactions.api.*;
 
@@ -13,20 +14,21 @@ import java.util.*;
 public interface IBeanDataStorage
 {
   /**
-   * Processes value changes for a bean within a container.
+   * Registers a persistent bean type. This may be used by the storage system to initialize required structures.
    *
-   * @param pKey           the index based key identified the bean
-   * @param pChangedValues all changed values to process
+   * @param pBeanType    the bean type to register with the key
+   * @param pContainerId the id of the persistent container
+   * @param pIsContainer <tt>true</tt> if the persistent beans should be stored in a container
    */
-  void processChangesForBean(ContainerIndexKey pKey, Map<IField<?>, Object> pChangedValues);
+  void registerPersistentBean(Class<? extends IBean<?>> pBeanType, String pContainerId, boolean pIsContainer);
 
   /**
-   * Processes value changes for single persistent bean.
+   * Processes value changes for a persistent bean.
    *
-   * @param pKey           the id of the single bean
+   * @param pKey           the key identifying the changed bean
    * @param pChangedValues all changed values to process
    */
-  void processChangesForSingleBean(String pKey, Map<IField<?>, Object> pChangedValues);
+  <KEY extends IBeanKey> void processChangesForBean(KEY pKey, Map<IField<?>, Object> pChangedValues);
 
   /**
    * Processes all bean additions to a persistent container.
@@ -34,19 +36,22 @@ public interface IBeanDataStorage
    * @param pContainerId the id of the container
    * @param pNewData     a list of all added bean data
    */
-  void processAdditionsForContainer(String pContainerId, List<BeanData<ContainerIndexKey>> pNewData);
+  void processAdditionsForContainer(String pContainerId, List<PersistentBeanData> pNewData);
 
   /**
-   * Processes all bean removals from a persistent container by index.
+   * Processes all bean removals from a persistent container.
    *
-   * @param pKeysToRemove a set of index based keys
+   * @param pKeysToRemove a set of container bean keys
    */
-  void processRemovalsById(Set<ContainerIndexKey> pKeysToRemove);
+  void processRemovals(Set<IContainerBeanKey> pKeysToRemove);
 
   /**
-   * Processes all bean removals from a persistent container by identifying fields.
-   *
-   * @param pKeysToRemove a set of identifier fields based keys
+   * Commits all changes to the persistent storage system within the transaction.
    */
-  void processRemovalsByIdentifiers(Set<ContainerIdentifierKey> pKeysToRemove);
+  void commitChanges();
+
+  /**
+   * Rolls back all changes made in this transaction.
+   */
+  void rollbackChanges();
 }

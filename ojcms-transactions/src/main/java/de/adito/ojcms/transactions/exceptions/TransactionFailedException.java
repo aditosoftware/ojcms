@@ -1,4 +1,4 @@
-package de.adito.ojcms.transactions.api;
+package de.adito.ojcms.transactions.exceptions;
 
 /**
  * Indicates that an transaction has failed.

@@ -3,12 +3,10 @@ package de.adito.ojcms.transactions;
 import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.transactions.annotations.TransactionalScoped;
 import de.adito.ojcms.transactions.api.*;
-import de.adito.ojcms.transactions.spi.IBeanDataLoader;
+import de.adito.ojcms.transactions.spi.*;
 
 import javax.inject.Inject;
-import java.sql.*;
 import java.util.*;
-import java.util.function.Function;
 
 /**
  * Implementation of a managed transaction that lives in a transactional scope.
@@ -23,85 +21,70 @@ class ManagedTransaction implements ITransaction
   @Inject
   private IBeanDataLoader loader;
   @Inject
+  private IBeanDataStorage storage;
+  @Inject
   private OverallTransactionalChanges overallTransactionalChanges;
   @Inject
   private TransactionalChanges changes;
-  @Inject
-  private Connection connection;
 
   private final Map<String, Integer> containerSizeCache = new HashMap<>();
-  private final Map<ContainerIndexKey, BeanData<ContainerIndexKey>> byIndexCache = new HashMap<>();
-  private final Map<ContainerIdentifierKey, BeanData<ContainerIndexKey>> byIdentifierCache = new HashMap<>();
-  private final Map<String, BeanData<String>> singleBeanCache = new HashMap<>();
+  private final Map<IBeanKey, PersistentBeanData> beanDataCache = new HashMap<>();
+  private final Map<String, Map<Integer, PersistentBeanData>> fullContainerLoadCache = new HashMap<>();
 
   @Override
   public int requestContainerSize(String pContainerId)
   {
-    if (overallTransactionalChanges.isContainerDirty(pContainerId, changes))
-      throw new ConcurrentTransactionException(pContainerId);
+    overallTransactionalChanges.throwIfContainerDirty(pContainerId, changes);
 
-    return containerSizeCache.computeIfAbsent(pContainerId, loader::loadSize);
+    final int initialSize = containerSizeCache.computeIfAbsent(pContainerId, loader::loadContainerSize);
+    final int differenceByChanges = changes.getContainerSizeDifference(pContainerId);
+    return initialSize + differenceByChanges;
   }
 
   @Override
-  public BeanData<ContainerIndexKey> requestBeanDataFromContainer(ContainerIndexKey pIndexBasedKey)
+  public <KEY extends IBeanKey> PersistentBeanData requestBeanDataByKey(KEY pKey)
   {
-    if (overallTransactionalChanges.isBeanInContainerDirty(pIndexBasedKey, changes))
-      throw new ConcurrentTransactionException(pIndexBasedKey);
+    overallTransactionalChanges.throwIfBeanDirty(pKey, changes);
 
-    return _retrieveFromCacheOrLoadAndCache(byIndexCache, pIndexBasedKey, loader::loadByIndex);
+    final PersistentBeanData initialData = beanDataCache.computeIfAbsent(pKey, loader::loadByKey);
+    return _integrateChanges(pKey, initialData);
   }
 
   @Override
-  public BeanData<ContainerIndexKey> requestBeanDataFromContainer(ContainerIdentifierKey pIdentifierKey)
+  public Map<Integer, PersistentBeanData> requestFullContainerLoad(String pContainerId)
   {
-    final BeanData<ContainerIndexKey> beanData = _retrieveFromCacheOrLoadAndCache(byIdentifierCache, pIdentifierKey,
-                                                                                  loader::loadByIdentifiers);
+    overallTransactionalChanges.throwIfContainerDirty(pContainerId, changes);
+    final Map<Integer, PersistentBeanData> fullData = fullContainerLoadCache.computeIfAbsent(pContainerId, loader::fullContainerLoad);
 
-    //If there are changes to the requested bean, it must have been cached, so no problem retrieving the index key from there
-    if (overallTransactionalChanges.isBeanInContainerDirty(beanData.getKey(), changes))
-      throw new ConcurrentTransactionException(beanData.getKey());
+    for (PersistentBeanData beanData : fullData.values())
+    {
+      //There may be changes registered by index or identifiers
+      _integrateChanges(beanData.createIndexKey(pContainerId), beanData);
+      _integrateChanges(beanData.createIdentifierKey(pContainerId), beanData);
+    }
 
-    return beanData;
-  }
-
-  @Override
-  public BeanData<String> requestSingleBeanData(String pSingleBeanId)
-  {
-    if (overallTransactionalChanges.isSingleBeanDirty(pSingleBeanId, changes))
-      throw new ConcurrentTransactionException(pSingleBeanId);
-
-    return singleBeanCache.computeIfAbsent(pSingleBeanId, loader::loadSingleBean);
+    return fullData;
   }
 
   @Override
   public void registerBeanAddition(String pContainerId, int pIndex, Map<IField<?>, Object> pNewData)
   {
+    overallTransactionalChanges.throwIfContainerDirty(pContainerId, changes);
     changes.beanAdded(pContainerId, pIndex, pNewData);
   }
 
   @Override
-  public void registerBeanRemoval(ContainerIndexKey pIndexBasedKey)
+  public <KEY extends IContainerBeanKey> void registerBeanRemoval(KEY pKey)
   {
-    changes.beanRemoved(pIndexBasedKey);
+    overallTransactionalChanges.throwIfContainerDirty(pKey.getContainerId(), changes);
+    changes.beanRemoved(pKey);
   }
 
   @Override
-  public void registerBeanRemoval(ContainerIdentifierKey pIdentifierKey)
+  public <KEY extends IBeanKey, VALUE> void registerBeanValueChange(KEY pKey, IField<VALUE> pChangedField, VALUE pNewValue)
   {
-    changes.beanRemoved(pIdentifierKey);
-  }
-
-  @Override
-  public <VALUE> void registerBeanValueChange(ContainerIndexKey pContainerKey, IField<VALUE> pChangedField, VALUE pNewValue)
-  {
-    changes.beanValueChanged(pContainerKey, pChangedField, pNewValue);
-  }
-
-  @Override
-  public <VALUE> void registerSingleBeanValueChange(String pSingleBeanId, IField<VALUE> pChangedField, VALUE pNewValue)
-  {
-    changes.singleBeanValueChanged(pSingleBeanId, pChangedField, pNewValue);
+    overallTransactionalChanges.throwIfBeanDirty(pKey, changes);
+    changes.beanValueChanged(pKey, pChangedField, pNewValue);
   }
 
   /**
@@ -110,15 +93,7 @@ class ManagedTransaction implements ITransaction
   void commit()
   {
     changes.commitChanges();
-
-    try
-    {
-      connection.commit();
-    }
-    catch (SQLException pE)
-    {
-      throw new RuntimeException(pE);
-    }
+    storage.commitChanges();
   }
 
   /**
@@ -126,35 +101,20 @@ class ManagedTransaction implements ITransaction
    */
   void rollback()
   {
-    try
-    {
-      connection.rollback();
-    }
-    catch (SQLException pE)
-    {
-      throw new RuntimeException(pE);
-    }
+    storage.rollbackChanges();
   }
 
   /**
-   * Tries to retrieve bean data from the cache or load the data if not cached yet.
+   * Integrates changes made within this transaction to an instance of {@link PersistentBeanData}.
    *
-   * @param pCache the cache holding bean data by identifying keys
-   * @param pKey the generic key to identify the bean data
-   * @param loadingFunction a function to load the persistent bean data by the key
-   * @param <KEY> the generic type of the key identifying the bean data
-   * @return the cached or loaded bean data
+   * @param pKey         the key to identify the changes
+   * @param pInitialData the intial bean data to integrate the changes into
+   * @return the persistent bean data with integrated changes
    */
-  private <KEY> BeanData<ContainerIndexKey> _retrieveFromCacheOrLoadAndCache(Map<KEY, BeanData<ContainerIndexKey>> pCache, KEY pKey,
-                                                                             Function<KEY, BeanData<ContainerIndexKey>> loadingFunction)
+  private <KEY extends IBeanKey> PersistentBeanData _integrateChanges(KEY pKey, PersistentBeanData pInitialData)
   {
-    if (pCache.containsKey(pKey))
-      return pCache.get(pKey);
-
-    final BeanData<ContainerIndexKey> beanData = loadingFunction.apply(pKey);
-    byIndexCache.put(beanData.getKey(), beanData);
-    byIdentifierCache.put(beanData.getIdentifierKey(beanData.getKey().getContainerId()), beanData);
-
-    return beanData;
+    return changes.getPotentiallyChangedValues(pKey)
+        .map(pInitialData::integrateChanges)
+        .orElse(pInitialData);
   }
 }

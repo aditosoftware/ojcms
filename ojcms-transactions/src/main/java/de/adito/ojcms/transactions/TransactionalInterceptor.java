@@ -1,8 +1,9 @@
 package de.adito.ojcms.transactions;
 
 import de.adito.ojcms.cdi.*;
+import de.adito.ojcms.cdi.context.IActiveContext;
 import de.adito.ojcms.transactions.annotations.*;
-import de.adito.ojcms.transactions.api.*;
+import de.adito.ojcms.transactions.exceptions.*;
 
 import javax.inject.Inject;
 import javax.interceptor.*;

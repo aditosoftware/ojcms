@@ -6,12 +6,12 @@ import de.adito.ojcms.beans.literals.fields.IField;
 import java.util.*;
 
 /**
- * An unique key for {@link BeanData} within a container that is based on bean fields marked as {@link Identifier}.
+ * An unique key for {@link PersistentBeanData} within a container that is based on bean fields marked as {@link Identifier}.
  * The key combines the container's id and all values of identifier fields.
  *
  * @author Simon Danner, 26.12.2019
  */
-public final class ContainerIdentifierKey
+public final class BeanIdentifiersKey implements IContainerBeanKey
 {
   private final String containerId;
   private final Map<IField<?>, Object> identifiers;
@@ -22,20 +22,26 @@ public final class ContainerIdentifierKey
    * @param pContainerId the id of the container the bean data is located in
    * @param pIdentifiers the identifier fields' values
    */
-  public ContainerIdentifierKey(String pContainerId, Map<IField<?>, Object> pIdentifiers)
+  public BeanIdentifiersKey(String pContainerId, Map<IField<?>, Object> pIdentifiers)
   {
     containerId = pContainerId;
     identifiers = pIdentifiers;
   }
 
-  /**
-   * The id of the container the bean data associated with this key is located in.
-   *
-   * @return the container id
-   */
+  @Override
   public String getContainerId()
   {
     return containerId;
+  }
+
+  /**
+   * The values mapped by bean fields identifying the associated bean.
+   *
+   * @return the bean value identifiers
+   */
+  public Map<IField<?>, Object> getIdentifiers()
+  {
+    return new HashMap<>(identifiers);
   }
 
   @Override
@@ -46,7 +52,7 @@ public final class ContainerIdentifierKey
     if (pOther == null || getClass() != pOther.getClass())
       return false;
 
-    final ContainerIdentifierKey that = (ContainerIdentifierKey) pOther;
+    final BeanIdentifiersKey that = (BeanIdentifiersKey) pOther;
     return Objects.equals(containerId, that.containerId) && identifiers.equals(that.identifiers);
   }
 
