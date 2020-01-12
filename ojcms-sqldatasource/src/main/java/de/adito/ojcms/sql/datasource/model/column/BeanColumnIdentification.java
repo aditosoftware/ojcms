@@ -1,12 +1,11 @@
-package de.adito.ojcms.persistence.datastores.sql.definition;
+package de.adito.ojcms.sql.datasource.model.column;
 
 import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.beans.literals.fields.util.IBeanFieldBased;
 import de.adito.ojcms.sqlbuilder.definition.IColumnIdentification;
 
-import java.util.*;
+import java.util.Collection;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * A database column identification based on a bean field.
@@ -21,7 +20,7 @@ public class BeanColumnIdentification<VALUE> implements IColumnIdentification<VA
   /**
    * Creates a new column identification.
    *
-   * @param pField the bean field, that identifies the column
+   * @param pField the bean field that identifies the column
    */
   public BeanColumnIdentification(IField<VALUE> pField)
   {
@@ -52,10 +51,10 @@ public class BeanColumnIdentification<VALUE> implements IColumnIdentification<VA
    * @param pFields the bean fields to create the identifications tuples from
    * @return an array of column identifications
    */
-  public static List<BeanColumnIdentification<?>> ofMultiple(Collection<IField<?>> pFields)
+  public static BeanColumnIdentification<?>[] ofMultiple(Collection<IField<?>> pFields)
   {
     return pFields.stream()
         .map((Function<IField<?>, BeanColumnIdentification<?>>) BeanColumnIdentification::new)
-        .collect(Collectors.toList());
+        .toArray(BeanColumnIdentification[]::new);
   }
 }

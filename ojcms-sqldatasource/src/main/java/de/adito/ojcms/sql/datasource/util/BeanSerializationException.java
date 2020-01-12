@@ -1,4 +1,4 @@
-package de.adito.ojcms.persistence.datastores.sql.util;
+package de.adito.ojcms.sql.datasource.util;
 
 /**
  * Exception for bean serialization problems.

@@ -1,4 +1,4 @@
-package de.adito.ojcms.persistence.datastores.sql.util;
+package de.adito.ojcms.sql.datasource.util;
 
 /**
  * Several database constants.
@@ -12,7 +12,7 @@ public final class DatabaseConstants
   }
 
   public static final String BEAN_TABLE_NAME = "OJbeans";
-  public static final String BEAN_TABLE_COLUMN_PREFIX = "field";
   public static final String BEAN_TABLE_BEAN_ID = "beanId";
+  public static final String BEAN_TABLE_CONTENT = "beanContent";
   public static final String ID_COLUMN = "ID";
 }
