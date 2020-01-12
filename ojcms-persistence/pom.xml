@@ -28,25 +28,18 @@
     </dependency>
 
     <dependency>
-      <groupId>com.squareup</groupId>
-      <artifactId>javapoet</artifactId>
-      <version>1.11.1</version>
+      <groupId> de.adito.ojcms</groupId>
+      <artifactId>ojcms-transactions</artifactId>
+      <version>${version.ojcms}</version>
+    </dependency>
+
+    <dependency>
+      <groupId> de.adito.ojcms</groupId>
+      <artifactId>ojcms-cdi-testutils</artifactId>
+      <version>${version.ojcms}</version>
+      <scope>test</scope>
     </dependency>
 
   </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.6.1</version>
-        <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
-          <compilerArgument>-proc:none</compilerArgument>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 
 </project>

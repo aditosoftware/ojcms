@@ -1,4 +1,4 @@
-package de.adito.ojcms.persistence.util;
+package de.adito.ojcms.persistence;
 
 import de.adito.ojcms.beans.IBean;
 
@@ -37,6 +37,6 @@ public class OJPersistenceException extends RuntimeException
    */
   public OJPersistenceException(Class<? extends IBean> pNonPersistentBean)
   {
-    super("The bean type '" + pNonPersistentBean.getName() + "' is excepted to be annotated as persistent bean!");
+    super("The bean type '" + pNonPersistentBean.getName() + "' is not a persistent bean type! Should be annotated with @Persist!");
   }
 }

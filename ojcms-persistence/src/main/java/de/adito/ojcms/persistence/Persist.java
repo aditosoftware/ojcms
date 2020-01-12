@@ -1,8 +1,5 @@
 package de.adito.ojcms.persistence;
 
-import de.adito.ojcms.beans.annotations.ObserveCreation;
-import de.adito.ojcms.persistence.util.*;
-
 import java.lang.annotation.*;
 
 /**
@@ -15,7 +12,6 @@ import java.lang.annotation.*;
 @Documented
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@ObserveCreation
 public @interface Persist
 {
   /**
@@ -32,13 +28,4 @@ public @interface Persist
    * @return the persistence mode
    */
   EPersistenceMode mode() default EPersistenceMode.CONTAINER;
-
-  /**
-   * The mode in which persistent beans will be added to the persistent container.
-   * This configuration is only relevant, if the persistence mode is {@link EPersistenceMode#CONTAINER}.
-   * Default: all beans have to be stored manually.
-   *
-   * @return the storage mode
-   */
-  EStorageMode storageMode() default EStorageMode.MANUAL;
 }
