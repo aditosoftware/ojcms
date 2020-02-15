@@ -1,16 +1,19 @@
 package de.adito.ojcms.transactions;
 
-import de.adito.ojcms.cdi.*;
+import de.adito.ojcms.cdi.ICdiControl;
 import de.adito.ojcms.cdi.context.IActiveContext;
 import de.adito.ojcms.transactions.annotations.*;
 import de.adito.ojcms.transactions.exceptions.*;
 
+import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.interceptor.*;
 import java.util.Optional;
 import java.util.logging.*;
+import java.util.stream.Stream;
 
 import static de.adito.ojcms.transactions.annotations.ETransactionMode.REQUIRES_NEW;
+import static javax.interceptor.Interceptor.Priority.APPLICATION;
 
 /**
  * Interceptor for methods or classes annotated by {@link Transactional}.
@@ -20,6 +23,7 @@ import static de.adito.ojcms.transactions.annotations.ETransactionMode.REQUIRES_
  */
 @Transactional
 @Interceptor
+@Priority(APPLICATION)
 class TransactionalInterceptor
 {
   private static final Logger LOGGER = Logger.getLogger(TransactionalInterceptor.class.getName());
@@ -30,7 +34,7 @@ class TransactionalInterceptor
   private TransactionManager transactionManager;
 
   @AroundInvoke
-  private Object _manageTransaction(InvocationContext pInvocation)
+  private Object _manageTransaction(InvocationContext pInvocation) throws Exception
   {
     final Transactional annotation = _retrieveAnnotation(pInvocation);
     final int tries = annotation.tries();
@@ -60,6 +64,15 @@ class TransactionalInterceptor
       }
       catch (Exception pE)
       {
+        final boolean isDeclaredException = Stream.of(pInvocation.getMethod().getExceptionTypes())
+            .anyMatch(pExceptionType -> pExceptionType.isAssignableFrom(pE.getClass()));
+
+        if (isDeclaredException)
+        {
+          transactionManager.commitChanges();
+          throw pE;
+        }
+
         transactionManager.rollbackChanges();
         throw new TransactionFailedException(pE);
       }

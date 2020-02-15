@@ -14,7 +14,7 @@ public class TransactionFailedException extends RuntimeException
    */
   public TransactionFailedException(Throwable pCause)
   {
-    super("Transaction failed unexpected! Not retries will be scheduled!", pCause);
+    super("Transaction failed unexpectedly! Not retries will be scheduled!", pCause);
   }
 
   /**
