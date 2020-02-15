@@ -3,14 +3,14 @@ package de.adito.ojcms.cdi;
 import de.adito.ojcms.cdi.context.*;
 import de.adito.picoservice.IPicoRegistry;
 
-import javax.enterprise.context.*;
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.spi.Context;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.se.*;
 import javax.enterprise.inject.spi.*;
 import java.lang.annotation.Annotation;
 import java.util.*;
-import java.util.function.Function;
+import java.util.function.*;
 import java.util.stream.Collectors;
 
 import static java.util.function.Function.identity;
@@ -34,7 +34,7 @@ public final class CdiContainer
 
   @Produces
   @ApplicationScoped
-  private static ICdiControl CDI_CONTROL;
+  static ICdiControl CDI_CONTROL;
 
   private CdiContainer()
   {
@@ -49,10 +49,24 @@ public final class CdiContainer
    */
   public static ICdiControl boot()
   {
+    return boot(config -> {
+    });
+  }
+
+  /**
+   * Boots the CDI container. After a successful startup process {@link ICdiControl} will be available via injection.
+   * To reboot the CDI container {@link ICdiControl#shutdown()} has to be called first. Otherwise a subsequent call
+   * will lead to a runtime exception.
+   *
+   * @return an interface to control and create CDI elements
+   */
+  public static ICdiControl boot(Consumer<SeContainerInitializer> pConfig)
+  {
     if (CDI_CONTROL != null)
       throw new IllegalStateException("Cdi container already booted!");
 
     final SeContainerInitializer initializer = SeContainerInitializer.newInstance();
+    pConfig.accept(initializer);
     CDI_CONTROL = new _CdiControl(initializer.initialize());
     return CDI_CONTROL;
   }
@@ -136,6 +150,12 @@ public final class CdiContainer
     public boolean isContextActive(Class<? extends Annotation> pScopeAnnotationType)
     {
       return _retrieveFromContext(pScopeAnnotationType, AbstractCustomContext::isActive);
+    }
+
+    @Override
+    public SeContainer getContainer()
+    {
+      return container;
     }
 
     @Override
