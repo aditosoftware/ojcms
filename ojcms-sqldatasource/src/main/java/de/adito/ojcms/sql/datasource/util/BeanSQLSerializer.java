@@ -50,7 +50,7 @@ public class BeanSQLSerializer extends DefaultValueSerializer
     final VALUE value = pTuple.getValue();
 
     if (value == null)
-      return null;
+      return NULL_SERIAL_VALUE;
 
     if (!(field instanceof ISerializableField))
       throw new BeanSerializationException(_notSerializableMessage(field, true));
@@ -70,19 +70,21 @@ public class BeanSQLSerializer extends DefaultValueSerializer
    * @param <VALUE>    the data type of the bean field
    * @return the converted data value
    */
-  @SuppressWarnings("unchecked")
   private <VALUE, SERIAL extends Serializable> VALUE _fromPersistent(IColumnIdentification<?> pColumn, ResultSet pResultSet, int pIndex)
   {
-    final SERIAL serialValue = (SERIAL) super.fromSerial(pColumn, pResultSet, pIndex);
+    if (!(pColumn instanceof IBeanFieldBased))
+      //noinspection unchecked
+      return (VALUE) super.fromSerial(pColumn, pResultSet, pIndex);
 
-    if (!(pColumn instanceof IBeanFieldTupleBased))
-      return (VALUE) serialValue;
-
-    final IField<VALUE> field = ((IBeanFieldTupleBased<VALUE>) pColumn).getFieldValueTuple().getField();
+    //noinspection unchecked
+    final IField<VALUE> field = ((IBeanFieldBased<VALUE>) pColumn).getBeanField();
     if (!(field instanceof ISerializableField))
       throw new BeanSerializationException(_notSerializableMessage(field, false));
 
-    return ((ISerializableField<VALUE, SERIAL>) field).fromPersistent(serialValue);
+    final ISerializableField<VALUE, SERIAL> serializableField = (ISerializableField<VALUE, SERIAL>) field;
+    final SERIAL serialValue = retrieveSerialValue(serializableField.getSerialValueType(), pResultSet, pIndex);
+
+    return serializableField.fromPersistent(serialValue);
   }
 
   /**

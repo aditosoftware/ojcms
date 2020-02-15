@@ -49,6 +49,12 @@ public class DateField extends AbstractField<Instant> implements ISerializableFi
   }
 
   @Override
+  public Class<Long> getSerialValueType()
+  {
+    return Long.class;
+  }
+
+  @Override
   public Instant fromPersistent(Long pSerialValue)
   {
     return Instant.ofEpochMilli(pSerialValue);

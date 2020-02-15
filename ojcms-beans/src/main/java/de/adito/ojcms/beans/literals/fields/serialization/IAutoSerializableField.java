@@ -21,4 +21,10 @@ public interface IAutoSerializableField<VALUE extends Serializable> extends ISer
   {
     return pSerialValue;
   }
+
+  @Override
+  default Class<VALUE> getSerialValueType()
+  {
+    return getDataType();
+  }
 }

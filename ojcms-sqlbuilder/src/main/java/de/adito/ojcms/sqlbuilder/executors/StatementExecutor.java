@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 
 /**
  * Implementation of a statement executor based on a function that will be provided with a {@link PreparedStatement}.
@@ -17,6 +18,8 @@ import java.util.function.Supplier;
  */
 class StatementExecutor<RESULT> implements IStatementExecutor<RESULT>
 {
+  private static final Logger LOGGER = Logger.getLogger(StatementExecutor.class.getName());
+
   private final Supplier<Connection> connectionSupplier;
   private final ThrowingFunction<PreparedStatement, RESULT, SQLException> executor;
   private Connection connection;
@@ -47,7 +50,9 @@ class StatementExecutor<RESULT> implements IStatementExecutor<RESULT>
       for (ISerialValue arg : pArgs)
         arg.applyToStatement(statement, argIndex++);
 
-      return executor.apply(statement);
+      final RESULT result = executor.apply(statement);
+      LOGGER.info("SQL executed: " + pSQLStatement);
+      return result;
     }
     catch (SQLException pE)
     {

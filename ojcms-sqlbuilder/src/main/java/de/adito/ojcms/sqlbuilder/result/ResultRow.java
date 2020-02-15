@@ -99,7 +99,8 @@ public final class ResultRow
   {
     //noinspection unchecked
     return Stream.of(pColumnsToInclude)
-        .collect(Collectors.toMap(pColumnMapper, pColumn -> get((IColumnIdentification) pColumn)));
+        //Allow null values
+        .collect(HashMap::new, (pMap, pColumn) -> pMap.put(pColumnMapper.apply(pColumn), get((IColumnIdentification) pColumn)), HashMap::putAll);
   }
 
   /**

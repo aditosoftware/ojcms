@@ -50,6 +50,12 @@ public class EnumField<ENUM extends Enum> extends AbstractField<ENUM> implements
   }
 
   @Override
+  public Class<String> getSerialValueType()
+  {
+    return String.class;
+  }
+
+  @Override
   public ENUM copyValue(ENUM pEnum, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
   {
     return pEnum;

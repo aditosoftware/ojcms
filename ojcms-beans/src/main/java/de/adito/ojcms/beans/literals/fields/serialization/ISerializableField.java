@@ -27,4 +27,9 @@ public interface ISerializableField<VALUE, SERIAL extends Serializable> extends 
    * @return the original field value
    */
   VALUE fromPersistent(SERIAL pSerialValue);
+
+  /**
+   * The serial value's type.
+   */
+  Class<SERIAL> getSerialValueType();
 }

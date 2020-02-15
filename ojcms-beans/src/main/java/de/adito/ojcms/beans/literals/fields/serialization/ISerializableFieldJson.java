@@ -21,4 +21,10 @@ public interface ISerializableFieldJson<VALUE> extends ISerializableField<VALUE,
   {
     return new Gson().fromJson(pSerialString, getDataType());
   }
+
+  @Override
+  default Class<String> getSerialValueType()
+  {
+    return String.class;
+  }
 }

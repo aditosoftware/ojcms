@@ -21,6 +21,7 @@ import static java.util.function.Function.identity;
 public class DefaultValueSerializer implements IValueSerializer
 {
   private static final Map<Class, _SupportedSerialization<?, ?>> SUPPORTED_SERIALIZATIONS = new HashMap<>();
+  protected static final ISerialValue NULL_SERIAL_VALUE = new _NullSerialValue();
 
   /*
    * Adds all supported data types.
@@ -58,8 +59,7 @@ public class DefaultValueSerializer implements IValueSerializer
   @Nullable
   public <VALUE> VALUE fromSerial(IColumnIdentification<VALUE> pColumn, ResultSet pResultSet, int pIndex)
   {
-    final _SupportedSerialization<VALUE, ?> serialization = _getSerializationForType(pColumn.getDataType());
-    return serialization.retrieveConvertedResult(pResultSet, pIndex);
+    return retrieveSerialValue(pColumn.getDataType(), pResultSet, pIndex);
   }
 
   /**
@@ -73,7 +73,7 @@ public class DefaultValueSerializer implements IValueSerializer
   protected <VALUE, SERIAL extends Serializable> ISerialValue createSerialValue(Class<VALUE> pDataType, VALUE pDataValue)
   {
     if (pDataValue == null)
-      return null;
+      return NULL_SERIAL_VALUE;
 
     final _SupportedSerialization<VALUE, SERIAL> serialization = _getSerializationForType(pDataType);
 
@@ -94,6 +94,21 @@ public class DefaultValueSerializer implements IValueSerializer
         }
       }
     };
+  }
+
+  /**
+   * Retrieves a value from a {@link ResultSet} and converts it back to its original data value.
+   *
+   * @param pValueType the value type to retrieve
+   * @param pResultSet the SQL result set to retrieve the value from
+   * @param pIndex     the index to retrieve the result from
+   * @return the original data value
+   */
+  @Nullable
+  protected <VALUE> VALUE retrieveSerialValue(Class<VALUE> pValueType, ResultSet pResultSet, int pIndex)
+  {
+    final _SupportedSerialization<VALUE, ?> serialization = _getSerializationForType(pValueType);
+    return serialization.retrieveConvertedResult(pResultSet, pIndex);
   }
 
   /**
@@ -236,5 +251,24 @@ public class DefaultValueSerializer implements IValueSerializer
      * @return the serial value in it correct data type
      */
     SERIAL retrieveResult(ResultSet pResultSet, int pIndex) throws SQLException;
+  }
+
+  /**
+   * Null serial value.
+   */
+  private static class _NullSerialValue implements ISerialValue
+  {
+    @Override
+    public void applyToStatement(PreparedStatement pStatement, int pIndex)
+    {
+      try
+      {
+        pStatement.setObject(pIndex, null);
+      }
+      catch (SQLException pE)
+      {
+        throw new OJDatabaseException("Unable to apply parameter to statement!", pE);
+      }
+    }
   }
 }
