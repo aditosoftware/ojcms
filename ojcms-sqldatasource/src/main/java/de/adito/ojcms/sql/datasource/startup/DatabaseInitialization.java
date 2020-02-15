@@ -31,7 +31,8 @@ class DatabaseInitialization implements IStartupCallback
   @Override
   public void onCdiStartup()
   {
-    SingleBeanPersistenceModel.createSingleBeanTableIfNecessary(builder);
+    if (!models.getAllSingleBeanIds().isEmpty())
+      SingleBeanPersistenceModel.createSingleBeanTableIfNecessary(builder);
 
     for (IDatabaseCleanup cleaner : cleaners)
       cleaner.cleanup(builder);
