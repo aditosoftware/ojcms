@@ -13,4 +13,15 @@ public interface IStartupCallback
    * Called after successful CDI initialization.
    */
   void onCdiStartup();
+
+  /**
+   * A number identifying the priority of this startup callback.
+   * The default is zero. Callbacks with higher numbers will be executed earlier.
+   *
+   * @return a number indicating the priority of the startup callback
+   */
+  default int priority()
+  {
+    return 0;
+  }
 }

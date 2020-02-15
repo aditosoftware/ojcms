@@ -25,4 +25,10 @@ class StartupBeanRegistration implements IStartupCallback
     CONTAINER_BEAN_TYPES.forEach((pBeanType, pContainerId) -> storage.registerPersistentBean(pBeanType, pContainerId, true));
     SINGLE_BEAN_TYPES.forEach((pBeanType, pBeanId) -> storage.registerPersistentBean(pBeanType, pBeanId, false));
   }
+
+  @Override
+  public int priority()
+  {
+    return 100;
+  }
 }

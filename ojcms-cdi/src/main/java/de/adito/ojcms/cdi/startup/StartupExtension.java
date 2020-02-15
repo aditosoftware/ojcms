@@ -31,6 +31,10 @@ class StartupExtension implements Extension
    */
   void afterCdiStartup(@Observes @Initialized(ApplicationScoped.class) Object pObject)
   {
-    startupCallbacks.forEach(pCallbackType -> CDI.current().select(pCallbackType).get().onCdiStartup());
+    startupCallbacks.stream()
+        .map(pCallbackType -> CDI.current().select(pCallbackType).get())
+        //Execute them in descending priority order
+        .sorted(Comparator.comparingInt(IStartupCallback::priority).reversed())
+        .forEach(IStartupCallback::onCdiStartup);
   }
 }

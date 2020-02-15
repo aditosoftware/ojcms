@@ -21,7 +21,7 @@ public class CustomContextTest
   @BeforeAll
   public static void bootCdi()
   {
-    cdiControl = CdiContainer.boot();
+    cdiControl = CdiContainer.boot(pConfig -> pConfig.addBeanClasses(SomeBeanLivingInCustomContext.class));
   }
 
   @AfterAll

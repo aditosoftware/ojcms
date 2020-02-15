@@ -4,8 +4,9 @@ import de.adito.ojcms.cdi.*;
 import org.junit.jupiter.api.Test;
 
 import javax.enterprise.context.ApplicationScoped;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test for {@link IStartupCallback} that should be called after CDI boot.
@@ -14,14 +15,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public class StartupCallbackTest
 {
-  private static boolean called;
+  private static List<Class<? extends IStartupCallback>> calledOrder;
 
   @Test
   public void testCallbackRegisteredAndCalled()
   {
-    called = false;
-    final ICdiControl cdiControl = CdiContainer.boot();
-    assertTrue(called);
+    calledOrder = new ArrayList<>();
+    final ICdiControl cdiControl = CdiContainer.boot(pConfig -> pConfig.addBeanClasses(Callback.class, CallbackWithHigherPriority.class));
+    assertEquals(2, calledOrder.size());
+    assertSame(CallbackWithHigherPriority.class, calledOrder.get(0));
+    assertSame(Callback.class, calledOrder.get(1));
     cdiControl.shutdown();
   }
 
@@ -32,7 +35,24 @@ public class StartupCallbackTest
     @Override
     public void onCdiStartup()
     {
-      called = true;
+      calledOrder.add(Callback.class);
+    }
+  }
+
+  @SuppressWarnings("unused")
+  @ApplicationScoped
+  static class CallbackWithHigherPriority implements IStartupCallback
+  {
+    @Override
+    public void onCdiStartup()
+    {
+      calledOrder.add(CallbackWithHigherPriority.class);
+    }
+
+    @Override
+    public int priority()
+    {
+      return 1;
     }
   }
 }
