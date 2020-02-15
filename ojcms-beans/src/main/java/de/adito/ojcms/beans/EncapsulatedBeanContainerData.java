@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.*;
+import java.util.stream.IntStream;
 
 /**
  * The encapsulated bean container data implementation based on a data source.
@@ -30,6 +30,7 @@ class EncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends AbstractEn
   private final Optional<IStatisticData<Integer>> statisticData;
   private final Map<BEAN, Disposable> beanDisposableMapping = new ConcurrentHashMap<>();
   private final IndexChecker indexChecker = IndexChecker.create(this::size);
+  private boolean observingActive = false;
 
   /**
    * Creates the encapsulated bean container data core.
@@ -42,8 +43,6 @@ class EncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends AbstractEn
     super(pDataSource);
     beanType = pBeanType;
     statisticData = _tryCreateStatisticData();
-    //Observe all initial beans in the container
-    StreamSupport.stream(pDataSource.spliterator(), false).forEach(this::_observeBean);
   }
 
   @Override
@@ -65,7 +64,10 @@ class EncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends AbstractEn
       pIndex--;
     }
 
-    getDatasource().addBean(_observeBean(pBean), pIndex);
+    if (observingActive)
+      _observeBean(pBean);
+
+    getDatasource().addBean(pBean, pIndex);
   }
 
   @Override
@@ -79,7 +81,9 @@ class EncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends AbstractEn
   @Override
   public boolean removeBean(BEAN pBean)
   {
-    beanDisposableMapping.remove(pBean).dispose();
+    if (observingActive)
+      beanDisposableMapping.remove(pBean).dispose();
+
     return getDatasource().removeBean(pBean);
   }
 
@@ -122,6 +126,7 @@ class EncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends AbstractEn
       if (diffToMany > 0)
         IntStream.range(0, diffToMany).forEach(pIndex -> removeBean(0));
     }
+
     limitInfo = pMaxCount < 0 ? null : new _LimitInfo(pMaxCount, pEvicting);
   }
 
@@ -136,6 +141,19 @@ class EncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends AbstractEn
   public Iterator<BEAN> iterator()
   {
     return getDatasource().iterator();
+  }
+
+  @Override
+  public <EVENT extends IEvent<?>> Observable<EVENT> observeByType(Class<EVENT> pEventType)
+  {
+    if (!observingActive)
+    {
+      //Observe all beans in the container
+      stream().forEach(this::_observeBean);
+      observingActive = true;
+    }
+
+    return super.observeByType(pEventType);
   }
 
   /**
@@ -164,6 +182,7 @@ class EncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends AbstractEn
     //noinspection unchecked
     final Disposable disposable = combinedObservables
         .subscribe(pChangeEvent -> getEventObserverFromType((Class<IEvent<BEAN>>) pChangeEvent.getClass()).onNext(pChangeEvent));
+
     beanDisposableMapping.put(pBean, disposable);
     return pBean;
   }
