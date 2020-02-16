@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>de.adito.ojcms</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>ojcms-rest</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>de.adito.ojcms</groupId>
+      <artifactId>ojcms-persistence</artifactId>
+      <version>${version.ojcms}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>de.adito.ojcms</groupId>
+      <artifactId>ojcms-sqldatasource</artifactId>
+      <version>${version.ojcms}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>jakarta.ws.rs</groupId>
+      <artifactId>jakarta.ws.rs-api</artifactId>
+      <version>2.1.6</version>
+    </dependency>
+
+    <dependency>
+    <groupId>org.glassfish.jersey.inject</groupId>
+    <artifactId>jersey-cdi2-se</artifactId>
+    <version>2.30</version>
+    <exclusions>
+      <exclusion>
+        <groupId>org.jboss.weld.se</groupId>
+        <artifactId>weld-se-core</artifactId>
+      </exclusion>
+    </exclusions>
+  </dependency>
+
+  </dependencies>
+
+</project>
