@@ -2,7 +2,7 @@ package de.adito.ojcms.utils;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
+import java.util.*;
 import java.util.function.*;
 
 /**
@@ -98,6 +98,18 @@ public final class OptionalNullable<VALUE>
   public <NEW> OptionalNullable<NEW> map(Function<? super VALUE, ? extends NEW> pMapper)
   {
     return present ? of(pMapper.apply(value)) : notPresent();
+  }
+
+  /**
+   * Maps the value of this {@link OptionalNullable} to a regular {@link Optional}.
+   *
+   * @param pMapper the function to map the value. (may result in a new value type)
+   * @param <NEW>   the type of the new value
+   * @return the new regular optional based on the mapped value
+   */
+  public <NEW> Optional<NEW> mapToOptional(Function<? super VALUE, ? extends NEW> pMapper)
+  {
+    return present ? Optional.ofNullable(pMapper.apply(value)) : Optional.empty();
   }
 
   /**
