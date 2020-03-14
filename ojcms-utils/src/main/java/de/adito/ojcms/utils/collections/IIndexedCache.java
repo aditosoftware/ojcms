@@ -6,6 +6,7 @@ import java.util.function.Function;
 /**
  * Indexed based, sortable cache that may be filled lazily. Also adapts indexes when elements are removed or added.
  * Null elements are not allowed.
+ * Duplicate elements at different indexes are forbidden also.
  *
  * @param <T> the type of the elements within the indexed cache
  * @author Simon Danner, 10.01.2020
@@ -40,6 +41,7 @@ public interface IIndexedCache<T>
   /**
    * Registers a cached element at a specific index. If the index is not available anymore, the element is considered as
    * a new addition to the cache. In this case all elements that are above the added (index-wise) will increase their index by one.
+   * An element must be unique. Otherwise a runtime exception will be thrown.
    *
    * @param pElement the element to cache
    * @param pIndex   the index to cache the element at
@@ -48,6 +50,7 @@ public interface IIndexedCache<T>
 
   /**
    * Replaces an existing element at a specific index.
+   * If there is no element at the given index, this call is equal to {@link IIndexedCache#addAtIndex(Object, int)}.
    *
    * @param pElement the new element to replace the prior with
    * @param pIndex   the index at which the element should be replaced

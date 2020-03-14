@@ -51,6 +51,15 @@ class IndexedCacheTest extends AbstractInterfaceTest<IIndexedCache>
   }
 
   @TestAllSubTypes
+  public void testAddElementAtIndex_DuplicateElementsForbidden(IIndexedCache<_Element> pCache)
+  {
+    final _Element e1 = new _Element(42, "42");
+    final _Element e2 = new _Element(42, "42"); //Equal by hashCode
+    pCache.addAtIndex(e1, 5);
+    assertThrows(IllegalArgumentException.class, () -> pCache.addAtIndex(e2, 6));
+  }
+
+  @TestAllSubTypes
   public void testReplaceElement(IIndexedCache<_Element> pCache)
   {
     final _Element e1 = new _Element(42, "42");
@@ -153,8 +162,27 @@ class IndexedCacheTest extends AbstractInterfaceTest<IIndexedCache>
     cache.addAtIndex(new _Element(1, "1"), 0);
     assertFalse(cache.isFull());
 
-    cache.addAtIndex(new _Element(1, "1"), 1);
+    cache.addAtIndex(new _Element(2, "2"), 1);
     assertTrue(cache.isFull());
+
+    assertThrows(IllegalArgumentException.class, () -> cache.addAtIndex(new _Element(2, "2"), 1));
+  }
+
+  @TestAllSubTypes
+  public void testAddAtFront(IIndexedCache<_Element> pCache)
+  {
+    final _Element e1 = new _Element(42, "42");
+    final _Element e2 = new _Element(43, "43");
+    pCache.addAtIndex(e1, 0);
+    pCache.addAtIndex(e2, 1);
+
+    final _Element e3 = new _Element(44, "44");
+    pCache.addAtIndex(e3, 0);
+
+    assertEquals(3, pCache.size());
+    assertSame(e3, pCache.getElementAtIndex(0).orElseThrow(AssertionError::new));
+    assertSame(e1, pCache.getElementAtIndex(1).orElseThrow(AssertionError::new));
+    assertSame(e2, pCache.getElementAtIndex(2).orElseThrow(AssertionError::new));
   }
 
   /**

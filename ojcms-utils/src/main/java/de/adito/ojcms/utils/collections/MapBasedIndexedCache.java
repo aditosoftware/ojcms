@@ -1,6 +1,7 @@
 package de.adito.ojcms.utils.collections;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 /**
  * Map based implementation of {@link IIndexedCache}.
@@ -69,13 +70,18 @@ public class MapBasedIndexedCache<T> implements IIndexedCache<T>
       throw new IllegalArgumentException("Unable to add new element at last possible index! max size: " + maxSize.getAsInt());
 
     if (idByIndex.containsKey(pIndex))
-      _adaptIndexesAfterContentChange(pIndex, true);
+      _adaptIndexesAfterAddition(pIndex);
 
     idByIndex.put(pIndex, currentId);
     indexById.put(currentId, pIndex);
     contentById.put(currentId, pElement);
+
+    if (idByContent.containsKey(pElement))
+      throw new IllegalArgumentException("Duplicate content! That is forbidden! Duplicate: " + pElement);
     idByContent.put(pElement, currentId);
+
     currentId++;
+    _assureConsistency();
   }
 
   @Override
@@ -90,10 +96,11 @@ public class MapBasedIndexedCache<T> implements IIndexedCache<T>
     {
       final Long id = idByIndex.get(pIndex);
       contentById.put(id, pElement);
-      idByContent.remove(pElement);
+      idByContent.remove(oldElement.get());
       idByContent.put(pElement, id);
     }
 
+    _assureConsistency();
     return oldElement;
   }
 
@@ -108,7 +115,8 @@ public class MapBasedIndexedCache<T> implements IIndexedCache<T>
     indexById.remove(id);
     idByContent.remove(removedContent);
 
-    _adaptIndexesAfterContentChange(pIndex, false);
+    _adaptIndexesAfterRemoval(pIndex);
+    _assureConsistency();
     return Optional.of(removedContent);
   }
 
@@ -123,7 +131,8 @@ public class MapBasedIndexedCache<T> implements IIndexedCache<T>
     idByIndex.remove(index);
     contentById.remove(id);
 
-    _adaptIndexesAfterContentChange(index, false);
+    _adaptIndexesAfterRemoval(index);
+    _assureConsistency();
     return true;
   }
 
@@ -143,6 +152,8 @@ public class MapBasedIndexedCache<T> implements IIndexedCache<T>
       indexById.put(id, index);
       idByIndex.put(index, id);
     }
+
+    _assureConsistency();
   }
 
   @Override
@@ -167,29 +178,57 @@ public class MapBasedIndexedCache<T> implements IIndexedCache<T>
   }
 
   /**
-   * Adapts all indexes above an affected index after an addition or removal of an element.
-   * In case of an addition all indexes will be increased by one.
-   * Accordingly in case of a removal all indexes above will be decreased by one.
+   * Adapts all indexes above an affected index after an addition of an element.
+   * All indexes will be increased by one.
    *
-   * @param pAffectedIndex the affected index of the addition or removal
-   * @param pIsAddition    <tt>true</tt> if the change has been an addition
+   * @param pAffectedIndex the affected index of the addition
    */
-  private void _adaptIndexesAfterContentChange(int pAffectedIndex, boolean pIsAddition)
+  private void _adaptIndexesAfterAddition(int pAffectedIndex)
   {
-    final int threshold = pAffectedIndex + (pIsAddition ? 0 : 1);
+    final Set<Integer> indexesToRemove = new HashSet<>();
 
-    for (Map.Entry<Long, Integer> entry : indexById.entrySet())
-    {
-      if (entry.getValue() < threshold)
-        continue;
+    indexById.entrySet().stream()
+        .filter(pEntry -> pEntry.getValue() >= pAffectedIndex) //Remove entries with index below affected one
+        .sorted((pEntry1, pEntry2) -> pEntry2.getValue() - pEntry1.getValue()) //Descending by index
+        .forEach(pEntry ->
+                 {
+                   final int oldIndex = pEntry.getValue();
+                   final int newIndex = oldIndex + 1;
 
-      final int oldIndex = entry.getValue();
-      final int newIndex = pIsAddition ? oldIndex + 1 : oldIndex - 1;
+                   pEntry.setValue(newIndex);
+                   idByIndex.put(newIndex, pEntry.getKey());
+                   indexesToRemove.add(oldIndex);
+                   indexesToRemove.remove(newIndex);
+                 });
 
-      entry.setValue(newIndex);
-      idByIndex.remove(oldIndex);
-      idByIndex.put(newIndex, entry.getKey());
-    }
+    indexesToRemove.forEach(idByIndex::remove);
+  }
+
+  /**
+   * Adapts all indexes above an affected index after a removal of an element.
+   * All indexes will be decreased by one.
+   *
+   * @param pAffectedIndex the affected index of the removal
+   */
+  private void _adaptIndexesAfterRemoval(int pAffectedIndex)
+  {
+    final Set<Integer> indexesToRemove = new HashSet<>();
+
+    indexById.entrySet().stream()
+        .filter(pEntry -> pEntry.getValue() > pAffectedIndex) //Remove entries with index below the affected one
+        .sorted((pEntry1, pEntry2) -> pEntry2.getValue() - pEntry1.getValue()) //Descending by index
+        .forEach(pEntry ->
+                 {
+                   final int oldIndex = pEntry.getValue();
+                   final int newIndex = oldIndex - 1;
+
+                   pEntry.setValue(newIndex);
+                   idByIndex.put(newIndex, pEntry.getKey());
+                   indexesToRemove.add(oldIndex);
+                   indexesToRemove.remove(newIndex);
+                 });
+
+    indexesToRemove.forEach(idByIndex::remove);
   }
 
   /**
@@ -209,5 +248,18 @@ public class MapBasedIndexedCache<T> implements IIndexedCache<T>
       throw new IndexOutOfBoundsException("Index is greater than max size! index: " + pIndex + ", max size: " + maxSize.getAsInt());
 
     return pIndex;
+  }
+
+  /**
+   * Makes sure the content of the indexed is still consistent. (May be removed if the implementation is stable enough)
+   */
+  private void _assureConsistency()
+  {
+    final boolean isConsistent = IntStream.of(idByContent.size(), contentById.size(), indexById.size(), idByIndex.size())
+        .distinct()
+        .count() == 1;
+
+    if (!isConsistent)
+      throw new IllegalStateException("Content of indexed cache is not consistent anymore!");
   }
 }

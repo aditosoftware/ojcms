@@ -53,7 +53,7 @@ interface IEncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends IEnca
    * Removes a bean by index.
    *
    * @param pIndex the index to remove
-   * @return the removed bean or null
+   * @return the removed bean
    * @throws IndexOutOfBoundsException if, the index is not within the range of the contained beans
    */
   BEAN removeBean(int pIndex);
