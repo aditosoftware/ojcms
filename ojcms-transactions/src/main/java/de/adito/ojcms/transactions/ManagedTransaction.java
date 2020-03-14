@@ -7,6 +7,7 @@ import de.adito.ojcms.transactions.spi.*;
 
 import javax.inject.Inject;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of a managed transaction that lives in a transactional scope.
@@ -25,66 +26,106 @@ class ManagedTransaction implements ITransaction
   @Inject
   private OverallTransactionalChanges overallTransactionalChanges;
   @Inject
-  private TransactionalChanges changes;
+  private TransactionalChanges transactionalChanges;
 
-  private final Map<String, Integer> containerSizeCache = new HashMap<>();
-  private final Map<IBeanKey, PersistentBeanData> beanDataCache = new HashMap<>();
-  private final Map<String, Map<Integer, PersistentBeanData>> fullContainerLoadCache = new HashMap<>();
+  private final Map<String, Integer> containerSizes = new HashMap<>();
+  private final Map<InitialIndexKey, PersistentBeanData> containerBeanData = new HashMap<>();
+  private final Map<_RequestByIdentifiers, Optional<InitialIndexKey>> identifierRequestCache = new HashMap<>();
+  private final Map<SingleBeanKey, PersistentBeanData> singleBeanData = new HashMap<>();
+  private final Map<String, Map<Integer, PersistentBeanData>> fullContainerData = new HashMap<>();
 
   @Override
   public int requestContainerSize(String pContainerId)
   {
-    overallTransactionalChanges.throwIfContainerDirty(pContainerId, changes);
-
-    final int initialSize = containerSizeCache.computeIfAbsent(pContainerId, loader::loadContainerSize);
-    final int differenceByChanges = changes.getContainerSizeDifference(pContainerId);
+    overallTransactionalChanges.throwIfContainerDirtyInSize(pContainerId, transactionalChanges);
+    final int initialSize = containerSizes.computeIfAbsent(pContainerId, loader::loadContainerSize);
+    final int differenceByChanges = transactionalChanges.getContainerSizeDifference(pContainerId);
     return initialSize + differenceByChanges;
   }
 
   @Override
-  public <KEY extends IBeanKey> PersistentBeanData requestBeanDataByKey(KEY pKey)
+  public PersistentBeanData requestBeanDataByIndex(CurrentIndexKey pKey)
   {
-    overallTransactionalChanges.throwIfBeanDirty(pKey, changes);
+    final InitialIndexKey initialKey = transactionalChanges.currentToInitialIndexKey(pKey);
+    overallTransactionalChanges.throwIfContainerBeanDirty(initialKey, transactionalChanges);
 
-    final PersistentBeanData initialData = beanDataCache.computeIfAbsent(pKey, loader::loadByKey);
-    return _integrateChanges(pKey, initialData);
+    if (transactionalChanges.isAdded(pKey))
+      throw new IllegalStateException("Cannot request bean data that has just been added within this transaction!");
+
+    if (transactionalChanges.isRemoved(initialKey))
+      throw new IllegalStateException("Cannot request bean data that has been removed within this transaction!");
+
+    final PersistentBeanData beanData = containerBeanData.computeIfAbsent(initialKey, loader::loadContainerBeanDataByIndex);
+    return transactionalChanges.integrateContainerBeanChanges(initialKey, beanData);
+  }
+
+  @Override
+  public Optional<PersistentBeanData> requestBeanDataByIdentifierTuples(String pContainerId, Map<IField<?>, Object> pIdentifiers)
+  {
+    return identifierRequestCache.computeIfAbsent(new _RequestByIdentifiers(pContainerId, pIdentifiers), pRequest ->
+    {
+      //Load data by identifiers if not cached yet
+      final Optional<PersistentBeanData> beanData = loader.loadContainerBeanDataByIdentifiers(pContainerId, pIdentifiers);
+
+      if (beanData.isPresent())
+      {
+        final InitialIndexKey key = new InitialIndexKey(pContainerId, beanData.get().getIndex());
+        containerBeanData.putIfAbsent(key, beanData.get());
+        return Optional.of(key);
+      }
+
+      return Optional.empty();
+    })
+        //Integrate changes finally
+        .map(pIndexKey -> transactionalChanges.integrateContainerBeanChanges(pIndexKey, containerBeanData.get(pIndexKey)));
+  }
+
+  @Override
+  public PersistentBeanData requestSingleBeanData(SingleBeanKey pKey)
+  {
+    overallTransactionalChanges.throwIfSingleBeanDirty(pKey, transactionalChanges);
+    final PersistentBeanData beanData = singleBeanData.computeIfAbsent(pKey, loader::loadSingleBeanData);
+    return transactionalChanges.integrateSingleBeanChanges(pKey, beanData);
   }
 
   @Override
   public Map<Integer, PersistentBeanData> requestFullContainerLoad(String pContainerId)
   {
-    overallTransactionalChanges.throwIfContainerDirty(pContainerId, changes);
-    final Map<Integer, PersistentBeanData> fullData = fullContainerLoadCache.computeIfAbsent(pContainerId, loader::fullContainerLoad);
-
-    for (PersistentBeanData beanData : fullData.values())
-    {
-      //There may be changes registered by index or identifiers
-      _integrateChanges(beanData.createIndexKey(pContainerId), beanData);
-      _integrateChanges(beanData.createIdentifierKey(pContainerId), beanData);
-    }
-
-    return fullData;
+    overallTransactionalChanges.throwIfContainerDirtyInSize(pContainerId, transactionalChanges);
+    final Map<Integer, PersistentBeanData> fullData = fullContainerData.computeIfAbsent(pContainerId, loader::fullContainerLoad);
+    //Integrate changes here as well
+    return fullData.entrySet().stream()
+        .collect(Collectors.toMap(Map.Entry::getKey, pEntry ->
+            transactionalChanges.integrateContainerBeanChanges(new InitialIndexKey(pContainerId, pEntry.getKey()), pEntry.getValue())));
   }
 
   @Override
-  public void registerBeanAddition(String pContainerId, int pIndex, Map<IField<?>, Object> pNewData)
+  public void registerBeanAddition(CurrentIndexKey pKey, Map<IField<?>, Object> pNewData)
   {
-    overallTransactionalChanges.throwIfContainerDirty(pContainerId, changes);
-    changes.beanAdded(pContainerId, pIndex, pNewData);
+    overallTransactionalChanges.throwIfContainerDirtyInSize(pKey.getContainerId(), transactionalChanges);
+    transactionalChanges.beanAdded(pKey, pNewData);
   }
 
   @Override
-  public <KEY extends IContainerBeanKey> void registerBeanRemoval(KEY pKey)
+  public void registerBeanRemoval(CurrentIndexKey pKey)
   {
-    overallTransactionalChanges.throwIfContainerDirty(pKey.getContainerId(), changes);
-    changes.beanRemoved(pKey);
+    overallTransactionalChanges.throwIfContainerDirtyInSize(pKey.getContainerId(), transactionalChanges);
+    transactionalChanges.beanRemoved(pKey);
   }
 
   @Override
-  public <KEY extends IBeanKey, VALUE> void registerBeanValueChange(KEY pKey, IField<VALUE> pChangedField, VALUE pNewValue)
+  public <VALUE> void registerContainerBeanValueChange(CurrentIndexKey pKey, IField<VALUE> pChangedField, VALUE pNewValue)
   {
-    overallTransactionalChanges.throwIfBeanDirty(pKey, changes);
-    changes.beanValueChanged(pKey, pChangedField, pNewValue);
+    final InitialIndexKey initialKey = transactionalChanges.currentToInitialIndexKey(pKey);
+    overallTransactionalChanges.throwIfContainerBeanDirty(initialKey, transactionalChanges);
+    transactionalChanges.containerBeanValueHasChanged(pKey, pChangedField, pNewValue);
+  }
+
+  @Override
+  public <VALUE> void registerSingleBeanValueChange(SingleBeanKey pKey, IField<VALUE> pChangedField, VALUE pNewValue)
+  {
+    overallTransactionalChanges.throwIfSingleBeanDirty(pKey, transactionalChanges);
+    transactionalChanges.singleBeanValueHasChanged(pKey, pChangedField, pNewValue);
   }
 
   /**
@@ -92,7 +133,7 @@ class ManagedTransaction implements ITransaction
    */
   void commit()
   {
-    changes.commitChanges();
+    transactionalChanges.commitChanges();
     storage.commitChanges();
   }
 
@@ -105,16 +146,35 @@ class ManagedTransaction implements ITransaction
   }
 
   /**
-   * Integrates changes made within this transaction to an instance of {@link PersistentBeanData}.
-   *
-   * @param pKey         the key to identify the changes
-   * @param pInitialData the intial bean data to integrate the changes into
-   * @return the persistent bean data with integrated changes
+   * Identifier and wrapper for a bean data request by identifiers (field value tuples)
    */
-  private <KEY extends IBeanKey> PersistentBeanData _integrateChanges(KEY pKey, PersistentBeanData pInitialData)
+  private static class _RequestByIdentifiers
   {
-    return changes.getPotentiallyChangedValues(pKey)
-        .map(pInitialData::integrateChanges)
-        .orElse(pInitialData);
+    private final String containerId;
+    private final Map<IField<?>, Object> identifiers;
+
+    _RequestByIdentifiers(String pContainerId, Map<IField<?>, Object> pIdentifiers)
+    {
+      containerId = pContainerId;
+      identifiers = new HashMap<>(pIdentifiers);
+    }
+
+    @Override
+    public boolean equals(Object pOther)
+    {
+      if (this == pOther)
+        return true;
+      if (pOther == null || getClass() != pOther.getClass())
+        return false;
+
+      final _RequestByIdentifiers that = (_RequestByIdentifiers) pOther;
+      return Objects.equals(containerId, that.containerId) && Objects.equals(identifiers, that.identifiers);
+    }
+
+    @Override
+    public int hashCode()
+    {
+      return Objects.hash(containerId, identifiers);
+    }
   }
 }

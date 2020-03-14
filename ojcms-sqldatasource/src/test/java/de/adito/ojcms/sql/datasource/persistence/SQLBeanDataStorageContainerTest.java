@@ -1,12 +1,11 @@
 package de.adito.ojcms.sql.datasource.persistence;
 
-import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.sql.datasource.model.*;
 import de.adito.ojcms.transactions.api.*;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
-import java.util.*;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,25 +25,14 @@ public class SQLBeanDataStorageContainerTest extends AbstractDatabaseTest<Contai
   public void testProcessChangesForBean()
   {
     addContentToContainer(0, 42, "42", true);
-    final BeanIndexKey indexKey = new BeanIndexKey(CONTAINER_ID, 0);
+    final InitialIndexKey indexKey = new InitialIndexKey(CONTAINER_ID, 0);
 
-    storage.processChangesForBean(indexKey, Collections.singletonMap(SomeBean.FIELD1, 22));
-    final PersistentBeanData changedData1 = loader.loadByKey(indexKey);
+    storage.processChangesForContainerBean(indexKey, Collections.singletonMap(SomeBean.FIELD1, 22));
+    final PersistentBeanData changedData1 = loader.loadContainerBeanDataByIndex(indexKey);
 
     assertNotNull(changedData1);
     assertEquals(0, changedData1.getIndex());
     assertEquals(22, changedData1.getData().get(SomeBean.FIELD1));
-
-    final BeanIdentifiersKey identifiersKey = createIdentifiersKey(22, "42");
-    final Map<IField<?>, Object> changes = new HashMap<>();
-    changes.put(SomeBean.FIELD2, "22");
-    changes.put(SomeBean.FIELD3, false);
-
-    storage.processChangesForBean(identifiersKey, changes);
-    final PersistentBeanData changedData2 = loader.loadByKey(indexKey);
-    assertNotNull(changedData2);
-    assertEquals("22", changedData2.getData().get(SomeBean.FIELD2));
-    assertEquals(false, changedData2.getData().get(SomeBean.FIELD3));
   }
 
   @Test
@@ -55,10 +43,16 @@ public class SQLBeanDataStorageContainerTest extends AbstractDatabaseTest<Contai
 
     assertEquals(2, loader.loadContainerSize(CONTAINER_ID));
 
-    final PersistentBeanData data1 = loader.loadByKey(new BeanIndexKey(CONTAINER_ID, 0));
-    final PersistentBeanData data2 = loader.loadByKey(new BeanIndexKey(CONTAINER_ID, 1));
+    final PersistentBeanData data1 = loader.loadContainerBeanDataByIndex(new InitialIndexKey(CONTAINER_ID, 0));
+    final PersistentBeanData data2 = loader.loadContainerBeanDataByIndex(new InitialIndexKey(CONTAINER_ID, 1));
     assertEquals(expectedData1, data1);
     assertEquals(expectedData2, data2);
+
+    addContentToContainer(0, 3, "3", false);
+    assertEquals(3, loader.loadContainerSize(CONTAINER_ID));
+    final PersistentBeanData newData2 = loader.loadContainerBeanDataByIndex(new InitialIndexKey(CONTAINER_ID, 1));
+    assertEquals(1, newData2.getIndex());
+    assertEquals(expectedData1.getData(), newData2.getData());
   }
 
   @Test
@@ -67,18 +61,13 @@ public class SQLBeanDataStorageContainerTest extends AbstractDatabaseTest<Contai
     addContentToContainer(0, 1, "1", false);
     addContentToContainer(1, 2, "2", true);
     final PersistentBeanData expectedData = addContentToContainer(2, 3, "3", true);
-
     assertEquals(3, loader.loadContainerSize(CONTAINER_ID));
 
-    final Set<IContainerBeanKey> keys = new HashSet<>();
-    keys.add(new BeanIndexKey(CONTAINER_ID, 1));
-    keys.add(createIdentifiersKey(1, "1"));
+    storage.processRemovals(Collections.singletonMap(CONTAINER_ID, Collections.singleton(new InitialIndexKey(CONTAINER_ID, 1))));
 
-    storage.processRemovals(keys);
-
-    assertEquals(1, loader.loadContainerSize(CONTAINER_ID));
-    final PersistentBeanData data = loader.loadByKey(new BeanIndexKey(CONTAINER_ID, 0));
-    assertEquals(0, data.getIndex());
+    assertEquals(2, loader.loadContainerSize(CONTAINER_ID));
+    final PersistentBeanData data = loader.loadContainerBeanDataByIndex(new InitialIndexKey(CONTAINER_ID, 1));
+    assertEquals(1, data.getIndex());
     assertEquals(expectedData.getData(), data.getData());
   }
 

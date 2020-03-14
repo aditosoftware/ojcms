@@ -8,7 +8,7 @@ import java.util.Objects;
  *
  * @author Simon Danner, 26.12.2019
  */
-public final class BeanIndexKey implements IContainerBeanKey
+abstract class AbstractIndexKey
 {
   private final String containerId;
   private final int index;
@@ -19,13 +19,17 @@ public final class BeanIndexKey implements IContainerBeanKey
    * @param pContainerId the id of the container the bean data is located in
    * @param pIndex       the index of the bean data
    */
-  public BeanIndexKey(String pContainerId, int pIndex)
+  protected AbstractIndexKey(String pContainerId, int pIndex)
   {
     containerId = pContainerId;
     index = pIndex;
   }
 
-  @Override
+  /**
+   * The id of the persistence container id the bean is located in.
+   *
+   * @return the container's id
+   */
   public String getContainerId()
   {
     return containerId;
@@ -49,7 +53,7 @@ public final class BeanIndexKey implements IContainerBeanKey
     if (pOther == null || getClass() != pOther.getClass())
       return false;
 
-    final BeanIndexKey that = (BeanIndexKey) pOther;
+    final AbstractIndexKey that = (AbstractIndexKey) pOther;
     return index == that.index && Objects.equals(containerId, that.containerId);
   }
 

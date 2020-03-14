@@ -22,7 +22,7 @@ public class ContainerPersistenceModelTest extends AbstractDatabaseTest<Containe
     otherModel.initModelInDatabase(builder);
 
     assertTrue(builder.hasTable(CONTAINER_ID + 2));
-    assertEquals(4, builder.getColumnCount(CONTAINER_ID + 2)); //Three bean fields + id column -> 4
+    assertEquals(5, builder.getColumnCount(CONTAINER_ID + 2)); //Three bean fields + id and index column -> 5
   }
 
   @Test
@@ -35,30 +35,31 @@ public class ContainerPersistenceModelTest extends AbstractDatabaseTest<Containe
     addContentToContainer(2, 2345, "value3", true);
     assertEquals(3, model.loadSize(builder));
 
-    storage.processRemovals(Collections.singleton(new BeanIndexKey(CONTAINER_ID, 1)));
+    storage.processRemovals(Collections.singletonMap(CONTAINER_ID, Collections.singleton(new InitialIndexKey(CONTAINER_ID, 1))));
     assertEquals(2, model.loadSize(builder));
   }
 
   @Test
   public void testLoadDataByKey_Container()
   {
-    final BeanIndexKey indexKeyFirstRow = new BeanIndexKey(CONTAINER_ID, 0);
-    assertThrows(BeanDataNotFoundException.class, () -> model.loadDataByKey(indexKeyFirstRow, builder));
+    final InitialIndexKey indexKeyFirstRow = new InitialIndexKey(CONTAINER_ID, 0);
+    assertThrows(BeanDataNotFoundException.class, () -> model.loadDataByIndex(indexKeyFirstRow, builder));
 
     final List<PersistentBeanData> added = _addSomeContent();
 
     //Null key
-    assertThrows(NullPointerException.class, () -> model.loadDataByKey(null, builder));
+    assertThrows(NullPointerException.class, () -> model.loadDataByIndex(null, builder));
     //Bad index
-    assertThrows(BeanDataNotFoundException.class, () -> model.loadDataByKey(new BeanIndexKey(CONTAINER_ID, 55), builder));
+    assertThrows(BeanDataNotFoundException.class, () -> model.loadDataByIndex(new InitialIndexKey(CONTAINER_ID, 55), builder));
     //Bad first value identifiers
-    assertThrows(BeanDataNotFoundException.class, () -> model.loadDataByKey(createIdentifiersKey(12, "xxx"), builder));
+    assertFalse(model.loadDataByIdentifiers(createIdentifiers(12, "xxx"), builder).isPresent());
     //Bad second value identifiers
-    assertThrows(BeanDataNotFoundException.class, () -> model.loadDataByKey(createIdentifiersKey(666, "value1"), builder));
+    assertFalse(model.loadDataByIdentifiers(createIdentifiers(666, "value1"), builder).isPresent());
 
-    final PersistentBeanData result = model.loadDataByKey(indexKeyFirstRow, builder);
+    final PersistentBeanData result = model.loadDataByIndex(indexKeyFirstRow, builder);
     assertEquals(added.get(0), result);
-    final PersistentBeanData result2 = model.loadDataByKey(createIdentifiersKey(2, "2"), builder);
+    final PersistentBeanData result2 = model.loadDataByIdentifiers(createIdentifiers(2, "2"), builder)
+        .orElseThrow(AssertionError::new);
     assertEquals(added.get(1), result2);
   }
 

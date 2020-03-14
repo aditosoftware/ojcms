@@ -90,7 +90,7 @@ class BeanProducerExtension implements Extension
 
   /**
    * Creates producer beans for a persistent single bean.
-   * This includes the {@link IBean} instance itself and a {@link TransactionalScoped} {@link BeanContent}
+   * This includes the {@link IBean} instance itself and a {@link TransactionalScoped} {@link SingleBeanContent}
    * managing the content of the bean per transaction.
    *
    * @param pAfterBeanDiscovery allows the addition of custom CDI beans
@@ -110,7 +110,7 @@ class BeanProducerExtension implements Extension
     pAfterBeanDiscovery.addBean()
         .scope(TransactionalScoped.class)
         .qualifiers(literal)
-        .types(BeanContent.class)
+        .types(SingleBeanContent.class)
         .produceWith(pEnvironment -> _createSingleBeanContent(pEnvironment, pBeanId));
   }
 
@@ -156,22 +156,21 @@ class BeanProducerExtension implements Extension
   private static <BEAN extends IBean<BEAN>> BEAN _createSingleBean(Instance<Object> pEnvironment, Class<BEAN> pBeanType,
                                                                    ContainerQualifier pLiteral)
   {
-    //noinspection unchecked
-    final BeanContent<SingleBeanKey> content = pEnvironment.select(BeanContent.class, pLiteral).get();
+    final SingleBeanContent content = pEnvironment.select(SingleBeanContent.class, pLiteral).get();
     final PersistentBeanDatasource datasource = new PersistentBeanDatasource(content);
     return BeanPersistenceUtil.newPersistentBeanInstance(pBeanType, datasource);
   }
 
   /**
-   * Creates a {@link BeanContent} for a persistent single bean to manage its content.
+   * Creates a {@link SingleBeanContent} for a persistent single bean to manage its content.
    *
    * @param pEnvironment a CDI instance to create managed CDI beans
    * @param pBeanId      the persistence id of the single bean
    * @return the created instance managing the bean's content
    */
-  private static BeanContent<SingleBeanKey> _createSingleBeanContent(Instance<Object> pEnvironment, String pBeanId)
+  private static SingleBeanContent _createSingleBeanContent(Instance<Object> pEnvironment, String pBeanId)
   {
     final ITransaction transaction = pEnvironment.select(ITransaction.class).get();
-    return new BeanContent<>(new SingleBeanKey(pBeanId), transaction);
+    return new SingleBeanContent(new SingleBeanKey(pBeanId), transaction);
   }
 }

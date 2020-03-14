@@ -6,21 +6,21 @@ import de.adito.ojcms.transactions.annotations.TransactionalScoped;
 
 /**
  * A {@link IBeanDataSource} for persistent beans.
- * The actual values are provided by a {@link TransactionalScoped} {@link BeanContent}.
+ * The actual values are provided by a {@link TransactionalScoped} {@link AbstractBeanContent}.
  * Field removal is not supported for this datasource.
  *
  * @author Simon Danner, 01.01.2020
  */
 class PersistentBeanDatasource implements IBeanDataSource
 {
-  private final BeanContent content;
+  private final AbstractBeanContent content;
 
   /**
    * Initializes the persistent bean datasource.
    *
    * @param pContent the transactional scoped content of the bean
    */
-  PersistentBeanDatasource(BeanContent pContent)
+  PersistentBeanDatasource(AbstractBeanContent pContent)
   {
     content = pContent;
   }

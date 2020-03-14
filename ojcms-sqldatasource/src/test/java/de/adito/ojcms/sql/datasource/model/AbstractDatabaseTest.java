@@ -71,7 +71,7 @@ public abstract class AbstractDatabaseTest<MODEL extends IPersistenceModel> exte
   {
     final SomeBean bean = new SomeBean(pFirstValue, pSecondValue, pThirdValue);
     final PersistentBeanData persistentData = new PersistentBeanData(pIndex, bean.toMap());
-    final List<PersistentBeanData> newData = Collections.singletonList(persistentData);
+    final Set<PersistentBeanData> newData = Collections.singleton(persistentData);
 
     storage.processAdditionsForContainer(CONTAINER_ID, newData);
     return persistentData;
@@ -88,23 +88,22 @@ public abstract class AbstractDatabaseTest<MODEL extends IPersistenceModel> exte
   protected void setSingleBeanValues(int pFirstValue, String pSecondValue, boolean pThirdValue)
   {
     final SomeBean bean = new SomeBean(pFirstValue, pSecondValue, pThirdValue);
-    storage.processChangesForBean(new SingleBeanKey(CONTAINER_ID), bean.toMap());
+    storage.processChangesForSingleBean(new SingleBeanKey(CONTAINER_ID), bean.toMap());
   }
 
   /**
-   * Creates a {@link BeanIdentifiersKey} that identifies an instance of {@link SomeBean}.
+   * Creates field value tuple based identifiers for an instance of {@link SomeBean}.
    *
    * @param pFirstValue  the first value to identify
    * @param pSecondValue the second value to identify
-   * @return the created identifier based key
+   * @return the created identifiers as map
    */
-  protected BeanIdentifiersKey createIdentifiersKey(int pFirstValue, String pSecondValue)
+  protected Map<IField<?>, Object> createIdentifiers(int pFirstValue, String pSecondValue)
   {
     final Map<IField<?>, Object> identifiers = new HashMap<>();
     identifiers.put(SomeBean.FIELD1, pFirstValue);
     identifiers.put(SomeBean.FIELD2, pSecondValue);
-
-    return new BeanIdentifiersKey(CONTAINER_ID, identifiers);
+    return identifiers;
   }
 
   /**
@@ -160,13 +159,21 @@ public abstract class AbstractDatabaseTest<MODEL extends IPersistenceModel> exte
     private static IPersistenceModel model;
 
     @Override
-    public <KEY extends IBeanKey> IPersistenceModel<KEY> getPersistenceModel(String pContainerId)
+    public ContainerPersistenceModel getContainerPersistenceModel(String pContainerId)
     {
       if (CONTAINER_ID.equals(pContainerId))
-        //noinspection unchecked
-        return model;
+        return (ContainerPersistenceModel) model;
 
       throw new IllegalArgumentException("No model for container id " + pContainerId);
+    }
+
+    @Override
+    public SingleBeanPersistenceModel getSingleBeanPersistenceModel(String pBeanId)
+    {
+      if (CONTAINER_ID.equals(pBeanId))
+        return (SingleBeanPersistenceModel) model;
+
+      throw new IllegalArgumentException("No model for bean id " + pBeanId);
     }
   }
 }

@@ -5,6 +5,7 @@ import de.adito.ojcms.beans.literals.fields.util.FieldValueTuple;
 import de.adito.ojcms.sqlbuilder.definition.condition.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A where condition for database statements based on a {@link FieldValueTuple}.
@@ -51,16 +52,16 @@ public class BeanWhereCondition<VALUE> extends BeanColumnValueTuple<VALUE> imple
   }
 
   /**
-   * Creates an array of where conditions based on a field value map.
+   * Creates a list of where conditions based on a field value map.
    *
    * @param pValueMap the values mapped by bean fields to create the conditions of
-   * @return an array of where conditions
+   * @return a list of where conditions
    */
-  public static BeanWhereCondition<?>[] ofMap(Map<IField<?>, Object> pValueMap)
+  public static List<IWhereCondition<?>> conditionsOfMap(Map<IField<?>, Object> pValueMap)
   {
     //noinspection unchecked
     return pValueMap.entrySet().stream()
-        .map(pEntry -> new BeanWhereCondition<>((IField) pEntry.getKey(), pEntry.getValue(), IWhereOperator.isEqual()))
-        .toArray(BeanWhereCondition[]::new);
+        .map(pEntry -> (IWhereCondition<?>) new BeanWhereCondition<>((IField) pEntry.getKey(), pEntry.getValue(), IWhereOperator.isEqual()))
+        .collect(Collectors.toList());
   }
 }

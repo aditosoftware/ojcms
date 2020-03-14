@@ -1,33 +1,21 @@
 package de.adito.ojcms.persistence.datasource;
 
 import de.adito.ojcms.beans.literals.fields.IField;
-import de.adito.ojcms.transactions.api.*;
+import de.adito.ojcms.transactions.api.ITransaction;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 /**
- * Manages the content of a persistent bean within one {@link ITransaction}.
+ * Base class to manage the content of a persistent bean within one {@link ITransaction}.
  *
- * @param <KEY> the type of bean key used to identify the bean data
  * @author Simon Danner, 01.01.2020
  */
-class BeanContent<KEY extends IBeanKey>
+abstract class AbstractBeanContent<KEY>
 {
   private final KEY beanKey;
-  private final ITransaction transaction;
   private final Map<IField<?>, Object> content;
-
-  /**
-   * Initializes the bean content by requesting the initial content from the transaction.
-   *
-   * @param pBeanKey     the bean key that identifies the data
-   * @param pTransaction the transaction this bean data is associated with
-   */
-  BeanContent(KEY pBeanKey, ITransaction pTransaction)
-  {
-    this(pBeanKey, pTransaction, pTransaction.requestBeanDataByKey(pBeanKey).getData());
-  }
+  private final ITransaction transaction;
 
   /**
    * Initializes the bean content with given bean data.
@@ -36,7 +24,7 @@ class BeanContent<KEY extends IBeanKey>
    * @param pTransaction the transaction this bean data is associated with
    * @param pContent     given initial content mapped by bean fields
    */
-  BeanContent(KEY pBeanKey, ITransaction pTransaction, Map<IField<?>, Object> pContent)
+  AbstractBeanContent(KEY pBeanKey, ITransaction pTransaction, Map<IField<?>, Object> pContent)
   {
     beanKey = Objects.requireNonNull(pBeanKey);
     transaction = Objects.requireNonNull(pTransaction);
@@ -70,6 +58,16 @@ class BeanContent<KEY extends IBeanKey>
       throw new UnsupportedOperationException("Addition of fields not supported for persistent beans!");
 
     content.put(pField, pValue);
-    transaction.registerBeanValueChange(beanKey, pField, pValue);
+    registerValueChangeAtTransaction(transaction, beanKey, pField, pValue);
   }
+
+  /**
+   * Registers a bean value change at the associated transaction.
+   *
+   * @param pTransaction  the current transaction
+   * @param pBeanKey      the bean key associated with this content
+   * @param pChangedField the changed bean field
+   * @param pValue        the new value
+   */
+  abstract <VALUE> void registerValueChangeAtTransaction(ITransaction pTransaction, KEY pBeanKey, IField<VALUE> pChangedField, VALUE pValue);
 }

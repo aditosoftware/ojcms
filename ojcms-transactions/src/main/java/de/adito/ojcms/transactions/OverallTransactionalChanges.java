@@ -1,7 +1,8 @@
 package de.adito.ojcms.transactions;
 
-import de.adito.ojcms.transactions.api.IBeanKey;
+import de.adito.ojcms.transactions.api.*;
 import de.adito.ojcms.transactions.exceptions.ConcurrentTransactionException;
+import org.jboss.weld.proxy.WeldClientProxy;
 
 import javax.enterprise.context.ApplicationScoped;
 import java.util.Set;
@@ -26,20 +27,31 @@ class OverallTransactionalChanges
    * @param pContainerId   the id of the container to check
    * @param pSelfReference a self reference to the asking changes instance (to exclude its changes)
    */
-  void throwIfContainerDirty(String pContainerId, TransactionalChanges pSelfReference)
+  void throwIfContainerDirtyInSize(String pContainerId, TransactionalChanges pSelfReference)
   {
-    _throwIfChangedInOtherTransaction(pContainerId, pChanges -> pChanges.isContainerDirty(pContainerId), pSelfReference);
+    _throwIfChangedInOtherTransaction(pContainerId, pChanges -> pChanges.isContainerDirtyInSize(pContainerId), pSelfReference);
   }
 
   /**
-   * Throws a {@link ConcurrentTransactionException} if a bean has been modified by another transaction.
+   * Throws a {@link ConcurrentTransactionException} if a bean within a container has been modified by another transaction.
    *
-   * @param pKey           the key identifying the bean
+   * @param pKey           the key identifying the bean by index
    * @param pSelfReference a self reference to the asking changes instance (to exclude its changes)
    */
-  <KEY extends IBeanKey> void throwIfBeanDirty(KEY pKey, TransactionalChanges pSelfReference)
+  void throwIfContainerBeanDirty(InitialIndexKey pKey, TransactionalChanges pSelfReference)
   {
-    _throwIfChangedInOtherTransaction(pKey, pChanges -> pChanges.isBeanDirty(pKey), pSelfReference);
+    _throwIfChangedInOtherTransaction(pKey, pChanges -> pChanges.isContainerBeanDirty(pKey), pSelfReference);
+  }
+
+  /**
+   * Throws a {@link ConcurrentTransactionException} if a single bean has been modified by another transaction.
+   *
+   * @param pKey           the key identifying the single bean
+   * @param pSelfReference a self reference to the asking changes instance (to exclude its changes)
+   */
+  void throwIfSingleBeanDirty(SingleBeanKey pKey, TransactionalChanges pSelfReference)
+  {
+    _throwIfChangedInOtherTransaction(pKey, pChanges -> pChanges.isSingleBeanDirty(pKey), pSelfReference);
   }
 
   /**
@@ -72,8 +84,11 @@ class OverallTransactionalChanges
    */
   private void _throwIfChangedInOtherTransaction(Object pKey, Predicate<TransactionalChanges> pPredicate, TransactionalChanges pSelfReference)
   {
+    final TransactionalChanges selfReferences = pSelfReference instanceof WeldClientProxy ?
+        (TransactionalChanges) ((WeldClientProxy) pSelfReference).getMetadata().getContextualInstance() : pSelfReference;
+
     if (activeTransactionalChanges.stream()
-        .filter(pChanges -> pChanges.equals(pSelfReference))
+        .filter(pChanges -> pChanges != selfReferences)
         .anyMatch(pPredicate))
       throw new ConcurrentTransactionException(pKey);
   }

@@ -2,13 +2,10 @@ package de.adito.ojcms.sql.datasource.model;
 
 import de.adito.ojcms.beans.IBean;
 import de.adito.ojcms.sqlbuilder.OJSQLBuilder;
-import de.adito.ojcms.transactions.api.IBeanKey;
 
 import javax.enterprise.context.ApplicationScoped;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * Manages all {@link IPersistenceModel} of the application.
@@ -18,36 +15,57 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 public class PersistenceModels
 {
-  private final Map<String, IPersistenceModel<?>> models = new ConcurrentHashMap<>();
+  private final Map<String, ContainerPersistenceModel> containerModels = new ConcurrentHashMap<>();
+  private final Map<String, SingleBeanPersistenceModel> singleBeanModels = new ConcurrentHashMap<>();
 
   /**
-   * Registers a persistent bean type to create its suitable {@link IPersistenceModel}.
+   * Registers a persistent container bean type to create its {@link ContainerPersistenceModel}.
    *
-   * @param pBeanType    the bean type of the persistent beans
+   * @param pBeanType    the bean type of the persistent bean
    * @param pContainerId the id of the persistent container
-   * @param pIsContainer <tt>true</tt> if the beans for the given bean type should be stored in a container
    */
-  public void registerPersistentBean(Class<? extends IBean<?>> pBeanType, String pContainerId, boolean pIsContainer)
+  public void registerPersistentContainerBean(Class<? extends IBean<?>> pBeanType, String pContainerId)
   {
-    final IPersistenceModel<? extends IBeanKey> model = pIsContainer ? new ContainerPersistenceModel(pContainerId, pBeanType) :
-        new SingleBeanPersistenceModel(pContainerId, pBeanType);
-    models.put(pContainerId, model);
+    containerModels.putIfAbsent(pContainerId, new ContainerPersistenceModel(pContainerId, pBeanType));
   }
 
   /**
-   * Resolves a {@link IPersistenceModel} by the id of the persistent container.
+   * Registers a persistent single bean type to create its {@link SingleBeanPersistenceModel}.
+   *
+   * @param pBeanType the bean type of the persistent bean
+   * @param pBeanId   the id of the persistent single bean
+   */
+  public void registerPersistentSingleBean(Class<? extends IBean<?>> pBeanType, String pBeanId)
+  {
+    singleBeanModels.putIfAbsent(pBeanId, new SingleBeanPersistenceModel(pBeanId, pBeanType));
+  }
+
+  /**
+   * Resolves a {@link ContainerPersistenceModel} by the id of the persistent container.
    *
    * @param pContainerId the id of the persistent container
-   * @param <KEY>        the type of the bean key to identify bean data within the persistence model
-   * @return the resolved persistence model
+   * @return the resolved container persistence model
    */
-  public <KEY extends IBeanKey> IPersistenceModel<KEY> getPersistenceModel(String pContainerId)
+  public ContainerPersistenceModel getContainerPersistenceModel(String pContainerId)
   {
-    if (!models.containsKey(pContainerId))
-      throw new IllegalArgumentException("No bean model found for container id: " + pContainerId);
+    if (!containerModels.containsKey(pContainerId))
+      throw new IllegalArgumentException("No container bean model found for container id: " + pContainerId);
 
-    //noinspection unchecked
-    return (IPersistenceModel<KEY>) models.get(pContainerId);
+    return containerModels.get(pContainerId);
+  }
+
+  /**
+   * Resolves a {@link SingleBeanPersistenceModel} by the id of the persistent single bean.
+   *
+   * @param pBeanId the id of the persistent single bean
+   * @return the resolved single bean persistence model
+   */
+  public SingleBeanPersistenceModel getSingleBeanPersistenceModel(String pBeanId)
+  {
+    if (!singleBeanModels.containsKey(pBeanId))
+      throw new IllegalArgumentException("No single bean model found for bean id: " + pBeanId);
+
+    return singleBeanModels.get(pBeanId);
   }
 
   /**
@@ -57,7 +75,8 @@ public class PersistenceModels
    */
   public void initAllModels(OJSQLBuilder pBuilder)
   {
-    models.values().forEach(pModel -> pModel.initModelInDatabase(pBuilder));
+    containerModels.values().forEach(pModel -> pModel.initModelInDatabase(pBuilder));
+    singleBeanModels.values().forEach(pModel -> pModel.initModelInDatabase(pBuilder));
   }
 
   /**
@@ -67,7 +86,7 @@ public class PersistenceModels
    */
   public List<String> getAllContainerTableNames()
   {
-    return _getContainerIdsByPredicate(pModel -> pModel instanceof ContainerPersistenceModel);
+    return new ArrayList<>(containerModels.keySet());
   }
 
   /**
@@ -77,20 +96,6 @@ public class PersistenceModels
    */
   public List<String> getAllSingleBeanIds()
   {
-    return _getContainerIdsByPredicate(pModel -> pModel instanceof SingleBeanPersistenceModel);
-  }
-
-  /**
-   * Resolves persistent container ids by a {@link Predicate} based on a {@link IPersistenceModel}.
-   *
-   * @param pPredicate the predicate to filter the requested persistence models
-   * @return a list of container ids of filtered models
-   */
-  private List<String> _getContainerIdsByPredicate(Predicate<IPersistenceModel<?>> pPredicate)
-  {
-    return models.entrySet().stream()
-        .filter(pEntry -> pPredicate.test(pEntry.getValue()))
-        .map(Map.Entry::getKey)
-        .collect(Collectors.toList());
+    return new ArrayList<>(singleBeanModels.keySet());
   }
 }

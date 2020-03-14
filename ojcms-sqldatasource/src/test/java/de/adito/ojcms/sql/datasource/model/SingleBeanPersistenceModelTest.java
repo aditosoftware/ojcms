@@ -44,14 +44,14 @@ public class SingleBeanPersistenceModelTest extends AbstractDatabaseTest<SingleB
   public void testLoadDataByKey()
   {
     //First check initial state
-    final PersistentBeanData initialData = model.loadDataByKey(new SingleBeanKey(CONTAINER_ID), builder);
+    final PersistentBeanData initialData = model.loadSingleBeanData(new SingleBeanKey(CONTAINER_ID), builder);
     assertEquals(-1, initialData.getIndex());
     final Map<IField<?>, Object> initialValues = initialData.getData();
     assertEquals(3, initialValues.size());
     initialValues.forEach(((pField, pValue) -> assertEquals(pField.getInitialValue(), pValue)));
 
     setSingleBeanValues(42, "42", true);
-    final PersistentBeanData changedData = model.loadDataByKey(new SingleBeanKey(CONTAINER_ID), builder);
+    final PersistentBeanData changedData = model.loadSingleBeanData(new SingleBeanKey(CONTAINER_ID), builder);
     assertEquals(-1, changedData.getIndex());
     final Map<IField<?>, Object> changedValues = changedData.getData();
     assertEquals(3, changedValues.size());

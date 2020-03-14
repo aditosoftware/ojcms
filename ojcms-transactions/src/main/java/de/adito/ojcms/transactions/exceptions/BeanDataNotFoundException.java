@@ -1,6 +1,6 @@
 package de.adito.ojcms.transactions.exceptions;
 
-import de.adito.ojcms.transactions.api.IBeanKey;
+import de.adito.ojcms.transactions.api.*;
 
 /**
  * Indicates that some persistent bean data could not have been found.
@@ -14,8 +14,18 @@ public class BeanDataNotFoundException extends RuntimeException
    *
    * @param pKey the key for which the persistent data could not have been found
    */
-  public BeanDataNotFoundException(IBeanKey pKey)
+  public BeanDataNotFoundException(InitialIndexKey pKey)
   {
-    super("Unable to find any bean data for key: " + pKey);
+    super("Unable to find container bean data for key: " + pKey);
+  }
+
+  /**
+   * Initializes the exception.
+   *
+   * @param pKey the key for which the persistent data could not have been found
+   */
+  public BeanDataNotFoundException(SingleBeanKey pKey)
+  {
+    super("Unable to find single bean for id: " + pKey.getBeanId());
   }
 }

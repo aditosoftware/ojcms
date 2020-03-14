@@ -14,36 +14,51 @@ import java.util.*;
 public interface IBeanDataStorage
 {
   /**
-   * Registers a persistent bean type. This may be used by the storage system to initialize required structures.
+   * Registers a persistent container bean type. This may be used by the storage system to initialize required structures.
    *
-   * @param pBeanType    the bean type to register with the key
+   * @param pBeanType    the bean type to register
    * @param pContainerId the id of the persistent container
-   * @param pIsContainer <tt>true</tt> if the persistent beans should be stored in a container
    */
-  void registerPersistentBean(Class<? extends IBean<?>> pBeanType, String pContainerId, boolean pIsContainer);
+  void registerPersistentContainerBean(Class<? extends IBean<?>> pBeanType, String pContainerId);
 
   /**
-   * Processes value changes for a persistent bean.
+   * Registers a persistent single bean type. This may be used by the storage system to initialize required structures.
    *
-   * @param pKey           the key identifying the changed bean
+   * @param pBeanType the bean type to register
+   * @param pBeanId   the id of the persistent single bean
+   */
+  void registerPersistentSingleBean(Class<? extends IBean<?>> pBeanType, String pBeanId);
+
+  /**
+   * Processes value changes for a persistent bean within a container.
+   *
+   * @param pKey           the key identifying the changed bean by index
    * @param pChangedValues all changed values to process
    */
-  <KEY extends IBeanKey> void processChangesForBean(KEY pKey, Map<IField<?>, Object> pChangedValues);
+  void processChangesForContainerBean(InitialIndexKey pKey, Map<IField<?>, Object> pChangedValues);
+
+  /**
+   * Processes value changes for a persistent single bean.
+   *
+   * @param pKey           the key identifying the changed bean by index
+   * @param pChangedValues all changed values to process
+   */
+  void processChangesForSingleBean(SingleBeanKey pKey, Map<IField<?>, Object> pChangedValues);
 
   /**
    * Processes all bean additions to a persistent container.
    *
    * @param pContainerId the id of the container
-   * @param pNewData     a list of all added bean data
+   * @param pNewData     a set of all added bean data
    */
-  void processAdditionsForContainer(String pContainerId, List<PersistentBeanData> pNewData);
+  void processAdditionsForContainer(String pContainerId, Set<PersistentBeanData> pNewData);
 
   /**
    * Processes all bean removals from a persistent container.
    *
-   * @param pKeysToRemove a set of container bean keys
+   * @param pKeysToRemoveByContainer all removed bean keys grouped by container id
    */
-  void processRemovals(Set<IContainerBeanKey> pKeysToRemove);
+  void processRemovals(Map<String, Set<InitialIndexKey>> pKeysToRemoveByContainer);
 
   /**
    * Commits all changes to the persistent storage system within the transaction.

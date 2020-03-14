@@ -1,11 +1,13 @@
 package de.adito.ojcms.persistence;
 
+import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.transactions.api.*;
+import de.adito.ojcms.transactions.exceptions.BeanDataNotFoundException;
 import de.adito.ojcms.transactions.spi.IBeanDataLoader;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -30,16 +32,22 @@ class BeanLoaderForTest implements IBeanDataLoader
   }
 
   @Override
-  public <KEY extends IBeanKey> PersistentBeanData loadByKey(KEY pKey)
+  public PersistentBeanData loadContainerBeanDataByIndex(InitialIndexKey pKey)
   {
-    if (pKey instanceof BeanIndexKey)
-      return _findInContainer(pKey, pPersistentBeanData -> pPersistentBeanData.getIndex() == ((BeanIndexKey) pKey).getIndex());
-    else if (pKey instanceof BeanIdentifiersKey)
-      return _findInContainer(pKey, pData -> pData.getData().entrySet().containsAll(((BeanIdentifiersKey) pKey).getIdentifiers().entrySet()));
-    else if (pKey instanceof SingleBeanKey)
-      return data.getContentForSingleBean(pKey.getContainerId());
-    else
-      throw new IllegalArgumentException("Key type " + pKey.getClass().getName() + " not supported!");
+    return _findInContainer(pKey.getContainerId(), pData -> pData.getIndex() == pKey.getIndex())
+        .orElseThrow(() -> new BeanDataNotFoundException(pKey));
+  }
+
+  @Override
+  public Optional<PersistentBeanData> loadContainerBeanDataByIdentifiers(String pContainerId, Map<IField<?>, Object> pIdentifiers)
+  {
+    return _findInContainer(pContainerId, pData -> pData.getData().entrySet().containsAll(pIdentifiers.entrySet()));
+  }
+
+  @Override
+  public PersistentBeanData loadSingleBeanData(SingleBeanKey pKey)
+  {
+    return data.getContentForSingleBean(pKey.getBeanId());
   }
 
   @Override
@@ -50,17 +58,16 @@ class BeanLoaderForTest implements IBeanDataLoader
   }
 
   /**
-   * Resolves some {@link PersistentBeanData} in a specific container based on a given predicate.
+   * Tries to resolve some {@link PersistentBeanData} in a specific container based on a given predicate.
    *
-   * @param pKey       the bean key to resolve the container id from
-   * @param pPredicate the predicate to find the requested persistent bean data
-   * @return the persistent data applying to the predicate
+   * @param pContainerId the id of the container the bean data is located in
+   * @param pPredicate   the predicate to find the requested persistent bean data
+   * @return the optionally resolved persistent data applying to the predicate
    */
-  private PersistentBeanData _findInContainer(IBeanKey pKey, Predicate<PersistentBeanData> pPredicate)
+  private Optional<PersistentBeanData> _findInContainer(String pContainerId, Predicate<PersistentBeanData> pPredicate)
   {
-    return data.getContentForContainer(pKey.getContainerId()).stream()
+    return data.getContentForContainer(pContainerId).stream()
         .filter(pPredicate)
-        .findAny()
-        .orElseThrow(() -> new AssertionError("Bean not found for key " + pKey + " in container!"));
+        .findAny();
   }
 }

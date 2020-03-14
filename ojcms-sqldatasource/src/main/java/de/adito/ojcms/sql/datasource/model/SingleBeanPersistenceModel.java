@@ -9,6 +9,7 @@ import de.adito.ojcms.sqlbuilder.OJSQLBuilder;
 import de.adito.ojcms.sqlbuilder.definition.*;
 import de.adito.ojcms.sqlbuilder.definition.column.*;
 import de.adito.ojcms.transactions.api.*;
+import de.adito.ojcms.transactions.exceptions.BeanDataNotFoundException;
 import de.adito.ojcms.utils.StringUtility;
 
 import java.lang.reflect.Type;
@@ -27,7 +28,7 @@ import static java.util.function.Function.identity;
  *
  * @author Simon Danner, 01.01.2020
  */
-public class SingleBeanPersistenceModel implements IPersistenceModel<SingleBeanKey>
+public class SingleBeanPersistenceModel implements IPersistenceModel
 {
   //Several column definitions for the special single bean table
   public static final IColumnIdentification<String> ID_COLUMN = IColumnIdentification.of(BEAN_TABLE_BEAN_ID, String.class);
@@ -91,17 +92,22 @@ public class SingleBeanPersistenceModel implements IPersistenceModel<SingleBeanK
         .insert());
   }
 
-  @Override
-  public PersistentBeanData loadDataByKey(SingleBeanKey pKey, OJSQLBuilder pBuilder)
+  /**
+   * Loads single bean data by a {@link SingleBeanKey}.
+   *
+   * @param pKey     the key to identify the single bean
+   * @param pBuilder a builder to execute SQL statements
+   * @return the loaded persistent single bean data
+   */
+  public PersistentBeanData loadSingleBeanData(SingleBeanKey pKey, OJSQLBuilder pBuilder)
   {
-    final byte[] serialContent = pBuilder.doSelectOne(CONTENT_COLUMN, pSelect -> pSelect
+    return pBuilder.doSelectOne(CONTENT_COLUMN, pSelect -> pSelect
         .from(BEAN_TABLE_NAME)
         .where(isEqual(ID_COLUMN, beanId))
         .firstResult()
-        .orIfNotPresentThrow(AssertionError::new));
-
-    final Map<IField<?>, Object> beanContent = _fromPersistent(serialContent);
-    return new PersistentBeanData(-1, beanContent);
+        .map(this::_fromPersistent)
+        .map(pBeanContent -> new PersistentBeanData(-1, pBeanContent)))
+        .orIfNotPresentThrow(() -> new BeanDataNotFoundException(pKey));
   }
 
   /**
@@ -113,7 +119,7 @@ public class SingleBeanPersistenceModel implements IPersistenceModel<SingleBeanK
   public void processChanges(Map<IField<?>, Object> pChangedValues, OJSQLBuilder pBuilder)
   {
     //This may be improved later to avoid redundant loading by query
-    final PersistentBeanData changedData = loadDataByKey(new SingleBeanKey(beanId), pBuilder).integrateChanges(pChangedValues);
+    final PersistentBeanData changedData = loadSingleBeanData(new SingleBeanKey(beanId), pBuilder).integrateChanges(pChangedValues);
 
     pBuilder.doUpdate(pUpdate -> pUpdate
         .table(BEAN_TABLE_NAME)

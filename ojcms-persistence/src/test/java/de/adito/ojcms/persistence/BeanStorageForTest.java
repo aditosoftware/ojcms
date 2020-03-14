@@ -19,44 +19,53 @@ import java.util.*;
 class BeanStorageForTest implements IBeanDataStorage
 {
   @Inject
+  private RegisteredBeans registeredBeans;
+  @Inject
   private BeanTestData data;
 
   @Override
-  public void registerPersistentBean(Class<? extends IBean<?>> pBeanType, String pContainerId, boolean pIsContainer)
+  public void registerPersistentContainerBean(Class<? extends IBean<?>> pBeanType, String pContainerId)
   {
-    if (pIsContainer)
-      data.registerContainerType(pContainerId);
-    else
-      data.registerSingleBeanType(pContainerId, pBeanType);
+    registeredBeans.registerContainerType(pContainerId);
   }
 
   @Override
-  public <KEY extends IBeanKey> void processChangesForBean(KEY pKey, Map<IField<?>, Object> pChangedValues)
+  public void registerPersistentSingleBean(Class<? extends IBean<?>> pBeanType, String pBeanId)
   {
-    data.processChange(pKey, pChangedValues);
+    registeredBeans.registerSingleBeanType(pBeanId, pBeanType);
   }
 
   @Override
-  public void processAdditionsForContainer(String pContainerId, List<PersistentBeanData> pNewData)
+  public void processChangesForContainerBean(InitialIndexKey pKey, Map<IField<?>, Object> pChangedValues)
+  {
+    data.processChangeForContainerBean(pKey, pChangedValues);
+  }
+
+  @Override
+  public void processChangesForSingleBean(SingleBeanKey pKey, Map<IField<?>, Object> pChangedValues)
+  {
+    data.processChangeForSingleBean(pKey, pChangedValues);
+  }
+
+  @Override
+  public void processAdditionsForContainer(String pContainerId, Set<PersistentBeanData> pNewData)
   {
     data.addToContainer(pContainerId, pNewData);
   }
 
   @Override
-  public void processRemovals(Set<IContainerBeanKey> pKeysToRemove)
+  public void processRemovals(Map<String, Set<InitialIndexKey>> pKeysToRemoveByContainer)
   {
-    data.removeFromContainer(pKeysToRemove);
+    data.removeFromContainer(pKeysToRemoveByContainer);
   }
 
   @Override
   public void commitChanges()
   {
-    data.clear();
   }
 
   @Override
   public void rollbackChanges()
   {
-    data.clear();
   }
 }

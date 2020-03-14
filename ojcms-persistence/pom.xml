@@ -22,19 +22,19 @@
     </dependency>
 
     <dependency>
-      <groupId> de.adito.ojcms</groupId>
+      <groupId>de.adito.ojcms</groupId>
       <artifactId>ojcms-sqlbuilder</artifactId>
       <version>${version.ojcms}</version>
     </dependency>
 
     <dependency>
-      <groupId> de.adito.ojcms</groupId>
+      <groupId>de.adito.ojcms</groupId>
       <artifactId>ojcms-transactions</artifactId>
       <version>${version.ojcms}</version>
     </dependency>
 
     <dependency>
-      <groupId> de.adito.ojcms</groupId>
+      <groupId>de.adito.ojcms</groupId>
       <artifactId>ojcms-cdi-testutils</artifactId>
       <version>${version.ojcms}</version>
       <scope>test</scope>

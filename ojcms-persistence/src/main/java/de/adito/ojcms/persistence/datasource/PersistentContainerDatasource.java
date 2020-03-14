@@ -67,7 +67,7 @@ class PersistentContainerDatasource<BEAN extends IBean<BEAN>> implements IBeanCo
   @Override
   public void sort(Comparator<BEAN> pComparator)
   {
-    content.sort(pComparator);
+    throw new UnsupportedOperationException("Sorting not supported for persistent containers!");
   }
 
   @NotNull

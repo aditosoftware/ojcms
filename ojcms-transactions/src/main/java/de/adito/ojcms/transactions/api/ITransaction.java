@@ -3,7 +3,7 @@ package de.adito.ojcms.transactions.api;
 import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.transactions.annotations.Transactional;
 
-import java.util.Map;
+import java.util.*;
 
 /**
  * Defines operations from the bean context that relate to a transaction. Persistent bean data must always be accessed
@@ -26,13 +26,30 @@ public interface ITransaction
   int requestContainerSize(String pContainerId);
 
   /**
-   * Requests persistent data of a bean for a given key.
-   * The exception handling (in case a bean cannot be found within the container etc.) must be defined by the classes implementing the SPI.
+   * Requests persistent data of a bean within a container by index.
    *
-   * @param pKey the key to identify the requested bean
+   * @param pKey the key to identify the requested bean by index
    * @return the requested persistent bean data
    */
-  <KEY extends IBeanKey> PersistentBeanData requestBeanDataByKey(KEY pKey);
+  PersistentBeanData requestBeanDataByIndex(CurrentIndexKey pKey);
+
+  /**
+   * Requests persistent data of a bean within a container by identifying field value tuples.
+   * This result may be empty if there's no bean for the given identifiers.
+   *
+   * @param pContainerId the id of the container the bean is located in
+   * @param pIdentifiers the field value tuples to identify a bean as a map
+   * @return the requested persistent bean data or empty if not found
+   */
+  Optional<PersistentBeanData> requestBeanDataByIdentifierTuples(String pContainerId, Map<IField<?>, Object> pIdentifiers);
+
+  /**
+   * Requests persistent data of a single bean.
+   *
+   * @param pKey the key to identify the requested single bean
+   * @return the requested persistent bean data
+   */
+  PersistentBeanData requestSingleBeanData(SingleBeanKey pKey);
 
   /**
    * Requests a full container load that provides all persistent bean data. This method mainly exists due to a performance issue
@@ -46,26 +63,35 @@ public interface ITransaction
   /**
    * Registers the addition of a bean to a container within this transaction.
    *
-   * @param pContainerId the id of the container the bean has been added to
-   * @param pIndex       the index of the added bean
-   * @param pNewData     the data of the added bean
+   * @param pIndexKey the index key the bean has been added for
+   * @param pNewData  the data of the added bean
    */
-  void registerBeanAddition(String pContainerId, int pIndex, Map<IField<?>, Object> pNewData);
+  void registerBeanAddition(CurrentIndexKey pIndexKey, Map<IField<?>, Object> pNewData);
 
   /**
    * Registers the removal of a bean from a container within this transaction.
    *
-   * @param pContainerKey the key to identify the removed bean
+   * @param pContainerKey the index based key to identify the removed bean
    */
-  <KEY extends IContainerBeanKey> void registerBeanRemoval(KEY pContainerKey);
+  void registerBeanRemoval(CurrentIndexKey pContainerKey);
 
   /**
    * Registers a value change of a persistent bean within this transaction.
    *
-   * @param pKey          the key to identify the changed bean
+   * @param pKey          the key to identify the changed bean by index
    * @param pChangedField the changed bean field
    * @param pNewValue     the new value for the field
    * @param <VALUE>       the value type of the changed field
    */
-  <KEY extends IBeanKey, VALUE> void registerBeanValueChange(KEY pKey, IField<VALUE> pChangedField, VALUE pNewValue);
+  <VALUE> void registerContainerBeanValueChange(CurrentIndexKey pKey, IField<VALUE> pChangedField, VALUE pNewValue);
+
+  /**
+   * Registers a value change of a persistent single bean within this transaction.
+   *
+   * @param pKey          the key to identify the changed single bean
+   * @param pChangedField the changed bean field
+   * @param pNewValue     the new value for the field
+   * @param <VALUE>       the value type of the changed field
+   */
+  <VALUE> void registerSingleBeanValueChange(SingleBeanKey pKey, IField<VALUE> pChangedField, VALUE pNewValue);
 }

@@ -4,7 +4,8 @@ import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.beans.literals.fields.util.*;
 import de.adito.ojcms.sqlbuilder.definition.*;
 
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A database column value tuple based on a {@link FieldValueTuple}.
@@ -48,16 +49,16 @@ public class BeanColumnValueTuple<VALUE> implements IColumnValueTuple<VALUE>, IB
   }
 
   /**
-   * Creates an array of tuples based on a field value map.
+   * Creates a list of tuples based on a field value map.
    *
    * @param pValueMap the values mapped by bean fields to create the tuples of
    * @return an array of column value tuples
    */
-  public static BeanColumnValueTuple<?>[] ofMap(Map<IField<?>, Object> pValueMap)
+  public static List<IColumnValueTuple<?>> ofMap(Map<IField<?>, Object> pValueMap)
   {
     //noinspection unchecked
     return pValueMap.entrySet().stream()
-        .map(pEntry -> new BeanColumnValueTuple<>((IField) pEntry.getKey(), pEntry.getValue()))
-        .toArray(BeanColumnValueTuple[]::new);
+        .map(pEntry -> (IColumnValueTuple<?>) new BeanColumnValueTuple<>((IField) pEntry.getKey(), pEntry.getValue()))
+        .collect(Collectors.toList());
   }
 }

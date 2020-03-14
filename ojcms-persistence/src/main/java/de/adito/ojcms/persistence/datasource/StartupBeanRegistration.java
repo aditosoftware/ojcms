@@ -22,8 +22,8 @@ class StartupBeanRegistration implements IStartupCallback
   @Override
   public void onCdiStartup()
   {
-    CONTAINER_BEAN_TYPES.forEach((pBeanType, pContainerId) -> storage.registerPersistentBean(pBeanType, pContainerId, true));
-    SINGLE_BEAN_TYPES.forEach((pBeanType, pBeanId) -> storage.registerPersistentBean(pBeanType, pBeanId, false));
+    CONTAINER_BEAN_TYPES.forEach((pBeanType, pContainerId) -> storage.registerPersistentContainerBean(pBeanType, pContainerId));
+    SINGLE_BEAN_TYPES.forEach((pBeanType, pBeanId) -> storage.registerPersistentSingleBean(pBeanType, pBeanId));
   }
 
   @Override

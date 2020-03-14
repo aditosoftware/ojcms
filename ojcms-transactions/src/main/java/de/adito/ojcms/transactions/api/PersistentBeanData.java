@@ -3,7 +3,6 @@ package de.adito.ojcms.transactions.api;
 import de.adito.ojcms.beans.literals.fields.IField;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Holds value based persistent data for a bean. These data consist of a value for every {@link IField} of the bean.
@@ -24,7 +23,7 @@ public final class PersistentBeanData
   public PersistentBeanData(int pIndex, Map<IField<?>, Object> pData)
   {
     index = pIndex;
-    data = Objects.requireNonNull(pData);
+    data = new HashMap<>(Objects.requireNonNull(pData));
   }
 
   /**
@@ -35,32 +34,6 @@ public final class PersistentBeanData
   public int getIndex()
   {
     return index;
-  }
-
-  /**
-   * Creates a {@link BeanIndexKey} from these bean data.
-   *
-   * @param pContainerId the container id the key to create is associated with
-   * @return the created index based key
-   */
-  public BeanIndexKey createIndexKey(String pContainerId)
-  {
-    return new BeanIndexKey(pContainerId, index);
-  }
-
-  /**
-   * Creates a {@link BeanIdentifiersKey} from these bean data.
-   *
-   * @param pContainerId the container id the key to create is associated with
-   * @return the created container identifier based key
-   */
-  public BeanIdentifiersKey createIdentifierKey(String pContainerId)
-  {
-    final Map<IField<?>, Object> identifiers = getData().entrySet().stream()
-        .filter(pEntry -> pEntry.getKey().isIdentifier())
-        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-    return new BeanIdentifiersKey(pContainerId, identifiers);
   }
 
   /**
@@ -106,5 +79,14 @@ public final class PersistentBeanData
   public int hashCode()
   {
     return Objects.hash(index, data);
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "{" +
+        "index=" + index +
+        ", data=" + data +
+        '}';
   }
 }

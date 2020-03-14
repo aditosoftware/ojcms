@@ -50,7 +50,7 @@ public class SQLBeanDataStorageSingleBeanTest extends AbstractDatabaseTest<Singl
    */
   private Map<IField<?>, Object> _loadSingleBeanData()
   {
-    return loader.loadByKey(new SingleBeanKey(CONTAINER_ID)).getData();
+    return loader.loadSingleBeanData(new SingleBeanKey(CONTAINER_ID)).getData();
   }
 
   @Override

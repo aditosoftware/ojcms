@@ -1,8 +1,8 @@
 package de.adito.ojcms.sql.datasource.persistence;
 
-import de.adito.ojcms.sql.datasource.model.*;
+import de.adito.ojcms.beans.literals.fields.IField;
+import de.adito.ojcms.sql.datasource.model.PersistenceModels;
 import de.adito.ojcms.sqlbuilder.OJSQLBuilder;
-import de.adito.ojcms.sqlbuilder.util.OJDatabaseException;
 import de.adito.ojcms.transactions.annotations.TransactionalScoped;
 import de.adito.ojcms.transactions.api.*;
 import de.adito.ojcms.transactions.spi.IBeanDataLoader;
@@ -10,7 +10,7 @@ import de.adito.ojcms.transactions.spi.IBeanDataLoader;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.sql.Connection;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Application wide {@link IBeanDataLoader} to load bean related data from a SQL database.
@@ -32,35 +32,30 @@ public class SQLBeanDataLoader implements IBeanDataLoader
   @Override
   public int loadContainerSize(String pContainerId)
   {
-    return _requiresContainerModel(pContainerId).loadSize(builder);
+    return models.getContainerPersistenceModel(pContainerId).loadSize(builder);
   }
 
   @Override
-  public <KEY extends IBeanKey> PersistentBeanData loadByKey(KEY pKey)
+  public PersistentBeanData loadContainerBeanDataByIndex(InitialIndexKey pKey)
   {
-    return models.getPersistenceModel(pKey.getContainerId()).loadDataByKey(pKey, builder);
+    return models.getContainerPersistenceModel(pKey.getContainerId()).loadDataByIndex(pKey, builder);
+  }
+
+  @Override
+  public Optional<PersistentBeanData> loadContainerBeanDataByIdentifiers(String pContainerId, Map<IField<?>, Object> pIdentifiers)
+  {
+    return models.getContainerPersistenceModel(pContainerId).loadDataByIdentifiers(pIdentifiers, builder);
+  }
+
+  @Override
+  public PersistentBeanData loadSingleBeanData(SingleBeanKey pKey)
+  {
+    return models.getSingleBeanPersistenceModel(pKey.getBeanId()).loadSingleBeanData(pKey, builder);
   }
 
   @Override
   public Map<Integer, PersistentBeanData> fullContainerLoad(String pContainerId)
   {
-    return _requiresContainerModel(pContainerId).loadFullData(builder);
-  }
-
-  /**
-   * Tries to resolves a {@link ContainerPersistenceModel} by container id.
-   * Throws a {@link OJDatabaseException} if the model behind the id does not relate to a bean container.
-   *
-   * @param pContainerId the id of the container to resolve the model for
-   * @return the container model for the requested id
-   */
-  private ContainerPersistenceModel _requiresContainerModel(String pContainerId)
-  {
-    final IPersistenceModel<?> model = models.getPersistenceModel(pContainerId);
-
-    if (!(model instanceof ContainerPersistenceModel))
-      throw new OJDatabaseException("No bean container model found for container id: " + pContainerId);
-
-    return (ContainerPersistenceModel) model;
+    return models.getContainerPersistenceModel(pContainerId).loadFullData(builder);
   }
 }
