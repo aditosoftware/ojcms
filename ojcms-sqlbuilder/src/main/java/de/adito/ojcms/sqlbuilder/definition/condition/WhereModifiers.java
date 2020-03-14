@@ -80,7 +80,7 @@ public class WhereModifiers
   {
     private _Combiner()
     {
-      super(Objects.requireNonNull(idCondition));
+      super(idCondition);
       addConcatenation(Objects.requireNonNull(whereCondition), EConcatenationType.AND);
     }
   }

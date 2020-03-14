@@ -7,8 +7,7 @@ import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 import de.adito.ojcms.sqlbuilder.serialization.IValueSerializer;
 import org.jetbrains.annotations.*;
 
-import java.util.Objects;
-import java.util.stream.Stream;
+import java.util.*;
 
 /**
  * An abstract base class for every statement that is based on a table and allows conditions,
@@ -57,12 +56,24 @@ public abstract class AbstractConditionStatement<MODIFIERS extends WhereModifier
    */
   public STATEMENT where(IWhereCondition<?>... pConditions)
   {
-    if (pConditions == null || pConditions.length == 0)
+    return where(Arrays.asList(pConditions));
+  }
+
+  /**
+   * Sets the where condition for this statement.
+   * The condition contains any amount of single where conditions that will be concatenated with "AND".
+   *
+   * @param pConditions the single conditions to concatenate a multiple where condition
+   * @return the statement itself to enable a pipelining mechanism
+   */
+  public STATEMENT where(List<IWhereCondition<?>> pConditions)
+  {
+    if (pConditions == null || pConditions.isEmpty())
       //noinspection unchecked
       return (STATEMENT) this;
 
-    final IWhereConditions conditions = IWhereConditions.create(pConditions[0]);
-    Stream.of(pConditions)
+    final IWhereConditions conditions = IWhereConditions.create(pConditions.get(0));
+    pConditions.stream()
         .skip(1)
         .forEach(conditions::and);
 
@@ -89,9 +100,20 @@ public abstract class AbstractConditionStatement<MODIFIERS extends WhereModifier
    * @param pId the row id
    * @return the statement itself to enable a pipelining mechanism
    */
-  public STATEMENT whereId(int pId)
+  public STATEMENT whereId(long pId)
   {
     return whereId(IWhereOperator.isEqual(), pId);
+  }
+
+  /**
+   * Configures the statement to only affect rows with ids that are contained in a given set.
+   *
+   * @param pIds the row ids the statement should affect
+   * @return the statement itself to enable a pipelining mechanism
+   */
+  public STATEMENT whereIdIn(Set<Long> pIds)
+  {
+    return whereId(IWhereConditionsForId.in(pIds, idColumnIdentification));
   }
 
   /**
@@ -101,7 +123,7 @@ public abstract class AbstractConditionStatement<MODIFIERS extends WhereModifier
    * @param pId            the row id for the condition
    * @return the statement itself to enable a pipelining mechanism
    */
-  public STATEMENT whereId(@NotNull IWhereOperator pWhereOperator, int pId)
+  public STATEMENT whereId(@NotNull IWhereOperator pWhereOperator, long pId)
   {
     return whereId(IWhereConditionsForId.create(Objects.requireNonNull(pWhereOperator), pId));
   }

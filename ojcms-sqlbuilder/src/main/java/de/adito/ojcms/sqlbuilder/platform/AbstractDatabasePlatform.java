@@ -3,7 +3,7 @@ package de.adito.ojcms.sqlbuilder.platform;
 import de.adito.ojcms.sqlbuilder.definition.column.*;
 import de.adito.ojcms.sqlbuilder.util.OJDatabaseException;
 
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -27,6 +27,17 @@ public abstract class AbstractDatabasePlatform implements IDatabasePlatform
    * @return the column mapping for the platform
    */
   protected abstract Map<EColumnType, Function<IColumnType, String>> getColumnMapping();
+
+  /**
+   * Provides a map containing deviations for column modifier statement formats for this platform.
+   * By default there are none. Override this method to specify some.
+   *
+   * @return a map containing deviating statement formats for certain column modifiers
+   */
+  protected Map<EColumnModifier, String> getColumnModifierDeviations()
+  {
+    return Collections.emptyMap();
+  }
 
   /**
    * This method may be overwritten optionally to setup some platform specific environment.
@@ -61,5 +72,12 @@ public abstract class AbstractDatabasePlatform implements IDatabasePlatform
       throw new OJDatabaseException("No column mapping given for " + type.name() + ". (platform: " + getClass().getSimpleName() + ")");
 
     return columnMapping.get(type).apply(pColumnType);
+  }
+
+  @Override
+  public String columnModifierToStatementFormat(EColumnModifier pModifier)
+  {
+    return Optional.ofNullable(getColumnModifierDeviations().get(pModifier))
+        .orElse(pModifier.getDefaultFormat());
   }
 }

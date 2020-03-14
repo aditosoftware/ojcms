@@ -28,7 +28,7 @@ abstract class AbstractStatementConcatenation<NEGATE extends IMultipleCondition<
    */
   protected AbstractStatementConcatenation(IPreparedStatementFormat pInitialEntry)
   {
-    lastEntry = pInitialEntry;
+    lastEntry = Objects.requireNonNull(pInitialEntry);
   }
 
   @Override

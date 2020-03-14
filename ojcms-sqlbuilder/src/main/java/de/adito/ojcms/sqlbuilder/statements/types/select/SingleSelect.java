@@ -1,7 +1,7 @@
 package de.adito.ojcms.sqlbuilder.statements.types.select;
 
-import de.adito.ojcms.sqlbuilder.*;
-import de.adito.ojcms.sqlbuilder.definition.*;
+import de.adito.ojcms.sqlbuilder.AbstractSQLBuilder;
+import de.adito.ojcms.sqlbuilder.definition.IColumnIdentification;
 import de.adito.ojcms.sqlbuilder.executors.IStatementExecutor;
 import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 import de.adito.ojcms.sqlbuilder.result.SingleColumnResult;
@@ -10,6 +10,7 @@ import de.adito.ojcms.sqlbuilder.util.OJDatabaseException;
 import de.adito.ojcms.utils.OptionalNullable;
 
 import java.sql.ResultSet;
+import java.util.Collections;
 
 /**
  * A single column select statement.
@@ -35,7 +36,7 @@ public class SingleSelect<VALUE> extends AbstractSelect<SingleSelect<VALUE>>
   {
     super(pStatementExecutor, pBuilder, pPlatform, pSerializer, pIdColumnName);
     column = pColumnToSelect;
-    addColumns(column);
+    addColumns(Collections.singleton(column));
   }
 
   /**

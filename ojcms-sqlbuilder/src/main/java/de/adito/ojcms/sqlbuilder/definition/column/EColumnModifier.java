@@ -12,21 +12,26 @@ public enum EColumnModifier implements IStatementFormat
 {
   NOT_NULL("NOT NULL"), AUTO_INCREMENT, UNIQUE;
 
-  private final String descriptor;
+  private final String format;
 
   EColumnModifier()
   {
-    descriptor = name();
+    format = name();
   }
 
-  EColumnModifier(String pDescriptor)
+  EColumnModifier(String pFormat)
   {
-    descriptor = pDescriptor;
+    format = pFormat;
+  }
+
+  public String getDefaultFormat()
+  {
+    return format;
   }
 
   @Override
   public String toStatementFormat(IDatabasePlatform pPlatform, String pIdColumnName)
   {
-    return descriptor;
+    return pPlatform.columnModifierToStatementFormat(this);
   }
 }

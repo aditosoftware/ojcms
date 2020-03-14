@@ -19,7 +19,7 @@ import static java.util.function.Function.identity;
  */
 public final class ResultRow
 {
-  private final IColumnIdentification<Integer> idColumn;
+  private final IColumnIdentification<Long> idColumn;
   private final Map<IColumnIdentification<?>, Object> values;
 
   /**
@@ -30,7 +30,7 @@ public final class ResultRow
    * @param pSerializer      the serializer for the database values
    * @param pResultSet       the result set to build this row from (can not be stored, because the result set may be closed in the future)
    */
-  public ResultRow(List<IColumnIdentification<?>> pSelectedColumns, IColumnIdentification<Integer> pIdColumn,
+  public ResultRow(List<IColumnIdentification<?>> pSelectedColumns, IColumnIdentification<Long> pIdColumn,
                    IValueSerializer pSerializer, ResultSet pResultSet)
   {
     idColumn = pIdColumn;
@@ -53,7 +53,7 @@ public final class ResultRow
    *
    * @return the id of the result row
    */
-  public int getId()
+  public long getId()
   {
     return get(idColumn);
   }

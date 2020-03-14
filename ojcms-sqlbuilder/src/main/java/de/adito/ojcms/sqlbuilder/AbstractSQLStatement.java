@@ -26,7 +26,7 @@ public abstract class AbstractSQLStatement<RESULT, STATEMENT extends AbstractSQL
   protected final AbstractSQLBuilder builder;
   protected final IDatabasePlatform databasePlatform;
   protected final IValueSerializer serializer;
-  protected final IColumnIdentification<Integer> idColumnIdentification;
+  protected final IColumnIdentification<Long> idColumnIdentification;
   private String tableName;
 
   /**
@@ -45,7 +45,7 @@ public abstract class AbstractSQLStatement<RESULT, STATEMENT extends AbstractSQL
     builder = pBuilder;
     databasePlatform = pPlatform;
     serializer = pSerializer;
-    idColumnIdentification = IColumnIdentification.of(pIdColumnName.toUpperCase(), Integer.class);
+    idColumnIdentification = IColumnIdentification.of(pIdColumnName.toUpperCase(), Long.class);
   }
 
   /**

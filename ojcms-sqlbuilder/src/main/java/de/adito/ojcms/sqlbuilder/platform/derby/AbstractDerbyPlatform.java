@@ -47,4 +47,10 @@ abstract class AbstractDerbyPlatform extends AbstractDatabasePlatform
   {
     return COLUMN_MAPPING;
   }
+
+  @Override
+  protected Map<EColumnModifier, String> getColumnModifierDeviations()
+  {
+    return Collections.singletonMap(EColumnModifier.AUTO_INCREMENT, "GENERATED ALWAYS AS IDENTITY");
+  }
 }

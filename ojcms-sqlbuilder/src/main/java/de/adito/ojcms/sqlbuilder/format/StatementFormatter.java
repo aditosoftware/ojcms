@@ -1,6 +1,6 @@
 package de.adito.ojcms.sqlbuilder.format;
 
-import de.adito.ojcms.sqlbuilder.definition.*;
+import de.adito.ojcms.sqlbuilder.definition.IColumnValueTuple;
 import de.adito.ojcms.sqlbuilder.definition.condition.*;
 import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 import de.adito.ojcms.sqlbuilder.serialization.*;
@@ -251,12 +251,12 @@ public final class StatementFormatter
    */
   public StatementFormatter appendWhereCondition(WhereModifiers pModifiers)
   {
-    final Optional<IPreparedStatementFormat> where = pModifiers.where();
-    if (where.isPresent())
-    {
-      builder.appendWithWhitespace("WHERE");
-      appendPreparedStatement(where.get());
-    }
+    pModifiers.where()
+        .ifPresent(pWhere ->
+                   {
+                     builder.appendWithWhitespace("WHERE");
+                     appendPreparedStatement(pWhere);
+                   });
     return this;
   }
 

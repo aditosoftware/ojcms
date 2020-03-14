@@ -17,8 +17,8 @@ import java.util.*;
 class OperatorWithId extends AbstractNegatable<OperatorWithId> implements IPreparedStatementFormat
 {
   private final IWhereOperator operator;
-  private final int id;
-  private IColumnIdentification<Integer> identification;
+  private final long id;
+  private IColumnIdentification<Long> identification;
 
   /**
    * Creates a new wrapper instance.
@@ -26,7 +26,7 @@ class OperatorWithId extends AbstractNegatable<OperatorWithId> implements IPrepa
    * @param pOperator the where operator for the id condition
    * @param pId       the id value for the condition
    */
-  OperatorWithId(IWhereOperator pOperator, int pId)
+  OperatorWithId(IWhereOperator pOperator, long pId)
   {
     operator = pOperator;
     id = pId;
@@ -51,10 +51,10 @@ class OperatorWithId extends AbstractNegatable<OperatorWithId> implements IPrepa
    * @param pIdColumnName the global id column name
    * @return the column identification for the condition
    */
-  private IColumnIdentification<Integer> _getIdentification(String pIdColumnName)
+  private IColumnIdentification<Long> _getIdentification(String pIdColumnName)
   {
     if (identification == null)
-      identification = IColumnIdentification.of(pIdColumnName, Integer.class);
+      identification = IColumnIdentification.of(pIdColumnName, Long.class);
     return identification;
   }
 }

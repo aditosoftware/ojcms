@@ -117,12 +117,12 @@ public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>> exte
    * @param pColumns the column identifications the select
    * @return the select statement itself to enable a pipelining mechanism
    */
-  protected SELECT addColumns(IColumnIdentification<?>... pColumns)
+  protected SELECT addColumns(Collection<IColumnIdentification<?>> pColumns)
   {
-    if (pColumns.length == 0)
+    if (pColumns.isEmpty())
       throw new OJDatabaseException("At least one column has to be selected!");
 
-    columnsToSelect.addAll(Arrays.asList(pColumns));
+    columnsToSelect.addAll(pColumns);
     //noinspection unchecked
     return (SELECT) this;
   }

@@ -8,7 +8,7 @@ import de.adito.ojcms.sqlbuilder.result.*;
 import de.adito.ojcms.sqlbuilder.serialization.IValueSerializer;
 
 import java.sql.ResultSet;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * A select statement.
@@ -39,6 +39,17 @@ public class Select extends AbstractSelect<Select>
    * @return the select statement itself to enable a pipelining mechanism
    */
   public Select select(IColumnIdentification<?>... pColumns)
+  {
+    return addColumns(Arrays.asList(pColumns));
+  }
+
+  /**
+   * Defines the columns to select. Must be at least one column.
+   *
+   * @param pColumns the columns to select
+   * @return the select statement itself to enable a pipelining mechanism
+   */
+  public Select select(Collection<IColumnIdentification<?>> pColumns)
   {
     return addColumns(pColumns);
   }

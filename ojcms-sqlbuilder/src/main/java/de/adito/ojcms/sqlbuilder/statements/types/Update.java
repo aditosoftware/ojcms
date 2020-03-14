@@ -1,6 +1,6 @@
 package de.adito.ojcms.sqlbuilder.statements.types;
 
-import de.adito.ojcms.sqlbuilder.*;
+import de.adito.ojcms.sqlbuilder.AbstractSQLBuilder;
 import de.adito.ojcms.sqlbuilder.definition.*;
 import de.adito.ojcms.sqlbuilder.definition.condition.WhereModifiers;
 import de.adito.ojcms.sqlbuilder.executors.IStatementExecutor;
@@ -59,7 +59,18 @@ public class Update extends AbstractConditionStatement<WhereModifiers, Void, Voi
    */
   public Update set(IColumnValueTuple<?>... pChanges)
   {
-    changes.addAll(Arrays.asList(pChanges));
+    return set(Arrays.asList(pChanges));
+  }
+
+  /**
+   * Determines tuples (column + value) to update in the given table.
+   *
+   * @param pChanges the changes defined as column value tuples
+   * @return the update statement itself to enable a pipelining mechanism
+   */
+  public Update set(Collection<IColumnValueTuple<?>> pChanges)
+  {
+    changes.addAll(pChanges);
     return this;
   }
 
@@ -69,7 +80,7 @@ public class Update extends AbstractConditionStatement<WhereModifiers, Void, Voi
    * @param pNewId the new id
    * @return the update statement itself to enable a pipelining mechanism
    */
-  public Update setId(int pNewId)
+  public Update setId(long pNewId)
   {
     return set(IColumnValueTuple.of(idColumnIdentification, pNewId));
   }
@@ -93,7 +104,7 @@ public class Update extends AbstractConditionStatement<WhereModifiers, Void, Voi
    * @param pNumber    a number to apply on the numeric operation and the old id
    * @return the update statement itself to enable a pipelining mechanism
    */
-  public Update adaptId(ENumericOperation pOperation, int pNumber)
+  public Update adaptId(ENumericOperation pOperation, long pNumber)
   {
     return adaptNumericValue(INumericValueAdaption.of(idColumnIdentification, pOperation, pNumber));
   }

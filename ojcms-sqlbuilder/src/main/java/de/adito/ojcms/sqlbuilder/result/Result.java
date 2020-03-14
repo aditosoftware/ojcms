@@ -21,7 +21,7 @@ public final class Result implements Iterable<ResultRow>
   private final List<IColumnIdentification<?>> selectedColumns;
   private final IValueSerializer serializer;
   private final ResultSet resultSet;
-  private final IColumnIdentification<Integer> idColumnIdentification;
+  private final IColumnIdentification<Long> idColumnIdentification;
   private boolean used = false;
 
   /**
@@ -32,7 +32,7 @@ public final class Result implements Iterable<ResultRow>
    * @param pSerializer             the value serializer
    * @param pResult                 the result set from the query
    */
-  public Result(List<IColumnIdentification<?>> pSelectedColumns, IColumnIdentification<Integer> pIdColumnIdentification,
+  public Result(List<IColumnIdentification<?>> pSelectedColumns, IColumnIdentification<Long> pIdColumnIdentification,
                 IValueSerializer pSerializer, ResultSet pResult)
   {
     selectedColumns = pSelectedColumns;

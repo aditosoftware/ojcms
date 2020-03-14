@@ -1,6 +1,6 @@
 package de.adito.ojcms.sqlbuilder.platform;
 
-import de.adito.ojcms.sqlbuilder.definition.column.IColumnType;
+import de.adito.ojcms.sqlbuilder.definition.column.*;
 
 /**
  * Defines a database platform (MYSQL, ORACLE, DERBY etc).
@@ -37,4 +37,12 @@ public interface IDatabasePlatform
    * @return the definition of a column as string for this database platform
    */
   String columnTypeToStatementFormat(IColumnType pColumnType);
+
+  /**
+   * A column modifier in its statement format.
+   *
+   * @param pModifier the column modifier
+   * @return the modifier of a column as string for this database platform
+   */
+  String columnModifierToStatementFormat(EColumnModifier pModifier);
 }

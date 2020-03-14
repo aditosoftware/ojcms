@@ -1,17 +1,17 @@
 package de.adito.ojcms.sqlbuilder.statements.types;
 
 import de.adito.ojcms.sqlbuilder.*;
-import de.adito.ojcms.sqlbuilder.serialization.IValueSerializer;
 import de.adito.ojcms.sqlbuilder.definition.column.*;
 import de.adito.ojcms.sqlbuilder.executors.IStatementExecutor;
 import de.adito.ojcms.sqlbuilder.format.StatementFormatter;
 import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
-import de.adito.ojcms.sqlbuilder.AbstractSQLStatement;
+import de.adito.ojcms.sqlbuilder.serialization.IValueSerializer;
 import de.adito.ojcms.sqlbuilder.util.OJDatabaseException;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static de.adito.ojcms.sqlbuilder.definition.column.EColumnModifier.*;
 import static de.adito.ojcms.sqlbuilder.format.EFormatConstant.*;
 import static de.adito.ojcms.sqlbuilder.format.EFormatter.CREATE;
 import static de.adito.ojcms.sqlbuilder.format.ESeparator.*;
@@ -40,7 +40,7 @@ public class Create extends AbstractSQLStatement<Void, Create>
   {
     super(pStatementExecutor, pBuilder, pPlatform, pSerializer, pIdColumnName);
     idColumnDefinition = IColumnDefinition.of(pIdColumnName.toUpperCase(),
-                                              EColumnType.INT.create().primaryKey().modifiers(EColumnModifier.NOT_NULL));
+                                              EColumnType.LONG.create().primaryKey().modifiers(NOT_NULL, AUTO_INCREMENT));
   }
 
   /**
@@ -62,9 +62,20 @@ public class Create extends AbstractSQLStatement<Void, Create>
    */
   public Create columns(IColumnDefinition... pColumnDefinitions)
   {
-    if (pColumnDefinitions == null || pColumnDefinitions.length == 0)
+    return columns(Arrays.asList(pColumnDefinitions));
+  }
+
+  /**
+   * Determines the columns to create.
+   *
+   * @param pColumnDefinitions the column definitions to create
+   * @return the create statement itself to enable a pipelining mechanism
+   */
+  public Create columns(Collection<IColumnDefinition> pColumnDefinitions)
+  {
+    if (pColumnDefinitions == null || pColumnDefinitions.size() == 0)
       throw new OJDatabaseException("The columns to create cannot be empty!");
-    columns.addAll(Arrays.asList(pColumnDefinitions));
+    columns.addAll(pColumnDefinitions);
     return this;
   }
 
@@ -108,8 +119,10 @@ public class Create extends AbstractSQLStatement<Void, Create>
         .filter(pColumn -> pColumn.getColumnType().isPrimaryKey())
         .map(pColumnDefinition -> pColumnDefinition.getColumnName().toUpperCase())
         .collect(Collectors.toList());
+
     if (primaryKeyColumnNames.isEmpty())
       return;
+
     pFormatter.appendSeparator(COMMA, NEW_LINE);
     pFormatter.appendConstant(PRIMARY_KEY, String.join(", ", primaryKeyColumnNames));
   }
