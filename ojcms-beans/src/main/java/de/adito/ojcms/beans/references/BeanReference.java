@@ -16,7 +16,7 @@ import java.util.stream.*;
  *
  * @author Simon Danner, 24.11.2018
  */
-public final class BeanReference extends WeakReference<IBean<?>> implements Iterable<BeanReference>
+public final class BeanReference extends WeakReference<IBean> implements Iterable<BeanReference>
 {
   private final IField<?> field;
 
@@ -26,7 +26,7 @@ public final class BeanReference extends WeakReference<IBean<?>> implements Iter
    * @param pBean  the bean that holds to reference
    * @param pField the field that holds the reference
    */
-  public BeanReference(IBean<?> pBean, IField<?> pField)
+  public BeanReference(IBean pBean, IField<?> pField)
   {
     super(Objects.requireNonNull(pBean));
     field = pField;
@@ -37,7 +37,7 @@ public final class BeanReference extends WeakReference<IBean<?>> implements Iter
    *
    * @return a bean holding the reference
    */
-  public IBean<?> getBean()
+  public IBean getBean()
   {
     return _requiresExistingReference();
   }
@@ -102,7 +102,7 @@ public final class BeanReference extends WeakReference<IBean<?>> implements Iter
    * @return the bean holding the reference
    * @throws OJRuntimeException if the reference does not exist anymore
    */
-  private IBean<?> _requiresExistingReference()
+  private IBean _requiresExistingReference()
   {
     return Optional.ofNullable(get())
         .orElseThrow(() -> new OJRuntimeException("This bean reference is not existing anymore!"));

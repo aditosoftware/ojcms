@@ -14,7 +14,7 @@ import java.util.*;
  * @author Simon Danner, 25.01.2017
  */
 @EncapsulatedData
-interface IEncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends IEncapsulatedData<BEAN, IBeanContainerDataSource<BEAN>>
+interface IEncapsulatedBeanContainerData<BEAN extends IBean> extends IEncapsulatedData<BEAN, IBeanContainerDataSource<BEAN>>
 {
   /**
    * The type of the beans in this data core.

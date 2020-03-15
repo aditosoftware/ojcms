@@ -4,6 +4,7 @@ import de.adito.ojcms.beans.annotations.GenericBeanField;
 import de.adito.ojcms.beans.exceptions.OJInternalException;
 import de.adito.ojcms.beans.literals.IAdditionalMemberInfo;
 import de.adito.ojcms.beans.literals.fields.IField;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -37,9 +38,9 @@ final class BeanFieldFactory
    * @param <FIELD>          the generic field type
    * @return the newly created field
    */
-  static <BEAN extends IBean<BEAN>, VALUE, FIELD extends IField<VALUE>> FIELD createField(Class<FIELD> pFieldType, String pName,
-                                                                                          boolean pIsPrivate, Collection<Annotation> pAnnotations,
-                                                                                          Optional<BiPredicate<BEAN, VALUE>> pActiveCondition)
+  static <VALUE, FIELD extends IField<VALUE>> FIELD createField(Class<FIELD> pFieldType, String pName, boolean pIsPrivate,
+                                                                Collection<Annotation> pAnnotations,
+                                                                @Nullable BiPredicate<? extends IBean, VALUE> pActiveCondition)
   {
     return createField(pFieldType, () -> null, pName, pIsPrivate, pAnnotations, pActiveCondition);
   }
@@ -56,36 +57,38 @@ final class BeanFieldFactory
    * @param pIsPrivate           determines if the field is declared privately
    * @param pAnnotations         the field's annotations
    * @param pActiveCondition     an optional condition for optional bean fields (determines the active state of the field)
-   * @param <BEAN>               the generic type of the bean the field is for
    * @param <VALUE>              the data type of the field to create
    * @param <FIELD>              the generic field type
    * @return the newly created field
    */
-  static <BEAN extends IBean<?>, VALUE, FIELD extends IField<VALUE>> FIELD createField(Class<FIELD> pFieldType,
-                                                                                       Supplier<Class<?>> pGenericTypeSupplier,
-                                                                                       String pName, boolean pIsPrivate,
-                                                                                       Collection<Annotation> pAnnotations,
-                                                                                       Optional<BiPredicate<BEAN, VALUE>> pActiveCondition)
+  static <VALUE, FIELD extends IField<VALUE>> FIELD createField(Class<FIELD> pFieldType, Supplier<Class<?>> pGenericTypeSupplier,
+                                                                String pName, boolean pIsPrivate, Collection<Annotation> pAnnotations,
+                                                                @Nullable BiPredicate<? extends IBean, VALUE> pActiveCondition)
   {
     try
     {
       final Optional<Class<?>> optionalGenericType = _getGenericType(pFieldType, pGenericTypeSupplier);
-      final boolean isOptional = pActiveCondition.isPresent();
+      final boolean isOptional = pActiveCondition != null;
       //Constructor argument distinction between generic and non generic values (generic types provide their type additionally)
       final Class[] constructorArgumentTypes = optionalGenericType
           .map(pType -> new Class[]{Class.class, String.class, Collection.class, boolean.class, boolean.class})
           .orElseGet(() -> new Class[]{String.class, Collection.class, boolean.class, boolean.class});
+
       final Object[] constructorArguments = optionalGenericType
           .map(pClass -> new Object[]{pClass, pName, pAnnotations, isOptional, pIsPrivate})
           .orElseGet(() -> new Object[]{pName, pAnnotations, isOptional, pIsPrivate});
+
       //Create the field by using the reflected constructor
       final Constructor<FIELD> constructor = pFieldType.getDeclaredConstructor(constructorArgumentTypes);
       if (!constructor.isAccessible())
         constructor.setAccessible(true);
+
       final FIELD field = constructor.newInstance(constructorArguments);
+
       //Add the optional condition as field info to determine the state of the field later on
       if (isOptional)
-        field.addAdditionalInformation(OPTIONAL_FIELD_INFO, pActiveCondition.get());
+        field.addAdditionalInformation(OPTIONAL_FIELD_INFO, pActiveCondition);
+
       return field;
     }
     catch (NoSuchMethodException | InstantiationException | InvocationTargetException | IllegalAccessException pE)

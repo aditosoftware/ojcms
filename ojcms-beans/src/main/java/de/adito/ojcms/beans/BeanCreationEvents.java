@@ -22,7 +22,7 @@ import java.util.stream.Stream;
  */
 public final class BeanCreationEvents
 {
-  private static final Map<Class<? extends IBean>, PublishSubject<IBean<?>>> PUBLISHERS_BY_TYPE = new ConcurrentHashMap<>();
+  private static final Map<Class<? extends IBean>, PublishSubject<IBean>> PUBLISHERS_BY_TYPE = new ConcurrentHashMap<>();
   private static final Map<Class<? extends Annotation>, PublishSubject<? extends BeanCreationEvent<?>>> PUBLISHERS_BY_ANNOTATION = new ConcurrentHashMap<>();
 
   private BeanCreationEvents()
@@ -35,7 +35,7 @@ public final class BeanCreationEvents
    * @param pBeanType the bean's type to observe creations of
    * @param <BEAN>    the generic runtime type of the bean
    */
-  public static <BEAN extends IBean<BEAN>> Observable<BEAN> observeCreationByBeanType(Class<BEAN> pBeanType)
+  public static <BEAN extends IBean> Observable<BEAN> observeCreationByBeanType(Class<BEAN> pBeanType)
   {
     _getObservableAnnotation(pBeanType); //check, if annotation is present
     //noinspection unchecked
@@ -64,7 +64,7 @@ public final class BeanCreationEvents
    *
    * @param pCreatedBean the newly created bean
    */
-  static void fireCreationIfAnnotationPresent(IBean<?> pCreatedBean)
+  static void fireCreationIfAnnotationPresent(IBean pCreatedBean)
   {
     if (_observersPresent() && hasObservableAnnotation(pCreatedBean.getClass()))
       fireCreation(pCreatedBean);
@@ -75,7 +75,7 @@ public final class BeanCreationEvents
    *
    * @param pCreatedBean the created bean
    */
-  static void fireCreation(IBean<?> pCreatedBean)
+  static void fireCreation(IBean pCreatedBean)
   {
     if (!_observersPresent())
       return;

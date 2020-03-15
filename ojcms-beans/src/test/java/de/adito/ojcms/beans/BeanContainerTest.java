@@ -376,10 +376,22 @@ class BeanContainerTest
     assertSame(thirdBean, twoResultsTwoTuple.get(1));
   }
 
+  @Test
+  public void testInheritance()
+  {
+    final IBeanContainer<SomeBean> baseTypeContainer = IBeanContainer.empty(SomeBean.class);
+
+    baseTypeContainer.addBean(new SomeSpecialBean(34, 12));
+    baseTypeContainer.addBean(new SomeBean(1));
+
+    assertEquals(2, baseTypeContainer.size());
+    assertSame(baseTypeContainer.getBean(0).getClass(), SomeSpecialBean.class);
+  }
+
   /**
    * Some bean for the container.
    */
-  public static class SomeBean extends OJBean<SomeBean> implements Comparable<SomeBean>
+  public static class SomeBean extends OJBean implements Comparable<SomeBean>
   {
     @Identifier
     public static final IntegerField SOME_FIELD = OJFields.create(SomeBean.class);
@@ -400,6 +412,20 @@ class BeanContainerTest
     public int compareTo(@NotNull SomeBean pBean)
     {
       return getValue(SOME_FIELD) - pBean.getValue(SOME_FIELD);
+    }
+  }
+
+  /**
+   * Some special bean extending {@link SomeBean}
+   */
+  public static class SomeSpecialBean extends SomeBean
+  {
+    public static final IntegerField SOME_SPECIAL_FIELD = OJFields.create(SomeSpecialBean.class);
+
+    public SomeSpecialBean(int pValue, int pSpecialValue)
+    {
+      super(pValue);
+      setValue(SOME_SPECIAL_FIELD, pSpecialValue);
     }
   }
 }

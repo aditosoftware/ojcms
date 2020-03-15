@@ -16,7 +16,7 @@ import java.util.function.*;
  * @param <VALUE> the map's value type
  * @author Simon Danner, 22.12.2018
  */
-public interface IMapBean<KEY, VALUE> extends Map<KEY, VALUE>, IBean<IMapBean<KEY, VALUE>>
+public interface IMapBean<KEY, VALUE> extends Map<KEY, VALUE>, IBean
 {
   /**
    * Creates a new map bean from an existing map.

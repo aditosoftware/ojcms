@@ -59,7 +59,7 @@ final class BeanInternalEvents
    * @return the encapsulated data core of the bean
    * @throws BeanFieldDoesNotExistException if the bean field is not present
    */
-  static IEncapsulatedBeanData requestEncapsulatedDataForField(IBean<?> pBean, IField<?> pField)
+  static IEncapsulatedBeanData requestEncapsulatedDataForField(IBean pBean, IField<?> pField)
   {
     final IEncapsulatedBeanData encapsulatedBeanData = requestEncapsulatedData(pBean);
     if (!encapsulatedBeanData.containsField(requireNonNull(pField)))
@@ -77,7 +77,7 @@ final class BeanInternalEvents
    * @throws BeanFieldDoesNotExistException if the bean field does not exist at the bean
    * @throws NullValueForbiddenException    if a null value would have been returned, but the field is marked as {@link NeverNull}
    */
-  static <VALUE> VALUE requestValue(IBean<?> pBean, IField<VALUE> pField)
+  static <VALUE> VALUE requestValue(IBean pBean, IField<VALUE> pField)
   {
     final VALUE value = requestEncapsulatedDataForField(pBean, pField).getValue(pField);
 
@@ -96,13 +96,12 @@ final class BeanInternalEvents
    * @param pBean     the bean from which a value has been changed
    * @param pField    the bean field from which the value has been changed
    * @param pNewValue the new value to set
-   * @param <BEAN>    the generic bean type
    * @param <VALUE>   the data type of the bean field
    * @throws BeanFieldDoesNotExistException if the bean field does not exist at the bean
    * @throws NullValueForbiddenException    if a null value would have been returned, but the field is marked as {@link NeverNull}
    */
   @SuppressWarnings("unchecked")
-  static <BEAN extends IBean<BEAN>, VALUE> void setValueAndPropagate(BEAN pBean, IField<VALUE> pField, VALUE pNewValue)
+  static <VALUE> void setValueAndPropagate(IBean pBean, IField<VALUE> pField, VALUE pNewValue)
   {
     if (pNewValue == null && pField.mustNeverBeNull())
       throw new NullValueForbiddenException(pField);
@@ -113,7 +112,7 @@ final class BeanInternalEvents
       throw new FieldIsFinalException(pField);
 
     //We have to check the states of the optional fields and then change the value with a following propagation of the change
-    final IBeanFieldActivePredicate<BEAN> fieldActiveSupplier = pBean.getFieldActivePredicate();
+    final IBeanFieldActivePredicate fieldActiveSupplier = pBean.getFieldActivePredicate();
     //Store before active optional fields to detect differences later on
     final List<IField<?>> optionalActiveFields = encapsulatedData.streamFields()
         .filter(pBeanField -> pBeanField.isOptional() && fieldActiveSupplier.isOptionalActive(pBeanField))
@@ -170,7 +169,7 @@ final class BeanInternalEvents
    * @param pBean      the added bean
    * @param <BEAN>     the generic type of the bean
    */
-  static <BEAN extends IBean<BEAN>> void beanAdded(IBeanContainer<BEAN> pContainer, BEAN pBean)
+  static <BEAN extends IBean> void beanAdded(IBeanContainer<BEAN> pContainer, BEAN pBean)
   {
     //Pass the references of the container to the beans as well
     final IEncapsulatedBeanData beanEncapsulated = requestEncapsulatedData(pBean);
@@ -189,7 +188,7 @@ final class BeanInternalEvents
    * @param pBean      the removed bean
    * @param <BEAN>     the generic type of the bean
    */
-  static <BEAN extends IBean<BEAN>> void beanRemoved(IBeanContainer<BEAN> pContainer, BEAN pBean)
+  static <BEAN extends IBean> void beanRemoved(IBeanContainer<BEAN> pContainer, BEAN pBean)
   {
     //Remove the references from the bean, which were created through the container
     final IEncapsulatedBeanData beanEncapsulated = requestEncapsulatedData(pBean);
@@ -210,8 +209,8 @@ final class BeanInternalEvents
    * @param <BEAN>          the type of the beans in the container
    * @return the optionally removed bean
    */
-  static <BEAN extends IBean<BEAN>> Optional<BEAN> removeFromContainer(IBeanContainer<BEAN> pContainer,
-                                                                       Function<IEncapsulatedBeanContainerData<BEAN>, BEAN> pDeleteFunction)
+  static <BEAN extends IBean> Optional<BEAN> removeFromContainer(IBeanContainer<BEAN> pContainer,
+                                                                 Function<IEncapsulatedBeanContainerData<BEAN>, BEAN> pDeleteFunction)
   {
     final BEAN removedBean = pDeleteFunction.apply(requestEncapsulatedData(pContainer));
     if (removedBean != null)
@@ -230,7 +229,7 @@ final class BeanInternalEvents
    * @param <BEAN>     the type of the beans in the container
    * @return <tt>true</tt> if at least one bean has been removed
    */
-  static <BEAN extends IBean<BEAN>> boolean doRemoveBeanIf(IBeanContainer<BEAN> pContainer, Predicate<BEAN> pPredicate, boolean pBreak)
+  static <BEAN extends IBean> boolean doRemoveBeanIf(IBeanContainer<BEAN> pContainer, Predicate<BEAN> pPredicate, boolean pBreak)
   {
     final Iterator<BEAN> it = requestEncapsulatedData(pContainer).iterator();
     boolean removed = false;
@@ -260,26 +259,13 @@ final class BeanInternalEvents
   }
 
   /**
-   * Helper to use a bean in its runtime type.
-   *
-   * @param pBean  the bean to cast
-   * @param <BEAN> the runtime type of the bean
-   * @return the bean in its runtime type
-   */
-  static <BEAN extends IBean<BEAN>> BEAN toRuntimeBean(IBean<BEAN> pBean)
-  {
-    //noinspection unchecked
-    return (BEAN) pBean;
-  }
-
-  /**
    * Tries to add a statistic entry for a bean container.
    * This method should be called, if a bean has been added or removed.
    *
    * @param pContainer the container, for which an entry may be added
    * @param <BEAN>     the type of the beans in the container
    */
-  private static <BEAN extends IBean<BEAN>> void _tryAddStatisticEntry(IBeanContainer<BEAN> pContainer)
+  private static <BEAN extends IBean> void _tryAddStatisticEntry(IBeanContainer<BEAN> pContainer)
   {
     pContainer.getStatisticData().ifPresent(pData -> pData.addEntry(pContainer.size()));
   }

@@ -132,7 +132,7 @@ public abstract class AbstractDatabaseTest<MODEL extends IPersistenceModel> exte
   /**
    * Some bean to use for the persistence models and the tests.
    */
-  public static class SomeBean extends OJBean<SomeBean>
+  public static class SomeBean extends OJBean
   {
     @Identifier
     public static final IntegerField FIELD1 = OJFields.create(SomeBean.class);

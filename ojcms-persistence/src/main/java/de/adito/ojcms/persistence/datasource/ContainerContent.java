@@ -16,9 +16,10 @@ import static de.adito.ojcms.persistence.datasource.BeanPersistenceUtil.newPersi
 /**
  * Manages the content of a persistent bean container within one {@link ITransaction}.
  *
+ * @param <BEAN> the type of the beans in the container
  * @author Simon Danner, 30.12.2019
  */
-class ContainerContent<BEAN extends IBean<BEAN>>
+class ContainerContent<BEAN extends IBean>
 {
   private final String containerId;
   private final Class<BEAN> beanType;

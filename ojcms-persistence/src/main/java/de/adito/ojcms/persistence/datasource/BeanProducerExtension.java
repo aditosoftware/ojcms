@@ -22,8 +22,8 @@ import java.util.*;
  */
 class BeanProducerExtension implements Extension
 {
-  static final Map<Class<? extends IBean<?>>, String> CONTAINER_BEAN_TYPES = new HashMap<>();
-  static final Map<Class<? extends IBean<?>>, String> SINGLE_BEAN_TYPES = new HashMap<>();
+  static final Map<Class<? extends IBean>, String> CONTAINER_BEAN_TYPES = new HashMap<>();
+  static final Map<Class<? extends IBean>, String> SINGLE_BEAN_TYPES = new HashMap<>();
 
   /**
    * Scans every {@link AnnotatedType} for persistent bean types.
@@ -31,7 +31,7 @@ class BeanProducerExtension implements Extension
    *
    * @param pProcessedBean a processed bean type
    */
-  void findPersistentBeans(@Observes ProcessAnnotatedType<? extends IBean<?>> pProcessedBean)
+  void findPersistentBeans(@Observes ProcessAnnotatedType<? extends IBean> pProcessedBean)
   {
     final Persist persistenceAnnotation = pProcessedBean.getAnnotatedType().getAnnotation(Persist.class);
 
@@ -39,7 +39,7 @@ class BeanProducerExtension implements Extension
       return;
 
     //noinspection unchecked
-    final Class<? extends IBean<?>> beanType = (Class<? extends IBean<?>>) pProcessedBean.getAnnotatedType().getBaseType();
+    final Class<? extends IBean> beanType = (Class<? extends IBean>) pProcessedBean.getAnnotatedType().getBaseType();
 
     if (persistenceAnnotation.mode() == EPersistenceMode.CONTAINER)
       CONTAINER_BEAN_TYPES.put(beanType, persistenceAnnotation.containerId());
@@ -70,7 +70,7 @@ class BeanProducerExtension implements Extension
    * @param pBeanType           the bean type of the persistent container
    * @param pContainerId        the id of the persistent bean container
    */
-  private static void _addContainerCdiBeans(AfterBeanDiscovery pAfterBeanDiscovery, Class<? extends IBean<?>> pBeanType, String pContainerId)
+  private static void _addContainerCdiBeans(AfterBeanDiscovery pAfterBeanDiscovery, Class<? extends IBean> pBeanType, String pContainerId)
   {
     final ContainerQualifier literal = ContainerQualifier.Literal.forContainerId(pContainerId);
 
@@ -97,7 +97,7 @@ class BeanProducerExtension implements Extension
    * @param pBeanType           the bean type of the persistent single bean
    * @param pBeanId             the id of the persistent single bean
    */
-  private static void _addSingleBeanCdiBeans(AfterBeanDiscovery pAfterBeanDiscovery, Class<? extends IBean<?>> pBeanType, String pBeanId)
+  private static void _addSingleBeanCdiBeans(AfterBeanDiscovery pAfterBeanDiscovery, Class<? extends IBean> pBeanType, String pBeanId)
   {
     final ContainerQualifier literal = ContainerQualifier.Literal.forContainerId(pBeanId);
 
@@ -122,8 +122,8 @@ class BeanProducerExtension implements Extension
    * @param pLiteral     a qualifier annotation literal to identify the persistent container
    * @return the created bean container instance
    */
-  private static <BEAN extends IBean<BEAN>> IBeanContainer<BEAN> _createBeanContainer(Instance<Object> pEnvironment, Class<BEAN> pBeanType,
-                                                                                      ContainerQualifier pLiteral)
+  private static <BEAN extends IBean> IBeanContainer<BEAN> _createBeanContainer(Instance<Object> pEnvironment, Class<BEAN> pBeanType,
+                                                                                ContainerQualifier pLiteral)
   {
     //noinspection unchecked
     final ContainerContent<BEAN> content = pEnvironment.select(ContainerContent.class, pLiteral).get();
@@ -139,8 +139,8 @@ class BeanProducerExtension implements Extension
    * @param pBeanType    the bean type of the bean container
    * @return the created instance managing the persistent container's content
    */
-  private static <BEAN extends IBean<BEAN>> ContainerContent<BEAN> _createContainerContent(Instance<Object> pEnvironment,
-                                                                                           String pContainerId, Class<BEAN> pBeanType)
+  private static <BEAN extends IBean> ContainerContent<BEAN> _createContainerContent(Instance<Object> pEnvironment, String pContainerId,
+                                                                                     Class<BEAN> pBeanType)
   {
     return new ContainerContent<>(pContainerId, pBeanType, pEnvironment.select(ITransaction.class).get());
   }
@@ -153,8 +153,7 @@ class BeanProducerExtension implements Extension
    * @param pLiteral     a qualifier annotation literal to identify the single persistent bean
    * @return the created single bean instance
    */
-  private static <BEAN extends IBean<BEAN>> BEAN _createSingleBean(Instance<Object> pEnvironment, Class<BEAN> pBeanType,
-                                                                   ContainerQualifier pLiteral)
+  private static <BEAN extends IBean> BEAN _createSingleBean(Instance<Object> pEnvironment, Class<BEAN> pBeanType, ContainerQualifier pLiteral)
   {
     final SingleBeanContent content = pEnvironment.select(SingleBeanContent.class, pLiteral).get();
     final PersistentBeanDatasource datasource = new PersistentBeanDatasource(content);

@@ -51,7 +51,7 @@ public class ContainerPersistenceModel implements IPersistenceModel
    * @param pContainerId the container id of the persistent container
    * @param pBeanType    the type of beans within the bean container
    */
-  ContainerPersistenceModel(String pContainerId, Class<? extends IBean<?>> pBeanType)
+  ContainerPersistenceModel(String pContainerId, Class<? extends IBean> pBeanType)
   {
     containerId = StringUtility.requireNotEmpty(pContainerId, "container id");
     final List<IField<?>> beanFields = BeanReflector.reflectBeanFields(pBeanType);

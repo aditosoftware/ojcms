@@ -22,7 +22,7 @@ import java.util.stream.IntStream;
  * @author Simon Danner, 08.12.2018
  */
 @EncapsulatedData
-class EncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends AbstractEncapsulatedData<BEAN, IBeanContainerDataSource<BEAN>>
+class EncapsulatedBeanContainerData<BEAN extends IBean> extends AbstractEncapsulatedData<BEAN, IBeanContainerDataSource<BEAN>>
     implements IEncapsulatedBeanContainerData<BEAN>
 {
   private final Class<BEAN> beanType;
@@ -177,11 +177,11 @@ class EncapsulatedBeanContainerData<BEAN extends IBean<BEAN>> extends AbstractEn
    */
   private BEAN _observeBean(BEAN pBean)
   {
-    final Observable<IEvent<BEAN>> combinedObservables = Observable.concat(pBean.observeValues(), pBean.observeFieldAdditions(),
-                                                                           pBean.observeFieldRemovals());
+    final Observable<IEvent<IBean>> combinedObservables = Observable.concat(pBean.observeValues(), pBean.observeFieldAdditions(),
+                                                                            pBean.observeFieldRemovals());
     //noinspection unchecked
     final Disposable disposable = combinedObservables
-        .subscribe(pChangeEvent -> getEventObserverFromType((Class<IEvent<BEAN>>) pChangeEvent.getClass()).onNext(pChangeEvent));
+        .subscribe(pChangeEvent -> getEventObserverFromType((Class<IEvent<IBean>>) pChangeEvent.getClass()).onNext(pChangeEvent));
 
     beanDisposableMapping.put(pBean, disposable);
     return pBean;

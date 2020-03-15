@@ -64,7 +64,7 @@ public class BeanCreationEventsTest
    * A bean type using {@link ObserveCreation} directly.
    */
   @ObserveCreation
-  public static class SomeBean extends OJBean<SomeBean>
+  public static class SomeBean extends OJBean
   {
     public static final IntegerField SOME_FIELD = OJFields.create(SomeBean.class);
 
@@ -78,14 +78,14 @@ public class BeanCreationEventsTest
    * A bean type using the annotation annotated by {@link ObserveCreation}.
    */
   @SomeAnnotation
-  public static class AnotherBean extends OJBean<AnotherBean>
+  public static class AnotherBean extends OJBean
   {
   }
 
   /**
    * A regular bean without any annotation.
    */
-  public static class BeanWithoutAnnotation extends OJBean<BeanWithoutAnnotation>
+  public static class BeanWithoutAnnotation extends OJBean
   {
   }
 

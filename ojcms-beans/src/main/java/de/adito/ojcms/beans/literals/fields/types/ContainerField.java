@@ -20,7 +20,7 @@ import java.util.Collection;
 @TypeDefaultField(types = IBeanContainer.class)
 @ReferenceField(resolverType = EReferableResolver.MULTI)
 @GenericBeanField(genericWrapperType = IBeanContainer.class)
-public class ContainerField<BEAN extends IBean<BEAN>> extends AbstractField<IBeanContainer<BEAN>>
+public class ContainerField<BEAN extends IBean> extends AbstractField<IBeanContainer<BEAN>>
 {
   protected ContainerField(Class<IBeanContainer<BEAN>> pType, @NotNull String pName, Collection<Annotation> pAnnotations,
                            boolean pIsOptional, boolean pIsPrivate)

@@ -19,7 +19,7 @@ import java.util.Collection;
 @TypeDefaultField(types = IBean.class)
 @ReferenceField(resolverType = EReferableResolver.SINGLE)
 @GenericBeanField
-public class BeanField<BEAN extends IBean<BEAN>> extends AbstractField<BEAN>
+public class BeanField<BEAN extends IBean> extends AbstractField<BEAN>
 {
   protected BeanField(Class<BEAN> pType, @NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional,
                       boolean pIsPrivate)

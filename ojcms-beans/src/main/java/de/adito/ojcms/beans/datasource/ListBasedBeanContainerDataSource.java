@@ -13,7 +13,7 @@ import java.util.stream.*;
  * @param <BEAN> the type of the beans in the data source
  * @author Simon Danner, 08.12.2018
  */
-public final class ListBasedBeanContainerDataSource<BEAN extends IBean<BEAN>> implements IBeanContainerDataSource<BEAN>
+public final class ListBasedBeanContainerDataSource<BEAN extends IBean> implements IBeanContainerDataSource<BEAN>
 {
   private final List<BEAN> beanList;
 

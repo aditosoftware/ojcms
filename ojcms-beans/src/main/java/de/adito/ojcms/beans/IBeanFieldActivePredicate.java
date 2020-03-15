@@ -12,17 +12,16 @@ import java.util.function.BiPredicate;
  * This leads to a very comfortable way to use this interface, especially if implemented as lambda expression.
  * For example, the bean interface may simply implement this interface as the following: "return () -> (BEAN) this;"
  *
- * @param <BEAN> the runtime type of the bean this field active condition is for
  * @author Simon Danner, 18.08.2017
  */
-interface IBeanFieldActivePredicate<BEAN extends IBean<BEAN>>
+interface IBeanFieldActivePredicate
 {
   /**
    * The bean for which the active status of a certain field should be checked.
    *
    * @return the bean to check
    */
-  BEAN getBean();
+  IBean getBean();
 
   /**
    * Determines, if an optional bean field is active at this moment.
@@ -38,9 +37,9 @@ interface IBeanFieldActivePredicate<BEAN extends IBean<BEAN>>
       return true;
 
     //noinspection unchecked
-    final BiPredicate<BEAN, VALUE> condition = pField.getAdditionalInformationOrThrow(BeanFieldFactory.OPTIONAL_FIELD_INFO);
+    final BiPredicate<IBean, VALUE> condition = pField.getAdditionalInformationOrThrow(BeanFieldFactory.OPTIONAL_FIELD_INFO);
     assert condition != null;
-    final BEAN bean = getBean();
+    final IBean bean = getBean();
     return condition.test(bean, bean.getValue(pField));
   }
 }

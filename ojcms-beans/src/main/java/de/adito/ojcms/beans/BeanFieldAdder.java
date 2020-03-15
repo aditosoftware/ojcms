@@ -7,22 +7,23 @@ import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.function.*;
 
+import static de.adito.ojcms.beans.BeanFieldFactory.createField;
+
 /**
  * Utility to add bean fields.
  *
- * @param <BEAN>  the runtime type of the bean the field is for
  * @param <VALUE> the data type of the field to add
  * @param <FIELD> the runtime type of the field to add/create
  * @author Simon Danner, 25.12.2018
  */
-public final class BeanFieldAdder<BEAN extends IBean<BEAN>, VALUE, FIELD extends IField<VALUE>>
+public final class BeanFieldAdder<VALUE, FIELD extends IField<VALUE>>
 {
   private final ObjIntConsumer<FIELD> addFunction;
   private final IntSupplier fieldCountSupplier;
   private final Class<FIELD> beanFieldType;
   private final String fieldName;
   private final Collection<Annotation> annotations;
-  private Optional<BiPredicate<BEAN, VALUE>> activeCondition = Optional.empty();
+  private BiPredicate<? extends IBean, VALUE> activeCondition;
   private Class<?> genericType;
 
   /**
@@ -51,7 +52,7 @@ public final class BeanFieldAdder<BEAN extends IBean<BEAN>, VALUE, FIELD extends
    * @param pGenericType the generic type of the field to add
    * @return the bean field adder itself to enable a pipelining mechanism
    */
-  public BeanFieldAdder<BEAN, VALUE, FIELD> withGenericType(Class<?> pGenericType)
+  public BeanFieldAdder<VALUE, FIELD> withGenericType(Class<?> pGenericType)
   {
     genericType = pGenericType;
     return this;
@@ -63,9 +64,9 @@ public final class BeanFieldAdder<BEAN extends IBean<BEAN>, VALUE, FIELD extends
    * @param pActiveCondition the condition to determine the active state of the field
    * @return the bean field adder itself to enable a pipelining mechanism
    */
-  public BeanFieldAdder<BEAN, VALUE, FIELD> optionalField(BiPredicate<BEAN, VALUE> pActiveCondition)
+  public <BEAN extends IBean> BeanFieldAdder<VALUE, FIELD> optionalField(BiPredicate<BEAN, VALUE> pActiveCondition)
   {
-    activeCondition = Optional.of(pActiveCondition);
+    activeCondition = pActiveCondition;
     return this;
   }
 
@@ -87,7 +88,7 @@ public final class BeanFieldAdder<BEAN extends IBean<BEAN>, VALUE, FIELD extends
    */
   public FIELD addAtIndex(int pIndex)
   {
-    final FIELD field = BeanFieldFactory.createField(beanFieldType, () -> genericType, fieldName, false, annotations, activeCondition);
+    final FIELD field = createField(beanFieldType, () -> genericType, fieldName, false, annotations, activeCondition);
     addFunction.accept(field, pIndex);
     return field;
   }

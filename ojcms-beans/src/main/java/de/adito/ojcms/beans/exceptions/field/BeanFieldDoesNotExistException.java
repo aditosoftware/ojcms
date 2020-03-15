@@ -17,7 +17,7 @@ public class BeanFieldDoesNotExistException extends OJRuntimeException
    * @param pBean  the bean missing the field
    * @param pField the missing field
    */
-  public BeanFieldDoesNotExistException(IBean<?> pBean, IField<?> pField)
+  public BeanFieldDoesNotExistException(IBean pBean, IField<?> pField)
   {
     super("Missing bean field: bean-type: " + pBean.getClass().getSimpleName() + " field: " + pField.getName() + ". Consider field filters!");
   }
@@ -38,7 +38,7 @@ public class BeanFieldDoesNotExistException extends OJRuntimeException
    * @param pBean      the bean missing the field
    * @param pFieldName the missing field's name
    */
-  public BeanFieldDoesNotExistException(IBean<?> pBean, String pFieldName)
+  public BeanFieldDoesNotExistException(IBean pBean, String pFieldName)
   {
     super("A bean field with the name '" + pFieldName + "' is not existing at bean type " + pBean.getClass().getName());
   }

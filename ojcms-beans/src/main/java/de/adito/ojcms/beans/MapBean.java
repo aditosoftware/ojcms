@@ -137,8 +137,8 @@ final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMapB
         .orElseGet(() ->
                    {
                      //noinspection unchecked,RedundantCast
-                     final IField<?> field = BeanFieldFactory.createField((Class<IField>) fieldType, genericFieldTypeSupplier, Objects.toString(pKey),
-                                                                          false, annotationsForField, Optional.empty());
+                     final IField<?> field = BeanFieldFactory.createField((Class<IField>) fieldType, genericFieldTypeSupplier,
+                                                                          Objects.toString(pKey), false, annotationsForField, null);
                      fieldCacheCallback.accept(pKey, field);
                      return field;
                    });
@@ -189,7 +189,7 @@ final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMapB
   public int hashCode()
   {
     final FieldValueTuple[] tuples = encapsulated.stream().toArray(FieldValueTuple[]::new);
-    return Objects.hash(tuples);
+    return Arrays.hashCode(tuples);
   }
 
   /**

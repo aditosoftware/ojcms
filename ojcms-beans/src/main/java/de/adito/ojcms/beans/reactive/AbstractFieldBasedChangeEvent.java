@@ -6,13 +6,12 @@ import de.adito.ojcms.beans.literals.fields.IField;
 /**
  * An abstract change event that is based on a bean and an associated field.
  *
- * @param <BEAN>  the type of the changed bean
  * @param <VALUE> the value type of the field that is associated with the field
  * @param <EVENT> the actual runtime type of this event
  * @author Simon Danner, 18.11.2018
  */
-public abstract class AbstractFieldBasedChangeEvent<BEAN extends IBean<BEAN>, VALUE, EVENT extends AbstractFieldBasedChangeEvent<BEAN, VALUE, EVENT>>
-    extends AbstractChangeEvent<BEAN, EVENT>
+public abstract class AbstractFieldBasedChangeEvent<VALUE, EVENT extends AbstractFieldBasedChangeEvent<VALUE, EVENT>>
+    extends AbstractChangeEvent<IBean, EVENT>
 {
   private final IField<VALUE> field;
 
@@ -22,7 +21,7 @@ public abstract class AbstractFieldBasedChangeEvent<BEAN extends IBean<BEAN>, VA
    * @param pSource the bean that is the source which triggered this event
    * @param pField  the field associated with the change
    */
-  protected AbstractFieldBasedChangeEvent(BEAN pSource, IField<VALUE> pField)
+  protected AbstractFieldBasedChangeEvent(IBean pSource, IField<VALUE> pField)
   {
     super(pSource);
     field = pField;

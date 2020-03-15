@@ -9,7 +9,7 @@ import de.adito.ojcms.beans.reactive.AbstractContainerChangeEvent;
  * @param <BEAN> the type of the removed bean
  * @author Simon Danner, 22.11.2018
  */
-public final class BeanContainerRemoval<BEAN extends IBean<BEAN>> extends AbstractContainerChangeEvent<BEAN, BeanContainerRemoval<BEAN>>
+public final class BeanContainerRemoval<BEAN extends IBean> extends AbstractContainerChangeEvent<BEAN, BeanContainerRemoval<BEAN>>
 {
   /**
    * Creates the removal event.

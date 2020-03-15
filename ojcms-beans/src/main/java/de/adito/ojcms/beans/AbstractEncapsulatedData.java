@@ -58,14 +58,14 @@ abstract class AbstractEncapsulatedData<ELEMENT, DATASOURCE extends IDataSource>
   }
 
   @Override
-  public void addWeakReference(IBean<?> pBean, IField<?> pField)
+  public void addWeakReference(IBean pBean, IField<?> pField)
   {
     final IEncapsulatedBeanData encapsulatedData = requestEncapsulatedDataForField(pBean, pField);
     weakReferencesMapping.computeIfAbsent(encapsulatedData, pKey -> new HashSet<>()).add(new BeanReference(pBean, pField));
   }
 
   @Override
-  public void removeReference(IBean<?> pBean, IField<?> pField)
+  public void removeReference(IBean pBean, IField<?> pField)
   {
     final IEncapsulatedBeanData encapsulatedData = requestEncapsulatedDataForField(pBean, pField);
     boolean removed = false;

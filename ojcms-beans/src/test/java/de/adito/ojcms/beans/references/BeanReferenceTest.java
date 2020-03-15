@@ -58,7 +58,7 @@ class BeanReferenceTest
   {
     final Data data = new Data();
     final Address deepAddress = data.getValue(Data.registry).getValue(PersonRegistry.persons).getBean(0).getValue(Person.address);
-    final Set<IBean<?>> referencesByField = deepAddress.getAllReferencesByField(Data.registry);
+    final Set<IBean> referencesByField = deepAddress.getAllReferencesByField(Data.registry);
     assertEquals(1, referencesByField.size());
     assertTrue(referencesByField.contains(data));
   }
@@ -66,7 +66,7 @@ class BeanReferenceTest
   /**
    * Some data POJO that manages a person registry.
    */
-  public static class Data extends OJBean<Data>
+  public static class Data extends OJBean
   {
     public static final BeanField<PersonRegistry> registry = OJFields.create(Data.class);
 
@@ -79,7 +79,7 @@ class BeanReferenceTest
   /**
    * A bean that holds multiple persons through a bean container field.
    */
-  public static class PersonRegistry extends OJBean<PersonRegistry>
+  public static class PersonRegistry extends OJBean
   {
     public static final ContainerField<Person> persons = OJFields.create(PersonRegistry.class);
 
@@ -92,7 +92,7 @@ class BeanReferenceTest
   /**
    * Bean for a person with an address property (reference).
    */
-  public static class Person extends OJBean<Person>
+  public static class Person extends OJBean
   {
     public static final TextField name = OJFields.create(Person.class);
     public static final BeanField<Address> address = OJFields.create(Person.class);
@@ -107,7 +107,7 @@ class BeanReferenceTest
   /**
    * Bean for an address.
    */
-  public static class Address extends OJBean<Address>
+  public static class Address extends OJBean
   {
     public static final TextField city = OJFields.create(Address.class);
     public static final IntegerField postalCode = OJFields.create(Address.class);

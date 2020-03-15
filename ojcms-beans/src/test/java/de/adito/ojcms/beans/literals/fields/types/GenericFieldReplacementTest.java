@@ -65,7 +65,7 @@ public class GenericFieldReplacementTest
   /**
    * Some bean type.
    */
-  public static class SomeBean extends OJBean<SomeBean>
+  public static class SomeBean extends OJBean
   {
   }
 

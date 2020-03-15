@@ -15,7 +15,7 @@ import java.util.stream.*;
  * @author Simon Danner, 23.08.2016
  */
 @RequiresEncapsulatedAccess
-public class BeanContainer<BEAN extends IBean<BEAN>> implements IBeanContainer<BEAN>
+public class BeanContainer<BEAN extends IBean> implements IBeanContainer<BEAN>
 {
   private final IEncapsulatedBeanContainerData<BEAN> encapsulatedData;
 

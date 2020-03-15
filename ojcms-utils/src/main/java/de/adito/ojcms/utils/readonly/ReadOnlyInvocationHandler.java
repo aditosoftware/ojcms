@@ -45,6 +45,7 @@ public class ReadOnlyInvocationHandler<SOURCE> implements InvocationHandler
     if (pMethod.isAnnotationPresent(WriteOperation.class))
       throw new UnsupportedOperationException("This element of type " + source.getClass().getName() + " is read-only! " +
                                                   "The content can not be modified!");
+
     final Object result = pMethod.invoke(source, pArgs);
     if (result instanceof List)
       return Collections.unmodifiableList((List<?>) result);

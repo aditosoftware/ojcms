@@ -110,7 +110,7 @@ public class PersistentContainerTest extends AbstractCdiTest
   }
 
   @Persist(containerId = "TEST")
-  public static class SomeBean extends OJBean<SomeBean>
+  public static class SomeBean extends OJBean
   {
     @Identifier
     public static final IntegerField NUMBER_FIELD = OJFields.create(SomeBean.class);

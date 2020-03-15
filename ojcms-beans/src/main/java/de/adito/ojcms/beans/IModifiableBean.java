@@ -16,11 +16,10 @@ import static de.adito.ojcms.beans.BeanInternalEvents.*;
  * A modifiable bean with dynamical fields.
  * Allows the extension and removal of bean fields.
  *
- * @param <BEAN> the runtime type of the concrete bean
  * @author Simon Danner, 01.02.2017
  */
 @RequiresEncapsulatedAccess
-public interface IModifiableBean<BEAN extends IModifiableBean<BEAN>> extends IBean<BEAN>
+public interface IModifiableBean extends IBean
 {
   /**
    * Extends this bean by one field.
@@ -33,8 +32,8 @@ public interface IModifiableBean<BEAN extends IModifiableBean<BEAN>> extends IBe
    * @param <FIELD>      the runtime type of the field to add/create
    * @return the created field instance
    */
-  default <VALUE, FIELD extends IField<VALUE>> BeanFieldAdder<BEAN, VALUE, FIELD> fieldAdder(Class<FIELD> pFieldType, String pName,
-                                                                                             Collection<Annotation> pAnnotations)
+  default <VALUE, FIELD extends IField<VALUE>> BeanFieldAdder<VALUE, FIELD> fieldAdder(Class<FIELD> pFieldType, String pName,
+                                                                                       Collection<Annotation> pAnnotations)
   {
     final IEncapsulatedBeanData encapsulated = requestEncapsulatedData(this);
     if (encapsulated.streamFields().anyMatch(pField -> pField.getName().equals(pName)))
@@ -63,12 +62,13 @@ public interface IModifiableBean<BEAN extends IModifiableBean<BEAN>> extends IBe
   default <VALUE> void addFieldAtIndex(IField<VALUE> pField, int pIndex)
   {
     final IEncapsulatedBeanData encapsulated = requestEncapsulatedData(this);
+
     if (encapsulated.containsField(pField))
       throw new BeanFieldDuplicateException(pField.getName());
     encapsulated.addField(pField, pIndex);
+
     if (getFieldActivePredicate().isOptionalActive(pField))
-      //noinspection unchecked
-      propagateChange(new BeanFieldAddition<>((BEAN) this, pField));
+      propagateChange(new BeanFieldAddition<>(this, pField));
   }
 
   /**
@@ -82,9 +82,9 @@ public interface IModifiableBean<BEAN extends IModifiableBean<BEAN>> extends IBe
   {
     final IEncapsulatedBeanData encapsulated = requestEncapsulatedDataForField(this, pField);
     final VALUE oldValue = encapsulated.getValue(pField);
+
     encapsulated.removeField(pField);
-    //noinspection unchecked
-    propagateChange(new BeanFieldRemoval<>((BEAN) this, pField, oldValue));
+    propagateChange(new BeanFieldRemoval<>(this, pField, oldValue));
     return oldValue;
   }
 

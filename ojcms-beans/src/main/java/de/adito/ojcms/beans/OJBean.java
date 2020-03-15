@@ -31,12 +31,11 @@ import java.util.stream.Collectors;
  * This bean has implementations for {@link #equals(Object)} and {@link #hashCode()}.
  * They include all fields marked as {@link de.adito.ojcms.beans.annotations.Identifier}.
  *
- * @param <BEAN> the runtime type of this bean
  * @author Simon Danner, 23.08.2016
  * @see BeanFieldFactory
  */
 @RequiresEncapsulatedAccess
-public abstract class OJBean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
+public abstract class OJBean implements IBean
 {
   static final String ENCAPSULATED_DATA_FIELD_NAME = "encapsulatedData";
   private final IEncapsulatedBeanData encapsulatedData;
@@ -112,7 +111,6 @@ public abstract class OJBean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
         .collect(Collectors.joining(", ")) + "}";
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public boolean equals(Object pOther)
   {
@@ -124,7 +122,7 @@ public abstract class OJBean<BEAN extends IBean<BEAN>> implements IBean<BEAN>
     if (identifiers.isEmpty())
       return false;
 
-    final OJBean<BEAN> other = (OJBean<BEAN>) pOther;
+    final OJBean other = (OJBean) pOther;
     return identifiers.stream()
         .allMatch(pIdentifier -> Objects.equals(pIdentifier.getValue(), other.getValue(pIdentifier.getField())));
   }

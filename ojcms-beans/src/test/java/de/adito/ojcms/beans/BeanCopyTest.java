@@ -92,7 +92,7 @@ class BeanCopyTest
   /**
    * Some data POJO that manages a person registry.
    */
-  public static class Data extends OJBean<Data>
+  public static class Data extends OJBean
   {
     public static final BeanField<Person> person1 = OJFields.create(Data.class);
     public static final BeanField<Person> person2 = OJFields.create(Data.class);
@@ -108,7 +108,7 @@ class BeanCopyTest
   /**
    * Bean for a person with an address property (reference).
    */
-  public static class Person extends OJBean<Person>
+  public static class Person extends OJBean
   {
     public static final TextField name = OJFields.create(Person.class);
     public static final BeanField<Address> address = OJFields.create(Person.class);
@@ -123,7 +123,7 @@ class BeanCopyTest
   /**
    * Bean for an address.
    */
-  public static class Address extends OJBean<Address>
+  public static class Address extends OJBean
   {
     public static final TextField city = OJFields.create(Address.class);
     public static final IntegerField postalCode = OJFields.create(Address.class);
@@ -136,7 +136,7 @@ class BeanCopyTest
     }
   }
 
-  public static class House extends OJBean<House>
+  public static class House extends OJBean
   {
     public static final BooleanField hasBasement = OJFields.create(House.class);
     @OptionalField

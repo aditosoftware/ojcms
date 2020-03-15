@@ -62,14 +62,14 @@ public class EncapsulatedWeakReferencesTest
   /**
    * Some bean to take the encapsulated data core from to check the references.
    */
-  public static class SomeBean extends OJBean<SomeBean>
+  public static class SomeBean extends OJBean
   {
   }
 
   /**
    * Some bean that will establish a reference to {@link SomeBean}.
    */
-  public static class ReferringBean extends OJBean<ReferringBean>
+  public static class ReferringBean extends OJBean
   {
     public static final BeanField<SomeBean> refField = OJFields.create(ReferringBean.class);
     public static final BeanField<SomeBean> anotherRefField = OJFields.create(ReferringBean.class);

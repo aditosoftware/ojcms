@@ -44,14 +44,15 @@ final class BeanCopies
    * @param pCustomCopies a collection of custom copy mechanisms for specific bean fields
    * @return a copy of the bean
    */
-  static <BEAN extends IBean<BEAN>> BEAN doCreateCopy(BEAN pOriginal, ECopyMode pMode, CustomFieldCopy<?>... pCustomCopies)
+  static IBean doCreateCopy(IBean pOriginal, ECopyMode pMode, CustomFieldCopy<?>... pCustomCopies)
   {
     requestEncapsulatedData(pOriginal); //Check if the data core is present
-    //noinspection unchecked
-    final Class<BEAN> beanType = (Class<BEAN>) BeanReflector.requiresDeclaredBeanType(pOriginal.getClass());
+    final Class<? extends IBean> beanType = BeanReflector.requiresDeclaredBeanType(pOriginal.getClass());
     final List<IField<?>> fieldOrder = pOriginal.streamFields().collect(Collectors.toList());
-    final BEAN copyInstance = _createBeanPerDefaultConstructorAndSetDataSource(beanType, fieldOrder)
+
+    final IBean copyInstance = _createBeanPerDefaultConstructorAndSetDataSource(beanType)
         .orElse(_createBeanSneakyAndInjectEncapsulatedData(beanType, fieldOrder));
+
     return _setValues(pOriginal, copyInstance, pMode, pCustomCopies);
   }
 
@@ -67,26 +68,25 @@ final class BeanCopies
    * @param pCustomCopies          a collection of custom copy mechanisms for specific bean fields
    * @return a copy of the bean
    */
-  static <BEAN extends IBean<BEAN>> BEAN doCreateCopy(BEAN pOriginal, ECopyMode pMode, UnaryOperator<BEAN> pCustomConstructorCall,
-                                                      CustomFieldCopy<?>... pCustomCopies)
+  static <BEAN extends IBean> BEAN doCreateCopy(BEAN pOriginal, ECopyMode pMode, UnaryOperator<BEAN> pCustomConstructorCall,
+                                                CustomFieldCopy<?>... pCustomCopies)
   {
     requestEncapsulatedData(pOriginal); //Check if the data core is present
-    return _setValues(pOriginal, pCustomConstructorCall.apply(pOriginal), pMode, pCustomCopies);
+    //noinspection unchecked
+    return (BEAN) _setValues(pOriginal, pCustomConstructorCall.apply(pOriginal), pMode, pCustomCopies);
   }
 
   /**
    * Tries to create the bean copy per default constructor call.
    *
    * @param pBeanType the bean type to copy
-   * @param <BEAN>    the generic bean type
    * @return an optional instance of the copied bean
    */
-  private static <BEAN extends IBean<BEAN>> Optional<BEAN> _createBeanPerDefaultConstructorAndSetDataSource(Class<BEAN> pBeanType,
-                                                                                                            List<IField<?>> pFieldOrder)
+  private static Optional<IBean> _createBeanPerDefaultConstructorAndSetDataSource(Class<? extends IBean> pBeanType)
   {
     try
     {
-      final BEAN bean = pBeanType.getDeclaredConstructor().newInstance();
+      final IBean bean = pBeanType.getDeclaredConstructor().newInstance();
       return Optional.of(bean);
     }
     catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException pE)
@@ -101,12 +101,11 @@ final class BeanCopies
    *
    * @param pBeanType   the type of the bean to create
    * @param pFieldOrder the ordered fields of the bean
-   * @param <BEAN>      the generic type of the bean
    * @return the created bean instance
    */
-  private static <BEAN extends IBean<BEAN>> BEAN _createBeanSneakyAndInjectEncapsulatedData(Class<BEAN> pBeanType, List<IField<?>> pFieldOrder)
+  private static IBean _createBeanSneakyAndInjectEncapsulatedData(Class<? extends IBean> pBeanType, List<IField<?>> pFieldOrder)
   {
-    final BEAN bean = COPY_CREATOR.newInstance(pBeanType);
+    final IBean bean = COPY_CREATOR.newInstance(pBeanType);
     final IBeanDataSource dataSource = new MapBasedBeanDataSource(pFieldOrder);
     final EncapsulatedBeanData encapsulatedData = new EncapsulatedBeanData(dataSource, pFieldOrder);
     try
@@ -133,15 +132,15 @@ final class BeanCopies
    * @param pCopy         the copied bean
    * @param pMode         the copy mode
    * @param pCustomCopies a collection of custom copy mechanisms for specific bean fields
-   * @param <BEAN>        the type of the bean to set the values
    * @return the copy of the bean
    */
-  private static <BEAN extends IBean<BEAN>> BEAN _setValues(BEAN pOriginal, BEAN pCopy, ECopyMode pMode, CustomFieldCopy<?>[] pCustomCopies)
+  private static IBean _setValues(IBean pOriginal, IBean pCopy, ECopyMode pMode, CustomFieldCopy<?>[] pCustomCopies)
   {
     final _BeanValueCopyCreator beanValueCopyCreator = new _BeanValueCopyCreator(pMode, pCustomCopies);
     //noinspection unchecked,RedundantCast
     requestEncapsulatedData(pOriginal).streamFields()
         .forEach(pField -> pCopy.setValue((IField) pField, beanValueCopyCreator.copyFieldValue((IField) pField, pOriginal.getValue(pField))));
+
     //If required set non bean values as well
     if (pMode.shouldCopyAllFields())
     {
@@ -160,6 +159,7 @@ final class BeanCopies
             }
           });
     }
+
     return pCopy;
   }
 

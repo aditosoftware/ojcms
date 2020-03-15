@@ -58,7 +58,7 @@ class BeanFieldConverterTest
   /**
    * Some bean with fields for all converters.
    */
-  public static class SomeBean extends OJBean<SomeBean>
+  public static class SomeBean extends OJBean
   {
     public static final DateField dateField = OJFields.create(SomeBean.class);
   }

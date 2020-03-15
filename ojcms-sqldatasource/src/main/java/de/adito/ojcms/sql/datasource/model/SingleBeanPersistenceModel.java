@@ -68,7 +68,7 @@ public class SingleBeanPersistenceModel implements IPersistenceModel
    * @param pBeanId   the id of the single bean, identifies the row within the database table
    * @param pBeanType the bean type of the single bean
    */
-  SingleBeanPersistenceModel(String pBeanId, Class<? extends IBean<?>> pBeanType)
+  SingleBeanPersistenceModel(String pBeanId, Class<? extends IBean> pBeanType)
   {
     beanId = StringUtility.requireNotEmpty(pBeanId, "single bean id");
     fieldNameMapping = BeanReflector.reflectBeanFields(pBeanType).stream()

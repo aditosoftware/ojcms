@@ -47,7 +47,7 @@ public class PersistentSingleBeanTest extends AbstractCdiTest
   }
 
   @Persist(containerId = "SINGLE_TEST", mode = EPersistenceMode.SINGLE)
-  public static class SomeSingleBean extends OJBean<SomeSingleBean> implements IModifiableBean<SomeSingleBean>
+  public static class SomeSingleBean extends OJBean implements IModifiableBean
   {
     public static final IntegerField NUMBER_FIELD = OJFields.create(SomeSingleBean.class);
     public static final DateField DATE_FIELD = OJFields.create(SomeSingleBean.class);

@@ -28,7 +28,7 @@ final class BeanPersistenceUtil
    * @return the created bean instance
    * @throws OJPersistenceException if the persistence annotation is missing
    */
-  static <BEAN extends IBean<BEAN>> BEAN newPersistentBeanInstance(Class<BEAN> pBeanType, IBeanDataSource pDataSource)
+  static <BEAN extends IBean> BEAN newPersistentBeanInstance(Class<BEAN> pBeanType, IBeanDataSource pDataSource)
   {
     try
     {

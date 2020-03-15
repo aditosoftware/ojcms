@@ -24,7 +24,7 @@ public class PersistenceModels
    * @param pBeanType    the bean type of the persistent bean
    * @param pContainerId the id of the persistent container
    */
-  public void registerPersistentContainerBean(Class<? extends IBean<?>> pBeanType, String pContainerId)
+  public void registerPersistentContainerBean(Class<? extends IBean> pBeanType, String pContainerId)
   {
     containerModels.putIfAbsent(pContainerId, new ContainerPersistenceModel(pContainerId, pBeanType));
   }
@@ -35,7 +35,7 @@ public class PersistenceModels
    * @param pBeanType the bean type of the persistent bean
    * @param pBeanId   the id of the persistent single bean
    */
-  public void registerPersistentSingleBean(Class<? extends IBean<?>> pBeanType, String pBeanId)
+  public void registerPersistentSingleBean(Class<? extends IBean> pBeanType, String pBeanId)
   {
     singleBeanModels.putIfAbsent(pBeanId, new SingleBeanPersistenceModel(pBeanId, pBeanType));
   }

@@ -172,7 +172,7 @@ class BeanTest
   @Test
   public void testResolveDeepBean()
   {
-    final IBean<?> deepBean = bean.resolveDeepBean(SomeBean.deepField, DeepBean.deeperField);
+    final IBean deepBean = bean.resolveDeepBean(SomeBean.deepField, DeepBean.deeperField);
     assertSame(DeepBean.DEEPER_BEAN, deepBean);
   }
 
@@ -216,13 +216,13 @@ class BeanTest
    */
   private static TextField _createTextField()
   {
-    return BeanFieldFactory.createField(TextField.class, TEXT_FIELD_NAME, false, Collections.emptySet(), Optional.empty());
+    return BeanFieldFactory.createField(TextField.class, TEXT_FIELD_NAME, false, Collections.emptySet(), null);
   }
 
   /**
    * Some bean.
    */
-  public static class SomeBean extends OJBean<SomeBean>
+  public static class SomeBean extends OJBean
   {
     @Identifier
     public static final SpecialTextField specialTextField = OJFields.create(SomeBean.class);
@@ -253,7 +253,7 @@ class BeanTest
   /**
    * A deep bean that holds a reference to another bean.
    */
-  public static class DeepBean extends OJBean<DeepBean>
+  public static class DeepBean extends OJBean
   {
     public static final DeeperBean DEEPER_BEAN = new DeeperBean();
     public static final BeanField<DeeperBean> deeperField = OJFields.create(DeepBean.class);
@@ -267,7 +267,7 @@ class BeanTest
   /**
    * An even deeper bean that holds a very deep value.
    */
-  public static class DeeperBean extends OJBean<DeeperBean>
+  public static class DeeperBean extends OJBean
   {
     public static final int DEEP_VALUE = 42;
     public static final IntegerField deepValue = OJFields.create(DeeperBean.class);
@@ -308,7 +308,7 @@ class BeanTest
   /**
    * A bean with one privately declared field.
    */
-  public static class BeanWithPrivateField extends OJBean<BeanWithPrivateField>
+  public static class BeanWithPrivateField extends OJBean
   {
     static final int EXPECTED_VALUE = 5;
     private static final IntegerField privateField = OJFields.create(BeanWithPrivateField.class);
@@ -324,12 +324,18 @@ class BeanTest
     }
   }
 
-  public static abstract class AbstractBaseBeanType<BEAN extends AbstractBaseBeanType<BEAN>> extends OJBean<BEAN>
+  /**
+   * Abstract base type for a bean with one field.
+   */
+  public static abstract class AbstractBaseBeanType extends OJBean
   {
     public static final IntegerField SOME_BASE_FIELD = OJFields.create(AbstractBaseBeanType.class);
   }
 
-  public static class ConcreteBeanType extends AbstractBaseBeanType<ConcreteBeanType>
+  /**
+   * Some concrete bean based on the abstract bean.
+   */
+  public static class ConcreteBeanType extends AbstractBaseBeanType
   {
     public static final IntegerField SOME_SPECIAL_FIELD = OJFields.create(ConcreteBeanType.class);
   }

@@ -8,7 +8,7 @@ import de.adito.ojcms.beans.literals.fields.types.*;
 import org.junit.jupiter.api.*;
 
 import java.lang.annotation.Annotation;
-import java.util.*;
+import java.util.Collections;
 import java.util.function.*;
 import java.util.stream.IntStream;
 
@@ -194,7 +194,7 @@ class BeanObserverTest
   private void _testAddition(BiConsumer<IField<?>, SomeBean> pAdder, int pExpectedIndex)
   {
     final DecimalField fieldToAdd = BeanFieldFactory.createField(DecimalField.class, "fieldX", false,
-                                                                 Collections.emptyList(), Optional.empty());
+                                                                 Collections.emptyList(), null);
 
     observe(bean, IBean::observeFieldAdditions)
         .assertCallCount(1)
@@ -231,7 +231,7 @@ class BeanObserverTest
    * Some bean to add listeners to.
    * Has to be a modifiable bean to test the creation and removal events.
    */
-  public static class SomeBean extends OJBean<SomeBean> implements IModifiableBean<SomeBean>
+  public static class SomeBean extends OJBean implements IModifiableBean
   {
     public SomeBean(String pValue1, int pValue2)
     {

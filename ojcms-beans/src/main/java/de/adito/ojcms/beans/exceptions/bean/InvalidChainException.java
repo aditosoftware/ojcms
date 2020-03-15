@@ -20,7 +20,7 @@ public class InvalidChainException extends OJRuntimeException
    * @param pParentBean      the parent bean not containing the specific field
    * @param pNotPresentField the missing bean field
    */
-  public InvalidChainException(IBean<?> pParentBean, IField<?> pNotPresentField)
+  public InvalidChainException(IBean pParentBean, IField<?> pNotPresentField)
   {
     this("The parent bean " + pParentBean + " does not contain a field " + pNotPresentField.getName() + "!");
   }

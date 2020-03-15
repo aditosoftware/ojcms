@@ -24,13 +24,13 @@ class BeanStorageForTest implements IBeanDataStorage
   private BeanTestData data;
 
   @Override
-  public void registerPersistentContainerBean(Class<? extends IBean<?>> pBeanType, String pContainerId)
+  public void registerPersistentContainerBean(Class<? extends IBean> pBeanType, String pContainerId)
   {
     registeredBeans.registerContainerType(pContainerId);
   }
 
   @Override
-  public void registerPersistentSingleBean(Class<? extends IBean<?>> pBeanType, String pBeanId)
+  public void registerPersistentSingleBean(Class<? extends IBean> pBeanType, String pBeanId)
   {
     registeredBeans.registerSingleBeanType(pBeanId, pBeanType);
   }

@@ -148,7 +148,7 @@ class BeanStatisticsTest
    * A bean type that collects statistics.
    */
   @Statistics(capacity = 100)
-  public static class SomeBean extends OJBean<SomeBean>
+  public static class SomeBean extends OJBean
   {
     @Statistics(capacity = FIELD_STATISTICS_LIMIT)
     public static final TextField field = OJFields.create(SomeBean.class);

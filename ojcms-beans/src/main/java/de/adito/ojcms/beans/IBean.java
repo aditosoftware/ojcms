@@ -11,7 +11,6 @@ import de.adito.ojcms.beans.references.*;
 import de.adito.ojcms.beans.statistics.IStatisticData;
 import de.adito.ojcms.beans.util.ECopyMode;
 import de.adito.ojcms.utils.StringUtility;
-import de.adito.ojcms.utils.readonly.*;
 import org.jetbrains.annotations.*;
 
 import java.util.*;
@@ -38,12 +37,10 @@ import static java.util.Objects.requireNonNull;
  * This might seem like a solution to the not available multi inheritance in Java, but only the base interface type
  * is transferred to the extending class. Methods and static field definitions stay at the concrete bean type.
  *
- * @param <BEAN> the concrete runtime type of the bean
  * @author Simon Danner, 23.08.2016
  */
 @RequiresEncapsulatedAccess
-public interface IBean<BEAN extends IBean<BEAN>>
-    extends IBeanEventPublisher<FieldValueTuple<?>, BEAN, IBeanDataSource, IEncapsulatedBeanData>, IReferenceProvider
+public interface IBean extends IBeanEventPublisher<FieldValueTuple<?>, IBeanDataSource, IEncapsulatedBeanData>, IReferenceProvider
 {
   /**
    * The value for a bean field.
@@ -110,10 +107,9 @@ public interface IBean<BEAN extends IBean<BEAN>>
    * @throws BeanFieldDoesNotExistException if the bean field does not exist at the bean
    * @throws NullValueForbiddenException    if a null value would have been returned, but the field is marked as {@link NeverNull}
    */
-  @WriteOperation
   default <VALUE> void setValue(IField<VALUE> pField, VALUE pValue)
   {
-    setValueAndPropagate(toRuntimeBean(this), pField, pValue);
+    setValueAndPropagate(this, pField, pValue);
   }
 
   /**
@@ -131,7 +127,6 @@ public interface IBean<BEAN extends IBean<BEAN>>
    * @throws NullValueForbiddenException         if a null value would have been returned, but the field is marked as {@link NeverNull}
    * @throws ValueConversionUnsupportedException if the conversion is not possible
    */
-  @WriteOperation
   @SuppressWarnings("unchecked")
   default <VALUE, SOURCE> void setValueConverted(IField<VALUE> pField, SOURCE pValueToConvert)
   {
@@ -151,7 +146,6 @@ public interface IBean<BEAN extends IBean<BEAN>>
    * Clears the values of all public field's of this bean back to the initial value of every field.
    * The clear operation ignores final fields and fields with a null initial value and annotated by {@link NeverNull}.
    */
-  @WriteOperation
   default void clear()
   {
     //noinspection unchecked,rawtypes
@@ -167,9 +161,9 @@ public interface IBean<BEAN extends IBean<BEAN>>
    *
    * @see IBeanFieldActivePredicate
    */
-  default IBeanFieldActivePredicate<BEAN> getFieldActivePredicate()
+  default IBeanFieldActivePredicate getFieldActivePredicate()
   {
-    return () -> toRuntimeBean(this);
+    return () -> this;
   }
 
   /**
@@ -240,9 +234,10 @@ public interface IBean<BEAN extends IBean<BEAN>>
    * @param pCustomFieldCopies a collection of custom copy mechanisms for specific bean fields
    * @return a copy of this bean
    */
-  default BEAN createCopy(ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
+  default <BEAN extends IBean> BEAN createCopy(ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
   {
-    return doCreateCopy(toRuntimeBean(this), pMode, pCustomFieldCopies);
+    //noinspection unchecked
+    return (BEAN) doCreateCopy(this, pMode, pCustomFieldCopies);
   }
 
   /**
@@ -256,9 +251,10 @@ public interface IBean<BEAN extends IBean<BEAN>>
    * @param pCustomFieldCopies     a collection of custom copy mechanisms for specific bean fields
    * @return a copy of this bean
    */
-  default BEAN createCopy(ECopyMode pMode, UnaryOperator<BEAN> pCustomConstructorCall, CustomFieldCopy<?>... pCustomFieldCopies)
+  default <BEAN extends IBean> BEAN createCopy(ECopyMode pMode, UnaryOperator<BEAN> pCustomConstructorCall, CustomFieldCopy<?>... pCustomFieldCopies)
   {
-    return doCreateCopy(toRuntimeBean(this), pMode, pCustomConstructorCall, pCustomFieldCopies);
+    //noinspection unchecked
+    return doCreateCopy((BEAN) this, pMode, pCustomConstructorCall, pCustomFieldCopies);
   }
 
   /**
@@ -297,7 +293,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
    * @return the deep bean within this bean's children
    */
   @NotNull
-  default IBean<?> resolveDeepBean(IField<?>... pChain)
+  default IBean resolveDeepBean(IField<?>... pChain)
   {
     return resolveDeepBean(Arrays.asList(pChain));
   }
@@ -310,9 +306,9 @@ public interface IBean<BEAN extends IBean<BEAN>>
    * @return the deep bean within this bean's children
    */
   @NotNull
-  default IBean<?> resolveDeepBean(List<IField<?>> pChain)
+  default IBean resolveDeepBean(List<IField<?>> pChain)
   {
-    IBean<?> current = this;
+    IBean current = this;
     for (IField<?> field : requireNonNull(pChain))
     {
       if (!current.hasField(field))
@@ -320,7 +316,7 @@ public interface IBean<BEAN extends IBean<BEAN>>
       final Object value = current.getValue(field);
       if (!(value instanceof IBean))
         throw new InvalidChainException(field);
-      current = (IBean<?>) value;
+      current = (IBean) value;
     }
 
     return current;
@@ -353,22 +349,10 @@ public interface IBean<BEAN extends IBean<BEAN>>
   @Nullable
   default <VALUE> VALUE resolveDeepValue(IField<VALUE> pDeepField, List<IField<?>> pChain)
   {
-    final IBean<?> deepBean = resolveDeepBean(pChain);
+    final IBean deepBean = resolveDeepBean(pChain);
     if (!deepBean.hasField(pDeepField))
       throw new InvalidChainException(deepBean, pDeepField);
     return deepBean.getValue(pDeepField);
-  }
-
-  /**
-   * This bean as a read only version.
-   * This will be a new instance, but the data core stays the same.
-   *
-   * @return this bean as a read only version
-   */
-  default IBean<BEAN> asReadOnly()
-  {
-    //noinspection unchecked
-    return ReadOnlyInvocationHandler.createReadOnlyInstance(IBean.class, this);
   }
 
   /**
@@ -415,11 +399,11 @@ public interface IBean<BEAN extends IBean<BEAN>>
    *
    * @return the bean itself
    */
-  @WriteOperation
-  default BEAN useDefaultEncapsulatedDataSource()
+  default <BEAN extends IBean> BEAN useDefaultEncapsulatedDataSource()
   {
     setEncapsulatedDataSource(new MapBasedBeanDataSource(this));
-    return toRuntimeBean(this);
+    //noinspection unchecked
+    return (BEAN) this;
   }
 
   @Override

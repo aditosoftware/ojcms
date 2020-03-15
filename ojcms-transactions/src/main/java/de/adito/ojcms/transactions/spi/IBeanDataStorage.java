@@ -19,7 +19,7 @@ public interface IBeanDataStorage
    * @param pBeanType    the bean type to register
    * @param pContainerId the id of the persistent container
    */
-  void registerPersistentContainerBean(Class<? extends IBean<?>> pBeanType, String pContainerId);
+  void registerPersistentContainerBean(Class<? extends IBean> pBeanType, String pContainerId);
 
   /**
    * Registers a persistent single bean type. This may be used by the storage system to initialize required structures.
@@ -27,7 +27,7 @@ public interface IBeanDataStorage
    * @param pBeanType the bean type to register
    * @param pBeanId   the id of the persistent single bean
    */
-  void registerPersistentSingleBean(Class<? extends IBean<?>> pBeanType, String pBeanId);
+  void registerPersistentSingleBean(Class<? extends IBean> pBeanType, String pBeanId);
 
   /**
    * Processes value changes for a persistent bean within a container.

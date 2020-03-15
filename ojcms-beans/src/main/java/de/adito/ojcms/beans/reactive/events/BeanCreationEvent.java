@@ -1,6 +1,7 @@
 package de.adito.ojcms.beans.reactive.events;
 
 import de.adito.ojcms.beans.*;
+import de.adito.ojcms.beans.annotations.ObserveCreation;
 
 import java.lang.annotation.Annotation;
 
@@ -14,16 +15,16 @@ import java.lang.annotation.Annotation;
  */
 public class BeanCreationEvent<ANNOTATION extends Annotation>
 {
-  private final IBean<?> createdBean;
+  private final IBean createdBean;
   private final ANNOTATION annotation;
 
   /**
    * Creates a new creation event.
    *
    * @param pCreatedBean the created bean instance
-   * @param pAnnotation  the creation observer annotation of the bean type, see {@link de.adito.ojcms.beans.annotations.ObserveCreation}
+   * @param pAnnotation  the creation observer annotation of the bean type, see {@link ObserveCreation}
    */
-  public BeanCreationEvent(IBean<?> pCreatedBean, ANNOTATION pAnnotation)
+  public BeanCreationEvent(IBean pCreatedBean, ANNOTATION pAnnotation)
   {
     createdBean = pCreatedBean;
     annotation = pAnnotation;
@@ -34,7 +35,7 @@ public class BeanCreationEvent<ANNOTATION extends Annotation>
    *
    * @return a bean instance
    */
-  public IBean<?> getCreatedBean()
+  public IBean getCreatedBean()
   {
     return createdBean;
   }
@@ -42,7 +43,7 @@ public class BeanCreationEvent<ANNOTATION extends Annotation>
   /**
    * The annotation instance that led to the observation.
    *
-   * @return an annotation instance based on {@link de.adito.ojcms.beans.annotations.ObserveCreation}.
+   * @return an annotation instance based on {@link ObserveCreation}.
    */
   public ANNOTATION getCreationAnnotation()
   {

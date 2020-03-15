@@ -9,7 +9,7 @@ import de.adito.ojcms.beans.*;
  * @param <EVENT> the actual runtime type of this event
  * @author Simon Danner, 18.11.2018
  */
-public abstract class AbstractContainerChangeEvent<BEAN extends IBean<BEAN>, EVENT extends AbstractContainerChangeEvent<BEAN, EVENT>>
+public abstract class AbstractContainerChangeEvent<BEAN extends IBean, EVENT extends AbstractContainerChangeEvent<BEAN, EVENT>>
     extends AbstractChangeEvent<IBeanContainer<BEAN>, EVENT>
 {
   private final BEAN bean;

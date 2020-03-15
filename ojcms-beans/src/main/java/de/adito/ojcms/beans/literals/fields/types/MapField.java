@@ -55,7 +55,7 @@ public class MapField<KEY, VALUE> extends AbstractField<IMapBean<KEY, VALUE>>
    * @param pBean the bean that this field belongs to
    * @return the original map that was represented by the bean (new instance of the map)
    */
-  public Map<KEY, VALUE> createMapFromBean(IBean<?> pBean)
+  public Map<KEY, VALUE> createMapFromBean(IBean pBean)
   {
     return new LinkedHashMap<>(pBean.getValue(this));
   }

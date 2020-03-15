@@ -11,7 +11,7 @@ import java.util.Comparator;
  * @param <BEAN> the type of the beans of this data source
  * @author Simon Danner, 08.12.2018
  */
-public interface IBeanContainerDataSource<BEAN extends IBean<BEAN>> extends IDataSource, Iterable<BEAN>
+public interface IBeanContainerDataSource<BEAN extends IBean> extends IDataSource, Iterable<BEAN>
 {
   /**
    * Adds a bean at a certain index.

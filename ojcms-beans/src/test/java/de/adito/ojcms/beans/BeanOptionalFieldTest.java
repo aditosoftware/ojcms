@@ -60,7 +60,7 @@ public class BeanOptionalFieldTest
   /**
    * Some bean with optional fields.
    */
-  public static class SomeBean extends OJBean<SomeBean>
+  public static class SomeBean extends OJBean
   {
     public static final TextField normalField = OJFields.create(SomeBean.class);
     @OptionalField

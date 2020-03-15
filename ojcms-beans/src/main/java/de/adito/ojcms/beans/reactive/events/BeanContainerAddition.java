@@ -9,7 +9,7 @@ import de.adito.ojcms.beans.reactive.AbstractContainerChangeEvent;
  * @param <BEAN> the type of the added bean
  * @author Simon Danner, 22.11.2018
  */
-public final class BeanContainerAddition<BEAN extends IBean<BEAN>> extends AbstractContainerChangeEvent<BEAN, BeanContainerAddition<BEAN>>
+public final class BeanContainerAddition<BEAN extends IBean> extends AbstractContainerChangeEvent<BEAN, BeanContainerAddition<BEAN>>
 {
   /**
    * Creates the addition event.

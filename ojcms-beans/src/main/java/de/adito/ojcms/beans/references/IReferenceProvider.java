@@ -53,7 +53,7 @@ public interface IReferenceProvider
    * @param pBean the bean that holds the reference
    * @return a collection of bean fields referring to this bean
    */
-  default Set<IField<?>> getAllReferencesByBean(IBean<?> pBean)
+  default Set<IField<?>> getAllReferencesByBean(IBean pBean)
   {
     return getAllReferences().stream()
         .filter(pNode -> pNode.getBean() == pBean)
@@ -68,7 +68,7 @@ public interface IReferenceProvider
    * @param pField the bean field that holds the reference
    * @return a collection of beans referring to this bean
    */
-  default Set<IBean<?>> getAllReferencesByField(IField<?> pField)
+  default Set<IBean> getAllReferencesByField(IField<?> pField)
   {
     return getAllReferences().stream()
         .filter(pNode -> pNode.getField() == pField)

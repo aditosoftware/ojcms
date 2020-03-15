@@ -35,11 +35,10 @@ public final class MapBasedBeanDataSource implements IBeanDataSource
    *
    * @param pBean the bean to take the initial fields and values from
    */
-  public MapBasedBeanDataSource(IBean<?> pBean)
+  public MapBasedBeanDataSource(IBean pBean)
   {
-    values = pBean.stream()
-        .collect(toMap(FieldValueTuple::getField,
-                       pTuple -> pTuple.getValue() == null ? pTuple.getField().getInitialValue() : pTuple.getValue()));
+    values = pBean.stream().collect(toMap(FieldValueTuple::getField,
+                                          pTuple -> pTuple.getValue() == null ? pTuple.getField().getInitialValue() : pTuple.getValue()));
   }
 
   @Override

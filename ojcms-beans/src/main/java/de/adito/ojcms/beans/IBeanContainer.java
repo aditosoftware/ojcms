@@ -46,8 +46,8 @@ import static java.util.Objects.requireNonNull;
  * @author Simon Danner, 23.08.2016
  */
 @RequiresEncapsulatedAccess
-public interface IBeanContainer<BEAN extends IBean<BEAN>>
-    extends IBeanEventPublisher<BEAN, BEAN, IBeanContainerDataSource<BEAN>, IEncapsulatedBeanContainerData<BEAN>>, IReferenceProvider
+public interface IBeanContainer<BEAN extends IBean>
+    extends IBeanEventPublisher<BEAN, IBeanContainerDataSource<BEAN>, IEncapsulatedBeanContainerData<BEAN>>, IReferenceProvider
 {
   /**
    * Creates an empty bean container.
@@ -56,7 +56,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    * @param <BEAN>    the generic type of the beans in the container
    * @return an empty bean container
    */
-  static <BEAN extends IBean<BEAN>> IBeanContainer<BEAN> empty(Class<BEAN> pBeanType)
+  static <BEAN extends IBean> IBeanContainer<BEAN> empty(Class<BEAN> pBeanType)
   {
     return new BeanContainer<>(pBeanType);
   }
@@ -68,7 +68,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    * @param <BEAN> the generic type of the beans in the container
    * @return a new bean container with one initial bean
    */
-  static <BEAN extends IBean<BEAN>> IBeanContainer<BEAN> ofSingleBean(BEAN pBean)
+  static <BEAN extends IBean> IBeanContainer<BEAN> ofSingleBean(BEAN pBean)
   {
     return ofVariableNotEmpty(pBean);
   }
@@ -81,7 +81,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    * @param <BEAN> the generic type of the beans in the container
    * @return a new bean container with multiple initial beans
    */
-  static <BEAN extends IBean<BEAN>> IBeanContainer<BEAN> ofStreamNotEmpty(Stream<BEAN> pBeans)
+  static <BEAN extends IBean> IBeanContainer<BEAN> ofStreamNotEmpty(Stream<BEAN> pBeans)
   {
     return ofIterableNotEmpty(pBeans.collect(Collectors.toList()));
   }
@@ -95,7 +95,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    * @param <BEAN>    the generic type of the beans in the container
    * @return a new bean container with multiple initial beans
    */
-  static <BEAN extends IBean<BEAN>> IBeanContainer<BEAN> ofStream(Class<BEAN> pBeanType, Stream<BEAN> pBeans)
+  static <BEAN extends IBean> IBeanContainer<BEAN> ofStream(Class<BEAN> pBeanType, Stream<BEAN> pBeans)
   {
     final IBeanContainer<BEAN> container = empty(pBeanType);
     container.addMultiple(pBeans);
@@ -111,7 +111,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    * @return a new bean container with multiple initial beans
    */
   @SafeVarargs
-  static <BEAN extends IBean<BEAN>> IBeanContainer<BEAN> ofVariableNotEmpty(BEAN... pBeans)
+  static <BEAN extends IBean> IBeanContainer<BEAN> ofVariableNotEmpty(BEAN... pBeans)
   {
     if (pBeans.length == 0)
       throw new OJRuntimeException("Unable to infer bean type! Empty varargs argument not allowed here!");
@@ -129,7 +129,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    * @return a new bean container with multiple initial beans
    */
   @SafeVarargs
-  static <BEAN extends IBean<BEAN>> IBeanContainer<BEAN> ofVariable(Class<BEAN> pBeanType, BEAN... pBeans)
+  static <BEAN extends IBean> IBeanContainer<BEAN> ofVariable(Class<BEAN> pBeanType, BEAN... pBeans)
   {
     return ofIterable(pBeanType, Arrays.asList(pBeans));
   }
@@ -142,7 +142,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    * @param <BEAN> the generic type of the beans in the container
    * @return a new bean container with multiple initial beans
    */
-  static <BEAN extends IBean<BEAN>> IBeanContainer<BEAN> ofIterableNotEmpty(Iterable<BEAN> pBeans)
+  static <BEAN extends IBean> IBeanContainer<BEAN> ofIterableNotEmpty(Iterable<BEAN> pBeans)
   {
     final Iterator<BEAN> it = pBeans.iterator();
     if (!it.hasNext())
@@ -161,7 +161,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    * @param <BEAN>    the generic type of the beans in the container
    * @return a new bean container with multiple initial beans
    */
-  static <BEAN extends IBean<BEAN>> IBeanContainer<BEAN> ofIterable(Class<BEAN> pBeanType, Iterable<BEAN> pBeans)
+  static <BEAN extends IBean> IBeanContainer<BEAN> ofIterable(Class<BEAN> pBeanType, Iterable<BEAN> pBeans)
   {
     return new BeanContainer<>(pBeanType, pBeans);
   }
@@ -175,8 +175,8 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    * @param <BEAN>      the generic bean type of the container
    * @return an  bean container with the custom data source
    */
-  static <BEAN extends IBean<BEAN>> IBeanContainer<BEAN> withCustomDataSource(Class<BEAN> pBeanType,
-                                                                              IBeanContainerDataSource<BEAN> pDataSource)
+  static <BEAN extends IBean> IBeanContainer<BEAN> withCustomDataSource(Class<BEAN> pBeanType,
+                                                                        IBeanContainerDataSource<BEAN> pDataSource)
   {
     return new BeanContainer<>(pBeanType, pDataSource);
   }
@@ -618,7 +618,7 @@ public interface IBeanContainer<BEAN extends IBean<BEAN>>
    * @param <BEAN> the type of the beans in the container
    */
   @SuppressWarnings("squid:S2160")
-  final class BeanContainerListProxy<BEAN extends IBean<BEAN>> extends AbstractList<BEAN>
+  final class BeanContainerListProxy<BEAN extends IBean> extends AbstractList<BEAN>
   {
     private final IBeanContainer<BEAN> container;
 

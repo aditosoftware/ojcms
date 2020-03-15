@@ -5,6 +5,7 @@ import de.adito.ojcms.beans.exceptions.OJInternalException;
 import de.adito.ojcms.beans.exceptions.field.BeanFieldCreationException;
 import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.beans.util.BeanReflector;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -31,15 +32,13 @@ public final class OJFields
    * This method takes care about the whole initialization of the fields. (name, type, annotations, etc.)
    *
    * @param pBeanType the bean type to which the created field should belong to
-   * @param <BEAN>    the generic type of the bean the field is for
-   *                  (is here based on  {@link OJBean} rather than on the interface, so it can not be a transformed bean type)
    * @param <VALUE>   the data type of the field to create
    * @param <FIELD>   the generic type of the field that will be created
    * @return the newly created field instance
    */
-  public static <BEAN extends OJBean<?>, VALUE, FIELD extends IField<VALUE>> FIELD create(Class<BEAN> pBeanType)
+  public static <VALUE, FIELD extends IField<VALUE>> FIELD create(Class<? extends OJBean> pBeanType)
   {
-    return _createField(pBeanType, Optional.empty());
+    return _createField(pBeanType, null);
   }
 
   /**
@@ -58,10 +57,10 @@ public final class OJFields
    * @param <FIELD>          the generic type of the field that will be created
    * @return the newly created field instance
    */
-  public static <BEAN extends OJBean<?>, VALUE, FIELD extends IField<VALUE>> FIELD createOptional(Class<BEAN> pBeanType,
-                                                                                                  BiPredicate<BEAN, VALUE> pActiveCondition)
+  public static <BEAN extends OJBean, VALUE, FIELD extends IField<VALUE>> FIELD createOptional(Class<BEAN> pBeanType,
+                                                                                               @Nullable BiPredicate<BEAN, VALUE> pActiveCondition)
   {
-    return _createField(pBeanType, Optional.of(pActiveCondition));
+    return _createField(pBeanType, pActiveCondition);
   }
 
   /**
@@ -69,14 +68,12 @@ public final class OJFields
    *
    * @param pBeanType        the bean type to which the created field should belong to
    * @param pActiveCondition an optional active condition determining the active state of the bean field
-   * @param <BEAN>           the generic type of the bean the field is for
-   *                         (is here based on  {@link OJBean} rather than on the interface, so it can not be a transformed bean type)
    * @param <VALUE>          the data type of the field to create
    * @param <FIELD>          the generic type of the field that will be created
    * @return the newly created field instance
    */
-  private static <BEAN extends OJBean<?>, VALUE, FIELD extends IField<VALUE>> FIELD _createField(Class<BEAN> pBeanType,
-                                                                                                 Optional<BiPredicate<BEAN, VALUE>> pActiveCondition)
+  private static <VALUE, FIELD extends IField<VALUE>> FIELD _createField(Class<? extends OJBean> pBeanType,
+                                                                         @Nullable BiPredicate<? extends OJBean, VALUE> pActiveCondition)
   {
     final Field declaredFieldToCreate = BeanReflector.reflectDeclaredBeanFields(pBeanType).stream()
         .filter(pField -> {

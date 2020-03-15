@@ -30,13 +30,13 @@ public class SQLBeanDataStorage implements IBeanDataStorage
   private Connection connection;
 
   @Override
-  public void registerPersistentContainerBean(Class<? extends IBean<?>> pBeanType, String pContainerId)
+  public void registerPersistentContainerBean(Class<? extends IBean> pBeanType, String pContainerId)
   {
     models.registerPersistentContainerBean(pBeanType, pContainerId);
   }
 
   @Override
-  public void registerPersistentSingleBean(Class<? extends IBean<?>> pBeanType, String pBeanId)
+  public void registerPersistentSingleBean(Class<? extends IBean> pBeanType, String pBeanId)
   {
     models.registerPersistentSingleBean(pBeanType, pBeanId);
   }

@@ -55,7 +55,7 @@ class RegisteredBeans
    * @param pBeanId   the id of the single bean
    * @param pBeanType the bean type of the persistent single bean
    */
-  void registerSingleBeanType(String pBeanId, Class<? extends IBean<?>> pBeanType)
+  void registerSingleBeanType(String pBeanId, Class<? extends IBean> pBeanType)
   {
     final Map<IField<?>, Object> initialContent = BeanReflector.reflectBeanFields(pBeanType).stream()
         .collect(HashMap::new, (pMap, pField) -> pMap.put(pField, pField.getInitialValue()), HashMap::putAll);

@@ -93,7 +93,7 @@ class MapFieldTest
    *
    * @param pBean the bean to test
    */
-  private static void _testFieldTuples(IBean<?> pBean)
+  private static void _testFieldTuples(IBean pBean)
   {
     final AtomicInteger index = new AtomicInteger();
     //Test in order and proper to bean transformation
@@ -107,7 +107,7 @@ class MapFieldTest
   /**
    * Some bean with a map field.
    */
-  public static class SomeBean extends OJBean<SomeBean>
+  public static class SomeBean extends OJBean
   {
     public static final MapField<Integer, String> mapField = OJFields.create(SomeBean.class);
     public static final MapField<String, SomeBean> mapField2 = OJFields.create(SomeBean.class);

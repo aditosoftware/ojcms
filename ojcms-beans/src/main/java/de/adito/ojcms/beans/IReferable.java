@@ -18,7 +18,7 @@ interface IReferable extends IReferenceProvider
    * @param pBean  the bean holding the reference
    * @param pField the bean field holding reference
    */
-  void addWeakReference(IBean<?> pBean, IField<?> pField);
+  void addWeakReference(IBean pBean, IField<?> pField);
 
   /**
    * Removes a reference from this bean element.
@@ -26,5 +26,5 @@ interface IReferable extends IReferenceProvider
    * @param pBean  the bean that held the reference
    * @param pField the bean field that held the reference
    */
-  void removeReference(IBean<?> pBean, IField<?> pField);
+  void removeReference(IBean pBean, IField<?> pField);
 }

@@ -12,9 +12,10 @@ import java.util.*;
  * A {@link IBeanContainerDataSource} for persistent bean containers.
  * The actual persistent beans within the container are provided by a {@link TransactionalScoped} {@link ContainerContent}.
  *
+ * @param <BEAN> the type of the beans in the container source
  * @author Simon Danner, 30.12.2019
  */
-class PersistentContainerDatasource<BEAN extends IBean<BEAN>> implements IBeanContainerDataSource<BEAN>
+class PersistentContainerDatasource<BEAN extends IBean> implements IBeanContainerDataSource<BEAN>
 {
   private final ContainerContent<BEAN> content; //Transactional scoped
 

@@ -67,7 +67,7 @@ public class BeanFieldCopyTest
   {
     assertNotNull(pFieldValueWrapper.value);
     final IField<VALUE> field = BeanFieldFactory.createField(pFieldValueWrapper.fieldType, pFieldValueWrapper::getGenericFieldType,
-                                                             "test", false, Collections.emptySet(), Optional.empty());
+                                                             "test", false, Collections.emptySet(), null);
     try
     {
       final VALUE copiedValue = field.copyValue(pFieldValueWrapper.value, ECopyMode.DEEP_ONLY_BEAN_FIELDS);
@@ -85,7 +85,7 @@ public class BeanFieldCopyTest
   /**
    * Some bean.
    */
-  public static class SomeBean extends OJBean<SomeBean>
+  public static class SomeBean extends OJBean
   {
     public static final TextField someField = OJFields.create(SomeBean.class);
     public static final TextField anotherField = OJFields.create(SomeBean.class);
