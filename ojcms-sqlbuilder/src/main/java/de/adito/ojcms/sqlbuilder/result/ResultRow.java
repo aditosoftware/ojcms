@@ -7,7 +7,7 @@ import de.adito.ojcms.sqlbuilder.util.OJDatabaseException;
 import java.sql.*;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.*;
+import java.util.stream.Collectors;
 
 import static java.util.function.Function.identity;
 
@@ -20,7 +20,7 @@ import static java.util.function.Function.identity;
 public final class ResultRow
 {
   private final IColumnIdentification<Long> idColumn;
-  private final Map<IColumnIdentification<?>, Object> values;
+  private final Map<String, Object> values;
 
   /**
    * Creates a new result row.
@@ -30,8 +30,8 @@ public final class ResultRow
    * @param pSerializer      the serializer for the database values
    * @param pResultSet       the result set to build this row from (can not be stored, because the result set may be closed in the future)
    */
-  public ResultRow(List<IColumnIdentification<?>> pSelectedColumns, IColumnIdentification<Long> pIdColumn,
-                   IValueSerializer pSerializer, ResultSet pResultSet)
+  public ResultRow(List<IColumnIdentification<?>> pSelectedColumns, IColumnIdentification<Long> pIdColumn, IValueSerializer pSerializer,
+                   ResultSet pResultSet)
   {
     idColumn = pIdColumn;
     values = _createValueMap(pSelectedColumns, pSerializer, pResultSet);
@@ -45,7 +45,7 @@ public final class ResultRow
    */
   public boolean hasColumn(IColumnIdentification<?> pColumn)
   {
-    return values.containsKey(pColumn);
+    return values.containsKey(pColumn.getColumnName());
   }
 
   /**
@@ -72,7 +72,7 @@ public final class ResultRow
       throw new OJDatabaseException("The column '" + pColumn.getColumnName() + "' is not present within the result row!");
 
     //noinspection unchecked
-    return (VALUE) values.get(pColumn);
+    return (VALUE) values.get(pColumn.getColumnName());
   }
 
   /**
@@ -81,7 +81,7 @@ public final class ResultRow
    * @param pColumnsToInclude the columns to include in the map
    * @return a map containing values for the requested columns
    */
-  public Map<IColumnIdentification<?>, Object> toMap(IColumnIdentification<?>[] pColumnsToInclude)
+  public Map<IColumnIdentification<?>, Object> toMap(Collection<IColumnIdentification<?>> pColumnsToInclude)
   {
     return toMap(pColumnsToInclude, identity());
   }
@@ -94,13 +94,14 @@ public final class ResultRow
    * @param pColumnMapper     mapper for the columns
    * @return a map containing values for the requested columns
    */
-  public <KEY, COLUMN extends IColumnIdentification<?>> Map<KEY, Object> toMap(COLUMN[] pColumnsToInclude,
-                                                                               Function<COLUMN, KEY> pColumnMapper)
+  public <KEY, COLUMN extends IColumnIdentification<?>> Map<KEY, Object> toMap(Collection<COLUMN> pColumnsToInclude, Function<COLUMN,
+      KEY> pColumnMapper)
   {
     //noinspection unchecked
-    return Stream.of(pColumnsToInclude)
+    return pColumnsToInclude.stream() //
         //Allow null values
-        .collect(HashMap::new, (pMap, pColumn) -> pMap.put(pColumnMapper.apply(pColumn), get((IColumnIdentification) pColumn)), HashMap::putAll);
+        .collect(HashMap::new, (pMap, pColumn) -> pMap.put(pColumnMapper.apply(pColumn), get((IColumnIdentification) pColumn)),
+            HashMap::putAll);
   }
 
   /**
@@ -110,8 +111,8 @@ public final class ResultRow
    * @param pResultSet the result set of the SQL statement
    * @return the column value map for this row
    */
-  private static Map<IColumnIdentification<?>, Object> _createValueMap(List<IColumnIdentification<?>> pSelectedColumns,
-                                                                       IValueSerializer pSerializer, ResultSet pResultSet)
+  private static Map<String, Object> _createValueMap(List<IColumnIdentification<?>> pSelectedColumns, IValueSerializer pSerializer,
+                                                     ResultSet pResultSet)
   {
     final Map<String, IColumnIdentification<?>> nameColumnMapping = pSelectedColumns.stream() //
         .collect(Collectors.toMap(pColumn -> pColumn.getColumnName().toUpperCase(), identity()));
@@ -119,7 +120,7 @@ public final class ResultRow
     try
     {
       final ResultSetMetaData metadata = pResultSet.getMetaData();
-      final Map<IColumnIdentification<?>, Object> mapping = new HashMap<>();
+      final Map<String, Object> mapping = new HashMap<>();
 
       for (int i = 1; i <= metadata.getColumnCount(); i++)
       {
@@ -127,10 +128,11 @@ public final class ResultRow
         final IColumnIdentification<?> column = nameColumnMapping.get(columnName);
 
         if (column == null)
-          throw new OJDatabaseException("Cannot find column '" + columnName + "' under the selected columns: " + nameColumnMapping.keySet());
+          throw new OJDatabaseException(
+              "Cannot find column '" + columnName + "' under the selected columns: " + nameColumnMapping.keySet());
 
         final Object dataValue = pSerializer.fromSerial(column, pResultSet, i);
-        mapping.put(column, dataValue);
+        mapping.put(column.getColumnName(), dataValue);
       }
 
       return mapping;

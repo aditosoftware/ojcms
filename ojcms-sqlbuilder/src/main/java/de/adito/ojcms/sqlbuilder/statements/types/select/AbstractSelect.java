@@ -24,7 +24,8 @@ import static de.adito.ojcms.sqlbuilder.format.ESeparator.COMMA_WITH_WHITESPACE;
  * @param <SELECT> the runtime type of the final select statement
  * @author Simon Danner, 26.04.2018
  */
-public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>> extends AbstractConditionStatement<SelectModifiers, Result, ResultSet, SELECT>
+public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>> extends AbstractConditionStatement<SelectModifiers, Result,
+    ResultSet, SELECT>
 {
   private List<IColumnIdentification<?>> columnsToSelect = new ArrayList<>();
 
@@ -140,19 +141,17 @@ public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>> exte
    */
   private ResultSet _query()
   {
-    final Supplier<String> columnSupplier = () -> StatementFormatter.join(columnsToSelect.stream().map(IColumnIdentification::getColumnName),
-                                                                          COMMA_WITH_WHITESPACE);
+    final Supplier<String> columnSupplier = () -> StatementFormatter.join(columnsToSelect.stream() //
+        .map(IColumnIdentification::getColumnName), COMMA_WITH_WHITESPACE);
 
-    final StatementFormatter statement = EFormatter.SELECT.create(databasePlatform, idColumnIdentification.getColumnName())
-        .conditional(modifiers.distinct(), pFormat -> pFormat.appendConstant(DISTINCT))
-        .conditionalOrElse(modifiers.count(),
-                           //with count
-                           pFormat -> pFormat.appendConstant(COUNT, columnSupplier.get()),
-                           //without count
-                           pFormat -> pFormat.appendMultiple(columnsToSelect.stream(), COMMA_WITH_WHITESPACE))
-        .appendTableName(getTableName())
-        .appendWhereCondition(modifiers);
-
-    return executeStatement(statement);
+    return executeStatement(EFormatter.SELECT.create(databasePlatform, idColumnIdentification.getColumnName()) //
+        .conditional(modifiers.distinct(), pFormat -> pFormat.appendConstant(DISTINCT)) //
+        .conditionalOrElse(modifiers.count(), //
+            //with count
+            pFormat -> pFormat.appendConstant(COUNT, columnSupplier.get()), //
+            //without count
+            pFormat -> pFormat.appendMultiple(columnsToSelect.stream(), COMMA_WITH_WHITESPACE)) //
+        .appendTableName(getTableName()) //
+        .appendWhereCondition(modifiers));
   }
 }

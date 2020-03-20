@@ -13,16 +13,18 @@ import java.util.function.Function;
  */
 public enum EFormatConstant
 {
-  PRIMARY_KEY(pParams -> "PRIMARY KEY(" + pParams[0] + ")"),
-  FOREIGN_KEY(pParams -> "FOREIGN KEY (" + pParams[0] + ") REFERENCES " + pParams[1] + " (" + pParams[2] + ")"),
-  VALUES,
-  WHERE,
-  NOT(pParams -> "NOT (" + pParams[0] + ")"),
-  DISTINCT,
-  SET,
-  COUNT(pParams -> "COUNT (" + pParams[0] + ") AS " + StaticConstants.COUNT_AS),
-  IN(pParams -> "IN (" + pParams[0] + ")"),
-  STAR(pParams -> "*");
+  PRIMARY_KEY(pParams -> "PRIMARY KEY(" + pParams[0] + ")"), //
+  FOREIGN_KEY(pParams -> "FOREIGN KEY (" + pParams[0] + ") REFERENCES " + pParams[1] + " (" + pParams[2] + ")"), //
+  VALUES, //
+  WHERE, //
+  NOT(pParams -> "NOT (" + pParams[0] + ")"), //
+  DISTINCT, //
+  SET, //
+  COUNT(pParams -> "COUNT (" + pParams[0] + ") AS " + StaticConstants.COUNT_AS), //
+  IN(pParams -> "IN (" + pParams[0] + ")"), //
+  STAR(pParams -> "*"), //
+  ADD(pParams -> "ADD"), //
+  DROP_COLUMN(pParams -> "DROP COLUMN " + pParams[0]);
 
   private final Function<String[], String> format;
 

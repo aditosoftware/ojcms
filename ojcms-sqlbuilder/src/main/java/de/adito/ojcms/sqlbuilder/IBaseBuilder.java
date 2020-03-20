@@ -22,6 +22,13 @@ interface IBaseBuilder
   void doCreate(Consumer<Create> pCreateStatement);
 
   /**
+   * Executes an alter table statement.
+   *
+   * @param pAlterTableStatement the statement to execute (defined in a pipelining mechanism)
+   */
+  void doAlterTable(Consumer<AlterTable> pAlterTableStatement);
+
+  /**
    * Executes an insert statement.
    *
    * @param pInsertStatement the statement to execute (defined in a pipelining mechanism)

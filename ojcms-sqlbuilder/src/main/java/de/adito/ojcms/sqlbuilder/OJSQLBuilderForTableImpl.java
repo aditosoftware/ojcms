@@ -8,6 +8,7 @@ import de.adito.ojcms.sqlbuilder.serialization.IValueSerializer;
 import de.adito.ojcms.sqlbuilder.statements.types.Create;
 import de.adito.ojcms.utils.StringUtility;
 
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -78,6 +79,12 @@ final class OJSQLBuilderForTableImpl extends AbstractSQLBuilder implements OJSQL
   public boolean hasColumn(String pColumnName)
   {
     return super.hasColumn(tableName, pColumnName);
+  }
+
+  @Override
+  public Set<String> getAllColumnNames()
+  {
+    return super.getAllColumnNames(tableName);
   }
 
   @Override

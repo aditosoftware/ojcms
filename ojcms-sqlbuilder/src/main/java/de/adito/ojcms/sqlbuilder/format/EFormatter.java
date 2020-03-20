@@ -11,7 +11,7 @@ import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
  */
 public enum EFormatter
 {
-  CREATE("TABLE"), INSERT("INTO"), SELECT("FROM"), UPDATE(""), DELETE("FROM");
+  CREATE("TABLE"), ALTER("TABLE"), INSERT("INTO"), SELECT("FROM"), UPDATE(""), DELETE("FROM");
 
   private final String tableNamePrefix;
 

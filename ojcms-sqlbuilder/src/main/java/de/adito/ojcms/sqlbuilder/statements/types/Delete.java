@@ -3,7 +3,6 @@ package de.adito.ojcms.sqlbuilder.statements.types;
 import de.adito.ojcms.sqlbuilder.AbstractSQLBuilder;
 import de.adito.ojcms.sqlbuilder.definition.condition.WhereModifiers;
 import de.adito.ojcms.sqlbuilder.executors.IStatementExecutor;
-import de.adito.ojcms.sqlbuilder.format.StatementFormatter;
 import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 import de.adito.ojcms.sqlbuilder.serialization.IValueSerializer;
 import de.adito.ojcms.sqlbuilder.statements.AbstractConditionStatement;
@@ -56,9 +55,8 @@ public class Delete extends AbstractConditionStatement<WhereModifiers, Boolean, 
   @Override
   protected Boolean doQuery()
   {
-    final StatementFormatter deleteStatement = DELETE.create(databasePlatform, idColumnIdentification.getColumnName())
-        .appendTableName(getTableName())
-        .appendWhereCondition(modifiers);
-    return executeStatement(deleteStatement);
+    return executeStatement(DELETE.create(databasePlatform, idColumnIdentification.getColumnName()) //
+        .appendTableName(getTableName()) //
+        .appendWhereCondition(modifiers));
   }
 }

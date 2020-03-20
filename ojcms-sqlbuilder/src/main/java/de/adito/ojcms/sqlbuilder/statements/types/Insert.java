@@ -3,7 +3,6 @@ package de.adito.ojcms.sqlbuilder.statements.types;
 import de.adito.ojcms.sqlbuilder.*;
 import de.adito.ojcms.sqlbuilder.definition.IColumnValueTuple;
 import de.adito.ojcms.sqlbuilder.executors.IStatementExecutor;
-import de.adito.ojcms.sqlbuilder.format.StatementFormatter;
 import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 import de.adito.ojcms.sqlbuilder.serialization.IValueSerializer;
 import de.adito.ojcms.sqlbuilder.util.OJDatabaseException;
@@ -83,16 +82,14 @@ public class Insert extends AbstractSQLStatement<Void, Insert>
     if (values.isEmpty())
       return;
 
-    final StatementFormatter statement = INSERT.create(databasePlatform, idColumnIdentification.getColumnName())
-        .appendTableName(getTableName())
-        .openBracket()
-        .appendEnumeration(values.stream().map(pTuple -> pTuple.getColumn().getColumnName().toUpperCase()),
-                           COMMA_WITH_WHITESPACE)
-        .closeBracket()
-        .appendConstant(VALUES)
-        .openBracket()
-        .appendMultipleArgumentEnumeration(values, COMMA_WITH_WHITESPACE)
-        .closeBracket();
-    executeStatement(statement);
+    executeStatement(INSERT.create(databasePlatform, idColumnIdentification.getColumnName()) //
+        .appendTableName(getTableName()) //
+        .openBracket() //
+        .appendEnumeration(values.stream().map(pTuple -> pTuple.getColumn().getColumnName().toUpperCase()), COMMA_WITH_WHITESPACE) //
+        .closeBracket() //
+        .appendConstant(VALUES) //
+        .openBracket() //
+        .appendMultipleArgumentEnumeration(values, COMMA_WITH_WHITESPACE) //
+        .closeBracket());
   }
 }

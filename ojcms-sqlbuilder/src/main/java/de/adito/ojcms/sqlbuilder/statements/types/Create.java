@@ -12,6 +12,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.adito.ojcms.sqlbuilder.definition.column.EColumnModifier.*;
+import static de.adito.ojcms.sqlbuilder.definition.column.EColumnType.LONG;
 import static de.adito.ojcms.sqlbuilder.format.EFormatConstant.*;
 import static de.adito.ojcms.sqlbuilder.format.EFormatter.CREATE;
 import static de.adito.ojcms.sqlbuilder.format.ESeparator.*;
@@ -39,8 +40,7 @@ public class Create extends AbstractSQLStatement<Void, Create>
                 IValueSerializer pSerializer, String pIdColumnName)
   {
     super(pStatementExecutor, pBuilder, pPlatform, pSerializer, pIdColumnName);
-    idColumnDefinition = IColumnDefinition.of(pIdColumnName.toUpperCase(),
-                                              EColumnType.LONG.create().primaryKey().modifiers(NOT_NULL, AUTO_INCREMENT));
+    idColumnDefinition = IColumnDefinition.of(pIdColumnName.toUpperCase(), LONG.create().primaryKey().modifiers(NOT_NULL, AUTO_INCREMENT));
   }
 
   /**
@@ -75,6 +75,7 @@ public class Create extends AbstractSQLStatement<Void, Create>
   {
     if (pColumnDefinitions == null || pColumnDefinitions.size() == 0)
       throw new OJDatabaseException("The columns to create cannot be empty!");
+
     columns.addAll(pColumnDefinitions);
     return this;
   }
@@ -98,14 +99,13 @@ public class Create extends AbstractSQLStatement<Void, Create>
     if (columns.isEmpty())
       throw new OJDatabaseException("At least one column must be defined to create a table!");
 
-    final StatementFormatter statement = CREATE.create(databasePlatform, idColumnDefinition.getColumnName())
-        .appendTableName(getTableName())
-        .openBracket()
-        .appendMultiple(columns.stream(), COMMA, NEW_LINE)
-        .appendFunctional(this::_primaryKeys)
-        .appendFunctional(this::_foreignKeys)
-        .closeBracket();
-    executeStatement(statement);
+    executeStatement(CREATE.create(databasePlatform, idColumnDefinition.getColumnName()) //
+        .appendTableName(getTableName()) //
+        .openBracket() //
+        .appendMultiple(columns.stream(), COMMA, NEW_LINE) //
+        .appendFunctional(this::_primaryKeys) //
+        .appendFunctional(this::_foreignKeys) //
+        .closeBracket());
   }
 
   /**
@@ -115,9 +115,9 @@ public class Create extends AbstractSQLStatement<Void, Create>
    */
   private void _primaryKeys(StatementFormatter pFormatter)
   {
-    final List<String> primaryKeyColumnNames = columns.stream()
-        .filter(pColumn -> pColumn.getColumnType().isPrimaryKey())
-        .map(pColumnDefinition -> pColumnDefinition.getColumnName().toUpperCase())
+    final List<String> primaryKeyColumnNames = columns.stream() //
+        .filter(pColumn -> pColumn.getColumnType().isPrimaryKey()) //
+        .map(pColumnDefinition -> pColumnDefinition.getColumnName().toUpperCase()) //
         .collect(Collectors.toList());
 
     if (primaryKeyColumnNames.isEmpty())
@@ -135,8 +135,8 @@ public class Create extends AbstractSQLStatement<Void, Create>
    */
   private void _foreignKeys(StatementFormatter pFormatter)
   {
-    final Map<String, IForeignKey> foreignKeyMapping = columns.stream()
-        .filter(pColumn -> pColumn.getColumnType().getForeignKey().isPresent())
+    final Map<String, IForeignKey> foreignKeyMapping = columns.stream() //
+        .filter(pColumn -> pColumn.getColumnType().getForeignKey().isPresent()) //
         .collect(Collectors.toMap(IColumnDefinition::getColumnName, pColumn -> pColumn.getColumnType().getForeignKey().get()));
 
     if (foreignKeyMapping.isEmpty())
@@ -144,12 +144,13 @@ public class Create extends AbstractSQLStatement<Void, Create>
 
     final OJSQLBuilder tableChecker = OJSQLBuilderFactory.newSQLBuilder(builder).create();
 
-    foreignKeyMapping.forEach((pColumn, pReference) -> {
+    foreignKeyMapping.forEach((pColumn, pReference) ->
+    {
       if (!tableChecker.hasTable(pReference.getTableName()))
         pReference.createReferencedTable(tableChecker.getPlatformConnectionSupplier()); //Create referenced table, if necessary
+
       pFormatter.appendSeparator(COMMA, NEW_LINE);
-      pFormatter.appendConstant(FOREIGN_KEY, pColumn, pReference.getTableName(),
-                                String.join(", ", pReference.getColumnNames()));
+      pFormatter.appendConstant(FOREIGN_KEY, pColumn, pReference.getTableName(), String.join(", ", pReference.getColumnNames()));
     });
   }
 }

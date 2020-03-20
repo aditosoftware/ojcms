@@ -1,13 +1,13 @@
 package de.adito.ojcms.sqlbuilder;
 
-import de.adito.ojcms.sqlbuilder.definition.*;
+import de.adito.ojcms.sqlbuilder.definition.IColumnIdentification;
 import de.adito.ojcms.sqlbuilder.definition.column.IColumnDefinition;
 import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 import de.adito.ojcms.sqlbuilder.platform.connection.IDatabaseConnectionSupplier;
 import de.adito.ojcms.sqlbuilder.serialization.IValueSerializer;
 import de.adito.ojcms.sqlbuilder.statements.types.Create;
 
-import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -63,7 +63,7 @@ final class OJSQLBuilderImpl extends AbstractSQLBuilder implements OJSQLBuilder
   }
 
   @Override
-  public List<String> getAllTableNames()
+  public Set<String> getAllTableNames()
   {
     return super.getAllTableNames();
   }
@@ -78,5 +78,11 @@ final class OJSQLBuilderImpl extends AbstractSQLBuilder implements OJSQLBuilder
   public boolean hasColumn(String pTableName, String pColumnName)
   {
     return super.hasColumn(pTableName, pColumnName);
+  }
+
+  @Override
+  public Set<String> getAllColumnNames(String pTableName)
+  {
+    return super.getAllColumnNames(pTableName);
   }
 }

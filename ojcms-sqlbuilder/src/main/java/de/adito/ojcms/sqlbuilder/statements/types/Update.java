@@ -4,10 +4,10 @@ import de.adito.ojcms.sqlbuilder.AbstractSQLBuilder;
 import de.adito.ojcms.sqlbuilder.definition.*;
 import de.adito.ojcms.sqlbuilder.definition.condition.WhereModifiers;
 import de.adito.ojcms.sqlbuilder.executors.IStatementExecutor;
-import de.adito.ojcms.sqlbuilder.format.StatementFormatter;
 import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;
 import de.adito.ojcms.sqlbuilder.serialization.IValueSerializer;
 import de.adito.ojcms.sqlbuilder.statements.AbstractConditionStatement;
+import de.adito.ojcms.sqlbuilder.util.OJDatabaseException;
 
 import java.util.*;
 
@@ -120,19 +120,18 @@ public class Update extends AbstractConditionStatement<WhereModifiers, Void, Voi
   @Override
   protected Void doQuery()
   {
-    if (!changes.isEmpty() || !updateOldValues.isEmpty())
-    {
-      final StatementFormatter statement = UPDATE.create(databasePlatform, idColumnIdentification.getColumnName())
-          .appendTableName(getTableName())
-          .appendConstant(SET)
-          .conditional(!changes.isEmpty(), pFormatter -> pFormatter.appendMultiplePrepared(changes.stream(), COMMA_WITH_WHITESPACE))
-          .conditional(!updateOldValues.isEmpty(), pFormatter -> {
-            pFormatter.conditional(!changes.isEmpty(), pInnerFormatter -> pInnerFormatter.appendSeparator(COMMA_WITH_WHITESPACE));
-            pFormatter.appendMultiple(updateOldValues.stream(), COMMA_WITH_WHITESPACE);
-          })
-          .appendWhereCondition(modifiers);
-      executeStatement(statement);
-    }
-    return null;
+    if (changes.isEmpty() && updateOldValues.isEmpty())
+      throw new OJDatabaseException("At least one value must be updated in an update statement!");
+
+    return executeStatement(UPDATE.create(databasePlatform, idColumnIdentification.getColumnName()) //
+        .appendTableName(getTableName()) //
+        .appendConstant(SET) //
+        .conditional(!changes.isEmpty(), pFormatter -> pFormatter.appendMultiplePrepared(changes.stream(), COMMA_WITH_WHITESPACE)) //
+        .conditional(!updateOldValues.isEmpty(), pFormatter ->
+        {
+          pFormatter.conditional(!changes.isEmpty(), pInnerFormatter -> pInnerFormatter.appendSeparator(COMMA_WITH_WHITESPACE));
+          pFormatter.appendMultiple(updateOldValues.stream(), COMMA_WITH_WHITESPACE);
+        }) //
+        .appendWhereCondition(modifiers));
   }
 }

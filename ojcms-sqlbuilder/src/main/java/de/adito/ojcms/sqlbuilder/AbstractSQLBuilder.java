@@ -59,6 +59,13 @@ public abstract class AbstractSQLBuilder implements IBaseBuilder
   }
 
   @Override
+  public void doAlterTable(Consumer<AlterTable> pAlterTableStatement)
+  {
+    final AlterTable statement = new AlterTable(execution.createVoidExecutor(), this, platform, serializer, idColumnName);
+    execution.execute(configureStatementBeforeExecution(statement), pAlterTableStatement);
+  }
+
+  @Override
   public void doInsert(Consumer<Insert> pInsertStatement)
   {
     final Insert statement = new Insert(execution.createVoidExecutor(), this, platform, serializer, idColumnName);
@@ -189,12 +196,12 @@ public abstract class AbstractSQLBuilder implements IBaseBuilder
   /**
    * All table names of the database.
    *
-   * @return a list of all table names
+   * @return a set of all table names
    */
-  protected List<String> getAllTableNames()
+  protected Set<String> getAllTableNames()
   {
     return execution.retrieveFromMetaData(pMetaData -> {
-      final List<String> names = new ArrayList<>();
+      final Set<String> names = new HashSet<>();
       final ResultSet tables = pMetaData.getTables(null, null, "%", null);
       while (tables.next())
       {
@@ -214,13 +221,7 @@ public abstract class AbstractSQLBuilder implements IBaseBuilder
    */
   protected int getColumnCount(String pTableName)
   {
-    return execution.retrieveFromMetaData(pMetaData -> {
-      final ResultSet result = pMetaData.getColumns(null, null, pTableName.toUpperCase(), null);
-      int count = 0;
-      while (result.next())
-        count++;
-      return count;
-    });
+    return getAllColumnNames(pTableName).size();
   }
 
   /**
@@ -234,6 +235,23 @@ public abstract class AbstractSQLBuilder implements IBaseBuilder
   {
     return execution.retrieveFromMetaData(pMetaData -> pMetaData.getColumns(null, null, pTableName.toUpperCase(),
                                                                             pColumnName.toUpperCase()).next());
+  }
+
+  /**
+   * All column names of a specific table.
+   *
+   * @param pTableName the name of table to retrieve all column names for
+   * @return a set of column names for the requested table
+   */
+  protected Set<String> getAllColumnNames(String pTableName)
+  {
+    return execution.retrieveFromMetaData(pMetaData -> {
+      final ResultSet resultSet = pMetaData.getColumns(null, null, pTableName.toUpperCase(), null);
+      final Set<String> columnNames = new HashSet<>();
+      while (resultSet.next())
+        columnNames.add(resultSet.getString("COLUMN_NAME"));
+      return columnNames;
+    });
   }
 
   /**

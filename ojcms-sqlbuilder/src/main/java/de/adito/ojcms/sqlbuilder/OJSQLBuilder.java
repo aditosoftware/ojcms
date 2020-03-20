@@ -4,7 +4,7 @@ import de.adito.ojcms.sqlbuilder.definition.IColumnIdentification;
 import de.adito.ojcms.sqlbuilder.definition.column.IColumnDefinition;
 import de.adito.ojcms.sqlbuilder.statements.types.Create;
 
-import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -60,9 +60,9 @@ public interface OJSQLBuilder extends IBaseBuilder
   /**
    * All table names of the database.
    *
-   * @return a list of all table names
+   * @return a set of all table names
    */
-  List<String> getAllTableNames();
+  Set<String> getAllTableNames();
 
   /**
    * The column count of a certain table.
@@ -80,4 +80,12 @@ public interface OJSQLBuilder extends IBaseBuilder
    * @return <tt>true</tt> if the column is present
    */
   boolean hasColumn(String pTableName, String pColumnName);
+
+  /**
+   * All column names of a specific table.
+   *
+   * @param pTableName the name of table to retrieve all column names for
+   * @return a set of column names for the requested table
+   */
+  Set<String> getAllColumnNames(String pTableName);
 }
