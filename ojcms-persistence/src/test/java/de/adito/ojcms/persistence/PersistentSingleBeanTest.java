@@ -28,7 +28,7 @@ public class PersistentSingleBeanTest extends AbstractCdiTest
   public void testFieldAdaptionForbidden()
   {
     assertThrows(UnsupportedOperationException.class,
-                 () -> bean.fieldAdder(ShortField.class, "NEW_FIELD", Collections.emptySet()).addAtIndex(0));
+        () -> bean.fieldAdder(ShortField.class, "NEW_FIELD", Collections.emptySet()).addAtIndex(0));
     assertThrows(UnsupportedOperationException.class, () -> bean.removeField(SomeSingleBean.TEXT_FIELD));
   }
 

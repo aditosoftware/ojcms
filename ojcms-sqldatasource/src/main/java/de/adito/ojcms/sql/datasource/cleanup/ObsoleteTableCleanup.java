@@ -6,7 +6,7 @@ import de.adito.ojcms.sqlbuilder.OJSQLBuilder;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.util.List;
+import java.util.Set;
 
 /**
  * Removes all obsolete bean container tables.
@@ -23,7 +23,7 @@ class ObsoleteTableCleanup implements IDatabaseCleanup
   @Override
   public void cleanup(OJSQLBuilder pBuilder)
   {
-    final List<String> allTables = pBuilder.getAllTableNames();
+    final Set<String> allTables = pBuilder.getAllTableNames();
     allTables.removeAll(models.getAllContainerTableNames());
     //Drop all remaining/obsolete tables
     allTables.forEach(pBuilder::dropTable);

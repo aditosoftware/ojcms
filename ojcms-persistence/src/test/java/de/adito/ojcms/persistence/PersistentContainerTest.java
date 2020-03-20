@@ -80,33 +80,33 @@ public class PersistentContainerTest extends AbstractCdiTest
 
     //Add some beans in first transaction
     transactionalContainers.doInNewTransaction(pContainer ->
-                                               {
-                                                 pContainer.addBean(new SomeBean(1));
-                                                 pContainer.addBean(new SomeBean(2));
-                                                 pContainer.addBean(new SomeBean(3));
-                                               });
+    {
+      pContainer.addBean(new SomeBean(1));
+      pContainer.addBean(new SomeBean(2));
+      pContainer.addBean(new SomeBean(3));
+    });
 
     //Modify container in second transaction
     transactionalContainers.doInNewTransaction(pContainer ->
-                                               {
-                                                 //Remove one bean
-                                                 final SomeBean removedBean = pContainer.removeBean(1);
-                                                 assertEquals(2, removedBean.getValue(SomeBean.NUMBER_FIELD));
-                                                 assertEquals(1, pContainer.getBean(0).getValue(SomeBean.NUMBER_FIELD));
-                                                 assertEquals(3, pContainer.getBean(1).getValue(SomeBean.NUMBER_FIELD));
-                                                 //Add some more bean at front
-                                                 pContainer.addBean(new SomeBean(99), 0);
-                                                 assertEquals(99, pContainer.getBean(0).getValue(SomeBean.NUMBER_FIELD));
-                                                 assertEquals(1, pContainer.getBean(1).getValue(SomeBean.NUMBER_FIELD));
-                                                 assertEquals(3, pContainer.getBean(2).getValue(SomeBean.NUMBER_FIELD));
-                                                 //Add another bean
-                                                 pContainer.addBean(new SomeBean(100), 1);
-                                                 assertEquals(4, pContainer.size());
-                                                 assertEquals(99, pContainer.getBean(0).getValue(SomeBean.NUMBER_FIELD));
-                                                 assertEquals(100, pContainer.getBean(1).getValue(SomeBean.NUMBER_FIELD));
-                                                 assertEquals(1, pContainer.getBean(2).getValue(SomeBean.NUMBER_FIELD));
-                                                 assertEquals(3, pContainer.getBean(3).getValue(SomeBean.NUMBER_FIELD));
-                                               });
+    {
+      //Remove one bean
+      final SomeBean removedBean = pContainer.removeBean(1);
+      assertEquals(2, removedBean.getValue(SomeBean.NUMBER_FIELD));
+      assertEquals(1, pContainer.getBean(0).getValue(SomeBean.NUMBER_FIELD));
+      assertEquals(3, pContainer.getBean(1).getValue(SomeBean.NUMBER_FIELD));
+      //Add some more bean at front
+      pContainer.addBean(new SomeBean(99), 0);
+      assertEquals(99, pContainer.getBean(0).getValue(SomeBean.NUMBER_FIELD));
+      assertEquals(1, pContainer.getBean(1).getValue(SomeBean.NUMBER_FIELD));
+      assertEquals(3, pContainer.getBean(2).getValue(SomeBean.NUMBER_FIELD));
+      //Add another bean
+      pContainer.addBean(new SomeBean(100), 1);
+      assertEquals(4, pContainer.size());
+      assertEquals(99, pContainer.getBean(0).getValue(SomeBean.NUMBER_FIELD));
+      assertEquals(100, pContainer.getBean(1).getValue(SomeBean.NUMBER_FIELD));
+      assertEquals(1, pContainer.getBean(2).getValue(SomeBean.NUMBER_FIELD));
+      assertEquals(3, pContainer.getBean(3).getValue(SomeBean.NUMBER_FIELD));
+    });
   }
 
   @Persist(containerId = "TEST")

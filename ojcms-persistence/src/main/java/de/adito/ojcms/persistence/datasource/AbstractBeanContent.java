@@ -1,5 +1,6 @@
 package de.adito.ojcms.persistence.datasource;
 
+import de.adito.ojcms.beans.IBean;
 import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.transactions.api.ITransaction;
 import org.jetbrains.annotations.Nullable;
@@ -11,9 +12,10 @@ import java.util.*;
  *
  * @author Simon Danner, 01.01.2020
  */
-abstract class AbstractBeanContent<KEY>
+abstract class AbstractBeanContent<KEY, BEAN extends IBean>
 {
   private final KEY beanKey;
+  private final Class<BEAN> beanType;
   private final Map<IField<?>, Object> content;
   private final ITransaction transaction;
 
@@ -24,11 +26,20 @@ abstract class AbstractBeanContent<KEY>
    * @param pTransaction the transaction this bean data is associated with
    * @param pContent     given initial content mapped by bean fields
    */
-  AbstractBeanContent(KEY pBeanKey, ITransaction pTransaction, Map<IField<?>, Object> pContent)
+  AbstractBeanContent(KEY pBeanKey, Class<BEAN> pBeanType, ITransaction pTransaction, Map<IField<?>, Object> pContent)
   {
     beanKey = Objects.requireNonNull(pBeanKey);
+    beanType = Objects.requireNonNull(pBeanType);
     transaction = Objects.requireNonNull(pTransaction);
     content = new HashMap<>(pContent);
+  }
+
+  /**
+   * The bean type the content is for.
+   */
+  Class<BEAN> getBeanType()
+  {
+    return beanType;
   }
 
   /**
@@ -65,9 +76,9 @@ abstract class AbstractBeanContent<KEY>
    * Registers a bean value change at the associated transaction.
    *
    * @param pTransaction  the current transaction
-   * @param pBeanKey      the bean key associated with this content
+   * @param pKey          the bean key associated with this content
    * @param pChangedField the changed bean field
    * @param pValue        the new value
    */
-  abstract <VALUE> void registerValueChangeAtTransaction(ITransaction pTransaction, KEY pBeanKey, IField<VALUE> pChangedField, VALUE pValue);
+  abstract <VALUE> void registerValueChangeAtTransaction(ITransaction pTransaction, KEY pKey, IField<VALUE> pChangedField, VALUE pValue);
 }

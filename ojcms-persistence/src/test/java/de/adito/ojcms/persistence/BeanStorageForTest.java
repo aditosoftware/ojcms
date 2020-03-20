@@ -19,7 +19,7 @@ import java.util.*;
 class BeanStorageForTest implements IBeanDataStorage
 {
   @Inject
-  private RegisteredBeans registeredBeans;
+  private RegisteredBeansForTest registeredBeans;
   @Inject
   private BeanTestData data;
 
@@ -27,6 +27,12 @@ class BeanStorageForTest implements IBeanDataStorage
   public void registerPersistentContainerBean(Class<? extends IBean> pBeanType, String pContainerId)
   {
     registeredBeans.registerContainerType(pContainerId);
+  }
+
+  @Override
+  public void registerPersistentBaseTypeContainer(String pContainerId, Set<Class<? extends IBean>> pSubTypes)
+  {
+    registeredBeans.registerBaseContainerType(pContainerId);
   }
 
   @Override
@@ -48,9 +54,9 @@ class BeanStorageForTest implements IBeanDataStorage
   }
 
   @Override
-  public void processAdditionsForContainer(String pContainerId, Set<PersistentBeanData> pNewData)
+  public void processAdditionsForContainer(String pContainerId, Set<BeanAddition> pBeanAdditions)
   {
-    data.addToContainer(pContainerId, pNewData);
+    data.addToContainer(pContainerId, pBeanAdditions);
   }
 
   @Override

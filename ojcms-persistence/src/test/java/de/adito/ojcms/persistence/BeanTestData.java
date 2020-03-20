@@ -20,13 +20,13 @@ import static java.util.stream.Collectors.toSet;
 @TestMethodScoped
 class BeanTestData
 {
-  private final Map<String, List<PersistentBeanData>> containers;
+  private final Map<String, List<BeanAddition>> containers;
   private final Map<String, PersistentBeanData> singleBeans;
 
   @Inject
-  BeanTestData(RegisteredBeans registeredBeans)
+  BeanTestData(RegisteredBeansForTest registeredBeans)
   {
-    containers = registeredBeans.getContainerIds().stream()
+    containers = registeredBeans.getContainerIds().stream() //
         .collect(Collectors.toMap(Function.identity(), pId -> new ArrayList<>()));
     singleBeans = registeredBeans.getSingleBeanInitialStates();
   }
@@ -37,7 +37,7 @@ class BeanTestData
    * @param pContainerId the id of the persistent container
    * @return a list of {@link PersistentBeanData}
    */
-  List<PersistentBeanData> getContentForContainer(String pContainerId)
+  List<BeanAddition> getContentForContainer(String pContainerId)
   {
     if (!containers.containsKey(pContainerId))
       throw new IllegalArgumentException("Persistent container with id " + pContainerId + " does not exist!");
@@ -60,17 +60,17 @@ class BeanTestData
   }
 
   /**
-   * Adds new {@link PersistentBeanData} to a persistent bean container.
+   * Adds new {@link BeanAddition} to a persistent bean container.
    *
-   * @param pContainerId the id of the persistent container
-   * @param pNewBeanData a set of the new bean data to add to the container
+   * @param pContainerId   the id of the persistent container
+   * @param pBeanAdditions data describing the additions to the container
    */
-  void addToContainer(String pContainerId, Set<PersistentBeanData> pNewBeanData)
+  void addToContainer(String pContainerId, Set<BeanAddition> pBeanAdditions)
   {
     if (!containers.containsKey(pContainerId))
       throw new IllegalArgumentException("Persistent container with id " + pContainerId + " does not exist!");
 
-    containers.get(pContainerId).addAll(pNewBeanData);
+    containers.get(pContainerId).addAll(pBeanAdditions);
   }
 
   /**
@@ -81,11 +81,11 @@ class BeanTestData
   void removeFromContainer(Map<String, Set<InitialIndexKey>> pKeysToRemoveByContainer)
   {
     pKeysToRemoveByContainer.forEach((pContainerId, pKeysToRemove) ->
-                                     {
-                                       final List<PersistentBeanData> content = getContentForContainer(pContainerId);
-                                       final Set<Integer> indexes = pKeysToRemove.stream().map(InitialIndexKey::getIndex).collect(toSet());
-                                       content.removeIf(pData -> indexes.contains(pData.getIndex()));
-                                     });
+    {
+      final List<BeanAddition> content = getContentForContainer(pContainerId);
+      final Set<Integer> indexes = pKeysToRemove.stream().map(InitialIndexKey::getIndex).collect(toSet());
+      content.removeIf(pData -> indexes.contains(pData.getIndex()));
+    });
   }
 
   /**
@@ -97,9 +97,9 @@ class BeanTestData
   void processChangeForContainerBean(InitialIndexKey pKey, Map<IField<?>, Object> pChangedData)
   {
     final int index = pKey.getIndex();
-    final List<PersistentBeanData> containerContent = getContentForContainer(pKey.getContainerId());
+    final List<BeanAddition> containerContent = getContentForContainer(pKey.getContainerId());
     final PersistentBeanData newData = containerContent.get(index).integrateChanges(pChangedData);
-    containerContent.set(index, newData);
+    containerContent.set(index, (BeanAddition) newData);
   }
 
   /**

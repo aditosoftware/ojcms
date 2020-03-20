@@ -1,5 +1,6 @@
 package de.adito.ojcms.sql.datasource.persistence;
 
+import de.adito.ojcms.beans.IBean;
 import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.sql.datasource.model.PersistenceModels;
 import de.adito.ojcms.sqlbuilder.OJSQLBuilder;
@@ -39,6 +40,12 @@ public class SQLBeanDataLoader implements IBeanDataLoader
   public PersistentBeanData loadContainerBeanDataByIndex(InitialIndexKey pKey)
   {
     return models.getContainerPersistenceModel(pKey.getContainerId()).loadDataByIndex(pKey, builder);
+  }
+
+  @Override
+  public <BEAN extends IBean> Class<BEAN> loadBeanTypeWithinContainer(InitialIndexKey pKey)
+  {
+    return models.getBaseContainerPersistenceModel(pKey.getContainerId()).loadBeanType(pKey, builder);
   }
 
   @Override

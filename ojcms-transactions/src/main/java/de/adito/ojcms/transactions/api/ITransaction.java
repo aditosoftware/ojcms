@@ -1,5 +1,6 @@
 package de.adito.ojcms.transactions.api;
 
+import de.adito.ojcms.beans.IBean;
 import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.transactions.annotations.Transactional;
 
@@ -34,6 +35,15 @@ public interface ITransaction
   PersistentBeanData requestBeanDataByIndex(CurrentIndexKey pKey);
 
   /**
+   * Requests the type of a bean within a persistent container at a specific index.
+   * This may be necessary if the type of the container is a bean base type and the actual types are persisted in the storage system.
+   *
+   * @param pKey the index based key to identify the bean to resolve the type for
+   * @return the requested bean type
+   */
+  <BEAN extends IBean> Class<BEAN> requestBeanTypeWithinContainer(CurrentIndexKey pKey);
+
+  /**
    * Requests persistent data of a bean within a container by identifying field value tuples.
    * This result may be empty if there's no bean for the given identifiers.
    *
@@ -63,10 +73,9 @@ public interface ITransaction
   /**
    * Registers the addition of a bean to a container within this transaction.
    *
-   * @param pIndexKey the index key the bean has been added for
-   * @param pNewData  the data of the added bean
+   * @param pBeanAddition data describing the addition
    */
-  void registerBeanAddition(CurrentIndexKey pIndexKey, Map<IField<?>, Object> pNewData);
+  void registerBeanAddition(BeanAddition pBeanAddition);
 
   /**
    * Registers the removal of a bean from a container within this transaction.

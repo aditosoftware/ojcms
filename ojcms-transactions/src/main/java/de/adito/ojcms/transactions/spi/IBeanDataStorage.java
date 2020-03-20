@@ -22,6 +22,14 @@ public interface IBeanDataStorage
   void registerPersistentContainerBean(Class<? extends IBean> pBeanType, String pContainerId);
 
   /**
+   * Registers a persistent container for bean base types. This may be used by the storage system to initialize required structures.
+   *
+   * @param pContainerId the id of the persistent container
+   * @param pSubTypes    the supported sub types that can be added to the base container
+   */
+  void registerPersistentBaseTypeContainer(String pContainerId, Set<Class<? extends IBean>> pSubTypes);
+
+  /**
    * Registers a persistent single bean type. This may be used by the storage system to initialize required structures.
    *
    * @param pBeanType the bean type to register
@@ -48,10 +56,10 @@ public interface IBeanDataStorage
   /**
    * Processes all bean additions to a persistent container.
    *
-   * @param pContainerId the id of the container
-   * @param pNewData     a set of all added bean data
+   * @param pContainerId   the id of the container
+   * @param pBeanAdditions data of all added beans for the container
    */
-  void processAdditionsForContainer(String pContainerId, Set<PersistentBeanData> pNewData);
+  void processAdditionsForContainer(String pContainerId, Set<BeanAddition> pBeanAdditions);
 
   /**
    * Processes all bean removals from a persistent container.

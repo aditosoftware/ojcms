@@ -17,7 +17,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static de.adito.ojcms.sql.datasource.util.DatabaseConstants.INDEX_COLUMN_NAME;
+import static de.adito.ojcms.sql.datasource.util.DatabaseConstants.*;
 import static de.adito.ojcms.sqlbuilder.definition.ENumericOperation.*;
 import static de.adito.ojcms.sqlbuilder.definition.INumericValueAdaption.of;
 import static de.adito.ojcms.sqlbuilder.definition.condition.IWhereCondition.greaterThan;
@@ -27,6 +27,7 @@ import static de.adito.ojcms.sqlbuilder.definition.condition.IWhereConditionsFor
 import static de.adito.ojcms.sqlbuilder.definition.condition.IWhereOperator.greaterThan;
 import static de.adito.ojcms.sqlbuilder.definition.condition.IWhereOperator.lessThan;
 import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * The persistence model for a database table for a persistent bean container.
@@ -38,41 +39,78 @@ import static java.util.function.Function.identity;
 public class ContainerPersistenceModel implements IPersistenceModel
 {
   private static final IColumnDefinition INDEX_COLUMN_DEFINITION = IColumnDefinition.of(INDEX_COLUMN_NAME, EColumnType.INT.create());
-  private static final IColumnIdentification<Integer> INDEX_COLUMN = IColumnIdentification.of(INDEX_COLUMN_NAME, Integer.class);
+  protected static final IColumnIdentification<Integer> INDEX_COLUMN = IColumnIdentification.of(INDEX_COLUMN_NAME, Integer.class);
 
-  private final String containerId;
-  private final BeanColumnDefinition[] columnDefinitions;
-  private final BeanColumnIdentification<?>[] beanColumns;
-  private final List<IColumnIdentification<?>> columnsToSelect;
+  protected final String containerId;
+  private final Set<IColumnDefinition> columnDefinitions;
+  private final Set<BeanColumnIdentification<?>> beanColumnIdentifications;
+  private final Set<IColumnIdentification<?>> columnsToSelect;
 
   /**
    * Initializes the persistence model for a persistent bean container.
    *
    * @param pContainerId the container id of the persistent container
-   * @param pBeanType    the type of beans within the bean container
+   * @param pBeanType    the types of the beans in the container
    */
   ContainerPersistenceModel(String pContainerId, Class<? extends IBean> pBeanType)
   {
+    this(pContainerId, BeanColumnDefinition.ofFields(BeanReflector.reflectBeanFields(pBeanType)));
+  }
+
+  /**
+   * Initializes the persistence model for a persistent bean container.
+   *
+   * @param pContainerId      the container id of the persistent container
+   * @param pColumns          the bean based column definitions for this container model
+   * @param pAdditionsColumns optional additional columns to select
+   */
+  ContainerPersistenceModel(String pContainerId, Set<BeanColumnDefinition<?>> pColumns, IColumnIdentification<?>... pAdditionsColumns)
+  {
     containerId = StringUtility.requireNotEmpty(pContainerId, "container id");
-    final List<IField<?>> beanFields = BeanReflector.reflectBeanFields(pBeanType);
-    columnDefinitions = BeanColumnDefinition.ofFields(beanFields);
-    beanColumns = BeanColumnIdentification.ofMultiple(beanFields);
-    columnsToSelect = new ArrayList<>();
+    columnDefinitions = new HashSet<>(pColumns);
+    beanColumnIdentifications = pColumns.stream().map(BeanColumnDefinition::toColumnIdentification).collect(toSet());
+
+    columnsToSelect = new HashSet<>();
     columnsToSelect.add(INDEX_COLUMN);
-    columnsToSelect.addAll(Arrays.asList(beanColumns));
+    columnsToSelect.addAll(beanColumnIdentifications);
+    columnsToSelect.addAll(Arrays.asList(pAdditionsColumns));
   }
 
   @Override
   public void initModelInDatabase(OJSQLBuilder pBuilder)
   {
-    final List<IColumnDefinition> columnsToCreate = new ArrayList<>();
-    columnsToCreate.add(INDEX_COLUMN_DEFINITION);
-    columnsToCreate.addAll(Arrays.asList(columnDefinitions));
+    if (!pBuilder.hasTable(containerId))
+      pBuilder.doCreate(pCreate -> pCreate //
+          .tableName(containerId) //
+          .withIdColumn() //
+          .columns(getColumnsToCreateInitially()) //
+          .create());
+    else
+    {
+      final Set<String> existingColumnNames = pBuilder.getAllColumnNames(containerId);
 
-    pBuilder.ifTableNotExistingCreate(containerId, pCreate -> pCreate
-        .withIdColumn()
-        .columns(columnsToCreate)
-        .create());
+      final Set<IColumnDefinition> columnsToAdd = columnDefinitions.stream() //
+          .filter(pColumn -> !existingColumnNames.contains(pColumn.getColumnName())) //
+          .collect(toSet());
+
+      //After the removal the remaining columns must be dropped
+      existingColumnNames.remove(ID_COLUMN);
+      existingColumnNames.remove(INDEX_COLUMN_NAME);
+      existingColumnNames.remove(BEAN_TYPE_COLUMN_NAME);
+      existingColumnNames.removeAll(columnDefinitions.stream() //
+          .map(IColumnDefinition::getColumnName) //
+          .collect(toSet()));
+
+      if (existingColumnNames.isEmpty() && columnsToAdd.isEmpty())
+        return;
+
+      //Add new columns and drop obsolete columns
+      pBuilder.doAlterTable(pAlter -> pAlter //
+          .table(containerId) //
+          .columnsToAdd(columnsToAdd) //
+          .columnsToDrop(existingColumnNames) //
+          .alter());
+    }
   }
 
   /**
@@ -95,14 +133,7 @@ public class ContainerPersistenceModel implements IPersistenceModel
    */
   public PersistentBeanData loadDataByIndex(InitialIndexKey pKey, OJSQLBuilder pBuilder)
   {
-    return pBuilder.doSelect(pSelect -> pSelect
-        .select(beanColumns)
-        .from(containerId)
-        .where(isEqual(INDEX_COLUMN, pKey.getIndex()))
-        .firstResult()
-        .map(pRow -> pRow.toMap(beanColumns, (Function<BeanColumnIdentification<?>, IField<?>>) BeanColumnIdentification::getBeanField))
-        .map(pBeanContent -> new PersistentBeanData(pKey.getIndex(), pBeanContent)))
-        .orElseThrow(() -> new BeanDataNotFoundException(pKey));
+    return selectSingleResultByIndex(pKey, columnsToSelect, pBuilder, this::_toBeanData);
   }
 
   /**
@@ -114,12 +145,11 @@ public class ContainerPersistenceModel implements IPersistenceModel
    */
   public Optional<PersistentBeanData> loadDataByIdentifiers(Map<IField<?>, Object> pIdentifiers, OJSQLBuilder pBuilder)
   {
-    return pBuilder.doSelect(pSelect -> pSelect
-        .select(columnsToSelect)
-        .withId()
-        .from(containerId)
-        .where(BeanWhereCondition.conditionsOfMap(pIdentifiers))
-        .firstResult()
+    return pBuilder.doSelect(pSelect -> pSelect //
+        .select(columnsToSelect) //
+        .from(containerId) //
+        .where(BeanWhereCondition.conditionsOfMap(pIdentifiers)) //
+        .firstResult() //
         .map(this::_toBeanData));
   }
 
@@ -132,13 +162,12 @@ public class ContainerPersistenceModel implements IPersistenceModel
    */
   public Map<Integer, PersistentBeanData> loadFullData(OJSQLBuilder pBuilder)
   {
-    return pBuilder.doSelect(pSelect -> pSelect
-        .select(columnsToSelect)
-        .withId()
-        .from(containerId)
-        .fullResult()
-        .stream()
-        .map(this::_toBeanData)
+    return pBuilder.doSelect(pSelect -> pSelect //
+        .select(columnsToSelect)//
+        .from(containerId) //
+        .fullResult() //
+        .stream() //
+        .map(this::_toBeanData) //
         .collect(Collectors.toMap(PersistentBeanData::getIndex, identity())));
   }
 
@@ -151,33 +180,33 @@ public class ContainerPersistenceModel implements IPersistenceModel
    */
   public void processValueChanges(int pIndex, Map<IField<?>, Object> pChangedValues, OJSQLBuilder pBuilder)
   {
-    pBuilder.doUpdate(pUpdate -> pUpdate
-        .table(containerId)
-        .set(BeanColumnValueTuple.ofMap(pChangedValues))
-        .where(isEqual(INDEX_COLUMN, pIndex))
+    pBuilder.doUpdate(pUpdate -> pUpdate //
+        .table(containerId) //
+        .set(BeanColumnValueTuple.ofMap(pChangedValues)) //
+        .where(isEqual(INDEX_COLUMN, pIndex)) //
         .update());
   }
 
   /**
    * Processes bean additions for the persistent bean container.
    *
-   * @param pNewBeans the data of newly added beans
-   * @param pBuilder  a builder to execute SQL statements
+   * @param pBeanAdditions data of all added beans
+   * @param pBuilder       a builder to execute SQL statements
    */
-  public void processAdditions(Set<PersistentBeanData> pNewBeans, OJSQLBuilder pBuilder)
+  public void processAdditions(Set<BeanAddition> pBeanAdditions, OJSQLBuilder pBuilder)
   {
-    for (PersistentBeanData newBean : pNewBeans)
+    for (BeanAddition addition : pBeanAdditions)
     {
       //Increase index of every row above the inserted index
-      pBuilder.doUpdate(pUpdate -> pUpdate
-          .table(containerId)
-          .adaptNumericValue(of(INDEX_COLUMN, ADD, 1))
-          .where(greaterThanOrEqual(INDEX_COLUMN, newBean.getIndex()))
+      pBuilder.doUpdate(pUpdate -> pUpdate //
+          .table(containerId) //
+          .adaptNumericValue(of(INDEX_COLUMN, ADD, 1)) //
+          .where(greaterThanOrEqual(INDEX_COLUMN, addition.getIndex())) //
           .update());
 
-      pBuilder.doInsert(pInsert -> pInsert
-          .into(containerId)
-          .values(_tuplesToInsertForNewBean(newBean))
+      pBuilder.doInsert(pInsert -> pInsert //
+          .into(containerId) //
+          .values(tuplesToInsertForNewBean(addition)) //
           .insert());
     }
   }
@@ -190,14 +219,14 @@ public class ContainerPersistenceModel implements IPersistenceModel
    */
   public void processRemovals(Set<InitialIndexKey> pKeysToRemove, OJSQLBuilder pBuilder)
   {
-    final List<Integer> indexesToDelete = pKeysToRemove.stream()
-        .map(InitialIndexKey::getIndex)
-        .sorted()
+    final List<Integer> indexesToDelete = pKeysToRemove.stream() //
+        .map(InitialIndexKey::getIndex) //
+        .sorted() //
         .collect(Collectors.toList());
 
-    pBuilder.doDelete(pDelete -> pDelete
-        .from(containerId)
-        .where(IWhereCondition.in(INDEX_COLUMN, indexesToDelete))
+    pBuilder.doDelete(pDelete -> pDelete //
+        .from(containerId) //
+        .where(IWhereCondition.in(INDEX_COLUMN, indexesToDelete)) //
         .delete());
 
     //Update all indexes between the deleted indexes
@@ -207,19 +236,80 @@ public class ContainerPersistenceModel implements IPersistenceModel
       final int nextIndexToDelete = indexesToDelete.get(i + 1);
       final int offset = i + 1;
 
-      pBuilder.doUpdate(pUpdate -> pUpdate
-          .table(containerId)
-          .adaptNumericValue(of(INDEX_COLUMN, SUBTRACT, offset))
-          .whereId(create(greaterThan(), indexToDelete).and(lessThan(), nextIndexToDelete))
+      pBuilder.doUpdate(pUpdate -> pUpdate //
+          .table(containerId) //
+          .adaptNumericValue(of(INDEX_COLUMN, SUBTRACT, offset)) //
+          .whereId(create(greaterThan(), indexToDelete).and(lessThan(), nextIndexToDelete)) //
           .update());
     }
 
     //Update all row indexes after the last index to delete
-    pBuilder.doUpdate(pUpdate -> pUpdate
-        .table(containerId)
-        .adaptNumericValue(of(INDEX_COLUMN, SUBTRACT, indexesToDelete.size()))
-        .where(greaterThan(INDEX_COLUMN, indexesToDelete.get(indexesToDelete.size() - 1)))
+    pBuilder.doUpdate(pUpdate -> pUpdate //
+        .table(containerId) //
+        .adaptNumericValue(of(INDEX_COLUMN, SUBTRACT, indexesToDelete.size())) //
+        .where(greaterThan(INDEX_COLUMN, indexesToDelete.get(indexesToDelete.size() - 1))) //
         .update());
+  }
+
+  /**
+   * Selects a generic result from a single row in the database by index.
+   * Throws a {@link BeanDataNotFoundException} if there is not data at the given index.
+   *
+   * @param pIndexKey        the index based key to determine the row to select
+   * @param pColumnsToSelect the columns to select from the single row
+   * @param pBuilder         a builder to execute SQL statements
+   * @param pResultMapper    a mapper to convert the single {@link ResultRow} to the requested result
+   * @return the generic result for the single row
+   */
+  protected <RESULT> RESULT selectSingleResultByIndex(InitialIndexKey pIndexKey, Set<IColumnIdentification<?>> pColumnsToSelect,
+                                                      OJSQLBuilder pBuilder, Function<ResultRow, RESULT> pResultMapper)
+  {
+    return pBuilder.doSelect(pSelect -> pSelect //
+        .select(pColumnsToSelect) //
+        .from(containerId) //
+        .where(isEqual(INDEX_COLUMN, pIndexKey.getIndex())) //
+        .firstResult() //
+        .map(pResultMapper) //
+        .orElseThrow(() -> new BeanDataNotFoundException(pIndexKey)));
+  }
+
+  /**
+   * Resolves a list of initial {@link IColumnDefinition} for the container SQL table to create.
+   *
+   * @return the list of columns to create for the container model
+   */
+  protected List<IColumnDefinition> getColumnsToCreateInitially()
+  {
+    final List<IColumnDefinition> columnsToCreate = new ArrayList<>();
+    columnsToCreate.add(INDEX_COLUMN_DEFINITION);
+    columnsToCreate.addAll(columnDefinitions);
+    return columnsToCreate;
+  }
+
+  /**
+   * Creates a list of {@link IColumnValueTuple} to perform an insertion based on some {@link PersistentBeanData}.
+   * The index value tuple will be included as well.
+   *
+   * @param pBeanAddition data describing the addition
+   * @return a list of column value tuples for an insertion
+   */
+  protected List<IColumnValueTuple<?>> tuplesToInsertForNewBean(BeanAddition pBeanAddition)
+  {
+    final List<IColumnValueTuple<?>> tuplesToInsert = new ArrayList<>();
+    tuplesToInsert.add(IColumnValueTuple.of(INDEX_COLUMN, pBeanAddition.getIndex()));
+    tuplesToInsert.addAll(BeanColumnValueTuple.ofMap(pBeanAddition.getData()));
+    return tuplesToInsert;
+  }
+
+  /**
+   * Resolves bean content (field values tuples) from a {@link ResultRow}.
+   *
+   * @param pResultRow the result row to obtain bean data from
+   * @return the beans's content as field value tuples
+   */
+  protected Map<IField<?>, Object> resultRowToBeanContent(ResultRow pResultRow)
+  {
+    return pResultRow.toMap(beanColumnIdentifications, BeanColumnIdentification::getBeanField);
   }
 
   /**
@@ -230,23 +320,8 @@ public class ContainerPersistenceModel implements IPersistenceModel
    */
   private PersistentBeanData _toBeanData(ResultRow pResultRow)
   {
-    final Map<IField<?>, Object> beanContent = pResultRow.toMap(beanColumns, BeanColumnIdentification::getBeanField);
+    final Map<IField<?>, Object> beanContent = resultRowToBeanContent(pResultRow);
     final int index = pResultRow.get(INDEX_COLUMN);
     return new PersistentBeanData(index, beanContent);
-  }
-
-  /**
-   * Creates a list of {@link IColumnValueTuple} to perform an insertion based on some {@link PersistentBeanData}.
-   * The index value tuple will be included as well.
-   *
-   * @param pBeanData the persistent bean data to create column value tuples for
-   * @return a list of column value tuples for an insertion
-   */
-  private List<IColumnValueTuple<?>> _tuplesToInsertForNewBean(PersistentBeanData pBeanData)
-  {
-    final List<IColumnValueTuple<?>> tuplesToInsert = new ArrayList<>();
-    tuplesToInsert.add(IColumnValueTuple.of(INDEX_COLUMN, pBeanData.getIndex()));
-    tuplesToInsert.addAll(BeanColumnValueTuple.ofMap(pBeanData.getData()));
-    return tuplesToInsert;
   }
 }

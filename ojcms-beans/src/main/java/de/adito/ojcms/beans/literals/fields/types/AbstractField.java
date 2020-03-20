@@ -79,9 +79,9 @@ abstract class AbstractField<VALUE> implements IField<VALUE>
   public <ANNOTATION extends Annotation> Optional<ANNOTATION> getAnnotation(Class<ANNOTATION> pType)
   {
     //noinspection unchecked
-    return annotations.stream()
-        .filter(pAnnotation -> pAnnotation.annotationType().equals(pType))
-        .findAny()
+    return annotations.stream() //
+        .filter(pAnnotation -> pAnnotation.annotationType().equals(pType)) //
+        .findAny() //
         .map(pAnnotation -> (ANNOTATION) pAnnotation);
   }
 
@@ -101,7 +101,7 @@ abstract class AbstractField<VALUE> implements IField<VALUE>
   public <INFO> Optional<INFO> getAdditionalInformation(IAdditionalMemberInfo<INFO> pIdentifier)
   {
     //noinspection unchecked
-    return Optional.ofNullable(additionalInformation.get(pIdentifier))
+    return Optional.ofNullable(additionalInformation.get(pIdentifier)) //
         .map(pInfo -> (INFO) pInfo);
   }
 
@@ -110,6 +110,7 @@ abstract class AbstractField<VALUE> implements IField<VALUE>
   {
     if (!pIdentifier.getDataType().isAssignableFrom(pValue.getClass()))
       throw new OJRuntimeException("Bad data type: " + pValue.getClass() + " should be from type " + pIdentifier.getDataType());
+
     additionalInformation.put(pIdentifier, pValue);
   }
 
@@ -150,17 +151,36 @@ abstract class AbstractField<VALUE> implements IField<VALUE>
   }
 
   @Override
+  public boolean equals(Object pOther)
+  {
+    if (this == pOther)
+      return true;
+
+    if (!(pOther instanceof AbstractField))
+      return false;
+
+    final AbstractField<?> that = (AbstractField<?>) pOther;
+    return Objects.equals(name, that.name);
+  }
+
+  @Override
+  public int hashCode()
+  {
+    return Objects.hash(name);
+  }
+
+  @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "{" +
-        "dataType=" + dataType +
-        ", name='" + name + '\'' +
-        ", isPrivate=" + isPrivate +
-        ", isOptional=" + isOptional +
-        ", isFinal=" + isValueFinal() +
-        ", neverNull=" + mustNeverBeNull() +
-        ", annotations=" + annotations +
-        ", additionalInformation=" + additionalInformation +
+    return getClass().getSimpleName() + "{" + //
+        "dataType=" + dataType + //
+        ", name='" + name + '\'' + //
+        ", isPrivate=" + isPrivate + //
+        ", isOptional=" + isOptional + //
+        ", isFinal=" + isValueFinal() + //
+        ", neverNull=" + mustNeverBeNull() + //
+        ", annotations=" + annotations + //
+        ", additionalInformation=" + additionalInformation + //
         '}';
   }
 
@@ -172,7 +192,8 @@ abstract class AbstractField<VALUE> implements IField<VALUE>
    * @param pFromConverter the converter that converts from the field's data type to the source's data type
    * @param <SOURCE>       the generic source data type
    */
-  protected <SOURCE> void registerConverter(Class<SOURCE> pSourceType, Function<SOURCE, VALUE> pToConverter, Function<VALUE, SOURCE> pFromConverter)
+  protected <SOURCE> void registerConverter(Class<SOURCE> pSourceType, Function<SOURCE, VALUE> pToConverter,
+                                            Function<VALUE, SOURCE> pFromConverter)
   {
     toConverters.put(pSourceType, pToConverter);
     fromConverters.put(pSourceType, pFromConverter);

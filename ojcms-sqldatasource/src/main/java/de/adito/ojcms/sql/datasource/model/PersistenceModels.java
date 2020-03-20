@@ -30,6 +30,17 @@ public class PersistenceModels
   }
 
   /**
+   * Registers a persistent base container to create its {@link ContainerPersistenceModel}.
+   *
+   * @param pSubTypes    all supported sub bean types of the container
+   * @param pContainerId the id of the persistent container
+   */
+  public void registerPersistentBaseContainer(Set<Class<? extends IBean>> pSubTypes, String pContainerId)
+  {
+    containerModels.putIfAbsent(pContainerId, new BaseContainerPersistenceModel(pContainerId, pSubTypes));
+  }
+
+  /**
    * Registers a persistent single bean type to create its {@link SingleBeanPersistenceModel}.
    *
    * @param pBeanType the bean type of the persistent bean
@@ -52,6 +63,18 @@ public class PersistenceModels
       throw new IllegalArgumentException("No container bean model found for container id: " + pContainerId);
 
     return containerModels.get(pContainerId);
+  }
+
+  /**
+   * Resolves a {@link BaseContainerPersistenceModel} by the id of the persistent container.
+   * Throws a {@link ClassCastException} if the requested model is not for a base container.
+   *
+   * @param pContainerId the id of the persistent container
+   * @return the resolved container persistence model
+   */
+  public BaseContainerPersistenceModel getBaseContainerPersistenceModel(String pContainerId)
+  {
+    return (BaseContainerPersistenceModel) getContainerPersistenceModel(pContainerId);
   }
 
   /**

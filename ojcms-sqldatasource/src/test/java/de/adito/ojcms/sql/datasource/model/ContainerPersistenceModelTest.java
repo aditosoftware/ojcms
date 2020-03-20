@@ -40,7 +40,7 @@ public class ContainerPersistenceModelTest extends AbstractDatabaseTest<Containe
   }
 
   @Test
-  public void testLoadDataByKey_Container()
+  public void testLoadData()
   {
     final InitialIndexKey indexKeyFirstRow = new InitialIndexKey(CONTAINER_ID, 0);
     assertThrows(BeanDataNotFoundException.class, () -> model.loadDataByIndex(indexKeyFirstRow, builder));
@@ -58,8 +58,7 @@ public class ContainerPersistenceModelTest extends AbstractDatabaseTest<Containe
 
     final PersistentBeanData result = model.loadDataByIndex(indexKeyFirstRow, builder);
     assertEquals(added.get(0), result);
-    final PersistentBeanData result2 = model.loadDataByIdentifiers(createIdentifiers(2, "2"), builder)
-        .orElseThrow(AssertionError::new);
+    final PersistentBeanData result2 = model.loadDataByIdentifiers(createIdentifiers(2, "2"), builder).orElseThrow(AssertionError::new);
     assertEquals(added.get(1), result2);
   }
 

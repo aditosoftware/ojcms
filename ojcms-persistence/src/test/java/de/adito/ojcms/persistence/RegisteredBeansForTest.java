@@ -14,19 +14,30 @@ import java.util.*;
  * @author Simon Danner, 29.02.2020
  */
 @ApplicationScoped
-class RegisteredBeans
+class RegisteredBeansForTest
 {
   private final Set<String> containerIds = new HashSet<>();
+  private final Set<String> baseContainerIds = new HashSet<>();
   private final Map<String, PersistentBeanData> singleBeanInitialStates = new HashMap<>();
 
   /**
    * All registered persistent container ids.
    *
-   * @return a list of bean container ids
+   * @return a set of bean container ids
    */
   Set<String> getContainerIds()
   {
     return new HashSet<>(containerIds);
+  }
+
+  /**
+   * All registered base persistent container ids.
+   *
+   * @return a set of base bean container ids
+   */
+  Set<String> getBaseContainerIds()
+  {
+    return new HashSet<>(baseContainerIds);
   }
 
   /**
@@ -50,6 +61,17 @@ class RegisteredBeans
   }
 
   /**
+   * Registers a base persistent container by id.
+   *
+   * @param pContainerId the container's id
+   */
+  void registerBaseContainerType(String pContainerId)
+  {
+    containerIds.add(pContainerId);
+    baseContainerIds.add(pContainerId);
+  }
+
+  /**
    * Registers a persistent single bean by id.
    *
    * @param pBeanId   the id of the single bean
@@ -57,8 +79,8 @@ class RegisteredBeans
    */
   void registerSingleBeanType(String pBeanId, Class<? extends IBean> pBeanType)
   {
-    final Map<IField<?>, Object> initialContent = BeanReflector.reflectBeanFields(pBeanType).stream()
-        .collect(HashMap::new, (pMap, pField) -> pMap.put(pField, pField.getInitialValue()), HashMap::putAll);
+    final Map<IField<?>, Object> initialContent = BeanReflector.reflectBeanFields(pBeanType).stream().collect(HashMap::new,
+        (pMap, pField) -> pMap.put(pField, pField.getInitialValue()), HashMap::putAll);
 
     singleBeanInitialStates.put(pBeanId, new PersistentBeanData(-1, initialContent));
   }

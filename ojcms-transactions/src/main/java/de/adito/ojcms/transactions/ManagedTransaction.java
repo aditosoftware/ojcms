@@ -1,5 +1,6 @@
 package de.adito.ojcms.transactions;
 
+import de.adito.ojcms.beans.IBean;
 import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.transactions.annotations.TransactionalScoped;
 import de.adito.ojcms.transactions.api.*;
@@ -30,6 +31,7 @@ class ManagedTransaction implements ITransaction
 
   private final Map<String, Integer> containerSizes = new HashMap<>();
   private final Map<InitialIndexKey, PersistentBeanData> containerBeanData = new HashMap<>();
+  private final Map<InitialIndexKey, Class<? extends IBean>> beanTypesWithinContainer = new HashMap<>();
   private final Map<_RequestByIdentifiers, Optional<InitialIndexKey>> identifierRequestCache = new HashMap<>();
   private final Map<SingleBeanKey, PersistentBeanData> singleBeanData = new HashMap<>();
   private final Map<String, Map<Integer, PersistentBeanData>> fullContainerData = new HashMap<>();
@@ -57,6 +59,22 @@ class ManagedTransaction implements ITransaction
 
     final PersistentBeanData beanData = containerBeanData.computeIfAbsent(initialKey, loader::loadContainerBeanDataByIndex);
     return transactionalChanges.integrateContainerBeanChanges(initialKey, beanData);
+  }
+
+  @Override
+  public <BEAN extends IBean> Class<BEAN> requestBeanTypeWithinContainer(CurrentIndexKey pKey)
+  {
+    final InitialIndexKey initialKey = transactionalChanges.currentToInitialIndexKey(pKey);
+    overallTransactionalChanges.throwIfContainerBeanDirty(initialKey, transactionalChanges);
+
+    if (transactionalChanges.isAdded(pKey))
+      throw new IllegalStateException("Cannot request the type of a bean that has just been added within this transaction!");
+
+    if (transactionalChanges.isRemoved(initialKey))
+      throw new IllegalStateException("Cannot request the type of a bean that has been removed within this transaction!");
+
+    //noinspection unchecked
+    return (Class<BEAN>) beanTypesWithinContainer.computeIfAbsent(initialKey, loader::loadBeanTypeWithinContainer);
   }
 
   @Override
@@ -94,16 +112,16 @@ class ManagedTransaction implements ITransaction
     overallTransactionalChanges.throwIfContainerDirtyInSize(pContainerId, transactionalChanges);
     final Map<Integer, PersistentBeanData> fullData = fullContainerData.computeIfAbsent(pContainerId, loader::fullContainerLoad);
     //Integrate changes here as well
-    return fullData.entrySet().stream()
-        .collect(Collectors.toMap(Map.Entry::getKey, pEntry ->
-            transactionalChanges.integrateContainerBeanChanges(new InitialIndexKey(pContainerId, pEntry.getKey()), pEntry.getValue())));
+    return fullData.entrySet().stream() //
+        .collect(Collectors.toMap(Map.Entry::getKey, pEntry -> transactionalChanges
+            .integrateContainerBeanChanges(new InitialIndexKey(pContainerId, pEntry.getKey()), pEntry.getValue())));
   }
 
   @Override
-  public void registerBeanAddition(CurrentIndexKey pKey, Map<IField<?>, Object> pNewData)
+  public void registerBeanAddition(BeanAddition pBeanAddition)
   {
-    overallTransactionalChanges.throwIfContainerDirtyInSize(pKey.getContainerId(), transactionalChanges);
-    transactionalChanges.beanAdded(pKey, pNewData);
+    overallTransactionalChanges.throwIfContainerDirtyInSize(pBeanAddition.getContainerId(), transactionalChanges);
+    transactionalChanges.beanAdded(pBeanAddition);
   }
 
   @Override

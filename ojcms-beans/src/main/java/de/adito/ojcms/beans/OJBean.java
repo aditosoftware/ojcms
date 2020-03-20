@@ -96,9 +96,11 @@ public abstract class OJBean implements IBean
   private void _checkForDuplicateFields()
   {
     final Set<IField<?>> checker = new HashSet<>();
-    final List<IField<?>> duplicates = streamFields()
-        .filter(pField -> !checker.add(pField))
+
+    final List<IField<?>> duplicates = streamFields() //
+        .filter(pField -> !checker.add(pField)) //
         .collect(Collectors.toList());
+
     if (!duplicates.isEmpty())
       throw new BeanFieldDuplicateException(duplicates);
   }
@@ -106,8 +108,8 @@ public abstract class OJBean implements IBean
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "{" + stream()
-        .map(Objects::toString)
+    return getClass().getSimpleName() + "{" + stream() //
+        .map(Objects::toString) //
         .collect(Collectors.joining(", ")) + "}";
   }
 
@@ -118,12 +120,13 @@ public abstract class OJBean implements IBean
       return true;
     if (pOther == null || getClass() != pOther.getClass())
       return false;
+
     final Set<FieldValueTuple<?>> identifiers = getIdentifiers();
     if (identifiers.isEmpty())
       return false;
 
     final OJBean other = (OJBean) pOther;
-    return identifiers.stream()
+    return identifiers.stream() //
         .allMatch(pIdentifier -> Objects.equals(pIdentifier.getValue(), other.getValue(pIdentifier.getField())));
   }
 
@@ -131,8 +134,8 @@ public abstract class OJBean implements IBean
   public int hashCode()
   {
     final Set<FieldValueTuple<?>> identifiers = getIdentifiers();
-    return identifiers.isEmpty() ? super.hashCode() : Objects.hash(identifiers.stream()
-                                                                       .map(FieldValueTuple::getValue)
-                                                                       .toArray(Object[]::new));
+    return identifiers.isEmpty() ? super.hashCode() : Objects.hash(identifiers.stream() //
+        .map(FieldValueTuple::getValue) //
+        .toArray(Object[]::new));
   }
 }

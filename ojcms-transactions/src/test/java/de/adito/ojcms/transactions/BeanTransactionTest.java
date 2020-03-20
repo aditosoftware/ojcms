@@ -1,5 +1,6 @@
 package de.adito.ojcms.transactions;
 
+import de.adito.ojcms.beans.IBean;
 import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.cdi.*;
 import de.adito.ojcms.transactions.annotations.TransactionalScoped;
@@ -70,7 +71,7 @@ public class BeanTransactionTest extends AbstractCdiTest
   @Test
   public void testContainerBeanDataRequestByIdentifiers()
   {
-    final PersistentBeanData beanData = transaction.requestBeanDataByIdentifierTuples(CONTAINER_ID, Collections.emptyMap())
+    final PersistentBeanData beanData = transaction.requestBeanDataByIdentifierTuples(CONTAINER_ID, Collections.emptyMap()) //
         .orElseThrow(AssertionError::new);
     _checkBeanData(beanData);
   }
@@ -83,10 +84,33 @@ public class BeanTransactionTest extends AbstractCdiTest
   }
 
   @Test
+  public void testRequestBeanTypeWithinContainer_Added_Fails()
+  {
+    final CurrentIndexKey key = new CurrentIndexKey(CONTAINER_ID, 0);
+    _registerBeanAddition(0);
+    assertThrows(IllegalStateException.class, () -> transaction.requestBeanTypeWithinContainer(key));
+  }
+
+  @Test
+  public void testRequestBeanTypeWithinContainer_Removed_Fails()
+  {
+    transaction.registerBeanRemoval(new CurrentIndexKey(CONTAINER_ID, 4));
+    transaction.registerBeanRemoval(new CurrentIndexKey(CONTAINER_ID, 1));
+    assertThrows(IllegalStateException.class, () -> transaction.requestBeanTypeWithinContainer(new CurrentIndexKey(CONTAINER_ID, 3)));
+  }
+
+  @Test
+  public void testRequestBeanTypeWithinContainer()
+  {
+    final CurrentIndexKey key = new CurrentIndexKey(CONTAINER_ID, 0);
+    assertEquals(IBean.class, transaction.requestBeanTypeWithinContainer(key));
+  }
+
+  @Test
   public void testRequestContainerSizeAfterChangeInSameTransaction()
   {
-    transaction.registerBeanAddition(new CurrentIndexKey(CONTAINER_ID, 1), Collections.emptyMap());
-    transaction.registerBeanAddition(new CurrentIndexKey(CONTAINER_ID, 2), Collections.emptyMap());
+    _registerBeanAddition(1);
+    _registerBeanAddition(2);
     transaction.registerBeanRemoval(new CurrentIndexKey(CONTAINER_ID, 0));
 
     final int size = transaction.requestContainerSize(CONTAINER_ID);
@@ -125,7 +149,7 @@ public class BeanTransactionTest extends AbstractCdiTest
   @Test
   public void testAvoidConcurrentModificationMultipleTransactions()
   {
-    transaction.registerBeanAddition(new CurrentIndexKey(CONTAINER_ID, 1), Collections.emptyMap());
+    _registerBeanAddition(1);
     cdiControl.startContext(TransactionalScoped.class);
     assertThrows(ConcurrentTransactionException.class, () -> transaction.requestContainerSize(CONTAINER_ID));
   }
@@ -148,10 +172,15 @@ public class BeanTransactionTest extends AbstractCdiTest
 
   private void _registerChanges()
   {
-    transaction.registerBeanAddition(new CurrentIndexKey(CONTAINER_ID, 1), Collections.emptyMap());
+    _registerBeanAddition(1);
     transaction.registerBeanRemoval(new CurrentIndexKey(CONTAINER_ID, 1));
     transaction.registerContainerBeanValueChange(new CurrentIndexKey(CONTAINER_ID, 0), BEAN_FIELD, 6);
     transaction.registerSingleBeanValueChange(SINGLE_BEAN_KEY, BEAN_FIELD, 7);
+  }
+
+  private void _registerBeanAddition(int pIndex)
+  {
+    transaction.registerBeanAddition(new BeanAddition(pIndex, Collections.emptyMap(), IBean.class, CONTAINER_ID));
   }
 
   @Alternative
@@ -170,6 +199,13 @@ public class BeanTransactionTest extends AbstractCdiTest
     public PersistentBeanData loadContainerBeanDataByIndex(InitialIndexKey pKey)
     {
       return new PersistentBeanData(0, BEAN_DATA);
+    }
+
+    @Override
+    public <BEAN extends IBean> Class<BEAN> loadBeanTypeWithinContainer(InitialIndexKey pKey)
+    {
+      //noinspection unchecked
+      return (Class<BEAN>) IBean.class;
     }
 
     @Override

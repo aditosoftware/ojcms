@@ -1,5 +1,6 @@
 package de.adito.ojcms.transactions.spi;
 
+import de.adito.ojcms.beans.IBean;
 import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.transactions.api.*;
 
@@ -27,6 +28,15 @@ public interface IBeanDataLoader
    * @return the loaded bean data
    */
   PersistentBeanData loadContainerBeanDataByIndex(InitialIndexKey pKey);
+
+  /**
+   * Loads the type of a bean within a container at a specific index.
+   * This may be necessary if the type of the container is a bean base type and the actual types are persisted in the storage system.
+   *
+   * @param pKey the index based key to identify the bean to load the type for
+   * @return the requested bean type
+   */
+  <BEAN extends IBean> Class<BEAN> loadBeanTypeWithinContainer(InitialIndexKey pKey);
 
   /**
    * Loads persistent data for a bean within a container by identifying field values tuples.

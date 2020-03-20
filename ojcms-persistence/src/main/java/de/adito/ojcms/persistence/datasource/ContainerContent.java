@@ -6,6 +6,7 @@ import de.adito.ojcms.beans.literals.fields.util.FieldValueTuple;
 import de.adito.ojcms.transactions.api.*;
 import de.adito.ojcms.utils.StringUtility;
 import de.adito.ojcms.utils.collections.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -30,13 +31,13 @@ class ContainerContent<BEAN extends IBean>
    * Initializes the container content.
    *
    * @param pContainerId the id of the persistent container the content belongs to
-   * @param pBeanType    the bean type of the container
+   * @param pBeanType    the bean type of the container if available (might not be if the content is for a base container)
    * @param pTransaction the transaction the content is associated with
    */
-  ContainerContent(String pContainerId, Class<BEAN> pBeanType, ITransaction pTransaction)
+  ContainerContent(String pContainerId, @Nullable Class<BEAN> pBeanType, ITransaction pTransaction)
   {
     containerId = StringUtility.requireNotEmpty(pContainerId, "container id");
-    beanType = Objects.requireNonNull(pBeanType);
+    beanType = pBeanType;
     transaction = Objects.requireNonNull(pTransaction);
   }
 
@@ -90,8 +91,15 @@ class ContainerContent<BEAN extends IBean>
   {
     _checkIndex(pIndex);
 
-    final BEAN removedBean = content.removeAtIndex(pIndex)
-        .orElseGet(() -> newPersistentBeanInstance(beanType, new PersistentBeanDatasource(_beanContentForIndex(pIndex))))
+    final BEAN removedBean = content.removeAtIndex(pIndex) //
+        .orElseGet(() ->
+        {
+          //Request bean data if not present yet
+          final BeanContentForContainer beanContent = _beanContentForIndex(pIndex);
+          //noinspection unchecked
+          final Class<BEAN> beanType = beanContent.getBeanType();
+          return newPersistentBeanInstance(beanType, new PersistentBeanDatasource(beanContent));
+        }) //
         .useDefaultEncapsulatedDataSource();
 
     transaction.registerBeanRemoval(_indexKey(pIndex));
@@ -111,7 +119,7 @@ class ContainerContent<BEAN extends IBean>
     if (index == -1)
       return false;
 
-    content.removeElement(pBean);
+    content.removeAtIndex(index);
     pBean.useDefaultEncapsulatedDataSource();
     transaction.registerBeanRemoval(_indexKey(index));
     return true;
@@ -125,9 +133,9 @@ class ContainerContent<BEAN extends IBean>
    */
   void addBean(BEAN pBean, int pIndex)
   {
-    pBean.setEncapsulatedDataSource(new PersistentBeanDatasource(_beanContentForIndexAndContent(pIndex, pBean.toMap())));
+    pBean.setEncapsulatedDataSource(new PersistentBeanDatasource(_beanContentForIndexAndContent(pIndex, pBean.getClass(), pBean.toMap())));
     content.addAtIndex(pBean, pIndex);
-    transaction.registerBeanAddition(_indexKey(pIndex), pBean.toMap());
+    transaction.registerBeanAddition(new BeanAddition(pIndex, pBean.toMap(), pBean.getClass(), containerId));
   }
 
   /**
@@ -139,10 +147,12 @@ class ContainerContent<BEAN extends IBean>
     if (_isFullyLoaded())
       return;
 
-    transaction.requestFullContainerLoad(containerId).entrySet().stream()
-        .filter(pEntry -> !content.containsIndex(pEntry.getKey()))
-        .forEach(pEntry -> _getOrCreateBean(pEntry.getKey(), () ->
-            _beanContentForIndexAndContent(pEntry.getKey(), pEntry.getValue().getData())));
+    transaction.requestFullContainerLoad(containerId) //
+        .entrySet().stream() //
+        .filter(pEntry -> !content.containsIndex(pEntry.getKey())) //
+        .forEach(pEntry -> _getOrCreateBean(pEntry.getKey(), () -> beanType == null ? //
+            _beanContentForIndexAndContent(pEntry.getKey(), pEntry.getValue().getData()) : //
+            _beanContentForIndexAndContent(pEntry.getKey(), beanType, pEntry.getValue().getData())));
   }
 
   /**
@@ -153,8 +163,8 @@ class ContainerContent<BEAN extends IBean>
    */
   private OptionalInt _loadIndexOfBean(BEAN pBean)
   {
-    final Map<IField<?>, Object> identifiers = pBean.getIdentifiers().stream()
-        .collect(Collectors.toMap(FieldValueTuple::getField, FieldValueTuple::getValue));
+    final Map<IField<?>, Object> identifiers = pBean.getIdentifiers().stream().collect(
+        Collectors.toMap(FieldValueTuple::getField, FieldValueTuple::getValue));
 
     final Optional<PersistentBeanData> beanData = transaction.requestBeanDataByIdentifierTuples(containerId, identifiers);
 
@@ -163,7 +173,7 @@ class ContainerContent<BEAN extends IBean>
 
     final int index = beanData.get().getIndex();
     //Add bean to the content map if we requested the data anyway
-    _getOrCreateBean(index, () -> _beanContentForIndexAndContent(index, beanData.get().getData()));
+    _getOrCreateBean(index, () -> _beanContentForIndexAndContent(index, pBean.getClass(), beanData.get().getData()));
 
     return OptionalInt.of(index);
   }
@@ -178,7 +188,12 @@ class ContainerContent<BEAN extends IBean>
   private BEAN _getOrCreateBean(int pIndex, Supplier<AbstractBeanContent> pBeanContentCreator)
   {
     return content.computeIfAbsent(pIndex, index ->
-        newPersistentBeanInstance(beanType, new PersistentBeanDatasource(pBeanContentCreator.get())));
+    {
+      final AbstractBeanContent beanContent = pBeanContentCreator.get();
+      //noinspection unchecked
+      final Class<BEAN> beanType = beanContent.getBeanType();
+      return newPersistentBeanInstance(beanType, new PersistentBeanDatasource(pBeanContentCreator.get()));
+    });
   }
 
   /**
@@ -214,11 +229,15 @@ class ContainerContent<BEAN extends IBean>
    */
   private BeanContentForContainer _beanContentForIndex(int pIndex)
   {
-    return new BeanContentForContainer(_indexKey(pIndex), transaction);
+    final CurrentIndexKey indexKey = _indexKey(pIndex);
+    return Optional.ofNullable(beanType) //
+        .map(pBeanType -> new BeanContentForContainer<>(indexKey, pBeanType, transaction)) //
+        .orElseGet(() -> new BeanContentForContainer<>(indexKey, transaction));
   }
 
   /**
    * Creates an instance of {@link BeanContentForContainer} that is based on a {@link CurrentIndexKey} with a given content.
+   * This variant will request the bean type the content is for from the {@link ITransaction}
    *
    * @param pIndex   the index the bean to create the instance for is located within the bean container
    * @param pContent the preset content for the instance to create
@@ -226,7 +245,21 @@ class ContainerContent<BEAN extends IBean>
    */
   private BeanContentForContainer _beanContentForIndexAndContent(int pIndex, Map<IField<?>, Object> pContent)
   {
-    return new BeanContentForContainer(_indexKey(pIndex), transaction, pContent);
+    return new BeanContentForContainer<>(_indexKey(pIndex), transaction, pContent);
+  }
+
+  /**
+   * Creates an instance of {@link BeanContentForContainer} that is based on a {@link CurrentIndexKey} with a given content.
+   *
+   * @param pIndex    the index the bean to create the instance for is located within the bean container
+   * @param pBeanType the type of the bean the content is for
+   * @param pContent  the preset content for the instance to create
+   * @return the created bean content by index
+   */
+  private BeanContentForContainer _beanContentForIndexAndContent(int pIndex, Class<? extends IBean> pBeanType,
+                                                                 Map<IField<?>, Object> pContent)
+  {
+    return new BeanContentForContainer<>(_indexKey(pIndex), pBeanType, transaction, pContent);
   }
 
   /**

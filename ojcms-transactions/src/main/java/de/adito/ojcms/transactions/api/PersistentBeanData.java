@@ -9,7 +9,7 @@ import java.util.*;
  *
  * @author Simon Danner, 27.12.2019
  */
-public final class PersistentBeanData
+public class PersistentBeanData
 {
   private final int index;
   private final Map<IField<?>, Object> data;
@@ -84,9 +84,9 @@ public final class PersistentBeanData
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "{" +
-        "index=" + index +
-        ", data=" + data +
+    return getClass().getSimpleName() + "{" + //
+        "index=" + index + //
+        ", data=" + data + //
         '}';
   }
 }

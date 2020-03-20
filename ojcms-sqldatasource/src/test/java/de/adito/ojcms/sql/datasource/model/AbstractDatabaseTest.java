@@ -17,6 +17,8 @@ import javax.enterprise.inject.Alternative;
 import javax.inject.Inject;
 import java.util.*;
 
+import static java.util.Collections.singleton;
+
 /**
  * Base class for database tests. This test uses an in-memory database to improve performance.
  * Every actual test class has to provide a {@link IPersistenceModel} type for which a database table will be created.
@@ -70,11 +72,24 @@ public abstract class AbstractDatabaseTest<MODEL extends IPersistenceModel> exte
   protected PersistentBeanData addContentToContainer(int pIndex, int pFirstValue, String pSecondValue, boolean pThirdValue)
   {
     final SomeBean bean = new SomeBean(pFirstValue, pSecondValue, pThirdValue);
-    final PersistentBeanData persistentData = new PersistentBeanData(pIndex, bean.toMap());
-    final Set<PersistentBeanData> newData = Collections.singleton(persistentData);
+    final Set<BeanAddition> additions = singleton(new BeanAddition(pIndex, bean.toMap(), SomeBean.class, CONTAINER_ID));
+    storage.processAdditionsForContainer(CONTAINER_ID, additions);
+    return new PersistentBeanData(pIndex, bean.toMap());
+  }
 
-    storage.processAdditionsForContainer(CONTAINER_ID, newData);
-    return persistentData;
+  /**
+   * Adds a sub type of {@link SomeBean} to the persistent base bean container.
+   * Only possible if the model type is assignable from {@link BaseContainerPersistenceModel}.
+   *
+   * @param pIndex    the index to add the bean at
+   * @param pBaseBean the sub type bean instance to add
+   * @return the persistent bean data of the added bean
+   */
+  protected PersistentBeanData addContentToBaseContainer(int pIndex, SomeBean pBaseBean)
+  {
+    final Set<BeanAddition> additions = singleton(new BeanAddition(pIndex, pBaseBean.toMap(), pBaseBean.getClass(), CONTAINER_ID));
+    storage.processAdditionsForContainer(CONTAINER_ID, additions);
+    return new PersistentBeanData(pIndex, pBaseBean.toMap());
   }
 
   /**
@@ -119,6 +134,12 @@ public abstract class AbstractDatabaseTest<MODEL extends IPersistenceModel> exte
     if (modelType == ContainerPersistenceModel.class)
       //noinspection unchecked
       return (MODEL) new ContainerPersistenceModel(CONTAINER_ID, SomeBean.class);
+    else if (modelType == BaseContainerPersistenceModel.class)
+    {
+      final Set<Class<? extends IBean>> subTypes = new HashSet<>(Arrays.asList(SomeOtherBean.class, SomeSpecialBean.class));
+      //noinspection unchecked
+      return (MODEL) new BaseContainerPersistenceModel(CONTAINER_ID, subTypes);
+    }
     else if (modelType == SingleBeanPersistenceModel.class)
     {
       SingleBeanPersistenceModel.createSingleBeanTableIfNecessary(builder);
@@ -145,6 +166,34 @@ public abstract class AbstractDatabaseTest<MODEL extends IPersistenceModel> exte
       setValue(FIELD1, pValue1);
       setValue(FIELD2, pValue2);
       setValue(FIELD3, pValue3);
+    }
+  }
+
+  /**
+   * Some other bean extending {@link SomeBean}.
+   */
+  public static class SomeOtherBean extends SomeBean
+  {
+    public static final IntegerField FIELD4 = OJFields.create(SomeOtherBean.class);
+
+    SomeOtherBean(int pValue1, String pValue2, boolean pValue3, int pValue4)
+    {
+      super(pValue1, pValue2, pValue3);
+      setValue(FIELD4, pValue4);
+    }
+  }
+
+  /**
+   * Some very special bean extending {@link SomeOtherBean}.
+   */
+  public static class SomeSpecialBean extends SomeOtherBean
+  {
+    public static final TextField FIELD5 = OJFields.create(SomeSpecialBean.class);
+
+    SomeSpecialBean(int pValue1, String pValue2, boolean pValue3, int pValue4, String pValue5)
+    {
+      super(pValue1, pValue2, pValue3, pValue4);
+      setValue(FIELD5, pValue5);
     }
   }
 

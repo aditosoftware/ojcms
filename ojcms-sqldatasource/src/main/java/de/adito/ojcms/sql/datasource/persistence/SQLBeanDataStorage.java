@@ -36,6 +36,12 @@ public class SQLBeanDataStorage implements IBeanDataStorage
   }
 
   @Override
+  public void registerPersistentBaseTypeContainer(String pContainerId, Set<Class<? extends IBean>> pSubTypes)
+  {
+    models.registerPersistentBaseContainer(pSubTypes, pContainerId);
+  }
+
+  @Override
   public void registerPersistentSingleBean(Class<? extends IBean> pBeanType, String pBeanId)
   {
     models.registerPersistentSingleBean(pBeanType, pBeanId);
@@ -54,16 +60,16 @@ public class SQLBeanDataStorage implements IBeanDataStorage
   }
 
   @Override
-  public void processAdditionsForContainer(String pContainerId, Set<PersistentBeanData> pNewBeans)
+  public void processAdditionsForContainer(String pContainerId, Set<BeanAddition> pBeanAdditions)
   {
-    models.getContainerPersistenceModel(pContainerId).processAdditions(pNewBeans, builder);
+    models.getContainerPersistenceModel(pContainerId).processAdditions(pBeanAdditions, builder);
   }
 
   @Override
   public void processRemovals(Map<String, Set<InitialIndexKey>> pKeysToRemoveByContainer)
   {
-    pKeysToRemoveByContainer.forEach((pContainerId, pRemovedKeys) ->
-                                         models.getContainerPersistenceModel(pContainerId).processRemovals(pRemovedKeys, builder));
+    pKeysToRemoveByContainer //
+        .forEach((pContainerId, pRemovedKeys) -> models.getContainerPersistenceModel(pContainerId).processRemovals(pRemovedKeys, builder));
   }
 
   @Override

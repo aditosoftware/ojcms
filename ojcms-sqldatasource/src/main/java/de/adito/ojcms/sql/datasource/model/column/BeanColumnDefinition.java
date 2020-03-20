@@ -5,7 +5,8 @@ import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.beans.literals.fields.util.IBeanFieldBased;
 import de.adito.ojcms.sqlbuilder.definition.column.*;
 
-import java.util.Collection;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A database column definition based on a bean field.
@@ -26,7 +27,7 @@ public class BeanColumnDefinition<VALUE> implements IColumnDefinition, IBeanFiel
   public BeanColumnDefinition(IField<VALUE> pBeanField)
   {
     beanField = pBeanField;
-    columnType = EColumnType.getByDataType(pBeanField.getDataType())
+    columnType = EColumnType.getByDataType(pBeanField.getDataType()) //
         .orElse(EColumnType.STRING.create());
 
     if (beanField.hasAnnotation(Identifier.class))
@@ -57,15 +58,25 @@ public class BeanColumnDefinition<VALUE> implements IColumnDefinition, IBeanFiel
   }
 
   /**
-   * Creates an array of column definitions from a collection of bean fields.
+   * Creates a new {@link BeanColumnIdentification} for this column definition.
+   *
+   * @return the newly created column identification based on the bean field of this column
+   */
+  public BeanColumnIdentification<VALUE> toColumnIdentification()
+  {
+    return new BeanColumnIdentification<>(beanField);
+  }
+
+  /**
+   * Creates a set of column definitions from a collection of bean fields.
    *
    * @param pBeanFields the bean fields to create the array from
-   * @return an array of columns definitions
+   * @return a set of columns definitions
    */
-  public static BeanColumnDefinition<?>[] ofFields(Collection<IField<?>> pBeanFields)
+  public static Set<BeanColumnDefinition<?>> ofFields(Collection<IField<?>> pBeanFields)
   {
-    return pBeanFields.stream()
-        .map(BeanColumnDefinition::new)
-        .toArray(BeanColumnDefinition<?>[]::new);
+    return pBeanFields.stream() //
+        .map(BeanColumnDefinition::new) //
+        .collect(Collectors.toSet());
   }
 }

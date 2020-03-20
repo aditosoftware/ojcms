@@ -8,8 +8,7 @@ import de.adito.ojcms.transactions.spi.IBeanDataStorage;
 import javax.annotation.*;
 import javax.inject.Inject;
 import java.util.*;
-
-import static java.util.stream.Collectors.toSet;
+import java.util.stream.Collectors;
 
 /**
  * Manages bean related changes for a single transaction.
@@ -25,7 +24,7 @@ class TransactionalChanges
   private IBeanDataStorage storage;
 
   //Containers
-  private final Map<String, Set<_BeanAddition>> additionsByContainer = new HashMap<>();
+  private final Map<String, Set<_VariableBeanAddition>> additionsByContainer = new HashMap<>();
   private final Map<String, Set<InitialIndexKey>> removalsByContainer = new HashMap<>();
   private final Map<InitialIndexKey, Map<IField<?>, Object>> changedContainerValuesByContainer = new HashMap<>();
   //Single beans
@@ -56,8 +55,8 @@ class TransactionalChanges
    */
   PersistentBeanData integrateContainerBeanChanges(InitialIndexKey pKey, PersistentBeanData pInitialData)
   {
-    final PersistentBeanData beanData = Optional.ofNullable(changedContainerValuesByContainer.get(pKey))
-        .map(pInitialData::integrateChanges)
+    final PersistentBeanData beanData = Optional.ofNullable(changedContainerValuesByContainer.get(pKey)) //
+        .map(pInitialData::integrateChanges) //
         .orElse(pInitialData);
 
     final int currentIndex = initialToCurrentIndexKey(pKey).getIndex();
@@ -73,8 +72,8 @@ class TransactionalChanges
    */
   PersistentBeanData integrateSingleBeanChanges(SingleBeanKey pKey, PersistentBeanData pInitialData)
   {
-    return Optional.ofNullable(changedSingleBeanValues.get(pKey))
-        .map(pInitialData::integrateChanges)
+    return Optional.ofNullable(changedSingleBeanValues.get(pKey)) //
+        .map(pInitialData::integrateChanges) //
         .orElse(pInitialData);
   }
 
@@ -121,7 +120,7 @@ class TransactionalChanges
    */
   boolean isContainerDirtyInSize(String pContainerId)
   {
-    return additionsByContainer.containsKey(pContainerId) && !additionsByContainer.get(pContainerId).isEmpty() ||
+    return additionsByContainer.containsKey(pContainerId) && !additionsByContainer.get(pContainerId).isEmpty() || //
         removalsByContainer.containsKey(pContainerId) && !removalsByContainer.get(pContainerId).isEmpty();
   }
 
@@ -156,8 +155,8 @@ class TransactionalChanges
   boolean isAdded(CurrentIndexKey pKey)
   {
     final String containerId = pKey.getContainerId();
-    return additionsByContainer.containsKey(containerId) &&
-        additionsByContainer.get(containerId).contains(new _BeanAddition(pKey.getIndex()));
+    return additionsByContainer.containsKey(containerId) && //
+        additionsByContainer.get(containerId).contains(new _VariableBeanAddition(pKey.getIndex()));
   }
 
   /**
@@ -175,21 +174,19 @@ class TransactionalChanges
   /**
    * Notifies the change manager that a bean has been added to a container.
    *
-   * @param pCurrentKey the current index based key the bean has been added for
-   * @param pBeanData   the data of the added bean
+   * @param pBeanAddition data describing the addition
    */
-  void beanAdded(CurrentIndexKey pCurrentKey, Map<IField<?>, Object> pBeanData)
+  void beanAdded(BeanAddition pBeanAddition)
   {
-    final int index = pCurrentKey.getIndex();
-    final String containerId = pCurrentKey.getContainerId();
-    final PersistentBeanData newBeanData = new PersistentBeanData(index, pBeanData);
-    final _BeanAddition addition = new _BeanAddition(newBeanData.getData(), index);
-    final Set<_BeanAddition> additionsForContainer = additionsByContainer.computeIfAbsent(containerId, pId -> new HashSet<>());
+    final int index = pBeanAddition.getIndex();
+    final String containerId = pBeanAddition.getContainerId();
+    final _VariableBeanAddition addition = new _VariableBeanAddition(pBeanAddition);
+    final Set<_VariableBeanAddition> additionsForContainer = additionsByContainer.computeIfAbsent(containerId, pId -> new HashSet<>());
 
     //Adapt indexes of prior additions for the same and the indexes above
-    additionsForContainer.stream()
-        .filter(pAddition -> pAddition.getIndex() >= index)
-        .forEach(_BeanAddition::incrementIndex);
+    additionsForContainer.stream() //
+        .filter(pAddition -> pAddition.getIndex() >= index) //
+        .forEach(_VariableBeanAddition::incrementIndex);
 
     additionsForContainer.add(addition);
   }
@@ -203,12 +200,11 @@ class TransactionalChanges
   {
     if (isAdded(pCurrentKey)) //If the bean has been added in the same transaction, just removed the change again
     {
-      final Set<_BeanAddition> additionsOfContainer = additionsByContainer.get(pCurrentKey.getContainerId());
-      additionsOfContainer.remove(new _BeanAddition(pCurrentKey.getIndex()));
+      final Set<_VariableBeanAddition> additionsOfContainer = additionsByContainer.get(pCurrentKey.getContainerId());
+      additionsOfContainer.remove(new _VariableBeanAddition(pCurrentKey.getIndex()));
       //Adapt keys of additions
-      additionsOfContainer.stream()
-          .filter(pAddition -> pAddition.getIndex() > pCurrentKey.getIndex())
-          .forEach(_BeanAddition::decrementIndex);
+      additionsOfContainer.stream().filter(pAddition -> pAddition.getIndex() > pCurrentKey.getIndex()) //
+          .forEach(_VariableBeanAddition::decrementIndex);
     }
     else
     {
@@ -229,20 +225,20 @@ class TransactionalChanges
   {
     if (isAdded(pCurrentKey))
     {
-      final _BeanAddition addition = additionsByContainer.get(pCurrentKey.getContainerId()).stream()
+      final _VariableBeanAddition addition = additionsByContainer.get(pCurrentKey.getContainerId()).stream() //
           .filter(pBeanAddition -> pBeanAddition.getIndex() == pCurrentKey.getIndex()) //
-          .findAny()
+          .findAny() //
           .orElseThrow(AssertionError::new);
 
       //Add changed value to addition data
-      addition.beanData.put(pChangedField, pNewValue);
+      addition.getContent().put(pChangedField, pNewValue);
     }
     else
     {
       final InitialIndexKey changedInitialKey = currentToInitialIndexKey(pCurrentKey);
       if (isRemoved(changedInitialKey))
-        throw new IllegalArgumentException("Cannot register change! Bean data for initial key " + changedInitialKey + " has been removed" +
-                                               " within this transaction!");
+        throw new IllegalArgumentException(
+            "Cannot register change! Bean data for initial key " + changedInitialKey + " has been removed" + " within this transaction!");
 
       changedContainerValuesByContainer.computeIfAbsent(changedInitialKey, pChangeKey -> new HashMap<>()).put(pChangedField, pNewValue);
     }
@@ -268,9 +264,9 @@ class TransactionalChanges
   {
     //The order is very important here: removals first, then additions and value changes at the end
     storage.processRemovals(removalsByContainer);
-    additionsByContainer.forEach((pContainerId, pData) -> storage.processAdditionsForContainer(pContainerId, pData.stream()
-        .map(_BeanAddition::toPersistentData)
-        .collect(toSet())));
+    additionsByContainer.forEach((pContainerId, pAddition) -> storage.processAdditionsForContainer(pContainerId, pAddition.stream() //
+        .map(_VariableBeanAddition::toBeanAdditionWithNewIndex) //
+        .collect(Collectors.toSet())));
 
     changedContainerValuesByContainer.forEach((pKey, pValues) -> storage.processChangesForContainerBean(pKey, pValues));
     changedSingleBeanValues.forEach((pKey, pValues) -> storage.processChangesForSingleBean(pKey, pValues));
@@ -285,10 +281,9 @@ class TransactionalChanges
    */
   private int _countAdditionsBeforeIndex(String pContainerId, int pIndex)
   {
-    return !additionsByContainer.containsKey(pContainerId) ? 0 : (int) additionsByContainer.get(pContainerId)
-        .stream()
-        .mapToInt(_BeanAddition::getIndex)
-        .filter(pAddedIndex -> pAddedIndex < pIndex)
+    return !additionsByContainer.containsKey(pContainerId) ? 0 : (int) additionsByContainer.get(pContainerId).stream() //
+        .mapToInt(_VariableBeanAddition::getIndex) //
+        .filter(pAddedIndex -> pAddedIndex < pIndex) //
         .count();
   }
 
@@ -301,10 +296,9 @@ class TransactionalChanges
    */
   private int _countRemovalsBeforeAndAtIndex(String pContainerId, int pIndex)
   {
-    return !removalsByContainer.containsKey(pContainerId) ? 0 : (int) removalsByContainer.get(pContainerId)
-        .stream()
-        .mapToInt(InitialIndexKey::getIndex)
-        .filter(pRemovedIndex -> pRemovedIndex <= pIndex)
+    return !removalsByContainer.containsKey(pContainerId) ? 0 : (int) removalsByContainer.get(pContainerId).stream() //
+        .mapToInt(InitialIndexKey::getIndex) //
+        .filter(pRemovedIndex -> pRemovedIndex <= pIndex) //
         .count();
   }
 
@@ -316,8 +310,8 @@ class TransactionalChanges
    */
   private int _countIfNotNull(Set<?> pAnySet)
   {
-    return Optional.ofNullable(pAnySet)
-        .map(Set::size)
+    return Optional.ofNullable(pAnySet) //
+        .map(Set::size) //
         .orElse(0);
   }
 
@@ -343,9 +337,10 @@ class TransactionalChanges
    * Describes the addition of a bean within the transaction.
    * The index of added beans may be adapted within the transaction if beans get added or removed later on.
    */
-  private static class _BeanAddition
+  private static class _VariableBeanAddition
   {
-    private final Map<IField<?>, Object> beanData;
+    private final BeanAddition original;
+    private final Map<IField<?>, Object> content;
     private int index;
 
     /**
@@ -353,31 +348,42 @@ class TransactionalChanges
      *
      * @param pIndex the index for the bean addition
      */
-    _BeanAddition(int pIndex)
+    _VariableBeanAddition(int pIndex)
     {
-      this(Collections.emptyMap(), pIndex);
-    }
-
-    /**
-     * Creates a new bean addition for given data and at a given index.
-     *
-     * @param pBeanData the data of the added bean
-     * @param pIndex    the index at which the bean has been added
-     */
-    _BeanAddition(Map<IField<?>, Object> pBeanData, int pIndex)
-    {
-      beanData = Objects.requireNonNull(pBeanData, "Bean data is required!");
+      original = null;
+      content = null;
       index = pIndex;
     }
 
     /**
-     * Converts the addition description to a {@link PersistentBeanData}.
+     * Creates a new bean addition for given type, data and index.
      *
-     * @return the created persistent bean data instance
+     * @param pBeanAddition data describing the addition
      */
-    PersistentBeanData toPersistentData()
+    _VariableBeanAddition(BeanAddition pBeanAddition)
     {
-      return new PersistentBeanData(index, beanData);
+      original = pBeanAddition;
+      content = pBeanAddition.getData();
+      index = pBeanAddition.getIndex();
+    }
+
+    /**
+     * Return either the original {@link BeanAddition} if the index didn't change or creates a copy with the new index.
+     *
+     * @return the bean addition with a potential adapted index
+     */
+    BeanAddition toBeanAdditionWithNewIndex()
+    {
+      return original.getIndex() == index && original.getData().equals(content) ? original : //
+          new BeanAddition(index, content, original.getBeanType(), original.getContainerId());
+    }
+
+    /**
+     * The content of the added bean.
+     */
+    Map<IField<?>, Object> getContent()
+    {
+      return content;
     }
 
     /**
@@ -412,7 +418,7 @@ class TransactionalChanges
       if (pOther == null || getClass() != pOther.getClass())
         return false;
 
-      final _BeanAddition that = (_BeanAddition) pOther;
+      final _VariableBeanAddition that = (_VariableBeanAddition) pOther;
       return index == that.index;
     }
 
