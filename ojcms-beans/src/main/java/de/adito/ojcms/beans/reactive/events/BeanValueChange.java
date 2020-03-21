@@ -23,7 +23,7 @@ public final class BeanValueChange<VALUE> extends AbstractFieldBasedChangeEvent<
    * @param pOldValue the old value of the field
    * @param pNewValue the new changed value
    */
-  public BeanValueChange(IBean pSource, IField<VALUE> pField, VALUE pOldValue, VALUE pNewValue)
+  public BeanValueChange(IBean pSource, IField<? extends VALUE> pField, VALUE pOldValue, VALUE pNewValue)
   {
     super(pSource, pField);
     oldValue = pOldValue;

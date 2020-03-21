@@ -50,7 +50,7 @@ class EncapsulatedBeanData extends AbstractEncapsulatedData<FieldValueTuple<?>, 
   }
 
   @Override
-  public <VALUE> void setValue(IField<VALUE> pField, VALUE pValue)
+  public <VALUE> void setValue(IField<? extends VALUE> pField, VALUE pValue)
   {
     _ifFieldExists(pField, pCheckedField ->
     {

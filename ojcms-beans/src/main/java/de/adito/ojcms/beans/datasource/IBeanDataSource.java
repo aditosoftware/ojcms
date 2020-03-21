@@ -27,7 +27,7 @@ public interface IBeanDataSource extends IDataSource
    * @param pAllowNewField <tt>true</tt>, if a new field should be created, if it isn't existing
    * @param <VALUE>        the data type of the field
    */
-  <VALUE> void setValue(IField<VALUE> pField, VALUE pValue, boolean pAllowNewField);
+  <VALUE> void setValue(IField<? extends VALUE> pField, VALUE pValue, boolean pAllowNewField);
 
   /**
    * Removes a bean field.

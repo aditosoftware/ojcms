@@ -13,7 +13,7 @@ import de.adito.ojcms.beans.literals.fields.IField;
 public abstract class AbstractFieldBasedChangeEvent<VALUE, EVENT extends AbstractFieldBasedChangeEvent<VALUE, EVENT>>
     extends AbstractChangeEvent<IBean, EVENT>
 {
-  private final IField<VALUE> field;
+  private final IField<? extends VALUE> field;
 
   /**
    * Creates field based change event.
@@ -21,7 +21,7 @@ public abstract class AbstractFieldBasedChangeEvent<VALUE, EVENT extends Abstrac
    * @param pSource the bean that is the source which triggered this event
    * @param pField  the field associated with the change
    */
-  protected AbstractFieldBasedChangeEvent(IBean pSource, IField<VALUE> pField)
+  protected AbstractFieldBasedChangeEvent(IBean pSource, IField<? extends VALUE> pField)
   {
     super(pSource);
     field = pField;
@@ -32,7 +32,7 @@ public abstract class AbstractFieldBasedChangeEvent<VALUE, EVENT extends Abstrac
    *
    * @return the associated bean field
    */
-  public IField<VALUE> getField()
+  public IField<? extends VALUE> getField()
   {
     return field;
   }
