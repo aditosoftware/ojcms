@@ -97,7 +97,7 @@ public class BeanSQLSerializer extends DefaultValueSerializer
    */
   private static <VALUE> String _notSerializableMessage(IField<VALUE> pField, boolean pToSerial)
   {
-    return "Unable to " + (pToSerial ? "persist" : "read") + " the value of the bean field " + pField.getName() +
-        " with type " + pField.getDataType() + "! The field must either be a reference or serializable field!";
+    return "Unable to " + (pToSerial ? "persist" : "read") + " the value of the bean field " + pField.getName() + " with type " + pField
+        .getDataType() + "! The field must either be a reference or serializable field!";
   }
 }

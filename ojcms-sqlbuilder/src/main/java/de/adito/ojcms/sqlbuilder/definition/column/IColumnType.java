@@ -25,9 +25,10 @@ public interface IColumnType extends IStatementFormat, Iterable<EColumnModifier>
   @Override
   default String toStatementFormat(IDatabasePlatform pPlatform, String pIdColumnName)
   {
-    final String modifiers = streamModifiers()
-        .map(pModifier -> pModifier.toStatementFormat(pPlatform, pIdColumnName))
+    final String modifiers = streamModifiers() //
+        .map(pModifier -> pModifier.toStatementFormat(pPlatform, pIdColumnName)) //
         .collect(Collectors.joining(" "));
+
     return pPlatform.columnTypeToStatementFormat(this) + (modifiers.isEmpty() ? "" : " " + modifiers);
   }
 

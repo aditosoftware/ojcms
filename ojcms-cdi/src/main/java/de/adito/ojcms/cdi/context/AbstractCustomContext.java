@@ -101,8 +101,8 @@ public abstract class AbstractCustomContext implements Context
     <T> T get(Contextual<T> pContextual)
     {
       //noinspection unchecked
-      return Optional.ofNullable(instances.get(pContextual))
-          .map(pContextualInstance -> (T) pContextualInstance.instance)
+      return Optional.ofNullable(instances.get(pContextual)) //
+          .map(pContextualInstance -> (T) pContextualInstance.instance) //
           .orElse(null);
     }
 

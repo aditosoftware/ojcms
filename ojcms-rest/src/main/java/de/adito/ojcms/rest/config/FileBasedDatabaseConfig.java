@@ -70,8 +70,8 @@ class FileBasedDatabaseConfig implements IDatabaseConfig
   private static boolean _resolveEmbedded(Properties pProperties)
   {
     final String embedded = _loadProperty(KEY_EMBEDDED, pProperties, false);
-    return Optional.ofNullable(embedded)
-        .map(pValue -> Boolean.parseBoolean(embedded))
+    return Optional.ofNullable(embedded) //
+        .map(pValue -> Boolean.parseBoolean(embedded)) //
         .orElse(false);
   }
 

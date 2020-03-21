@@ -17,9 +17,10 @@ public class BeanFieldCreationException extends OJRuntimeException
    */
   public BeanFieldCreationException(Class<? extends IBean> pBeanType)
   {
-    super("Unable to create field. There are no static field or all of them are initialized already. " +
-              "bean-type: " + pBeanType.getName() + ". Check the class type given to the field factory! " +
-              "It must be the same as the type containing the bean field to create.");
+    super(
+        "Unable to create field. There are no static field or all of them are initialized already. " + "bean-type: " + pBeanType.getName() +
+            ". Check the class type given to the field factory! " + "It must be the same as the type containing the bean field " +
+            "to create.");
   }
 
   /**

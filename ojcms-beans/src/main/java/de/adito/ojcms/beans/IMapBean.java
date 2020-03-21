@@ -51,6 +51,7 @@ public interface IMapBean<KEY, VALUE> extends Map<KEY, VALUE>, IBean
   {
     if (!(pOriginalMapBean instanceof MapBean))
       throw new OJRuntimeException("Only map beans created by this interface can be used for copying!");
+
     return new MapBean<>((MapBean<KEY, VALUE>) pOriginalMapBean);
   }
 

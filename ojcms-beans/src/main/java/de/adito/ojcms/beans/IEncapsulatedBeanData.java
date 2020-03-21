@@ -109,7 +109,7 @@ interface IEncapsulatedBeanData extends IEncapsulatedData<FieldValueTuple<?>, IB
    */
   default <VALUE> boolean containsField(IField<VALUE> pField)
   {
-    return streamFields()
+    return streamFields() //
         .anyMatch(pExistingBean -> pExistingBean == pField); //Compare references because of the static definition of bean fields
   }
 }

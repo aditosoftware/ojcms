@@ -64,9 +64,9 @@ public class WeakInputSortedContainer<ELEMENT> implements IInputSortedElements<E
   @Override
   public Iterator<ELEMENT> iterator()
   {
-    return content.entrySet().stream()
-        .sorted(Map.Entry.comparingByValue())
-        .map(Map.Entry::getKey)
+    return content.entrySet().stream() //
+        .sorted(Map.Entry.comparingByValue()) //
+        .map(Map.Entry::getKey) //
         .iterator();
   }
 }

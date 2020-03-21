@@ -38,8 +38,8 @@ public class SingleBeanPersistenceModel implements IPersistenceModel
   private static final IColumnDefinition CONTENT_COLUMN_DEFINITION = IColumnDefinition.of(BEAN_TABLE_CONTENT, EColumnType.BLOB.create());
 
   //Used for JSON serialization
-  private static final Gson GSON = new GsonBuilder()
-      .serializeNulls()
+  private static final Gson GSON = new GsonBuilder() //
+      .serializeNulls() //
       .create();
 
   //Type token for bean data presented as Map<IField, Object>
@@ -57,8 +57,8 @@ public class SingleBeanPersistenceModel implements IPersistenceModel
    */
   public static void createSingleBeanTableIfNecessary(OJSQLBuilder pBuilder)
   {
-    pBuilder.ifTableNotExistingCreate(BEAN_TABLE_NAME, pCreate -> pCreate
-        .columns(ID_COLUMN_DEFINITION, CONTENT_COLUMN_DEFINITION)
+    pBuilder.ifTableNotExistingCreate(BEAN_TABLE_NAME, pCreate -> pCreate //
+        .columns(ID_COLUMN_DEFINITION, CONTENT_COLUMN_DEFINITION) //
         .create());
   }
 
@@ -71,24 +71,23 @@ public class SingleBeanPersistenceModel implements IPersistenceModel
   SingleBeanPersistenceModel(String pBeanId, Class<? extends IBean> pBeanType)
   {
     beanId = StringUtility.requireNotEmpty(pBeanId, "single bean id");
-    fieldNameMapping = BeanReflector.reflectBeanFields(pBeanType).stream()
-        .collect(Collectors.toMap(IField::getName, identity()));
+    fieldNameMapping = BeanReflector.reflectBeanFields(pBeanType).stream().collect(Collectors.toMap(IField::getName, identity()));
   }
 
   @Override
   public void initModelInDatabase(OJSQLBuilder pBuilder)
   {
-    final boolean doesRowExist = pBuilder.doSelectOne(ID_COLUMN, pSelect -> pSelect
-        .from(BEAN_TABLE_NAME)
-        .where(isEqual(ID_COLUMN, beanId))
+    final boolean doesRowExist = pBuilder.doSelectOne(ID_COLUMN, pSelect -> pSelect //
+        .from(BEAN_TABLE_NAME) //
+        .where(isEqual(ID_COLUMN, beanId)) //
         .countRows() > 0);
 
     if (doesRowExist)
       return;
 
-    pBuilder.doInsert(pInsert -> pInsert
-        .into(BEAN_TABLE_NAME)
-        .values(IColumnValueTuple.of(ID_COLUMN, beanId), _contentTuple(_createInitialContent()))
+    pBuilder.doInsert(pInsert -> pInsert //
+        .into(BEAN_TABLE_NAME) //
+        .values(IColumnValueTuple.of(ID_COLUMN, beanId), _contentTuple(_createInitialContent())) //
         .insert());
   }
 
@@ -101,12 +100,12 @@ public class SingleBeanPersistenceModel implements IPersistenceModel
    */
   public PersistentBeanData loadSingleBeanData(SingleBeanKey pKey, OJSQLBuilder pBuilder)
   {
-    return pBuilder.doSelectOne(CONTENT_COLUMN, pSelect -> pSelect
-        .from(BEAN_TABLE_NAME)
-        .where(isEqual(ID_COLUMN, beanId))
-        .firstResult()
-        .map(this::_fromPersistent)
-        .map(pBeanContent -> new PersistentBeanData(-1, pBeanContent)))
+    return pBuilder.doSelectOne(CONTENT_COLUMN, pSelect -> pSelect //
+        .from(BEAN_TABLE_NAME) //
+        .where(isEqual(ID_COLUMN, beanId)) //
+        .firstResult() //
+        .map(this::_fromPersistent) //
+        .map(pBeanContent -> new PersistentBeanData(-1, pBeanContent))) //
         .orIfNotPresentThrow(() -> new BeanDataNotFoundException(pKey));
   }
 
@@ -121,10 +120,10 @@ public class SingleBeanPersistenceModel implements IPersistenceModel
     //This may be improved later to avoid redundant loading by query
     final PersistentBeanData changedData = loadSingleBeanData(new SingleBeanKey(beanId), pBuilder).integrateChanges(pChangedValues);
 
-    pBuilder.doUpdate(pUpdate -> pUpdate
-        .table(BEAN_TABLE_NAME)
-        .set(_contentTuple(changedData.getData()))
-        .where(isEqual(ID_COLUMN, beanId))
+    pBuilder.doUpdate(pUpdate -> pUpdate //
+        .table(BEAN_TABLE_NAME) //
+        .set(_contentTuple(changedData.getData())) //
+        .where(isEqual(ID_COLUMN, beanId)) //
         .update());
   }
 
@@ -146,7 +145,7 @@ public class SingleBeanPersistenceModel implements IPersistenceModel
    */
   private Map<IField<?>, Object> _createInitialContent()
   {
-    return fieldNameMapping.values().stream()
+    return fieldNameMapping.values().stream() //
         //Allow null values
         .collect(HashMap::new, (pMap, pField) -> pMap.put(pField, pField.getInitialValue()), HashMap::putAll);
   }
@@ -159,7 +158,7 @@ public class SingleBeanPersistenceModel implements IPersistenceModel
    */
   private static byte[] _toPersistent(Map<IField<?>, Object> pBeanContent)
   {
-    final Map<String, Object> fieldNameValueMap = pBeanContent.entrySet().stream()
+    final Map<String, Object> fieldNameValueMap = pBeanContent.entrySet().stream() //
         //Allow null values
         .collect(HashMap::new, (pMap, pEntry) -> pMap.put(pEntry.getKey().getName(), pEntry.getValue()), HashMap::putAll);
 
@@ -177,11 +176,11 @@ public class SingleBeanPersistenceModel implements IPersistenceModel
     final String json = new String(pSerialContent, StandardCharsets.UTF_8);
     final Map<String, Object> fieldNameValueMap = GSON.fromJson(json, CONTENT_TYPE_LITERAL);
 
-    return fieldNameValueMap.entrySet().stream()
+    return fieldNameValueMap.entrySet().stream() //
         //Allow null values
-        .collect(HashMap::new, (pMap, pEntry) -> pMap.put(fieldNameMapping.get(pEntry.getKey()),
-                                                          _assureCorrectFormat(fieldNameMapping.get(pEntry.getKey()), pEntry.getValue())),
-                 HashMap::putAll);
+        .collect(HashMap::new, (pMap, pEntry) -> pMap
+                .put(fieldNameMapping.get(pEntry.getKey()), _assureCorrectFormat(fieldNameMapping.get(pEntry.getKey()), pEntry.getValue())),
+            HashMap::putAll);
   }
 
   /**

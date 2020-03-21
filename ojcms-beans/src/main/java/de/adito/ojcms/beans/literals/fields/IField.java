@@ -28,7 +28,7 @@ public interface IField<VALUE> extends IMemberLiteral
    */
   static Class<IField<?>> getFieldTypeFromDataType(Class<?> pDataType)
   {
-    return findFieldTypeFromDataType(pDataType)
+    return findFieldTypeFromDataType(pDataType) //
         .orElseThrow(() -> new OJRuntimeException("There is no bean field for this data type: " + pDataType.getSimpleName()));
   }
 
@@ -203,8 +203,9 @@ public interface IField<VALUE> extends IMemberLiteral
   default FieldValueTuple<?> newUntypedTuple(Object pValue)
   {
     if (pValue != null && !getDataType().isAssignableFrom(pValue.getClass()))
-      throw new OJRuntimeException("type-mismatch for field value tuple:" +
-                                       " field type: " + getDataType().getName() + " value type: " + pValue.getClass().getName());
+      throw new OJRuntimeException(
+          "type-mismatch for field value tuple:" + " field type: " + getDataType().getName() + " value type: " + pValue.getClass()
+              .getName());
     //noinspection unchecked
     return new FieldValueTuple(this, pValue);
   }

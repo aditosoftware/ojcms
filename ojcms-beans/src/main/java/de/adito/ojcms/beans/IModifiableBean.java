@@ -38,6 +38,7 @@ public interface IModifiableBean extends IBean
     final IEncapsulatedBeanData encapsulated = requestEncapsulatedData(this);
     if (encapsulated.streamFields().anyMatch(pField -> pField.getName().equals(pName)))
       throw new BeanFieldDuplicateException(pName);
+
     return new BeanFieldAdder<>(this::addFieldAtIndex, encapsulated::getFieldCount, pFieldType, pName, pAnnotations);
   }
 
@@ -65,6 +66,7 @@ public interface IModifiableBean extends IBean
 
     if (encapsulated.containsField(pField))
       throw new BeanFieldDuplicateException(pField.getName());
+
     encapsulated.addField(pField, pIndex);
 
     if (getFieldActivePredicate().isOptionalActive(pField))
@@ -106,9 +108,10 @@ public interface IModifiableBean extends IBean
    */
   default void removeFieldIf(Predicate<IField<?>> pFieldPredicate)
   {
-    final List<IField<?>> toRemove = streamFields()
-        .filter(pFieldPredicate)
+    final List<IField<?>> toRemove = streamFields() //
+        .filter(pFieldPredicate) //
         .collect(Collectors.toList());
+
     toRemove.forEach(this::removeField);
   }
 }

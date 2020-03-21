@@ -79,7 +79,8 @@ class BeanTest
   public void testSetNullValueForbidden()
   {
     assertThrows(NullValueForbiddenException.class, () -> bean.setValue(SomeBean.specialTextField, null)); //Field type annotated
-    assertThrows(NullValueForbiddenException.class, () -> bean.setValue(SomeBean.numberField, null)); //Number field type annotated naturally
+    assertThrows(NullValueForbiddenException.class,
+        () -> bean.setValue(SomeBean.numberField, null)); //Number field type annotated naturally
     assertThrows(NullValueForbiddenException.class, () -> bean.setValue(SomeBean.someOtherField, null));
     //Should also throw with @FinalNeverNull
     assertThrows(NullValueForbiddenException.class, () -> bean.setValue(SomeBean.someOtherFinalField, null));
@@ -101,11 +102,10 @@ class BeanTest
   public void testClear()
   {
     bean.clear();
-
     assertEquals(OTHER_VALUE, bean.getValue(SomeBean.someOtherField)); //Should not have been cleared because of @NeverNull
 
-    bean.stream()
-        .filter(pTuple -> !pTuple.getField().mustNeverBeNull())
+    bean.stream() //
+        .filter(pTuple -> !pTuple.getField().mustNeverBeNull()) //
         .forEach(pTuple -> assertEquals(pTuple.getField().getInitialValue(), pTuple.getValue()));
   }
 

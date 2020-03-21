@@ -69,8 +69,8 @@ class BeanProducerExtension implements Extension
    * @param pBeanType      the annotated bean type
    * @param pProcessedBean the processed CDI bean
    */
-  private static void _registerPersistentBeanType(Persist pAnnotation, Class<? extends IBean> pBeanType, ProcessAnnotatedType<?
-      extends IBean> pProcessedBean)
+  private static void _registerPersistentBeanType(Persist pAnnotation, Class<? extends IBean> pBeanType,
+                                                  ProcessAnnotatedType<? extends IBean> pProcessedBean)
   {
     if (Modifier.isAbstract(pBeanType.getModifiers()))
       throw new OJPersistenceException("Abstract bean type " + pBeanType.getName() + " cannot be persisted!");

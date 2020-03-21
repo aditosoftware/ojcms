@@ -51,8 +51,8 @@ public final class Result implements Iterable<ResultRow>
     try
     {
       _checkUsage();
-      return resultSet.next() ?
-          Optional.of(new ResultRow(selectedColumns, idColumnIdentification, serializer, resultSet)) :
+      return resultSet.next() ? //
+          Optional.of(new ResultRow(selectedColumns, idColumnIdentification, serializer, resultSet)) : //
           Optional.empty();
     }
     catch (SQLException pE)

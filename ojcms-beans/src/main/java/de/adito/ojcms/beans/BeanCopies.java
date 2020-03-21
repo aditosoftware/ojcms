@@ -50,7 +50,7 @@ final class BeanCopies
     final Class<? extends IBean> beanType = BeanReflector.requiresDeclaredBeanType(pOriginal.getClass());
     final List<IField<?>> fieldOrder = pOriginal.streamFields().collect(Collectors.toList());
 
-    final IBean copyInstance = _createBeanPerDefaultConstructorAndSetDataSource(beanType)
+    final IBean copyInstance = _createBeanPerDefaultConstructorAndSetDataSource(beanType) //
         .orElse(_createBeanSneakyAndInjectEncapsulatedData(beanType, fieldOrder));
 
     return _setValues(pOriginal, copyInstance, pMode, pCustomCopies);
@@ -64,7 +64,8 @@ final class BeanCopies
    *
    * @param pOriginal              the original bean to create the copy of
    * @param pMode                  the copy mode
-   * @param pCustomConstructorCall a custom constructor call defined as function (the input is the existing bean, the function should create the copy)
+   * @param pCustomConstructorCall a custom constructor call defined as function (the input is the existing bean, the function should
+   *                               create the copy)
    * @param pCustomCopies          a collection of custom copy mechanisms for specific bean fields
    * @return a copy of the bean
    */
@@ -138,15 +139,17 @@ final class BeanCopies
   {
     final _BeanValueCopyCreator beanValueCopyCreator = new _BeanValueCopyCreator(pMode, pCustomCopies);
     //noinspection unchecked,RedundantCast
-    requestEncapsulatedData(pOriginal).streamFields()
-        .forEach(pField -> pCopy.setValue((IField) pField, beanValueCopyCreator.copyFieldValue((IField) pField, pOriginal.getValue(pField))));
+    requestEncapsulatedData(pOriginal).streamFields() //
+        .forEach(
+            pField -> pCopy.setValue((IField) pField, beanValueCopyCreator.copyFieldValue((IField) pField, pOriginal.getValue(pField))));
 
     //If required set non bean values as well
     if (pMode.shouldCopyAllFields())
     {
       final _NonBeanValueCopyCreator copyCreator = new _NonBeanValueCopyCreator(pMode);
-      BeanReflector.reflectDeclaredNonBeanFields(pOriginal.getClass())
-          .forEach(pField -> {
+      BeanReflector.reflectDeclaredNonBeanFields(pOriginal.getClass()) //
+          .forEach(pField ->
+          {
             try
             {
               if (!pField.isAccessible())
@@ -182,8 +185,8 @@ final class BeanCopies
     {
       mode = pMode;
       customCopies = pCustomCopies;
-      fieldCustomCopyMapping = Arrays.stream(pCustomCopies)
-          .collect(Collectors.toMap(CustomFieldCopy::getField, CustomFieldCopy::getCopyCreator));
+      fieldCustomCopyMapping = Arrays.stream(pCustomCopies).collect(
+          Collectors.toMap(CustomFieldCopy::getField, CustomFieldCopy::getCopyCreator));
     }
 
     /**
@@ -202,9 +205,8 @@ final class BeanCopies
       try
       {
         //noinspection unchecked
-        return (VALUE) Optional.ofNullable(fieldCustomCopyMapping.get(pField))
-            .map(pCreator -> pCreator.apply(pValue))
-            .orElse(pField.copyValue(pValue, mode, customCopies));
+        return (VALUE) Optional.ofNullable(fieldCustomCopyMapping.get(pField)).map(pCreator -> pCreator.apply(pValue)).orElse(
+            pField.copyValue(pValue, mode, customCopies));
       }
       catch (BeanCopyNotSupportedException pE)
       {
@@ -244,8 +246,8 @@ final class BeanCopies
 
       final Class<?> dataType = pDeclaredField.getType();
       final Type genericType = pDeclaredField.getGenericType();
-      final Type[] genericTypes = genericType instanceof ParameterizedType ?
-          ((ParameterizedType) genericType).getActualTypeArguments() : new Type[0];
+      final Type[] genericTypes =
+          genericType instanceof ParameterizedType ? ((ParameterizedType) genericType).getActualTypeArguments() : new Type[0];
       try
       {
         return SneakyCopyUtils.createDeepCopy(pValue, dataType, genericTypes);

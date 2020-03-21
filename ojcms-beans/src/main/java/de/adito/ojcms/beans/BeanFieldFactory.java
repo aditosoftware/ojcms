@@ -69,13 +69,14 @@ final class BeanFieldFactory
     {
       final Optional<Class<?>> optionalGenericType = _getGenericType(pFieldType, pGenericTypeSupplier);
       final boolean isOptional = pActiveCondition != null;
+
       //Constructor argument distinction between generic and non generic values (generic types provide their type additionally)
-      final Class[] constructorArgumentTypes = optionalGenericType
-          .map(pType -> new Class[]{Class.class, String.class, Collection.class, boolean.class, boolean.class})
+      final Class[] constructorArgumentTypes = optionalGenericType //
+          .map(pType -> new Class[]{Class.class, String.class, Collection.class, boolean.class, boolean.class}) //
           .orElseGet(() -> new Class[]{String.class, Collection.class, boolean.class, boolean.class});
 
-      final Object[] constructorArguments = optionalGenericType
-          .map(pClass -> new Object[]{pClass, pName, pAnnotations, isOptional, pIsPrivate})
+      final Object[] constructorArguments = optionalGenericType //
+          .map(pClass -> new Object[]{pClass, pName, pAnnotations, isOptional, pIsPrivate}) //
           .orElseGet(() -> new Object[]{pName, pAnnotations, isOptional, pIsPrivate});
 
       //Create the field by using the reflected constructor

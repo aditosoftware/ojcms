@@ -49,11 +49,12 @@ public class BeanOptionalFieldTest
   @Test
   public void testFieldObservers()
   {
-    observe(bean, IBean::observeFieldAdditions)
-        .assertCallCount(2)
+    observe(bean, IBean::observeFieldAdditions) //
+        .assertCallCount(2) //
         .whenDoing(pBean -> pBean.setValue(SomeBean.optionalField1, 1));
-    observe(bean, IBean::observeFieldRemovals)
-        .assertCallCount(1)
+
+    observe(bean, IBean::observeFieldRemovals) //
+        .assertCallCount(1) //
         .whenDoing(pBean -> pBean.setValue(SomeBean.normalField, "test"));
   }
 

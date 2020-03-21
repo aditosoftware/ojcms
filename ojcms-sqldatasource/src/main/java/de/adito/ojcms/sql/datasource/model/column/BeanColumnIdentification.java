@@ -4,9 +4,6 @@ import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.beans.literals.fields.util.IBeanFieldBased;
 import de.adito.ojcms.sqlbuilder.definition.IColumnIdentification;
 
-import java.util.Collection;
-import java.util.function.Function;
-
 /**
  * A database column identification based on a bean field.
  *
@@ -43,18 +40,5 @@ public class BeanColumnIdentification<VALUE> implements IColumnIdentification<VA
   public Class<VALUE> getDataType()
   {
     return field.getDataType();
-  }
-
-  /**
-   * Creates an array of column identifications based on a collection of bean fields.
-   *
-   * @param pFields the bean fields to create the identifications tuples from
-   * @return an array of column identifications
-   */
-  public static BeanColumnIdentification<?>[] ofMultiple(Collection<IField<?>> pFields)
-  {
-    return pFields.stream()
-        .map((Function<IField<?>, BeanColumnIdentification<?>>) BeanColumnIdentification::new)
-        .toArray(BeanColumnIdentification[]::new);
   }
 }

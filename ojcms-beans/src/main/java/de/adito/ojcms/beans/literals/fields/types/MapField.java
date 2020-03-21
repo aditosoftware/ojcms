@@ -45,7 +45,7 @@ public class MapField<KEY, VALUE> extends AbstractField<IMapBean<KEY, VALUE>>
   public IMapBean<KEY, VALUE> createBeanFromMap(Map<KEY, VALUE> pMap, Class<VALUE> pValueType)
   {
     return IMapBean.createFromMap(pMap, pValueType, fieldCache::put, pKey -> Optional.ofNullable(fieldCache.get(pKey)),
-                                  hasAnnotation(Detail.class));
+        hasAnnotation(Detail.class));
   }
 
   /**

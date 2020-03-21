@@ -42,8 +42,8 @@ public enum ESeparator
    */
   public static String merge(ESeparator... pSeparators)
   {
-    return Stream.of(pSeparators)
-        .map(ESeparator::getLiteral)
+    return Stream.of(pSeparators) //
+        .map(ESeparator::getLiteral) //
         .collect(Collectors.joining());
   }
 }

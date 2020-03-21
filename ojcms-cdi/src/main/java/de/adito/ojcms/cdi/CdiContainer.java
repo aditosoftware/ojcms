@@ -27,8 +27,8 @@ public final class CdiContainer
 
   static
   {
-    CUSTOM_CONTEXTS = IPicoRegistry.INSTANCE.find(AbstractCustomContext.class, CustomCdiContext.class).keySet().stream()
-        .map(CdiContainer::_createContext)
+    CUSTOM_CONTEXTS = IPicoRegistry.INSTANCE.find(AbstractCustomContext.class, CustomCdiContext.class).keySet().stream() //
+        .map(CdiContainer::_createContext) //
         .collect(Collectors.toMap(Context::getScope, identity()));
   }
 
@@ -49,7 +49,8 @@ public final class CdiContainer
    */
   public static ICdiControl boot()
   {
-    return boot(config -> {
+    return boot(config ->
+    {
     });
   }
 

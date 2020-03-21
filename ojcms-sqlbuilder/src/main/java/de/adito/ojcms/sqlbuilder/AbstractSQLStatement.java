@@ -1,6 +1,6 @@
 package de.adito.ojcms.sqlbuilder;
 
-import de.adito.ojcms.sqlbuilder.definition.*;
+import de.adito.ojcms.sqlbuilder.definition.IColumnIdentification;
 import de.adito.ojcms.sqlbuilder.executors.IStatementExecutor;
 import de.adito.ojcms.sqlbuilder.format.StatementFormatter;
 import de.adito.ojcms.sqlbuilder.platform.IDatabasePlatform;

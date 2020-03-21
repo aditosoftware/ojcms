@@ -23,6 +23,7 @@ public final class StringUtility
   {
     if (pStringToCheck == null || pStringToCheck.trim().isEmpty())
       throw new IllegalArgumentException("The " + pIdentifier + " must not be empty!");
+    
     return pStringToCheck;
   }
 }

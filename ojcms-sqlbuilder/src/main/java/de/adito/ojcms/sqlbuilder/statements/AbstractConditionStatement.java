@@ -19,7 +19,8 @@ import java.util.*;
  * @param <STATEMENT>   the concrete final type of the statement
  */
 public abstract class AbstractConditionStatement<MODIFIERS extends WhereModifiers, RESULT, INNERRESULT,
-    STATEMENT extends AbstractConditionStatement<MODIFIERS, RESULT, INNERRESULT, STATEMENT>> extends AbstractSQLStatement<INNERRESULT, STATEMENT>
+    STATEMENT extends AbstractConditionStatement<MODIFIERS, RESULT, INNERRESULT, STATEMENT>>
+    extends AbstractSQLStatement<INNERRESULT, STATEMENT>
 {
   protected final MODIFIERS modifiers;
 
@@ -33,8 +34,8 @@ public abstract class AbstractConditionStatement<MODIFIERS extends WhereModifier
    * @param pModifiers         the modifiers for this statement
    * @param pIdColumnName      the id column name
    */
-  public AbstractConditionStatement(IStatementExecutor<INNERRESULT> pStatementExecutor, AbstractSQLBuilder pBuilder, IDatabasePlatform pPlatform,
-                                    IValueSerializer pSerializer, MODIFIERS pModifiers, String pIdColumnName)
+  public AbstractConditionStatement(IStatementExecutor<INNERRESULT> pStatementExecutor, AbstractSQLBuilder pBuilder,
+                                    IDatabasePlatform pPlatform, IValueSerializer pSerializer, MODIFIERS pModifiers, String pIdColumnName)
   {
     super(pStatementExecutor, pBuilder, pPlatform, pSerializer, pIdColumnName);
     modifiers = pModifiers;
@@ -73,8 +74,8 @@ public abstract class AbstractConditionStatement<MODIFIERS extends WhereModifier
       return (STATEMENT) this;
 
     final IWhereConditions conditions = IWhereConditions.create(pConditions.get(0));
-    pConditions.stream()
-        .skip(1)
+    pConditions.stream() //
+        .skip(1) //
         .forEach(conditions::and);
 
     return where(conditions);

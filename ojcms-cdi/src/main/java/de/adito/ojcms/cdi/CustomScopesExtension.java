@@ -19,7 +19,7 @@ class CustomScopesExtension implements Extension
    */
   void beforeBeanDiscovery(@Observes BeforeBeanDiscovery pBeforeBeanDiscovery)
   {
-    CdiContainer.getAllCustomScopeAnnotationTypes()
+    CdiContainer.getAllCustomScopeAnnotationTypes() //
         .forEach(pAnnotationType -> pBeforeBeanDiscovery.addScope(pAnnotationType, true, false));
   }
 

@@ -74,17 +74,16 @@ public final class BeanReference extends WeakReference<IBean> implements Iterabl
   public String toString()
   {
     _requiresExistingReference();
-    return getClass().getSimpleName() + "{" +
-        "bean=" + getBean() +
-        ", field=" + field +
-        '}';
+    return getClass().getSimpleName() + "{" + "bean=" + getBean() + ", field=" + field + '}';
   }
 
   @Override
   public boolean equals(Object pObject)
   {
-    if (this == pObject) return true;
-    if (pObject == null || getClass() != pObject.getClass()) return false;
+    if (this == pObject)
+      return true;
+    if (pObject == null || getClass() != pObject.getClass())
+      return false;
 
     final BeanReference other = (BeanReference) pObject;
     return _requiresExistingReference() == other.getBean() && field == other.field;
@@ -104,7 +103,6 @@ public final class BeanReference extends WeakReference<IBean> implements Iterabl
    */
   private IBean _requiresExistingReference()
   {
-    return Optional.ofNullable(get())
-        .orElseThrow(() -> new OJRuntimeException("This bean reference is not existing anymore!"));
+    return Optional.ofNullable(get()).orElseThrow(() -> new OJRuntimeException("This bean reference is not existing anymore!"));
   }
 }

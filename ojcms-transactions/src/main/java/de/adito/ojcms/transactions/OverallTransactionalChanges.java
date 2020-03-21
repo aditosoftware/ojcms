@@ -82,13 +82,14 @@ class OverallTransactionalChanges
    * @param pPredicate     the predicate to determine if requested data is changed
    * @param pSelfReference a self reference to the asking changes instance (to exclude its changes)
    */
-  private void _throwIfChangedInOtherTransaction(Object pKey, Predicate<TransactionalChanges> pPredicate, TransactionalChanges pSelfReference)
+  private void _throwIfChangedInOtherTransaction(Object pKey, Predicate<TransactionalChanges> pPredicate,
+                                                 TransactionalChanges pSelfReference)
   {
     final TransactionalChanges selfReferences = pSelfReference instanceof WeldClientProxy ?
         (TransactionalChanges) ((WeldClientProxy) pSelfReference).getMetadata().getContextualInstance() : pSelfReference;
 
-    if (activeTransactionalChanges.stream()
-        .filter(pChanges -> pChanges != selfReferences)
+    if (activeTransactionalChanges.stream() //
+        .filter(pChanges -> pChanges != selfReferences) //
         .anyMatch(pPredicate))
       throw new ConcurrentTransactionException(pKey);
   }

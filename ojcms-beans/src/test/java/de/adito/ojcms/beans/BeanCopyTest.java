@@ -61,7 +61,7 @@ class BeanCopyTest
     final Data copy = original.createCopy(ECopyMode.SHALLOW_ALL_FIELDS);
     assertEquals(original.someNormalList, copy.someNormalList);
     assertSame(original.getValue(Data.person1).getValue(Person.address).someNormalField,
-               copy.getValue(Data.person1).getValue(Person.address).someNormalField);
+        copy.getValue(Data.person1).getValue(Person.address).someNormalField);
   }
 
   @Test
@@ -71,7 +71,7 @@ class BeanCopyTest
     final Data copy = original.createCopy(ECopyMode.DEEP_ALL_FIELDS);
     assertEquals(original.someNormalList, copy.someNormalList);
     assertNotSame(original.getValue(Data.person1).getValue(Person.address).someNormalField,
-                  copy.getValue(Data.person1).getValue(Person.address).someNormalField);
+        copy.getValue(Data.person1).getValue(Person.address).someNormalField);
   }
 
   @Test
@@ -141,7 +141,7 @@ class BeanCopyTest
     public static final BooleanField hasBasement = OJFields.create(House.class);
     @OptionalField
     public static final BooleanField isBasementUnderGround = OJFields.createOptional(House.class,
-                                                                                     ((pHouse, pValue) -> pHouse.getValue(hasBasement)));
+        ((pHouse, pValue) -> pHouse.getValue(hasBasement)));
     @OptionalField
     public static final TextField someBoringInfo = OJFields.createOptional(House.class, ((pHouse, pValue) -> pValue != null));
     @OptionalField

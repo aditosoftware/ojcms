@@ -133,7 +133,7 @@ public final class OJSQLBuilderFactory
     public OJSQLBuilderForTable create()
     {
       return new OJSQLBuilderForTableImpl(databasePlatform, connectionSupplier, closeConnectionAfterStatement, serializer, tableName,
-                                          idColumnName);
+          idColumnName);
     }
   }
 

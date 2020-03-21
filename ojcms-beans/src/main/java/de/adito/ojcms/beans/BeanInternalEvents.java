@@ -46,8 +46,10 @@ final class BeanInternalEvents
       IEncapsulatedDataHolder<E, D, ENCAPSULATED> pEncapsulatedHolder)
   {
     final ENCAPSULATED encapsulatedData = requireNonNull(pEncapsulatedHolder).getEncapsulatedData();
+
     if (encapsulatedData == null)
       throw new MissingDataCoreException(pEncapsulatedHolder.getClass());
+
     return encapsulatedData;
   }
 
@@ -62,8 +64,10 @@ final class BeanInternalEvents
   static IEncapsulatedBeanData requestEncapsulatedDataForField(IBean pBean, IField<?> pField)
   {
     final IEncapsulatedBeanData encapsulatedBeanData = requestEncapsulatedData(pBean);
+
     if (!encapsulatedBeanData.containsField(requireNonNull(pField)))
       throw new BeanFieldDoesNotExistException(pBean, pField);
+
     return encapsulatedBeanData;
   }
 
@@ -114,8 +118,8 @@ final class BeanInternalEvents
     //We have to check the states of the optional fields and then change the value with a following propagation of the change
     final IBeanFieldActivePredicate fieldActiveSupplier = pBean.getFieldActivePredicate();
     //Store before active optional fields to detect differences later on
-    final List<IField<?>> optionalActiveFields = encapsulatedData.streamFields()
-        .filter(pBeanField -> pBeanField.isOptional() && fieldActiveSupplier.isOptionalActive(pBeanField))
+    final List<IField<?>> optionalActiveFields = encapsulatedData.streamFields() //
+        .filter(pBeanField -> pBeanField.isOptional() && fieldActiveSupplier.isOptionalActive(pBeanField)) //
         .collect(Collectors.toList());
 
     final VALUE oldValue = encapsulatedData.getValue(pField); //Store old value for later comparison
@@ -128,14 +132,14 @@ final class BeanInternalEvents
       return;
 
     //Find newly activated optional fields and fire them as added fields
-    encapsulatedData.streamFields()
-        .filter(pBeanField -> pBeanField.isOptional() && fieldActiveSupplier.isOptionalActive(pBeanField))
-        .filter(pActiveField -> !optionalActiveFields.remove(pActiveField))
+    encapsulatedData.streamFields() //
+        .filter(pBeanField -> pBeanField.isOptional() && fieldActiveSupplier.isOptionalActive(pBeanField)) //
+        .filter(pActiveField -> !optionalActiveFields.remove(pActiveField)) //
         .forEach(pNewActiveField -> propagateChange(new BeanFieldAddition<>(pBean, pNewActiveField)));
 
     //Fire the remaining as removed fields
-    optionalActiveFields.stream()
-        .map(pBeforeActiveField -> (IField) pBeforeActiveField)
+    optionalActiveFields.stream() //
+        .map(pBeforeActiveField -> (IField) pBeforeActiveField) //
         .forEach(pRemovedField -> propagateChange(new BeanFieldRemoval<>(pBean, pRemovedField, encapsulatedData.getValue(pRemovedField))));
 
     //IMPORTANT: The value change itself must be fired after all optional fields have their correct active state
@@ -147,16 +151,14 @@ final class BeanInternalEvents
     {
       final Function<Object, Stream<IReferable>> resolver = pReferenceField.resolverType().getResolver();
       //Remove old references based on the old value
-      resolver.apply(oldValue)
-          .forEach(pReferable -> pReferable.removeReference(pBean, pField));
+      resolver.apply(oldValue).forEach(pReferable -> pReferable.removeReference(pBean, pField));
       //Add the new ones
-      resolver.apply(pNewValue)
-          .forEach(pReferable -> pReferable.addWeakReference(pBean, pField));
+      resolver.apply(pNewValue).forEach(pReferable -> pReferable.addWeakReference(pBean, pField));
     });
 
     //Add a statistic entry if necessary
-    Optional.ofNullable(encapsulatedData.getStatisticData().get(pField))
-        .map(pData -> (IStatisticData<VALUE>) pData)
+    Optional.ofNullable(encapsulatedData.getStatisticData().get(pField)) //
+        .map(pData -> (IStatisticData<VALUE>) pData) //
         .ifPresent(pData -> pData.addEntry(pNewValue));
   }
 
@@ -173,8 +175,8 @@ final class BeanInternalEvents
   {
     //Pass the references of the container to the beans as well
     final IEncapsulatedBeanData beanEncapsulated = requestEncapsulatedData(pBean);
-    pContainer.getDirectReferences()
-        .forEach(pNode -> beanEncapsulated.addWeakReference(pNode.getBean(), pNode.getField()));
+    pContainer.getDirectReferences().forEach(pNode -> beanEncapsulated.addWeakReference(pNode.getBean(), pNode.getField()));
+
     _tryAddStatisticEntry(pContainer);
     propagateChange(new BeanContainerAddition<>(pContainer, pBean));
   }
@@ -192,9 +194,11 @@ final class BeanInternalEvents
   {
     //Remove the references from the bean, which were created through the container
     final IEncapsulatedBeanData beanEncapsulated = requestEncapsulatedData(pBean);
-    pBean.getDirectReferences().stream()
+
+    pBean.getDirectReferences().stream() //
         .filter(pNode -> pNode.getBean().getValue(pNode.getField()) == pContainer) //Filter the references to the affected container
         .forEach(pNode -> beanEncapsulated.removeReference(pNode.getBean(), pNode.getField()));
+
     _tryAddStatisticEntry(pContainer);
     propagateChange(new BeanContainerRemoval<>(pContainer, pBean));
   }
@@ -213,8 +217,10 @@ final class BeanInternalEvents
                                                                  Function<IEncapsulatedBeanContainerData<BEAN>, BEAN> pDeleteFunction)
   {
     final BEAN removedBean = pDeleteFunction.apply(requestEncapsulatedData(pContainer));
+
     if (removedBean != null)
       beanRemoved(pContainer, removedBean);
+
     return Optional.ofNullable(removedBean);
   }
 
@@ -233,6 +239,7 @@ final class BeanInternalEvents
   {
     final Iterator<BEAN> it = requestEncapsulatedData(pContainer).iterator();
     boolean removed = false;
+
     while (it.hasNext())
     {
       final BEAN bean = it.next();
@@ -241,10 +248,12 @@ final class BeanInternalEvents
         it.remove();
         beanRemoved(pContainer, bean);
         removed = true;
+
         if (pBreak)
           break;
       }
     }
+
     return removed;
   }
 

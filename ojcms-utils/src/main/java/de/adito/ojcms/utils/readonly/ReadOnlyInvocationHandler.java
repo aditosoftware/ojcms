@@ -26,7 +26,7 @@ public class ReadOnlyInvocationHandler<SOURCE> implements InvocationHandler
   {
     //noinspection unchecked
     return (INTERFACE) Proxy.newProxyInstance(pInterfaceType.getClassLoader(), new Class[]{pInterfaceType},
-                                              new ReadOnlyInvocationHandler<>(pInstanceToMakeReadOnly));
+        new ReadOnlyInvocationHandler<>(pInstanceToMakeReadOnly));
   }
 
   /**
@@ -43,8 +43,8 @@ public class ReadOnlyInvocationHandler<SOURCE> implements InvocationHandler
   public Object invoke(Object pProxy, Method pMethod, Object[] pArgs) throws Throwable
   {
     if (pMethod.isAnnotationPresent(WriteOperation.class))
-      throw new UnsupportedOperationException("This element of type " + source.getClass().getName() + " is read-only! " +
-                                                  "The content can not be modified!");
+      throw new UnsupportedOperationException(
+          "This element of type " + source.getClass().getName() + " is read-only! " + "The content can not be modified!");
 
     final Object result = pMethod.invoke(source, pArgs);
     if (result instanceof List)

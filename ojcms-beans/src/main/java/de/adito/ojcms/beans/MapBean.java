@@ -64,10 +64,13 @@ final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMapB
     fieldKeyMapping = new HashMap<>();
     fieldCache = pFieldCache;
     fieldCacheCallback = pFieldCacheCallback;
-    final BiConsumer<LinkedHashMap<IField<?>, VALUE>, Map.Entry<KEY, VALUE>> accumulator =
-        (pSorted, pEntry) -> pSorted.put(_createField(pEntry.getKey()), pEntry.getValue());
-    final Map<IField<?>, VALUE> fieldValueMapping = pMap.entrySet().stream()
+
+    final BiConsumer<LinkedHashMap<IField<?>, VALUE>, Map.Entry<KEY, VALUE>> accumulator = (pSorted, pEntry) -> pSorted.put(
+        _createField(pEntry.getKey()), pEntry.getValue());
+
+    final Map<IField<?>, VALUE> fieldValueMapping = pMap.entrySet().stream() //
         .collect(LinkedHashMap::new, accumulator, Map::putAll);
+
     final List<IField<?>> fields = new ArrayList<>(fieldValueMapping.keySet());
     encapsulated = new EncapsulatedBeanData(new MapBasedBeanDataSource(fields), fields);
     fieldValueMapping.forEach(this::setValueConverted);
@@ -88,6 +91,7 @@ final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMapB
     fieldKeyMapping = new HashMap<>(pExistingMapBean.fieldKeyMapping);
     fieldCache = pExistingMapBean.fieldCache;
     fieldCacheCallback = pExistingMapBean.fieldCacheCallback;
+
     final List<IField<?>> fields = pExistingMapBean.streamFields().collect(Collectors.toList());
     encapsulated = new EncapsulatedBeanData(new MapBasedBeanDataSource(pExistingMapBean), fields);
   }
@@ -110,6 +114,7 @@ final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMapB
   {
     final IField<?> field;
     VALUE oldValue = null;
+
     if (keyFieldMapping.containsKey(pKey))
     {
       field = keyFieldMapping.get(pKey);
@@ -120,6 +125,7 @@ final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMapB
       field = _createField(pKey);
       encapsulated.addField(field, encapsulated.getFieldCount());
     }
+
     setValueConverted(field, pValue);
     return oldValue;
   }
@@ -133,15 +139,17 @@ final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMapB
    */
   private IField<?> _createField(KEY pKey)
   {
-    final IField<?> newField = fieldCache.apply(pKey)
+    final IField<?> newField = fieldCache.apply(pKey) //
         .orElseGet(() ->
-                   {
-                     //noinspection unchecked,RedundantCast
-                     final IField<?> field = BeanFieldFactory.createField((Class<IField>) fieldType, genericFieldTypeSupplier,
-                                                                          Objects.toString(pKey), false, annotationsForField, null);
-                     fieldCacheCallback.accept(pKey, field);
-                     return field;
-                   });
+        {
+          //noinspection unchecked,RedundantCast
+          final IField<?> field = BeanFieldFactory.createField((Class<IField>) fieldType, genericFieldTypeSupplier, Objects.toString(pKey),
+              false, annotationsForField, null);
+
+          fieldCacheCallback.accept(pKey, field);
+          return field;
+        });
+
     keyFieldMapping.put(pKey, newField);
     fieldKeyMapping.put(newField, pKey);
     return newField;
@@ -179,10 +187,12 @@ final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMapB
     final MapBean other = (MapBean) pObject;
     //MapBeans are the same, if all fields and associated values are equal
     //noinspection unchecked
-    return encapsulated.getFieldCount() == other.encapsulated.getFieldCount() &&
-        encapsulated.streamFields().allMatch(other::hasField) && encapsulated.streamFields()
-        .map(pField -> (IField) pField)
-        .allMatch(pIdentifierField -> Objects.equals(getValue(pIdentifierField), other.getValue(pIdentifierField)));
+    return encapsulated.getFieldCount() == other.encapsulated.getFieldCount() && //
+        encapsulated.streamFields() //
+            .allMatch(other::hasField) && //
+        encapsulated.streamFields() //
+            .map(pField -> (IField) pField) //
+            .allMatch(pIdentifierField -> Objects.equals(getValue(pIdentifierField), other.getValue(pIdentifierField)));
   }
 
   @Override
@@ -201,8 +211,8 @@ final class MapBean<KEY, VALUE> extends AbstractMap<KEY, VALUE> implements IMapB
     @Override
     public Iterator<Entry<KEY, VALUE>> iterator()
     {
-      return IndexBasedIterator.buildIterator(this::_createEntryForField, this::size)
-          .withRemover(encapsulated::removeFieldAtIndex)
+      return IndexBasedIterator.buildIterator(this::_createEntryForField, this::size) //
+          .withRemover(encapsulated::removeFieldAtIndex) //
           .createIterator();
     }
 

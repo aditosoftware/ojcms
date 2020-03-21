@@ -23,7 +23,8 @@ import java.util.stream.Stream;
 public final class BeanCreationEvents
 {
   private static final Map<Class<? extends IBean>, PublishSubject<IBean>> PUBLISHERS_BY_TYPE = new ConcurrentHashMap<>();
-  private static final Map<Class<? extends Annotation>, PublishSubject<? extends BeanCreationEvent<?>>> PUBLISHERS_BY_ANNOTATION = new ConcurrentHashMap<>();
+  private static final Map<Class<? extends Annotation>, PublishSubject<? extends BeanCreationEvent<?>>> PUBLISHERS_BY_ANNOTATION =
+      new ConcurrentHashMap<>();
 
   private BeanCreationEvents()
   {
@@ -39,7 +40,7 @@ public final class BeanCreationEvents
   {
     _getObservableAnnotation(pBeanType); //check, if annotation is present
     //noinspection unchecked
-    return (Observable<BEAN>) PUBLISHERS_BY_TYPE.computeIfAbsent(pBeanType, pType -> PublishSubject.create())
+    return (Observable<BEAN>) PUBLISHERS_BY_TYPE.computeIfAbsent(pBeanType, pType -> PublishSubject.create()) //
         .observeOn(Schedulers.newThread());
   }
 
@@ -55,8 +56,8 @@ public final class BeanCreationEvents
     if (!_isObservableAnnotation(pAnnotationType))
       throw new BeanCreationNotObservableException(pAnnotationType.getName() + " is not a valid creation observer annotation.");
     //noinspection unchecked
-    return (Observable<BeanCreationEvent<ANNOTATION>>) PUBLISHERS_BY_ANNOTATION.computeIfAbsent(pAnnotationType, pType -> PublishSubject.create())
-        .observeOn(Schedulers.newThread());
+    return (Observable<BeanCreationEvent<ANNOTATION>>) PUBLISHERS_BY_ANNOTATION.computeIfAbsent(pAnnotationType,
+        pType -> PublishSubject.create()).observeOn(Schedulers.newThread());
   }
 
   /**
@@ -89,7 +90,9 @@ public final class BeanCreationEvents
     if (PUBLISHERS_BY_ANNOTATION.containsKey(annotationType))
     {
       //noinspection unchecked
-      final PublishSubject<BeanCreationEvent<?>> publisher = (PublishSubject<BeanCreationEvent<?>>) PUBLISHERS_BY_ANNOTATION.get(annotationType);
+      final PublishSubject<BeanCreationEvent<?>> publisher = (PublishSubject<BeanCreationEvent<?>>) PUBLISHERS_BY_ANNOTATION.get(
+          annotationType);
+
       publisher.onNext(new BeanCreationEvent<>(pCreatedBean, beanType.getAnnotation(annotationType)));
     }
   }
@@ -112,7 +115,7 @@ public final class BeanCreationEvents
    */
   private static boolean _observersPresent()
   {
-    return Stream.concat(PUBLISHERS_BY_TYPE.values().stream(), PUBLISHERS_BY_ANNOTATION.values().stream())
+    return Stream.concat(PUBLISHERS_BY_TYPE.values().stream(), PUBLISHERS_BY_ANNOTATION.values().stream()) //
         .anyMatch(PublishSubject::hasObservers);
   }
 
@@ -126,8 +129,7 @@ public final class BeanCreationEvents
    */
   private static Class<? extends Annotation> _getObservableAnnotation(Class<? extends IBean> pBeanType)
   {
-    return _searchObservableAnnotation(pBeanType)
-        .orElseThrow(() -> new BeanCreationNotObservableException(pBeanType));
+    return _searchObservableAnnotation(pBeanType).orElseThrow(() -> new BeanCreationNotObservableException(pBeanType));
   }
 
   /**
@@ -139,10 +141,10 @@ public final class BeanCreationEvents
    */
   private static Optional<Class<? extends Annotation>> _searchObservableAnnotation(Class<? extends IBean> pBeanType)
   {
-    return Stream.of(pBeanType.getDeclaredAnnotations())
-        .map(Annotation::annotationType)
-        .filter(BeanCreationEvents::_isObservableAnnotation)
-        .findAny()
+    return Stream.of(pBeanType.getDeclaredAnnotations()) //
+        .map(Annotation::annotationType) //
+        .filter(BeanCreationEvents::_isObservableAnnotation) //
+        .findAny() //
         .map(pAnnotationType -> (Class<? extends Annotation>) pAnnotationType);
   }
 

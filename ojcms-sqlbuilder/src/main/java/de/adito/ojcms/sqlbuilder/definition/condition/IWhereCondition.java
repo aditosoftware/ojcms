@@ -181,10 +181,8 @@ public interface IWhereCondition<VALUE> extends IColumnValueTuple<VALUE>, IPrepa
    * @param <SOURCE>          the generic type of the source objects
    * @return an array of where conditions
    */
-  static <SOURCE> IWhereConditions ofMultiple(Collection<SOURCE> pSourceCollection,
-                                              Function<SOURCE, IColumnIdentification> pColumnResolver,
-                                              Function<SOURCE, ?> pValueResolver,
-                                              Function<SOURCE, IWhereOperator> pOperatorResolver)
+  static <SOURCE> IWhereConditions ofMultiple(Collection<SOURCE> pSourceCollection, Function<SOURCE, IColumnIdentification> pColumnResolver,
+                                              Function<SOURCE, ?> pValueResolver, Function<SOURCE, IWhereOperator> pOperatorResolver)
   {
     return ofMultiple(pSourceCollection.stream(), pColumnResolver, pValueResolver, pOperatorResolver);
   }
@@ -199,15 +197,14 @@ public interface IWhereCondition<VALUE> extends IColumnValueTuple<VALUE>, IPrepa
    * @param <SOURCE>          the generic type of the source objects
    * @return an array of where conditions
    */
-  static <SOURCE> IWhereConditions ofMultiple(Stream<SOURCE> pStream,
-                                              Function<SOURCE, IColumnIdentification> pColumnResolver,
-                                              Function<SOURCE, ?> pValueResolver,
-                                              Function<SOURCE, IWhereOperator> pOperatorResolver)
+  static <SOURCE> IWhereConditions ofMultiple(Stream<SOURCE> pStream, Function<SOURCE, IColumnIdentification> pColumnResolver,
+                                              Function<SOURCE, ?> pValueResolver, Function<SOURCE, IWhereOperator> pOperatorResolver)
   {
 
     //noinspection unchecked
-    return IWhereConditions.createFromMultiple(pStream.map(pSource -> of(pColumnResolver.apply(pSource), pValueResolver.apply(pSource),
-                                                                         pOperatorResolver.apply(pSource))), EConcatenationType.AND);
+    return IWhereConditions.createFromMultiple(pStream //
+        .map(pSource -> of(pColumnResolver.apply(pSource), pValueResolver.apply(pSource), //
+            pOperatorResolver.apply(pSource))), EConcatenationType.AND);
   }
 
   /**
@@ -220,8 +217,7 @@ public interface IWhereCondition<VALUE> extends IColumnValueTuple<VALUE>, IPrepa
    * @param <SOURCE>           the generic type of the source objects
    * @return an array of where conditions
    */
-  static <SOURCE> IWhereConditions ofMultiple(Collection<SOURCE> pCollection,
-                                              Function<SOURCE, IColumnIdentification> pColumnResolver,
+  static <SOURCE> IWhereConditions ofMultiple(Collection<SOURCE> pCollection, Function<SOURCE, IColumnIdentification> pColumnResolver,
                                               Function<SOURCE, ?> pValueResolver,
                                               BiFunction<IColumnIdentification, Object, IWhereCondition> pConditionResolver)
   {
@@ -238,14 +234,14 @@ public interface IWhereCondition<VALUE> extends IColumnValueTuple<VALUE>, IPrepa
    * @param <SOURCE>           the generic type of the source objects
    * @return an array of where conditions
    */
-  static <SOURCE> IWhereConditions ofMultiple(Stream<SOURCE> pStream,
-                                              Function<SOURCE, IColumnIdentification> pColumnResolver,
+  static <SOURCE> IWhereConditions ofMultiple(Stream<SOURCE> pStream, Function<SOURCE, IColumnIdentification> pColumnResolver,
                                               Function<SOURCE, ?> pValueResolver,
                                               BiFunction<IColumnIdentification, Object, IWhereCondition> pConditionResolver)
   {
     //noinspection unchecked
-    return IWhereConditions.createFromMultiple(pStream.map(pSource -> pConditionResolver.apply(pColumnResolver.apply(pSource),
-                                                                                               pValueResolver.apply(pSource))), EConcatenationType.AND);
+    return IWhereConditions
+        .createFromMultiple(pStream.map(pSource -> pConditionResolver.apply(pColumnResolver.apply(pSource), pValueResolver.apply(pSource))),
+            EConcatenationType.AND);
   }
 
   /**
@@ -285,7 +281,8 @@ public interface IWhereCondition<VALUE> extends IColumnValueTuple<VALUE>, IPrepa
    * @return the created where condition
    */
   static <VALUE> IWhereCondition<VALUE> in(IColumnIdentification<VALUE> pColumn,
-                                           BiFunction<IColumnIdentification<VALUE>, VALUE, IColumnValueTuple<VALUE>> pTupleCreator, Iterable<VALUE> pValues)
+                                           BiFunction<IColumnIdentification<VALUE>, VALUE, IColumnValueTuple<VALUE>> pTupleCreator,
+                                           Iterable<VALUE> pValues)
   {
     return in(pColumn, pTupleCreator, StreamSupport.stream(pValues.spliterator(), false));
   }
@@ -301,7 +298,8 @@ public interface IWhereCondition<VALUE> extends IColumnValueTuple<VALUE>, IPrepa
    * @return the created where condition
    */
   static <VALUE> IWhereCondition<VALUE> in(IColumnIdentification<VALUE> pColumn,
-                                           BiFunction<IColumnIdentification<VALUE>, VALUE, IColumnValueTuple<VALUE>> pTupleCreator, Stream<VALUE> pValues)
+                                           BiFunction<IColumnIdentification<VALUE>, VALUE, IColumnValueTuple<VALUE>> pTupleCreator,
+                                           Stream<VALUE> pValues)
   {
     return new InConditionImpl<>(pColumn, pTupleCreator, pValues);
   }

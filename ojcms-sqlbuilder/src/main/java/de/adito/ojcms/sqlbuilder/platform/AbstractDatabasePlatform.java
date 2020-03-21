@@ -77,7 +77,7 @@ public abstract class AbstractDatabasePlatform implements IDatabasePlatform
   @Override
   public String columnModifierToStatementFormat(EColumnModifier pModifier)
   {
-    return Optional.ofNullable(getColumnModifierDeviations().get(pModifier))
+    return Optional.ofNullable(getColumnModifierDeviations().get(pModifier)) //
         .orElse(pModifier.getDefaultFormat());
   }
 }

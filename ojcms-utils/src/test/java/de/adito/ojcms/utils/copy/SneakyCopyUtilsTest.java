@@ -126,8 +126,8 @@ public class SneakyCopyUtilsTest
     else if (pOriginal instanceof Map)
       _assertMapCopySuccessful((Map<?, ?>) pOriginal, (Map<?, ?>) pCopy);
     else
-      assertNotSame(pOriginal, pCopy, "origin: " + pValueOrigin + ", type: " + pOriginal.getClass().getName() + ", original: " +
-          pOriginal + ", copy: " + pCopy);
+      assertNotSame(pOriginal, pCopy,
+          "origin: " + pValueOrigin + ", type: " + pOriginal.getClass().getName() + ", original: " + pOriginal + ", copy: " + pCopy);
   }
 
   /**
@@ -199,8 +199,8 @@ public class SneakyCopyUtilsTest
    */
   private static boolean _isPrimitiveOrEnumOrTypeOrString(Class<?> pType)
   {
-    return ClassUtils.isPrimitiveOrWrapper(pType) || Enum.class.isAssignableFrom(pType) || Class.class.isAssignableFrom(pType) ||
-        String.class.isAssignableFrom(pType);
+    return ClassUtils.isPrimitiveOrWrapper(pType) || Enum.class.isAssignableFrom(pType) || Class.class
+        .isAssignableFrom(pType) || String.class.isAssignableFrom(pType);
   }
 
   /**
@@ -216,12 +216,12 @@ public class SneakyCopyUtilsTest
     private final List<Integer> primitiveList = Arrays.asList(1, 2, 3);
     private final List<_SecondClass> complexList = Arrays.asList(new _SecondClass(), new _SecondClass());
     private final Class<_FirstClass> classType = _FirstClass.class;
-    private final Map<String, _SecondClass> someMap = new HashMap<>();
     private final boolean[] primitiveArray = new boolean[]{true, false, false};
     private final _ThirdClass[] complexArray = new _ThirdClass[]{new _ThirdClass(), new _ThirdClass()};
 
     private _FirstClass()
     {
+      Map<String, _SecondClass> someMap = new HashMap<>();
       someMap.put("key1", new _SecondClass());
       someMap.put("key2", new _SecondClass());
       someMap.put("key3", new _SecondClass());

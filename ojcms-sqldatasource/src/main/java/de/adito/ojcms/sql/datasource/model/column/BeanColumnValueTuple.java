@@ -57,8 +57,8 @@ public class BeanColumnValueTuple<VALUE> implements IColumnValueTuple<VALUE>, IB
   public static List<IColumnValueTuple<?>> ofMap(Map<IField<?>, Object> pValueMap)
   {
     //noinspection unchecked
-    return pValueMap.entrySet().stream()
-        .map(pEntry -> (IColumnValueTuple<?>) new BeanColumnValueTuple<>((IField) pEntry.getKey(), pEntry.getValue()))
+    return pValueMap.entrySet().stream() //
+        .map(pEntry -> (IColumnValueTuple<?>) new BeanColumnValueTuple<>((IField) pEntry.getKey(), pEntry.getValue())) //
         .collect(Collectors.toList());
   }
 }

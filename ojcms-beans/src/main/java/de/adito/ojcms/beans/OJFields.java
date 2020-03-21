@@ -75,8 +75,9 @@ public final class OJFields
   private static <VALUE, FIELD extends IField<VALUE>> FIELD _createField(Class<? extends OJBean> pBeanType,
                                                                          @Nullable BiPredicate<? extends OJBean, VALUE> pActiveCondition)
   {
-    final Field declaredFieldToCreate = BeanReflector.reflectDeclaredBeanFields(pBeanType).stream()
-        .filter(pField -> {
+    final Field declaredFieldToCreate = BeanReflector.reflectDeclaredBeanFields(pBeanType).stream() //
+        .filter(pField ->
+        {
           try
           {
             if (!pField.isAccessible())
@@ -87,8 +88,8 @@ public final class OJFields
           {
             throw new OJInternalException(pE);
           }
-        })
-        .findAny()
+        }) //
+        .findAny() //
         .orElseThrow(() -> new BeanFieldCreationException(pBeanType));
 
     //noinspection unchecked
@@ -114,7 +115,8 @@ public final class OJFields
    */
   private static <FIELD extends IField<?>> Supplier<Class<?>> _genericTypeSupplier(Field pDeclaredField, Class<FIELD> pBeanFieldType)
   {
-    return () -> {
+    return () ->
+    {
       try
       {
         final Type genericType = ((ParameterizedType) pDeclaredField.getGenericType()).getActualTypeArguments()[0];
@@ -122,9 +124,11 @@ public final class OJFields
       }
       catch (Exception pE)
       {
-        throw new BeanFieldCreationException("Unable to reflect generic type of bean field " + pBeanFieldType.getName() + "! " +
-                                                 "The annotation " + GenericBeanField.class.getSimpleName() + " can only be used " +
-                                                 "if the field type uses exactly one generic type which is the data type of the field.", pE);
+        throw new BeanFieldCreationException(
+            "Unable to reflect generic type of bean field " + pBeanFieldType.getName() + "! " + "The annotation " + GenericBeanField.class
+                .getSimpleName() + " can only be used " + "if the field type uses exactly one generic type which is the data type of the " +
+                "field.",
+            pE);
       }
     };
   }

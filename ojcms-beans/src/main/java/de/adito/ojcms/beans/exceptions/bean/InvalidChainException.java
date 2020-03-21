@@ -32,7 +32,8 @@ public class InvalidChainException extends OJRuntimeException
    */
   public InvalidChainException(IField<?> pNoBeanField)
   {
-    this("It can only contain bean reference fields. " + pNoBeanField.getName() + " is of data type " + pNoBeanField.getDataType().getName());
+    this("It can only contain bean reference fields. " + pNoBeanField.getName() + " is of data type " +
+        pNoBeanField.getDataType().getName());
   }
 
   /**

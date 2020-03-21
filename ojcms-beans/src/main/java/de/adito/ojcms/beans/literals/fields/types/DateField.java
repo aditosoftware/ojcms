@@ -31,8 +31,8 @@ public class DateField extends AbstractField<Instant> implements ISerializableFi
   public String display(Instant pValue, IClientInfo pClientInfo)
   {
     final ZonedDateTime date = ZonedDateTime.ofInstant(pValue, pClientInfo.getZoneId());
-    return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.MEDIUM)
-        .withLocale(pClientInfo.getLocale())
+    return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.MEDIUM) //
+        .withLocale(pClientInfo.getLocale()) //
         .format(date);
   }
 

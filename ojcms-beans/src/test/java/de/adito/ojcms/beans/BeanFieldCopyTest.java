@@ -35,30 +35,29 @@ public class BeanFieldCopyTest
     final Map<String, Integer> testMap = new HashMap<>();
     testMap.put("test1", 6);
     testMap.put("test2", 60);
-    final Consumer<IMapBean<String, Integer>> mapTest = pMapBean -> {
+
+    final Consumer<IMapBean<String, Integer>> mapTest = pMapBean ->
+    {
       assertEquals(2, pMapBean.size());
       assertSame(6, pMapBean.get("test1"));
       assertSame(60, pMapBean.get("test2"));
       assertEquals(testMap, pMapBean);
     };
 
-    return Stream.of(
-        new _GenericFieldValueWrapper<>(BeanField.class, new SomeBean()),
-        new _FieldValueWrapper<>(BooleanField.class, true),
+    return Stream.of(new _GenericFieldValueWrapper<>(BeanField.class, new SomeBean()), new _FieldValueWrapper<>(BooleanField.class, true),
         new _FieldValueWrapper<>(CharacterField.class, 'a'),
         new _GenericFieldValueWrapper<>(ContainerField.class, IBeanContainer.empty(SomeBean.class)),
-        new _FieldValueWrapper<>(DateField.class, Instant.now()),
-        new _FieldValueWrapper<>(DecimalField.class, 5.2),
+        new _FieldValueWrapper<>(DateField.class, Instant.now()), new _FieldValueWrapper<>(DecimalField.class, 5.2),
         new _GenericFieldValueWrapper<>(EnumField.class, TestEnum.HELLO),
         new _GenericFieldValueWrapper<>(GenericField.class, new _FieldValueWrapper<>(BooleanField.class, true)),
-        new _FieldValueWrapper<>(IntegerField.class, 1),
-        new _GenericFieldValueWrapper<>(ListField.class, Arrays.asList("1", "2", "3")),
+        new _FieldValueWrapper<>(IntegerField.class, 1), new _GenericFieldValueWrapper<>(ListField.class, Arrays.asList("1", "2", "3")),
         new _FieldValueWrapper<>(LongField.class, 4L),
-        new _GenericFieldValueWrapper<>(MapField.class, IMapBean.createFromMap(testMap, Integer.class, (pName, pField) -> {},
-                                                                               pKey -> Optional.empty(), false), mapTest),
+        new _GenericFieldValueWrapper<>(MapField.class, IMapBean.createFromMap(testMap, Integer.class, (pName, pField) -> //
+            {
+            }, //
+            pKey -> Optional.empty(), false), mapTest),
         new _GenericFieldValueWrapper<>(SetField.class, new HashSet<>(Arrays.asList("1", "2", "3"))),
-        new _FieldValueWrapper<>(ShortField.class, (short) 7),
-        new _FieldValueWrapper<>(TextField.class, "testing"));
+        new _FieldValueWrapper<>(ShortField.class, (short) 7), new _FieldValueWrapper<>(TextField.class, "testing"));
   }
 
   @ParameterizedTest
@@ -66,14 +65,14 @@ public class BeanFieldCopyTest
   public <VALUE> void testFieldCopyMechanisms(_FieldValueWrapper<VALUE> pFieldValueWrapper)
   {
     assertNotNull(pFieldValueWrapper.value);
-    final IField<VALUE> field = BeanFieldFactory.createField(pFieldValueWrapper.fieldType, pFieldValueWrapper::getGenericFieldType,
-                                                             "test", false, Collections.emptySet(), null);
+    final IField<VALUE> field = BeanFieldFactory.createField(pFieldValueWrapper.fieldType, pFieldValueWrapper::getGenericFieldType, "test",
+        false, Collections.emptySet(), null);
     try
     {
       final VALUE copiedValue = field.copyValue(pFieldValueWrapper.value, ECopyMode.DEEP_ONLY_BEAN_FIELDS);
       final Class<?> valueType = copiedValue.getClass();
-      assertTrue(ClassUtils.isPrimitiveOrWrapper(valueType) || Enum.class.isAssignableFrom(valueType) ||
-                     String.class.isAssignableFrom(valueType) || copiedValue != pFieldValueWrapper.value);
+      assertTrue(ClassUtils.isPrimitiveOrWrapper(valueType) || Enum.class.isAssignableFrom(valueType) || String.class
+          .isAssignableFrom(valueType) || copiedValue != pFieldValueWrapper.value);
       pFieldValueWrapper.getOptionalTest().ifPresent(pTest -> pTest.accept((copiedValue)));
     }
     catch (BeanCopyNotSupportedException pE)

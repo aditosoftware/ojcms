@@ -156,10 +156,10 @@ public interface IColumnIdentification<VALUE> extends IStatementFormat
                                                      @Nullable BiPredicate<String, Class> pNumericDeterminer)
   {
     //noinspection unchecked
-    Function<SOURCE, IColumnIdentification> mapper = pSource -> of(pNameResolver.apply(pSource), pDataTypeResolver.apply(pSource),
-                                                                   (BiPredicate) pNumericDeterminer);
-    return pStream
-        .map(mapper)
+    Function<SOURCE, IColumnIdentification> mapper =
+        pSource -> of(pNameResolver.apply(pSource), pDataTypeResolver.apply(pSource), (BiPredicate) pNumericDeterminer);
+    return pStream //
+        .map(mapper) //
         .toArray(IColumnIdentification[]::new);
   }
 }

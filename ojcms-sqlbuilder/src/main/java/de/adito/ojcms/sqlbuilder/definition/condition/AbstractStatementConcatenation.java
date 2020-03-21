@@ -34,9 +34,9 @@ abstract class AbstractStatementConcatenation<NEGATE extends IMultipleCondition<
   @Override
   public String toStatementFormat(IDatabasePlatform pPlatform, String pIdColumnName)
   {
-    return stream()
-        .map(pCondition -> StatementFormatter.toFormat(pCondition, pPlatform, pIdColumnName) + " " +
-            (hasConcatenation(pCondition) ? getConcatenationType(pCondition).name() + " " : ""))
+    return stream() //
+        .map(pCondition -> StatementFormatter.toFormat(pCondition, pPlatform, pIdColumnName) + " " + //
+            (hasConcatenation(pCondition) ? getConcatenationType(pCondition).name() + " " : "")) //
         .collect(Collectors.joining());
   }
 

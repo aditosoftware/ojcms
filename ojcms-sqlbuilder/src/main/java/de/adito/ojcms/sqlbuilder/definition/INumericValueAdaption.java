@@ -52,7 +52,8 @@ public interface INumericValueAdaption<NUMBER extends Number> extends IStatement
    * @param <NUMBER>   the generic type for the number
    * @return a new instance based on given values
    */
-  static <NUMBER extends Number> INumericValueAdaption<NUMBER> of(IColumnIdentification<NUMBER> pColumn, ENumericOperation pOperation, NUMBER pNumber)
+  static <NUMBER extends Number> INumericValueAdaption<NUMBER> of(IColumnIdentification<NUMBER> pColumn, ENumericOperation pOperation,
+                                                                  NUMBER pNumber)
   {
     return new INumericValueAdaption<NUMBER>()
     {
@@ -110,8 +111,9 @@ public interface INumericValueAdaption<NUMBER extends Number> extends IStatement
                                                      Function<SOURCE, ? extends Number> pNumberResolver)
   {
     //noinspection unchecked
-    return pStream
-        .map(pSource -> of((IColumnIdentification<Number>) pColumnResolver.apply(pSource), pOperationResolver.apply(pSource), pNumberResolver.apply(pSource)))
+    return pStream //
+        .map(pSource -> of((IColumnIdentification<Number>) pColumnResolver.apply(pSource), pOperationResolver.apply(pSource),
+            pNumberResolver.apply(pSource))) //
         .toArray(INumericValueAdaption[]::new);
   }
 }

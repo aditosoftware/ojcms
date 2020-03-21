@@ -12,7 +12,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.*;
-import java.util.stream.*;
+import java.util.stream.Stream;
+
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * The encapsulated bean data core implementation based on a {@link IBeanDataSource}.
@@ -20,8 +23,7 @@ import java.util.stream.*;
  * @author Simon Danner, 08.12.2018
  */
 @EncapsulatedData
-class EncapsulatedBeanData extends AbstractEncapsulatedData<FieldValueTuple<?>, IBeanDataSource>
-    implements IEncapsulatedBeanData
+class EncapsulatedBeanData extends AbstractEncapsulatedData<FieldValueTuple<?>, IBeanDataSource> implements IEncapsulatedBeanData
 {
   private final List<IField<?>> fieldOrder;
   private final Map<IField<?>, IStatisticData<?>> statisticData;
@@ -67,7 +69,8 @@ class EncapsulatedBeanData extends AbstractEncapsulatedData<FieldValueTuple<?>, 
   @Override
   public <VALUE> void removeField(IField<VALUE> pField)
   {
-    _ifFieldExists(pField, pCheckedField -> {
+    _ifFieldExists(pField, pCheckedField ->
+    {
       getDatasource().removeField(pCheckedField);
       fieldOrder.remove(pCheckedField);
     });
@@ -115,8 +118,9 @@ class EncapsulatedBeanData extends AbstractEncapsulatedData<FieldValueTuple<?>, 
   @Override
   public Iterator<FieldValueTuple<?>> iterator()
   {
-    final Stream<FieldValueTuple<?>> fieldValueTupleStream = fieldOrder.stream()
+    final Stream<FieldValueTuple<?>> fieldValueTupleStream = fieldOrder.stream() //
         .map(pField -> pField.newUntypedTuple(getValue(pField)));
+
     return fieldValueTupleStream.iterator();
   }
 
@@ -127,10 +131,9 @@ class EncapsulatedBeanData extends AbstractEncapsulatedData<FieldValueTuple<?>, 
    */
   private Map<IField<?>, IStatisticData<?>> _createBeanStatisticMapping()
   {
-    return fieldOrder.stream()
-        .filter(pField -> pField.hasAnnotation(Statistics.class))
-        .collect(Collectors.toMap(Function.identity(),
-                                  pField -> new StatisticData<>(pField.getAnnotationOrThrow(Statistics.class).capacity(), null)));
+    return fieldOrder.stream() //
+        .filter(pField -> pField.hasAnnotation(Statistics.class)) //
+        .collect(toMap(identity(), pField -> new StatisticData<>(pField.getAnnotationOrThrow(Statistics.class).capacity(), null)));
   }
 
   /**

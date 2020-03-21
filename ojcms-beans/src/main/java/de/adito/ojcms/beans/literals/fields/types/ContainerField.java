@@ -31,7 +31,7 @@ public class ContainerField<BEAN extends IBean> extends AbstractField<IBeanConta
   @Override
   public IBeanContainer<BEAN> copyValue(IBeanContainer<BEAN> pOriginalContainer, ECopyMode pMode, CustomFieldCopy<?>... pCustomFieldCopies)
   {
-    return IBeanContainer.ofStream(pOriginalContainer.getBeanType(), pOriginalContainer.stream()
+    return IBeanContainer.ofStream(pOriginalContainer.getBeanType(), pOriginalContainer.stream() //
         .map(pOriginalBean -> pMode.shouldCopyDeep() ? pOriginalBean.createCopy(pMode, pCustomFieldCopies) : pOriginalBean));
   }
 }

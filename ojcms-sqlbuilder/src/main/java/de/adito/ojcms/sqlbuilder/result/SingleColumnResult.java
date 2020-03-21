@@ -38,8 +38,8 @@ public class SingleColumnResult<VALUE> implements Iterable<VALUE>
    */
   public OptionalNullable<VALUE> getFirst()
   {
-    return result.getFirst()
-        .map(pResultRow -> OptionalNullable.of(pResultRow.get(column)))
+    return result.getFirst() //
+        .map(pResultRow -> OptionalNullable.of(pResultRow.get(column))) //
         .orElseGet(OptionalNullable::notPresent);
   }
 

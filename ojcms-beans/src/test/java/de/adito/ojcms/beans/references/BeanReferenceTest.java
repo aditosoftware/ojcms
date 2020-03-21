@@ -33,11 +33,14 @@ class BeanReferenceTest
   public void testDirectParentsContainer()
   {
     final PersonRegistry registry = new PersonRegistry();
-    final List<BeanReference> directReferences = registry.getValue(PersonRegistry.persons).stream()
-        .flatMap(pPerson -> pPerson.getDirectReferences().stream())
+    final List<BeanReference> directReferences = registry.getValue(PersonRegistry.persons).stream() //
+        .flatMap(pPerson -> pPerson.getDirectReferences().stream()) //
         .collect(Collectors.toList());
+
     assertEquals(3, directReferences.size());
-    directReferences.forEach(pNode -> {
+
+    directReferences.forEach(pNode ->
+    {
       assertSame(pNode.getBean(), registry);
       assertSame(pNode.getField(), PersonRegistry.persons);
     });

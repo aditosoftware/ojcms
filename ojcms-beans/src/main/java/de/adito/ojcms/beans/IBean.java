@@ -89,11 +89,13 @@ public interface IBean extends IBeanEventPublisher<FieldValueTuple<?>, IBeanData
   default <VALUE, TARGET> TARGET getValueConverted(IField<VALUE> pField, Class<TARGET> pConvertType)
   {
     final VALUE actualValue = getValue(pField);
+
     if (actualValue == null || pConvertType.isAssignableFrom(actualValue.getClass()))
       //noinspection unchecked
       return (TARGET) actualValue;
-    return pField.getFromConverter(pConvertType)
-        .orElseThrow(() -> new ValueConversionUnsupportedException(pField, pConvertType))
+
+    return pField.getFromConverter(pConvertType) //
+        .orElseThrow(() -> new ValueConversionUnsupportedException(pField, pConvertType)) //
         .apply(actualValue);
   }
 
@@ -131,14 +133,16 @@ public interface IBean extends IBeanEventPublisher<FieldValueTuple<?>, IBeanData
   default <VALUE, SOURCE> void setValueConverted(IField<VALUE> pField, SOURCE pValueToConvert)
   {
     VALUE convertedValue = null;
+
     if (pValueToConvert != null)
     {
       final Class<SOURCE> sourceType = (Class<SOURCE>) pValueToConvert.getClass();
-      convertedValue = requireNonNull(pField).getDataType().isAssignableFrom(sourceType) ? (VALUE) pValueToConvert :
-          pField.getToConverter(sourceType)
-              .orElseThrow(() -> new ValueConversionUnsupportedException(pField, sourceType))
+      convertedValue = requireNonNull(pField).getDataType().isAssignableFrom(sourceType) ? (VALUE) pValueToConvert : //
+          pField.getToConverter(sourceType) //
+              .orElseThrow(() -> new ValueConversionUnsupportedException(pField, sourceType)) //
               .apply(pValueToConvert);
     }
+
     setValue(pField, convertedValue);
   }
 
@@ -149,10 +153,10 @@ public interface IBean extends IBeanEventPublisher<FieldValueTuple<?>, IBeanData
   default void clear()
   {
     //noinspection unchecked,rawtypes
-    streamFields()
-        .filter(pField -> !pField.isPrivate())
-        .filter(pField -> !pField.isValueFinal())
-        .filter(pField -> pField.getInitialValue() != null || !pField.mustNeverBeNull())
+    streamFields() //
+        .filter(pField -> !pField.isPrivate()) //
+        .filter(pField -> !pField.isValueFinal()) //
+        .filter(pField -> pField.getInitialValue() != null || !pField.mustNeverBeNull()) //
         .forEach(pField -> setValue((IField) pField, pField.getInitialValue()));
   }
 
@@ -198,8 +202,8 @@ public interface IBean extends IBeanEventPublisher<FieldValueTuple<?>, IBeanData
    */
   default <VALUE> int getFieldIndex(IField<VALUE> pField)
   {
-    return streamFields()
-        .collect(Collectors.toList())
+    return streamFields() //
+        .collect(Collectors.toList()) //
         .indexOf(pField);
   }
 
@@ -214,9 +218,9 @@ public interface IBean extends IBeanEventPublisher<FieldValueTuple<?>, IBeanData
   default IField<?> getFieldByName(String pFieldName)
   {
     StringUtility.requireNotEmpty(pFieldName, "field name");
-    return streamFields()
-        .filter(pField -> pField.getName().equals(pFieldName))
-        .findAny()
+    return streamFields() //
+        .filter(pField -> pField.getName().equals(pFieldName)) //
+        .findAny() //
         .orElseThrow(() -> new BeanFieldDoesNotExistException(this, pFieldName));
   }
 
@@ -224,7 +228,8 @@ public interface IBean extends IBeanEventPublisher<FieldValueTuple<?>, IBeanData
    * Creates a copy of this bean.
    * This method expects an existing default constructor for this concrete bean type.
    * If the copy should include deep fields, all deep beans are supposed to have default constructors as well.
-   * If it is not possible to provide a default constructor, you may use {@link IBean#createCopy(ECopyMode, UnaryOperator, CustomFieldCopy[])}
+   * If it is not possible to provide a default constructor, you may use
+   * {@link IBean#createCopy(ECopyMode, UnaryOperator, CustomFieldCopy[])}
    * to create bean copies. It allows you to define a custom constructor call to create the new instance.
    *
    * A copy will always be created with the default {@link IBeanDataSource}.
@@ -247,11 +252,13 @@ public interface IBean extends IBeanEventPublisher<FieldValueTuple<?>, IBeanData
    * a custom constructor call. If the copy should be deep, all deep bean values are supposed to have a default constructors.
    *
    * @param pMode                  the copy mode
-   * @param pCustomConstructorCall a custom constructor call defined as function (the input is the existing bean, the function should create the copy)
+   * @param pCustomConstructorCall a custom constructor call defined as function (the input is the existing bean, the function should
+   *                               create the copy)
    * @param pCustomFieldCopies     a collection of custom copy mechanisms for specific bean fields
    * @return a copy of this bean
    */
-  default <BEAN extends IBean> BEAN createCopy(ECopyMode pMode, UnaryOperator<BEAN> pCustomConstructorCall, CustomFieldCopy<?>... pCustomFieldCopies)
+  default <BEAN extends IBean> BEAN createCopy(ECopyMode pMode, UnaryOperator<BEAN> pCustomConstructorCall,
+                                               CustomFieldCopy<?>... pCustomFieldCopies)
   {
     //noinspection unchecked
     return doCreateCopy((BEAN) this, pMode, pCustomConstructorCall, pCustomFieldCopies);
@@ -268,7 +275,7 @@ public interface IBean extends IBeanEventPublisher<FieldValueTuple<?>, IBeanData
   {
     final IStatisticData<?> statisticData = requestEncapsulatedDataForField(this, pField).getStatisticData().get(pField);
     //noinspection unchecked
-    return Optional.ofNullable(statisticData)
+    return Optional.ofNullable(statisticData) //
         .map(pData -> (IStatisticData<VALUE>) pData);
   }
 
@@ -280,8 +287,8 @@ public interface IBean extends IBeanEventPublisher<FieldValueTuple<?>, IBeanData
    */
   default Set<FieldValueTuple<?>> getIdentifiers()
   {
-    return stream()
-        .filter(pTuple -> pTuple.getField().hasAnnotation(Identifier.class))
+    return stream() //
+        .filter(pTuple -> pTuple.getField().hasAnnotation(Identifier.class)) //
         .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
@@ -313,9 +320,11 @@ public interface IBean extends IBeanEventPublisher<FieldValueTuple<?>, IBeanData
     {
       if (!current.hasField(field))
         throw new InvalidChainException(current, field);
+
       final Object value = current.getValue(field);
       if (!(value instanceof IBean))
         throw new InvalidChainException(field);
+
       current = (IBean) value;
     }
 
@@ -350,8 +359,10 @@ public interface IBean extends IBeanEventPublisher<FieldValueTuple<?>, IBeanData
   default <VALUE> VALUE resolveDeepValue(IField<VALUE> pDeepField, List<IField<?>> pChain)
   {
     final IBean deepBean = resolveDeepBean(pChain);
+
     if (!deepBean.hasField(pDeepField))
       throw new InvalidChainException(deepBean, pDeepField);
+
     return deepBean.getValue(pDeepField);
   }
 
@@ -374,8 +385,8 @@ public interface IBean extends IBeanEventPublisher<FieldValueTuple<?>, IBeanData
    */
   default Stream<IField<?>> streamFields()
   {
-    return requestEncapsulatedData(this).streamFields()
-        .filter(pField -> !pField.isPrivate())
+    return requestEncapsulatedData(this).streamFields() //
+        .filter(pField -> !pField.isPrivate()) //
         .filter(pField -> getFieldActivePredicate().isOptionalActive(pField));
   }
 
@@ -387,8 +398,8 @@ public interface IBean extends IBeanEventPublisher<FieldValueTuple<?>, IBeanData
    */
   default Stream<FieldValueTuple<?>> stream()
   {
-    return requestEncapsulatedData(this).stream()
-        .filter(pFieldTuple -> !pFieldTuple.getField().isPrivate())
+    return requestEncapsulatedData(this).stream() //
+        .filter(pFieldTuple -> !pFieldTuple.getField().isPrivate()) //
         .filter(pFieldTuple -> getFieldActivePredicate().isOptionalActive(pFieldTuple.getField()));
   }
 

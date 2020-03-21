@@ -145,9 +145,9 @@ class InputSortedElementsTest extends AbstractInterfaceTest<IInputSortedElements
    */
   private List<_Person> _addMultiple(IInputSortedElements<_Person> pElementContainer, int pAmount)
   {
-    return IntStream.range(0, pAmount)
-        .mapToObj(pIndex -> new _Person(UUID.randomUUID().toString(), "Name"))
-        .peek(pElementContainer::add)
+    return IntStream.range(0, pAmount) //
+        .mapToObj(pIndex -> new _Person(UUID.randomUUID().toString(), "Name")) //
+        .peek(pElementContainer::add) //
         .collect(Collectors.toList());
   }
 

@@ -31,10 +31,10 @@ public class SingleBeanPersistenceModelTest extends AbstractDatabaseTest<SingleB
 
     final IColumnIdentification<String> idColumn = IColumnIdentification.of(BEAN_TABLE_BEAN_ID, String.class);
 
-    final Optional<ResultRow> result = builder.doSelect(pSelect -> pSelect
-        .select(idColumn)
-        .from(BEAN_TABLE_NAME)
-        .where(IWhereCondition.isEqual(idColumn, BEAN_ID + 2))
+    final Optional<ResultRow> result = builder.doSelect(pSelect -> pSelect //
+        .select(idColumn) //
+        .from(BEAN_TABLE_NAME) //
+        .where(IWhereCondition.isEqual(idColumn, BEAN_ID + 2)) //
         .firstResult());
 
     assertTrue(result.isPresent());

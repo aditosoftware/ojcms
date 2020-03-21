@@ -50,7 +50,7 @@ public class ReadOnlyInvocationTest
   /**
    * Example implementation of the test interface.
    */
-  public class _Impl implements _TestInterface
+  public static class _Impl implements _TestInterface
   {
     private int data = 0;
 

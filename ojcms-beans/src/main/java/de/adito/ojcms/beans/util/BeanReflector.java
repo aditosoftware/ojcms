@@ -101,8 +101,9 @@ public final class BeanReflector
    */
   private static List<IField<?>> _createBeanMetadata(Class<? extends IBean> pBeanType)
   {
-    return reflectDeclaredBeanFields(requiresDeclaredBeanType(pBeanType)).stream()
-        .map(pField -> {
+    return reflectDeclaredBeanFields(requiresDeclaredBeanType(pBeanType)).stream() //
+        .map(pField ->
+        {
           try
           {
             return (IField<?>) pField.get(null);
@@ -111,7 +112,7 @@ public final class BeanReflector
           {
             throw new OJInternalException(pE);
           }
-        })
+        }) //
         .collect(Collectors.toList());
   }
 
@@ -123,9 +124,9 @@ public final class BeanReflector
    */
   private static List<Field> _getDeclaredBeanFields(Class<? extends IBean> pBeanType)
   {
-    return _getDeclaredFields(pBeanType,
-                              pField -> Modifier.isStatic(pField.getModifiers()),
-                              pField -> IField.class.isAssignableFrom(pField.getType()));
+    return _getDeclaredFields(pBeanType,  //
+        pField -> Modifier.isStatic(pField.getModifiers()), //
+        pField -> IField.class.isAssignableFrom(pField.getType()));
   }
 
   /**
@@ -137,9 +138,9 @@ public final class BeanReflector
    */
   private static List<Field> _getDeclaredNonBeanFields(Class<? extends IBean> pBeanType)
   {
-    return _getDeclaredFields(pBeanType,
-                              pField -> !Modifier.isStatic(pField.getModifiers()),
-                              pField -> !IField.class.isAssignableFrom(pField.getType()));
+    return _getDeclaredFields(pBeanType, //
+        pField -> !Modifier.isStatic(pField.getModifiers()), //
+        pField -> !IField.class.isAssignableFrom(pField.getType()));
   }
 
   /**
@@ -154,16 +155,17 @@ public final class BeanReflector
   {
     Class<?> current = requiresDeclaredBeanType(pBeanType);
     final List<Field> declaredFields = new ArrayList<>();
-    final Predicate<Field> combinedPredicate = pField -> Stream.of(pFieldPredicates)
-        .allMatch(pPredicate -> pPredicate.test(pField));
+    final Predicate<Field> combinedPredicate = pField -> Stream.of(pFieldPredicates).allMatch(pPredicate -> pPredicate.test(pField));
+
     do
     {
-      Stream.of(current.getDeclaredFields())
-          .filter(pField -> !pField.isSynthetic())
-          .filter(combinedPredicate)
+      Stream.of(current.getDeclaredFields()) //
+          .filter(pField -> !pField.isSynthetic()) //
+          .filter(combinedPredicate) //
           .forEach(declaredFields::add);
     }
     while ((current = current.getSuperclass()) != null && !current.equals(OJBean.class));
+
     return declaredFields;
   }
 }

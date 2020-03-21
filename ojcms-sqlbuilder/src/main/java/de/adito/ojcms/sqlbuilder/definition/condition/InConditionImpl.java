@@ -27,13 +27,13 @@ class InConditionImpl<VALUE> extends ConditionImpl<VALUE>
    *                      this is mainly used for serialization
    * @param pValues       a stream of values the requested value should be in
    */
-  InConditionImpl(IColumnIdentification<VALUE> pColumn, BiFunction<IColumnIdentification<VALUE>, VALUE, IColumnValueTuple<VALUE>> pTupleCreator,
-                  Stream<VALUE> pValues)
+  InConditionImpl(IColumnIdentification<VALUE> pColumn,
+                  BiFunction<IColumnIdentification<VALUE>, VALUE, IColumnValueTuple<VALUE>> pTupleCreator, Stream<VALUE> pValues)
   {
     super(pColumn, null, () -> ""); //value and operator do not matter
 
-    values = pValues
-        .map(pValue -> pTupleCreator.apply(pColumn, pValue))
+    values = pValues //
+        .map(pValue -> pTupleCreator.apply(pColumn, pValue)) //
         .collect(Collectors.toList());
 
     if (values.isEmpty())

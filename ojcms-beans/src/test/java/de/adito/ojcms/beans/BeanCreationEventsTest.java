@@ -21,24 +21,26 @@ public class BeanCreationEventsTest
   @Test
   public void testObserveByBeanType()
   {
-    observe(observeCreationByBeanType(SomeBean.class))
-        .assertCallCount(1)
-        .whenDoing(SomeBean::new);
-    observe(observeCreationByBeanType(AnotherBean.class))
-        .assertCallCount(1)
+    observe(observeCreationByBeanType(SomeBean.class)) //
+        .assertCallCount(1) //
+        .whenDoing(SomeBean::new); //
+
+    observe(observeCreationByBeanType(AnotherBean.class)) //
+        .assertCallCount(1) //
         .whenDoing(AnotherBean::new);
+
     assertThrows(BeanCreationNotObservableException.class, () -> observeCreationByBeanType(BeanWithoutAnnotation.class));
   }
 
   @Test
   public void testObserveByAnnotationType()
   {
-    observe(observeCreationByAnnotationType(ObserveCreation.class))
-        .assertCallCount(1)
+    observe(observeCreationByAnnotationType(ObserveCreation.class)) //
+        .assertCallCount(1) //
         .whenDoing(SomeBean::new);
 
-    observe(observeCreationByAnnotationType(SomeAnnotation.class))
-        .assertCallCount(1)
+    observe(observeCreationByAnnotationType(SomeAnnotation.class)) //
+        .assertCallCount(1) //
         .whenDoing(AnotherBean::new);
 
     assertThrows(BeanCreationNotObservableException.class, () -> observeCreationByAnnotationType(Detail.class));
@@ -55,8 +57,8 @@ public class BeanCreationEventsTest
   @Test
   public void testObserveCreationIsAfterBeanConstruction()
   {
-    observe(observeCreationByBeanType(SomeBean.class))
-        .assertOnEveryValue(pNewBean -> assertEquals(10, pNewBean.getValue(SomeBean.SOME_FIELD)))
+    observe(observeCreationByBeanType(SomeBean.class)) //
+        .assertOnEveryValue(pNewBean -> assertEquals(10, pNewBean.getValue(SomeBean.SOME_FIELD))) //
         .whenDoing(SomeBean::new);
   }
 

@@ -33,12 +33,13 @@ public interface IReferenceProvider
     Set<BeanReference> newNodes = allNodes;
     do
     {
-      newNodes = newNodes.stream()
-          .flatMap(BeanReference::streamParentReferences)
-          .filter(pNode -> allNodes.stream()
-              .map(BeanReference::getBean)
+      newNodes = newNodes.stream() //
+          .flatMap(BeanReference::streamParentReferences) //
+          .filter(pNode -> allNodes.stream() //
+              .map(BeanReference::getBean) //
               .noneMatch(pInnerBean -> pInnerBean == pNode.getBean())) //Avoid cyclic references
           .collect(Collectors.toSet());
+
       allNodes.addAll(newNodes);
     }
     while (!newNodes.isEmpty());
@@ -55,9 +56,9 @@ public interface IReferenceProvider
    */
   default Set<IField<?>> getAllReferencesByBean(IBean pBean)
   {
-    return getAllReferences().stream()
-        .filter(pNode -> pNode.getBean() == pBean)
-        .map(BeanReference::getField)
+    return getAllReferences().stream() //
+        .filter(pNode -> pNode.getBean() == pBean) //
+        .map(BeanReference::getField) //
         .collect(Collectors.toSet());
   }
 
@@ -70,9 +71,9 @@ public interface IReferenceProvider
    */
   default Set<IBean> getAllReferencesByField(IField<?> pField)
   {
-    return getAllReferences().stream()
-        .filter(pNode -> pNode.getField() == pField)
-        .map(BeanReference::getBean)
+    return getAllReferences().stream() //
+        .filter(pNode -> pNode.getField() == pField) //
+        .map(BeanReference::getBean) //
         .collect(Collectors.toSet());
   }
 }

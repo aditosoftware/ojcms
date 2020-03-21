@@ -28,8 +28,7 @@ import static de.adito.ojcms.beans.BeanInternalEvents.requestEncapsulatedDataFor
 @EncapsulatedData
 abstract class AbstractEncapsulatedData<ELEMENT, DATASOURCE extends IDataSource> implements IEncapsulatedData<ELEMENT, DATASOURCE>
 {
-  private final Map<IEncapsulatedBeanData, Set<BeanReference>> weakReferencesMapping =
-      Collections.synchronizedMap(new WeakHashMap<>());
+  private final Map<IEncapsulatedBeanData, Set<BeanReference>> weakReferencesMapping = Collections.synchronizedMap(new WeakHashMap<>());
   private final Map<Class<? extends IEvent>, PublishSubject<? extends IEvent>> eventSubjects = new ConcurrentHashMap<>();
   private DATASOURCE datasource;
 
@@ -52,8 +51,8 @@ abstract class AbstractEncapsulatedData<ELEMENT, DATASOURCE extends IDataSource>
   @Override
   public Set<BeanReference> getDirectReferences()
   {
-    return weakReferencesMapping.values().stream()
-        .flatMap(Collection::stream)
+    return weakReferencesMapping.values().stream() //
+        .flatMap(Collection::stream) //
         .collect(Collectors.toSet());
   }
 
@@ -69,6 +68,7 @@ abstract class AbstractEncapsulatedData<ELEMENT, DATASOURCE extends IDataSource>
   {
     final IEncapsulatedBeanData encapsulatedData = requestEncapsulatedDataForField(pBean, pField);
     boolean removed = false;
+
     if (weakReferencesMapping.containsKey(encapsulatedData))
     {
       final Set<BeanReference> references = weakReferencesMapping.get(encapsulatedData);
@@ -86,6 +86,7 @@ abstract class AbstractEncapsulatedData<ELEMENT, DATASOURCE extends IDataSource>
         }
       }
     }
+
     if (!removed)
       throw new OJInternalException("Unable to remove reference! bean: " + pBean + " field: " + pField);
   }

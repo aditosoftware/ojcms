@@ -78,8 +78,8 @@ public final class ExternalConnectionProvider implements IDatabaseConnectionSupp
     }
     catch (SQLException pE)
     {
-      throw new OJDatabaseException(pE, "Unable to connect to external database! platform = " + platform.getPlatformName() +
-          " host = " + host + " port = " + port);
+      throw new OJDatabaseException(pE,
+          "Unable to connect to external database! platform = " + platform.getPlatformName() + " host = " + host + " port = " + port);
     }
   }
 

@@ -30,7 +30,7 @@ public class DefaultValueSerializer implements IValueSerializer
   static
   {
     _put(Character.class, String::valueOf, (pStatement, pSerial, pIndex) -> pStatement.setString(pIndex, pSerial), ResultSet::getString,
-         pSerial -> pSerial.charAt(0));
+        pSerial -> pSerial.charAt(0));
     _put(String.class, (pStatement, pSerial, pIndex) -> pStatement.setString(pIndex, pSerial), ResultSet::getString);
     _put(Integer.class, (pStatement, pSerial, pIndex) -> pStatement.setInt(pIndex, pSerial), ResultSet::getInt);
     _put(Double.class, (pStatement, pSerial, pIndex) -> pStatement.setDouble(pIndex, pSerial), ResultSet::getDouble);
@@ -40,11 +40,11 @@ public class DefaultValueSerializer implements IValueSerializer
     _put(Boolean.class, (pStatement, pSerial, pIndex) -> pStatement.setBoolean(pIndex, pSerial), ResultSet::getBoolean);
     _put(byte[].class, (pStatement, pSerial, pIndex) -> pStatement.setBytes(pIndex, pSerial), ResultSet::getBytes);
     _put(LocalDate.class, LocalDate::toEpochDay, (pStatement, pSerial, pIndex) -> pStatement.setLong(pIndex, pSerial), ResultSet::getLong,
-         LocalDate::ofEpochDay);
+        LocalDate::ofEpochDay);
     _put(LocalTime.class, LocalTime::toNanoOfDay, (pStatement, pSerial, pIndex) -> pStatement.setLong(pIndex, pSerial), ResultSet::getLong,
-         LocalTime::ofNanoOfDay);
+        LocalTime::ofNanoOfDay);
     _put(Instant.class, Instant::toEpochMilli, (pStatement, pSerial, pIndex) -> pStatement.setLong(pIndex, pSerial), ResultSet::getLong,
-         Instant::ofEpochMilli);
+        Instant::ofEpochMilli);
   }
 
   @Override

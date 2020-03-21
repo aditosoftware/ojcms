@@ -29,6 +29,7 @@ public class StatisticData<ENTRY> implements IStatisticData<ENTRY>
   {
     maxEntrySize = pCapacity;
     statistics = Collections.synchronizedMap(maxEntrySize == -1 ? new LinkedHashMap<>() : new _LimitedMap(maxEntrySize));
+
     if (pFirstValue != null)
       addEntry(pFirstValue);
   }

@@ -1,6 +1,6 @@
 package de.adito.ojcms.utils.collections;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

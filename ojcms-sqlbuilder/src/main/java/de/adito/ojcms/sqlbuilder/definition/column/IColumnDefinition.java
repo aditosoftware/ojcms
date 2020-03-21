@@ -47,7 +47,7 @@ public interface IColumnDefinition extends IStatementFormat
    */
   static IColumnDefinition forType(Class<?> pType, String pColumnName, @Nullable UnaryOperator<IColumnType> pModifier)
   {
-    final IColumnType columnType = EColumnType.getByDataType(pType)
+    final IColumnType columnType = EColumnType.getByDataType(pType) //
         .orElseThrow(() -> new OJDatabaseException("No column type found for data type " + pType.getName()));
     return of(pColumnName, pModifier == null ? columnType : pModifier.apply(columnType));
   }
@@ -104,8 +104,8 @@ public interface IColumnDefinition extends IStatementFormat
   static <SOURCE> IColumnDefinition[] ofMultiple(Stream<SOURCE> pStream, Function<SOURCE, String> pNameResolver,
                                                  Function<SOURCE, IColumnType> pTypeResolver)
   {
-    return pStream
-        .map(pSource -> of(pNameResolver.apply(pSource), pTypeResolver.apply(pSource)))
+    return pStream //
+        .map(pSource -> of(pNameResolver.apply(pSource), pTypeResolver.apply(pSource))) //
         .toArray(IColumnDefinition[]::new);
   }
 }

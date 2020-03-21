@@ -30,7 +30,7 @@ class BeanStatisticsTest
   public void resetBean()
   {
     bean = new SomeBean();
-    statisticData = bean.getStatisticData(SomeBean.field)
+    statisticData = bean.getStatisticData(SomeBean.field) //
         .orElseThrow(() -> new OJInternalException("Statistics not available!"));
   }
 
@@ -69,9 +69,9 @@ class BeanStatisticsTest
   {
     assertNotNull(statisticData);
     final AtomicInteger index = new AtomicInteger();
-    observe(statisticData, IStatisticData::observeStatistics)
-        .assertCallCount(10)
-        .assertOnEveryValue(pNewEntry -> assertEquals("value" + index.getAndIncrement(), pNewEntry.getValue()))
+    observe(statisticData, IStatisticData::observeStatistics) //
+        .assertCallCount(10) //
+        .assertOnEveryValue(pNewEntry -> assertEquals("value" + index.getAndIncrement(), pNewEntry.getValue())) //
         .whenDoing(pStatistics -> IntStream.range(0, 10).forEach(pIndex -> bean.setValue(SomeBean.field, "value" + pIndex)));
   }
 
@@ -91,13 +91,15 @@ class BeanStatisticsTest
     assertEquals(expectedEntryCount, actualEntrySize);
 
     final String newEntry = "someEntry";
-    observe(statisticData, pData -> pData.getIntervalStatistics(interval))
-        .assertCallCount(2)
-        .assertOnEveryValue(pUpdatedMap -> {
+    observe(statisticData, pData -> pData.getIntervalStatistics(interval)) //
+        .assertCallCount(2) //
+        .assertOnEveryValue(pUpdatedMap ->
+        {
           assertTrue(actualEntrySize < pUpdatedMap.size());
           assertEquals(newEntry, pUpdatedMap.get(new LinkedList<>(pUpdatedMap.keySet()).getLast()));
-        })
-        .whenDoing(pData -> {
+        }) //
+        .whenDoing(pData ->
+        {
           //wait a short time and add an entry
           try
           {

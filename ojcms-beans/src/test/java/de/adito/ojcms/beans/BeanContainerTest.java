@@ -75,7 +75,8 @@ class BeanContainerTest
   @Test
   public void testMerge()
   {
-    final IBeanContainer<SomeBean> container1 = IBeanContainer.ofIterableNotEmpty(Arrays.asList(new SomeBean(), new SomeBean(), new SomeBean()));
+    final IBeanContainer<SomeBean> container1 = IBeanContainer.ofIterableNotEmpty(
+        Arrays.asList(new SomeBean(), new SomeBean(), new SomeBean()));
     final IBeanContainer<SomeBean> container2 = IBeanContainer.ofVariableNotEmpty(new SomeBean(), new SomeBean());
     container1.merge(container2);
     assertEquals(5, container1.size());
@@ -190,12 +191,10 @@ class BeanContainerTest
   @Test
   public void testSort()
   {
-    final Stream<SomeBean> stream = IntStream.range(0, 5)
-        .mapToObj(SomeBean::new);
+    final Stream<SomeBean> stream = IntStream.range(0, 5).mapToObj(SomeBean::new);
     final IBeanContainer<SomeBean> container = IBeanContainer.ofStreamNotEmpty(stream);
     container.sort(Comparator.reverseOrder());
-    IntStream.range(0, 5)
-        .forEach(pIndex -> assertSame(4 - pIndex, container.getBean(pIndex).getValue(SomeBean.SOME_FIELD)));
+    IntStream.range(0, 5).forEach(pIndex -> assertSame(4 - pIndex, container.getBean(pIndex).getValue(SomeBean.SOME_FIELD)));
   }
 
   @Test
@@ -251,10 +250,13 @@ class BeanContainerTest
     equalsHashCodeChecker.makeAssertion(false);
     otherContainer.addBean(new SomeBean());
     equalsHashCodeChecker.makeAssertion(true);
-    IntStream.range(0, 5).forEach(pIndex -> {
+
+    IntStream.range(0, 5).forEach(pIndex ->
+    {
       container.addBean(new SomeBean());
       otherContainer.addBean(new SomeBean());
     });
+
     equalsHashCodeChecker.makeAssertion(true);
     container.getBean(3).setValue(SomeBean.SOME_FIELD, 9999);
     equalsHashCodeChecker.makeAssertion(false);
@@ -326,12 +328,13 @@ class BeanContainerTest
     assertFalse(noResult.isPresent());
 
     final Optional<SomeBean> oneResultTwoTuples = container.findOneByFieldValues(new FieldValueTuple<>(SomeBean.SOME_FIELD, 1),
-                                                                                 new FieldValueTuple<>(SomeBean.ANOTHER_FIELD, "anotherValue"));
+        new FieldValueTuple<>(SomeBean.ANOTHER_FIELD, "anotherValue"));
+
     assertTrue(oneResultTwoTuples.isPresent());
     assertSame(container.getBean(1), oneResultTwoTuples.get());
 
-    assertThrows(OJRuntimeException.class, () ->
-        container.findOneByFieldValues(new FieldValueTuple<>(SomeBean.ANOTHER_FIELD, "anotherValue")));
+    assertThrows(OJRuntimeException.class,
+        () -> container.findOneByFieldValues(new FieldValueTuple<>(SomeBean.ANOTHER_FIELD, "anotherValue")));
   }
 
   @Test
@@ -358,19 +361,20 @@ class BeanContainerTest
 
 
     final List<SomeBean> resultTwoTuple = container.findByFieldValues(new FieldValueTuple<>(SomeBean.SOME_FIELD, 2),
-                                                                      new FieldValueTuple<>(SomeBean.ANOTHER_FIELD, "testValue"));
+        new FieldValueTuple<>(SomeBean.ANOTHER_FIELD, "testValue"));
     assertEquals(1, resultOneTuple.size());
     assertSame(secondBean, resultTwoTuple.get(0));
 
     final List<SomeBean> badResultTwoTuple = container.findByFieldValues(new FieldValueTuple<>(SomeBean.SOME_FIELD, 2),
-                                                                         new FieldValueTuple<>(SomeBean.ANOTHER_FIELD, "anotherValue"));
+        new FieldValueTuple<>(SomeBean.ANOTHER_FIELD, "anotherValue"));
     assertTrue(badResultTwoTuple.isEmpty());
 
     final SomeBean thirdBean = new SomeBean(0);
     container.addBean(thirdBean);
 
     final List<SomeBean> twoResultsTwoTuple = container.findByFieldValues(new FieldValueTuple<>(SomeBean.SOME_FIELD, 0),
-                                                                          new FieldValueTuple<>(SomeBean.ANOTHER_FIELD, "anotherValue"));
+        new FieldValueTuple<>(SomeBean.ANOTHER_FIELD, "anotherValue"));
+
     assertEquals(2, twoResultsTwoTuple.size());
     assertSame(firstBean, twoResultsTwoTuple.get(0));
     assertSame(thirdBean, twoResultsTwoTuple.get(1));

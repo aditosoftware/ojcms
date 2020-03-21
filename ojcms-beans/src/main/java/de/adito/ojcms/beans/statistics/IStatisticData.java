@@ -58,8 +58,8 @@ public interface IStatisticData<ENTRY>
   default Observable<Map<Long, ENTRY>> getIntervalStatistics(int pInterval)
   {
     final IntervalStatisticsMap<ENTRY> map = new IntervalStatisticsMap<>(pInterval, getChangedDataStatistics());
-    return observeStatistics()
-        .map(pNewEntry -> map.newEntry(pNewEntry.getTimestamp(), pNewEntry.getValue()))
+    return observeStatistics() //
+        .map(pNewEntry -> map.newEntry(pNewEntry.getTimestamp(), pNewEntry.getValue())) //
         .startWith(map);
   }
 

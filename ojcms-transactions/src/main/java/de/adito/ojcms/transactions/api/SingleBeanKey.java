@@ -45,8 +45,8 @@ public final class SingleBeanKey
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "{" +
-        "singleBeanId='" + singleBeanId + '\'' +
+    return getClass().getSimpleName() + "{" + //
+        "singleBeanId='" + singleBeanId + '\'' + //
         '}';
   }
 }

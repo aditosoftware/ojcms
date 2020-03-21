@@ -82,9 +82,11 @@ class MapFieldTest
     map.put("key2", new SomeBean());
     map.put("key3", new SomeBean());
     final IMapBean<String, SomeBean> mapBean = SomeBean.mapField2.createBeanFromMap(map, SomeBean.class);
-    final IField<?> firstField = mapBean.streamFields()
-        .findFirst()
+
+    final IField<?> firstField = mapBean.streamFields() //
+        .findFirst() //
         .orElseThrow(AssertionError::new);
+
     assertSame(BeanField.class, firstField.getClass());
   }
 
@@ -97,8 +99,9 @@ class MapFieldTest
   {
     final AtomicInteger index = new AtomicInteger();
     //Test in order and proper to bean transformation
-    pBean.stream()
-        .forEach(pTuple -> {
+    pBean.stream() //
+        .forEach(pTuple ->
+        {
           assertEquals(String.valueOf(index.get()), pTuple.getField().getName());
           assertEquals("value" + index.getAndIncrement(), pTuple.getValue());
         });

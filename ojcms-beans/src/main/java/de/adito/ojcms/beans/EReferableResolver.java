@@ -58,8 +58,8 @@ public enum EReferableResolver
    */
   private static Stream<IReferable> _single(Object pValue)
   {
-    return _tryGetEncapsulated(pValue)
-        .map(pEncapsulated -> Stream.of((IReferable) pEncapsulated))
+    return _tryGetEncapsulated(pValue) //
+        .map(pEncapsulated -> Stream.of((IReferable) pEncapsulated)) //
         .orElse(Stream.empty());
   }
 
@@ -72,13 +72,12 @@ public enum EReferableResolver
    */
   private static Stream<IReferable> _withMulti(Object pValue)
   {
-    return _tryGetEncapsulated(pValue)
-        .map(pEncapsulated -> Stream.concat(pEncapsulated.stream()
-                                                .filter(pElement -> pElement instanceof IEncapsulatedDataHolder)
-                                                .map(EReferableResolver::_toEncapsulated)
-                                                .map(pInnerEncapsulated -> (IReferable) pInnerEncapsulated),
-                                            Stream.of(pEncapsulated)))
-        .orElse(Stream.empty());
+    return _tryGetEncapsulated(pValue) //
+        .map(pEncapsulated -> Stream.concat(pEncapsulated.stream() //
+                .filter(pElement -> pElement instanceof IEncapsulatedDataHolder) //
+                .map(EReferableResolver::_toEncapsulated) //
+                .map(pInnerEncapsulated -> (IReferable) pInnerEncapsulated), //
+            Stream.of(pEncapsulated))).orElse(Stream.empty());
   }
 
   /**
@@ -90,8 +89,7 @@ public enum EReferableResolver
    */
   private static Optional<IEncapsulatedData<?, ?>> _tryGetEncapsulated(Object pValue)
   {
-    return Optional.ofNullable(pValue)
-        .map(pHolder -> _toEncapsulated(pValue));
+    return Optional.ofNullable(pValue).map(pHolder -> _toEncapsulated(pValue));
   }
 
   /**

@@ -57,6 +57,7 @@ public final class IndexChecker
     final int maxIndex = sizeSupplier.getAsInt() - 1;
     if (pIndex < 0 || pIndex > maxIndex)
       throw new IndexOutOfBoundsException("index: " + pIndex + " max index: " + maxIndex);
+
     return pIndex;
   }
 }

@@ -60,10 +60,9 @@ public class BeanContainer<BEAN extends IBean> implements IBeanContainer<BEAN>
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "{beanType: " + getBeanType().getSimpleName() + ", count: " + size() + "}\nbeans:\n" +
-        stream()
-            .map(Objects::toString)
-            .collect(Collectors.joining("\n"));
+    return getClass().getSimpleName() + "{beanType: " + getBeanType().getSimpleName() + ", count: " + size() + "}\nbeans:\n" + stream() //
+        .map(Objects::toString) //
+        .collect(Collectors.joining("\n"));
   }
 
   @Override
@@ -78,8 +77,8 @@ public class BeanContainer<BEAN extends IBean> implements IBeanContainer<BEAN>
     //noinspection unchecked
     final BeanContainer<BEAN> otherContainer = (BeanContainer<BEAN>) pOther;
     final int size = size();
-    return size == otherContainer.size() &&
-        IntStream.range(0, size).allMatch(pIndex -> Objects.equals(getBean(pIndex), otherContainer.getBean(pIndex)));
+    return size == otherContainer.size() && IntStream.range(0, size).allMatch(
+        pIndex -> Objects.equals(getBean(pIndex), otherContainer.getBean(pIndex)));
   }
 
   @Override

@@ -94,8 +94,8 @@ public final class ResultRow
    * @param pColumnMapper     mapper for the columns
    * @return a map containing values for the requested columns
    */
-  public <KEY, COLUMN extends IColumnIdentification<?>> Map<KEY, Object> toMap(Collection<COLUMN> pColumnsToInclude, Function<COLUMN,
-      KEY> pColumnMapper)
+  public <KEY, COLUMN extends IColumnIdentification<?>> Map<KEY, Object> toMap(Collection<COLUMN> pColumnsToInclude,
+                                                                               Function<COLUMN, KEY> pColumnMapper)
   {
     //noinspection unchecked
     return pColumnsToInclude.stream() //

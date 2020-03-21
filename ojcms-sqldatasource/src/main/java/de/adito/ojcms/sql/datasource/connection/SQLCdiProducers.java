@@ -95,9 +95,9 @@ final class SQLCdiProducers
   {
     final IDatabaseConnectionSupplier connectionSupplier = pConfig.createConnectionSupplier(new ConnectionSupplierFactory(true));
 
-    return OJSQLBuilderFactory.newSQLBuilder(pDatabasePlatform, pConfig.getDefaultIdColumnName())
-        .withCustomSerializer(pSerializer)
-        .withClosingAndRenewingConnection(connectionSupplier)
+    return OJSQLBuilderFactory.newSQLBuilder(pDatabasePlatform, pConfig.getDefaultIdColumnName()) //
+        .withCustomSerializer(pSerializer) //
+        .withClosingAndRenewingConnection(connectionSupplier) //
         .create();
   }
 
@@ -115,8 +115,8 @@ final class SQLCdiProducers
   private static OJSQLBuilder _produceTransactionSQLBuilder(IDatabaseConfig pConfig, IDatabasePlatform pDatabasePlatform,
                                                             Connection pConnection, BeanSQLSerializer pSerializer)
   {
-    return OJSQLBuilderFactory.newSQLBuilder(pDatabasePlatform, pConfig.getDefaultIdColumnName())
-        .withCustomSerializer(pSerializer)
+    return OJSQLBuilderFactory.newSQLBuilder(pDatabasePlatform, pConfig.getDefaultIdColumnName()) //
+        .withCustomSerializer(pSerializer) //
         .withPermanentConnection(new IDatabaseConnectionSupplier()
         {
           @Override
@@ -130,7 +130,7 @@ final class SQLCdiProducers
           {
             return pDatabasePlatform;
           }
-        })
+        }) //
         .create();
   }
 }

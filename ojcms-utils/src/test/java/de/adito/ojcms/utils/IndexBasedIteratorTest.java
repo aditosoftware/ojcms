@@ -3,7 +3,7 @@ package de.adito.ojcms.utils;
 import org.junit.jupiter.api.*;
 
 import java.util.*;
-import java.util.function.*;
+import java.util.function.IntConsumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -33,32 +33,38 @@ public class IndexBasedIteratorTest
   @Test
   public void testStartIndex()
   {
-    final Iterator<Integer> it = IndexBasedIterator.buildIterator(list::get, list::size)
-        .startAtIndex(1)
+    final Iterator<Integer> it = IndexBasedIterator.buildIterator(list::get, list::size) //
+        .startAtIndex(1) //
         .createIterator();
+
     _checkIterator(it, 1, 2, 3);
   }
 
   @Test
   public void testEndIndex()
   {
-    final Iterator<Integer> it = IndexBasedIterator.buildIterator(list::get, list::size)
-        .endBeforeIndex(3)
+    final Iterator<Integer> it = IndexBasedIterator.buildIterator(list::get, list::size) //
+        .endBeforeIndex(3) //
         .createIterator();
+
     _checkIterator(it, 0, 1, 2);
   }
 
   @Test
   public void testNoSuchElement()
   {
-    final Iterator<Integer> it = IndexBasedIterator.buildIterator(list::get, list::size)
-        .endBeforeIndex(0)
+    final Iterator<Integer> it = IndexBasedIterator.buildIterator(list::get, list::size) //
+        .endBeforeIndex(0) //
         .createIterator();
+
     assertThrows(NoSuchElementException.class, it::next);
-    final Iterator<Integer> it2 = IndexBasedIterator.buildIterator(list::get, list::size)
-        .endBeforeIndex(1)
+
+    final Iterator<Integer> it2 = IndexBasedIterator.buildIterator(list::get, list::size) //
+        .endBeforeIndex(1) //
         .createIterator();
-    assertThrows(NoSuchElementException.class, () -> {
+
+    assertThrows(NoSuchElementException.class, () ->
+    {
       it2.next();
       it2.next();
     });
@@ -67,16 +73,19 @@ public class IndexBasedIteratorTest
   @Test
   public void testRemove()
   {
-    final Iterator<Integer> it = IndexBasedIterator.buildIterator(list::get, list::size)
-        .withRemover(remover)
+    final Iterator<Integer> it = IndexBasedIterator.buildIterator(list::get, list::size) //
+        .withRemover(remover) //
         .createIterator();
+
     it.next(); //= 0
     it.remove(); //removed 0
     assertEquals(Arrays.asList(1, 2, 3), list);
+
     it.next(); //= 1
     it.next(); //= 2
     it.remove(); //removed 2
     assertEquals(Arrays.asList(1, 3), list);
+
     it.next(); //= 3
     assertThrows(NoSuchElementException.class, it::next);
   }
@@ -84,11 +93,13 @@ public class IndexBasedIteratorTest
   @Test
   public void testRemoveIllegalState()
   {
-    final Iterator<Integer> it = IndexBasedIterator.buildIterator(list::get, list::size)
-        .withRemover(remover)
+    final Iterator<Integer> it = IndexBasedIterator.buildIterator(list::get, list::size) //
+        .withRemover(remover) //
         .createIterator();
+
     assertThrows(IllegalStateException.class, it::remove);
-    assertThrows(IllegalStateException.class, () -> {
+    assertThrows(IllegalStateException.class, () ->
+    {
       it.next();
       it.remove();
       it.remove();
@@ -120,8 +131,9 @@ public class IndexBasedIteratorTest
    */
   private static void _checkIterator(Iterator<Integer> pIterator, int... pExpectedElements)
   {
-    Arrays.stream(pExpectedElements, 0, pExpectedElements.length)
-        .forEach(pExpectedElement -> {
+    Arrays.stream(pExpectedElements, 0, pExpectedElements.length) //
+        .forEach(pExpectedElement ->
+        {
           assertTrue(pIterator.hasNext());
           assertSame(pExpectedElement, pIterator.next());
         });

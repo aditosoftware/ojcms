@@ -19,8 +19,8 @@ import static de.adito.ojcms.beans.BeanInternalEvents.requestEncapsulatedData;
  * @author Simon Danner, 07.12.2018
  */
 @EncapsulatedData
-interface IBeanEventPublisher<ELEMENT, DATASOURCE extends IDataSource,
-    ENCAPSULATED extends IEncapsulatedData<ELEMENT, DATASOURCE>> extends IEncapsulatedDataHolder<ELEMENT, DATASOURCE, ENCAPSULATED>
+interface IBeanEventPublisher<ELEMENT, DATASOURCE extends IDataSource, ENCAPSULATED extends IEncapsulatedData<ELEMENT, DATASOURCE>>
+    extends IEncapsulatedDataHolder<ELEMENT, DATASOURCE, ENCAPSULATED>
 {
   /**
    * An {@link Observable} to observe value changes of bean values.
@@ -29,7 +29,7 @@ interface IBeanEventPublisher<ELEMENT, DATASOURCE extends IDataSource,
    */
   default Observable<BeanValueChange<?>> observeValues()
   {
-    return requestEncapsulatedData(this).observeByType(BeanValueChange.class)
+    return requestEncapsulatedData(this).observeByType(BeanValueChange.class) //
         .map(pChange -> (BeanValueChange<?>) pChange);
   }
 
@@ -42,8 +42,8 @@ interface IBeanEventPublisher<ELEMENT, DATASOURCE extends IDataSource,
   {
     Objects.requireNonNull(pField);
     //noinspection unchecked
-    return observeValues()
-        .filter(pChange -> pChange.getField() == pField)
+    return observeValues() //
+        .filter(pChange -> pChange.getField() == pField) //
         .map(pChange -> (BeanValueChange<VALUE>) pChange);
   }
 
@@ -54,7 +54,7 @@ interface IBeanEventPublisher<ELEMENT, DATASOURCE extends IDataSource,
    */
   default Observable<BeanFieldAddition<?>> observeFieldAdditions()
   {
-    return requestEncapsulatedData(this).observeByType(BeanFieldAddition.class)
+    return requestEncapsulatedData(this).observeByType(BeanFieldAddition.class) //
         .map(pChange -> (BeanFieldAddition<?>) pChange);
   }
 
@@ -65,7 +65,7 @@ interface IBeanEventPublisher<ELEMENT, DATASOURCE extends IDataSource,
    */
   default Observable<BeanFieldRemoval<?>> observeFieldRemovals()
   {
-    return requestEncapsulatedData(this).observeByType(BeanFieldRemoval.class)
+    return requestEncapsulatedData(this).observeByType(BeanFieldRemoval.class) //
         .map(pChange -> (BeanFieldRemoval<?>) pChange);
   }
 }

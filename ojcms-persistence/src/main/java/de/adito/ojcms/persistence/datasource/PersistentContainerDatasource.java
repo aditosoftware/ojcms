@@ -76,8 +76,8 @@ class PersistentContainerDatasource<BEAN extends IBean> implements IBeanContaine
   public Iterator<BEAN> iterator()
   {
     content.requiresFullLoad();
-    return IndexBasedIterator.buildIterator(this::getBean, this::size)
-        .withRemover(this::removeBean)
+    return IndexBasedIterator.buildIterator(this::getBean, this::size) //
+        .withRemover(this::removeBean) //
         .createIterator();
   }
 }

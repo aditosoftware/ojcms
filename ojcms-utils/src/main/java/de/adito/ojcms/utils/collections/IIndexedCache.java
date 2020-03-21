@@ -68,13 +68,13 @@ public interface IIndexedCache<T>
    */
   default T computeIfAbsent(int pIndex, Function<Integer, T> pCreator)
   {
-    return getElementAtIndex(pIndex)
+    return getElementAtIndex(pIndex) //
         .orElseGet(() ->
-                   {
-                     final T createdElement = pCreator.apply(pIndex);
-                     addAtIndex(createdElement, pIndex);
-                     return createdElement;
-                   });
+        {
+          final T createdElement = pCreator.apply(pIndex);
+          addAtIndex(createdElement, pIndex);
+          return createdElement;
+        });
   }
 
   /**

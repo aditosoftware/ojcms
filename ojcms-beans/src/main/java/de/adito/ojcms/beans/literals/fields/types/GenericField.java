@@ -36,10 +36,10 @@ public class GenericField<VALUE> extends AbstractField<VALUE> implements ISerial
    */
   private static <TYPE> Class<TYPE> _checkGenericType(Class<TYPE> pGenericType)
   {
-    IField.findFieldTypeFromDataType(pGenericType)
-        .ifPresent(pReplacement ->
-                       LOGGER.warning("A generic field is not required for this data type. Use " + pReplacement.getName() + " instead." +
-                                          " generic type: " + pGenericType.getName()));
+    IField.findFieldTypeFromDataType(pGenericType) //
+        .ifPresent(pReplacement -> LOGGER.warning("A generic field is not required for this data type. Use " + pReplacement
+            .getName() + " instead." + " generic type: " + pGenericType.getName()));
+
     return pGenericType;
   }
 }

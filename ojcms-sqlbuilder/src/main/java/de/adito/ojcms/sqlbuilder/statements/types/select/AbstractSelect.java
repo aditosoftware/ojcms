@@ -24,8 +24,8 @@ import static de.adito.ojcms.sqlbuilder.format.ESeparator.COMMA_WITH_WHITESPACE;
  * @param <SELECT> the runtime type of the final select statement
  * @author Simon Danner, 26.04.2018
  */
-public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>> extends AbstractConditionStatement<SelectModifiers, Result,
-    ResultSet, SELECT>
+public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>>
+    extends AbstractConditionStatement<SelectModifiers, Result, ResultSet, SELECT>
 {
   private List<IColumnIdentification<?>> columnsToSelect = new ArrayList<>();
 

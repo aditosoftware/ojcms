@@ -1,6 +1,6 @@
 package de.adito.ojcms.sqlbuilder.definition.condition;
 
-import de.adito.ojcms.sqlbuilder.definition.*;
+import de.adito.ojcms.sqlbuilder.definition.IColumnValueTuple;
 import de.adito.ojcms.sqlbuilder.format.IPreparedStatementFormat;
 
 import java.util.List;
@@ -19,8 +19,8 @@ interface IMultipleCondition<CONDITION extends IMultipleCondition<CONDITION>>
   @Override
   default List<IColumnValueTuple<?>> getArguments(String pIdColumnName)
   {
-    return stream()
-        .flatMap(pCondition -> pCondition.getArguments(pIdColumnName).stream())
+    return stream() //
+        .flatMap(pCondition -> pCondition.getArguments(pIdColumnName).stream()) //
         .collect(Collectors.toList());
   }
 

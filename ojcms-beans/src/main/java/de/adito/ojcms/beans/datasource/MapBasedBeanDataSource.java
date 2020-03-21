@@ -26,7 +26,7 @@ public final class MapBasedBeanDataSource implements IBeanDataSource
    */
   public MapBasedBeanDataSource(List<IField<?>> pFields)
   {
-    values = pFields.stream()
+    values = pFields.stream() //
         .collect(HashMap::new, (pMap, pField) -> pMap.put(pField, pField.getInitialValue()), Map::putAll);
   }
 
@@ -37,8 +37,9 @@ public final class MapBasedBeanDataSource implements IBeanDataSource
    */
   public MapBasedBeanDataSource(IBean pBean)
   {
-    values = pBean.stream().collect(toMap(FieldValueTuple::getField,
-                                          pTuple -> pTuple.getValue() == null ? pTuple.getField().getInitialValue() : pTuple.getValue()));
+    values = pBean.stream() //
+        .collect(toMap(FieldValueTuple::getField,
+            pTuple -> pTuple.getValue() == null ? pTuple.getField().getInitialValue() : pTuple.getValue()));
   }
 
   @Override
@@ -54,6 +55,7 @@ public final class MapBasedBeanDataSource implements IBeanDataSource
     final boolean existing = values.containsKey(pField);
     if (!pAllowNewField && !existing)
       throw new OJInternalException("It is not allowed to add new fields for this bean data core. field: " + pField.getName());
+
     values.put(pField, pValue == null ? pField.getInitialValue() : pValue);
   }
 

@@ -13,9 +13,9 @@ import java.util.stream.Stream;
 public enum EColumnType
 {
   //text
-  CHAR(Character.class), STRING(String.class), BLOB(byte[].class),
+  CHAR(Character.class), STRING(String.class), BLOB(byte[].class), //
   //number
-  SHORT(Short.class), INT(Integer.class), LONG(Long.class), FLOAT(Float.class), DOUBLE(Double.class),
+  SHORT(Short.class), INT(Integer.class), LONG(Long.class), FLOAT(Float.class), DOUBLE(Double.class), //
   //date
   DATE(LocalDate.class), DATETIME(LocalDateTime.class), TIME(LocalTime.class);
 
@@ -49,9 +49,9 @@ public enum EColumnType
    */
   public static Optional<IColumnType> getByDataType(Class pJavaDataType)
   {
-    return Stream.of(values())
-        .filter(pColumnType -> pColumnType.javaDataType == pJavaDataType)
-        .findAny()
+    return Stream.of(values()) //
+        .filter(pColumnType -> pColumnType.javaDataType == pJavaDataType) //
+        .findAny() //
         .map(EColumnType::create);
   }
 }

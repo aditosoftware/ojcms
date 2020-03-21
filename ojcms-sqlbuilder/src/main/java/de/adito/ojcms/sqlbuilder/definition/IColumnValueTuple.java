@@ -76,7 +76,8 @@ public interface IColumnValueTuple<VALUE> extends IPreparedStatementFormat
    * @param <SOURCE>          the generic type of the source objects
    * @return an array of column value tuples
    */
-  static <SOURCE> IColumnValueTuple[] ofMultiple(Collection<SOURCE> pSourceCollection, Function<SOURCE, IColumnIdentification> pColumnResolver,
+  static <SOURCE> IColumnValueTuple[] ofMultiple(Collection<SOURCE> pSourceCollection,
+                                                 Function<SOURCE, IColumnIdentification> pColumnResolver,
                                                  Function<SOURCE, ?> pValueResolver)
   {
     return ofMultiple(pSourceCollection.stream(), pColumnResolver, pValueResolver);
@@ -95,8 +96,8 @@ public interface IColumnValueTuple<VALUE> extends IPreparedStatementFormat
                                                  Function<SOURCE, ?> pValueResolver)
   {
     //noinspection unchecked
-    return pStream
-        .map(pSource -> of((IColumnIdentification<Object>) pColumnResolver.apply(pSource), pValueResolver.apply(pSource)))
+    return pStream //
+        .map(pSource -> of((IColumnIdentification<Object>) pColumnResolver.apply(pSource), pValueResolver.apply(pSource))) //
         .toArray(IColumnValueTuple[]::new);
   }
 }

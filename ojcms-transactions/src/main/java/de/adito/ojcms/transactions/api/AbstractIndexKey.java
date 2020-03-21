@@ -66,9 +66,9 @@ abstract class AbstractIndexKey
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "{" +
-        "containerId='" + containerId + '\'' +
-        ", index=" + index +
+    return getClass().getSimpleName() + "{" + //
+        "containerId='" + containerId + '\'' + //
+        ", index=" + index + //
         '}';
   }
 }

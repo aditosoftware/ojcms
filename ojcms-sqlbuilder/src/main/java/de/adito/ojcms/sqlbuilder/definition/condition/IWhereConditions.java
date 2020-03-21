@@ -48,7 +48,9 @@ public interface IWhereConditions extends IMultipleCondition<IWhereConditions>
     final List<IWhereCondition<?>> conditionList = pConditions.collect(Collectors.toList());
     final IWhereConditions conditions = IWhereConditions.create(conditionList.remove(0));
     final boolean and = pConcatenationType == EConcatenationType.AND;
-    conditionList.forEach(pCondition -> {
+
+    conditionList.forEach(pCondition ->
+    {
       if (and)
         conditions.and(pCondition);
       else

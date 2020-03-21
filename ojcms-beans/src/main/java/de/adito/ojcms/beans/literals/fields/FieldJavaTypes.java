@@ -32,19 +32,19 @@ final class FieldJavaTypes
   static Optional<Class<IField<?>>> findFieldTypeFromDataType(Class<?> pDataType)
   {
     if (typeFieldMapping == null)
-      typeFieldMapping = IPicoRegistry.INSTANCE.find(IField.class, TypeDefaultField.class).entrySet().stream()
-          .flatMap(pEntry -> Stream.of(pEntry.getValue().types())
-              .map(pType -> new AbstractMap.SimpleEntry<>(pType, pEntry.getKey())))
-          .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
-                                    (pFieldType1, pFieldType2) ->
-                                    {
-                                      throw new OJInternalException("Incorrect default data types for bean field: " + pFieldType1.getSimpleName() +
-                                                                        " supports the same data type as " + pFieldType2.getSimpleName());
-                                    }));
+      typeFieldMapping = IPicoRegistry.INSTANCE.find(IField.class, TypeDefaultField.class).entrySet().stream() //
+          .flatMap(pEntry -> Stream.of(pEntry.getValue().types()) //
+              .map(pType -> new AbstractMap.SimpleEntry<>(pType, pEntry.getKey()))) //
+          .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (pFieldType1, pFieldType2) ->
+          {
+            throw new OJInternalException("Incorrect default data types for bean field: " + pFieldType1
+                .getSimpleName() + " supports the same data type as " + pFieldType2.getSimpleName());
+          }));
+
     //noinspection unchecked
-    return typeFieldMapping.entrySet().stream()
-        .filter(pEntry -> pEntry.getKey().isAssignableFrom(pDataType))
-        .findAny()
+    return typeFieldMapping.entrySet().stream() //
+        .filter(pEntry -> pEntry.getKey().isAssignableFrom(pDataType)) //
+        .findAny() //
         .map(pEntry -> (Class<IField<?>>) pEntry.getValue());
   }
 }

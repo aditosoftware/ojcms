@@ -37,7 +37,8 @@ public final class StatementExecution
    * @param pStatementConsumer a consumer of the specific statement to configure it before the execution
    * @param <STATEMENT>        the type of the specific statement to execute
    */
-  public <STATEMENT extends AbstractSQLStatement<Void, STATEMENT>> void execute(STATEMENT pStatement, Consumer<STATEMENT> pStatementConsumer)
+  public <STATEMENT extends AbstractSQLStatement<Void, STATEMENT>> void execute(STATEMENT pStatement,
+                                                                                Consumer<STATEMENT> pStatementConsumer)
   {
     pStatementConsumer.accept(pStatement);
     _tryClose(pStatement);
@@ -53,7 +54,8 @@ public final class StatementExecution
    * @param <QUERY>        the type of the specific query
    * @return the result determined by the given query
    */
-  public <RESULT, INNERRESULT, QUERY extends AbstractSQLStatement<INNERRESULT, QUERY>> RESULT query(QUERY pQuery, Function<QUERY, RESULT> pQueryConsumer)
+  public <RESULT, INNERRESULT, QUERY extends AbstractSQLStatement<INNERRESULT, QUERY>> RESULT query(QUERY pQuery,
+                                                                                                    Function<QUERY, RESULT> pQueryConsumer)
   {
     try
     {
@@ -131,7 +133,8 @@ public final class StatementExecution
    */
   public IStatementExecutor<Void> createVoidExecutor()
   {
-    return new StatementExecutor<>(connectionSupplier, pStatement -> {
+    return new StatementExecutor<>(connectionSupplier, pStatement ->
+    {
       pStatement.execute();
       return null;
     });
@@ -144,7 +147,8 @@ public final class StatementExecution
    */
   public IStatementExecutor<Boolean> createSuccessExecutor()
   {
-    return new StatementExecutor<>(connectionSupplier, pStatement -> {
+    return new StatementExecutor<>(connectionSupplier, pStatement ->
+    {
       try
       {
         pStatement.execute();

@@ -115,6 +115,7 @@ public interface IBeanContainer<BEAN extends IBean>
   {
     if (pBeans.length == 0)
       throw new OJRuntimeException("Unable to infer bean type! Empty varargs argument not allowed here!");
+
     //noinspection unchecked
     final Class<BEAN> type = (Class<BEAN>) pBeans[0].getClass();
     return ofVariable(type, pBeans);
@@ -147,6 +148,7 @@ public interface IBeanContainer<BEAN extends IBean>
     final Iterator<BEAN> it = pBeans.iterator();
     if (!it.hasNext())
       throw new OJRuntimeException("Unable to infer bean type! The amount of beans cannot be empty!");
+
     //noinspection unchecked
     final Class<BEAN> type = (Class<BEAN>) it.next().getClass();
     return ofIterable(type, pBeans);
@@ -175,8 +177,7 @@ public interface IBeanContainer<BEAN extends IBean>
    * @param <BEAN>      the generic bean type of the container
    * @return an  bean container with the custom data source
    */
-  static <BEAN extends IBean> IBeanContainer<BEAN> withCustomDataSource(Class<BEAN> pBeanType,
-                                                                        IBeanContainerDataSource<BEAN> pDataSource)
+  static <BEAN extends IBean> IBeanContainer<BEAN> withCustomDataSource(Class<BEAN> pBeanType, IBeanContainerDataSource<BEAN> pDataSource)
   {
     return new BeanContainer<>(pBeanType, pDataSource);
   }
@@ -264,6 +265,7 @@ public interface IBeanContainer<BEAN extends IBean>
     final BEAN removed = requestEncapsulatedData(this).replaceBean(requireNonNull(pBean), IndexChecker.check(this::size, pIndex));
     if (removed != null)
       beanRemoved(this, removed);
+
     beanAdded(this, pBean);
     return removed;
   }
@@ -291,7 +293,7 @@ public interface IBeanContainer<BEAN extends IBean>
   default BEAN removeBean(int pIndex)
   {
     IndexChecker.check(this::size, pIndex);
-    return removeFromContainer(this, pEncapsulated -> pEncapsulated.removeBean(pIndex))
+    return removeFromContainer(this, pEncapsulated -> pEncapsulated.removeBean(pIndex)) //
         .orElseThrow(() -> new OJInternalException("Unable to remove bean at index" + pIndex));
   }
 
@@ -441,11 +443,11 @@ public interface IBeanContainer<BEAN extends IBean>
     if (pFieldValueTuples.length == 0)
       return Collections.emptyList();
 
-    final Predicate<BEAN> combinedPredicate = pBean -> Stream.of(pFieldValueTuples)
+    final Predicate<BEAN> combinedPredicate = pBean -> Stream.of(pFieldValueTuples) //
         .allMatch(pTuple -> Objects.equals(pBean.getValue(pTuple.getField()), pTuple.getValue()));
 
-    return stream()
-        .filter(combinedPredicate)
+    return stream() //
+        .filter(combinedPredicate) //
         .collect(Collectors.toList());
   }
 
@@ -482,7 +484,7 @@ public interface IBeanContainer<BEAN extends IBean>
   default Observable<BeanContainerAddition<BEAN>> observeAdditions()
   {
     //noinspection unchecked
-    return requestEncapsulatedData(this).observeByType(BeanContainerAddition.class)
+    return requestEncapsulatedData(this).observeByType(BeanContainerAddition.class) //
         .map(pChange -> (BeanContainerAddition<BEAN>) pChange);
   }
 
@@ -494,7 +496,7 @@ public interface IBeanContainer<BEAN extends IBean>
   default Observable<BeanContainerRemoval<BEAN>> observeRemovals()
   {
     //noinspection unchecked
-    return requestEncapsulatedData(this).observeByType(BeanContainerRemoval.class)
+    return requestEncapsulatedData(this).observeByType(BeanContainerRemoval.class) //
         .map(pChange -> (BeanContainerRemoval<BEAN>) pChange);
   }
 
@@ -536,9 +538,9 @@ public interface IBeanContainer<BEAN extends IBean>
    */
   default <VALUE> Set<VALUE> getDistinctValues(Function<BEAN, VALUE> pValueResolver)
   {
-    return stream()
-        .map(pValueResolver)
-        .filter(Objects::nonNull)
+    return stream() //
+        .map(pValueResolver) //
+        .filter(Objects::nonNull) //
         .collect(Collectors.toSet());
   }
 

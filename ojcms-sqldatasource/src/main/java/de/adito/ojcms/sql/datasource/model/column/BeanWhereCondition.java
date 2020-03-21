@@ -60,7 +60,7 @@ public class BeanWhereCondition<VALUE> extends BeanColumnValueTuple<VALUE> imple
   public static List<IWhereCondition<?>> conditionsOfMap(Map<IField<?>, Object> pValueMap)
   {
     //noinspection unchecked
-    return pValueMap.entrySet().stream()
+    return pValueMap.entrySet().stream() //
         .map(pEntry -> (IWhereCondition<?>) new BeanWhereCondition<>((IField) pEntry.getKey(), pEntry.getValue(), IWhereOperator.isEqual()))
         .collect(Collectors.toList());
   }

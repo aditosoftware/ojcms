@@ -37,9 +37,9 @@ class SingleBeanRowCleanup implements IDatabaseCleanup
       pBuilder.doDelete(pDelete -> pDelete.from(BEAN_TABLE_NAME).delete());
     else
       //Else delete all that aren't existing anymore
-      pBuilder.doDelete(pDelete -> pDelete
-          .from(BEAN_TABLE_NAME)
-          .where(not(in(ID_COLUMN, stillExistingIds)))
+      pBuilder.doDelete(pDelete -> pDelete //
+          .from(BEAN_TABLE_NAME) //
+          .where(not(in(ID_COLUMN, stillExistingIds))) //
           .delete());
   }
 }

@@ -60,6 +60,7 @@ class EncapsulatedBeanContainerData<BEAN extends IBean> extends AbstractEncapsul
     {
       if (!limitInfo.evicting)
         throw new BeanContainerLimitReachedException(limitInfo.limit);
+
       removeBean(getBean(0)); //Remove first bean if limit is reached and evicting flag is set
       pIndex--;
     }
@@ -178,10 +179,10 @@ class EncapsulatedBeanContainerData<BEAN extends IBean> extends AbstractEncapsul
   private BEAN _observeBean(BEAN pBean)
   {
     final Observable<IEvent<IBean>> combinedObservables = Observable.concat(pBean.observeValues(), pBean.observeFieldAdditions(),
-                                                                            pBean.observeFieldRemovals());
+        pBean.observeFieldRemovals());
     //noinspection unchecked
-    final Disposable disposable = combinedObservables
-        .subscribe(pChangeEvent -> getEventObserverFromType((Class<IEvent<IBean>>) pChangeEvent.getClass()).onNext(pChangeEvent));
+    final Disposable disposable = combinedObservables.subscribe(
+        pChangeEvent -> getEventObserverFromType((Class<IEvent<IBean>>) pChangeEvent.getClass()).onNext(pChangeEvent));
 
     beanDisposableMapping.put(pBean, disposable);
     return pBean;

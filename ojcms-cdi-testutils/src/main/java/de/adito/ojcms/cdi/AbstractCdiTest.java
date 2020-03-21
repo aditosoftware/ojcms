@@ -29,8 +29,8 @@ public abstract class AbstractCdiTest
   public void setupCdi()
   {
     //Start all custom contexts in classpath
-    customContextList = CdiContainer.getAllCustomScopeAnnotationTypes().stream()
-        .map(pScopeAnnotationType -> cdiControl.startContext(pScopeAnnotationType))
+    customContextList = CdiContainer.getAllCustomScopeAnnotationTypes().stream() //
+        .map(pScopeAnnotationType -> cdiControl.startContext(pScopeAnnotationType)) //
         .collect(Collectors.toList());
 
     cdiControl.injectInstance(this);

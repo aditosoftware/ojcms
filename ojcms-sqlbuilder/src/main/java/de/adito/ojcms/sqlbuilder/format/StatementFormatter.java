@@ -17,7 +17,8 @@ import java.util.stream.*;
  * For further usage information check the methods below.
  *
  * The result of this formatter can be retrieved via {@link #getStatement()} and {@link #getSerialArguments(IValueSerializer)},
- * which both provide information for a prepared statement. This formatter generally allows normal and prepared statement formats (see methods)
+ * which both provide information for a prepared statement. This formatter generally allows normal and prepared statement formats (see
+ * methods)
  *
  * @author Simon Danner, 19.07.2018
  * @see EFormatter
@@ -75,8 +76,7 @@ public final class StatementFormatter
    */
   public static String join(Stream<String> pMultipleStrings, ESeparator... pSeparators)
   {
-    return pMultipleStrings
-        .collect(Collectors.joining(ESeparator.merge(pSeparators)));
+    return pMultipleStrings.collect(Collectors.joining(ESeparator.merge(pSeparators)));
   }
 
   /**
@@ -208,10 +208,12 @@ public final class StatementFormatter
    */
   public StatementFormatter appendMultiplePrepared(Stream<? extends IPreparedStatementFormat> pFormatStream, ESeparator... pSeparators)
   {
-    return _appendMultiple(pFormatStream.map(pFormat -> {
-      arguments.addAll(pFormat.getArguments(idColumnName));
-      return toFormat(pFormat, databasePlatform, idColumnName);
-    }), pSeparators);
+    return _appendMultiple(pFormatStream //
+        .map(pFormat ->
+        {
+          arguments.addAll(pFormat.getArguments(idColumnName));
+          return toFormat(pFormat, databasePlatform, idColumnName);
+        }), pSeparators);
   }
 
   /**
@@ -251,12 +253,12 @@ public final class StatementFormatter
    */
   public StatementFormatter appendWhereCondition(WhereModifiers pModifiers)
   {
-    pModifiers.where()
+    pModifiers.where() //
         .ifPresent(pWhere ->
-                   {
-                     builder.appendWithWhitespace("WHERE");
-                     appendPreparedStatement(pWhere);
-                   });
+        {
+          builder.appendWithWhitespace("WHERE");
+          appendPreparedStatement(pWhere);
+        });
     return this;
   }
 
@@ -300,9 +302,7 @@ public final class StatementFormatter
    */
   public List<ISerialValue> getSerialArguments(IValueSerializer pSerializer)
   {
-    return arguments.stream()
-        .map(pSerializer::toSerial)
-        .collect(Collectors.toList());
+    return arguments.stream().map(pSerializer::toSerial).collect(Collectors.toList());
   }
 
   /**

@@ -163,7 +163,8 @@ public final class OptionalNullable<VALUE>
       return true;
     if (pO == null || getClass() != pO.getClass())
       return false;
-    OptionalNullable<?> that = (OptionalNullable<?>) pO;
+
+    final OptionalNullable<?> that = (OptionalNullable<?>) pO;
     return present == that.present && Objects.equals(value, that.value);
   }
 

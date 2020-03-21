@@ -46,8 +46,8 @@ public final class IndexBasedIterator<ELEMENT> implements Iterator<ELEMENT>
    * @param pEndIndexExclusive the end index (exclusive)
    * @param pRemover           an optional action to remove an element at a given index
    */
-  private IndexBasedIterator(IntFunction<ELEMENT> pElementProvider, IntSupplier pSizeSupplier, int pStartIndex,
-                             int pEndIndexExclusive, @Nullable IntConsumer pRemover)
+  private IndexBasedIterator(IntFunction<ELEMENT> pElementProvider, IntSupplier pSizeSupplier, int pStartIndex, int pEndIndexExclusive,
+                             @Nullable IntConsumer pRemover)
   {
     index = pStartIndex;
     endIndexExclusive = pEndIndexExclusive;
@@ -83,6 +83,7 @@ public final class IndexBasedIterator<ELEMENT> implements Iterator<ELEMENT>
       throw new IllegalStateException();
     if (expectedSize != sizeSupplier.getAsInt())
       throw new ConcurrentModificationException();
+
     remover.accept(lastIndex);
     index = lastIndex;
     lastIndex = -1;

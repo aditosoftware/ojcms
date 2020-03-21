@@ -24,7 +24,7 @@ public final class ListBasedBeanContainerDataSource<BEAN extends IBean> implemen
    */
   public ListBasedBeanContainerDataSource(Iterable<BEAN> pBeans)
   {
-    beanList = StreamSupport.stream(Objects.requireNonNull(pBeans).spliterator(), false)
+    beanList = StreamSupport.stream(Objects.requireNonNull(pBeans).spliterator(), false) //
         .collect(Collectors.toList());
   }
 

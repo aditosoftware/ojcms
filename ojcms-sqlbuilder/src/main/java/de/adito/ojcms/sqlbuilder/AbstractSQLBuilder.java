@@ -94,10 +94,11 @@ public abstract class AbstractSQLBuilder implements IBaseBuilder
   }
 
   @Override
-  public <VALUE, RESULT> RESULT doSelectOne(IColumnIdentification<VALUE> pColumnToSelect, Function<SingleSelect<VALUE>, RESULT> pSelectQuery)
+  public <VALUE, RESULT> RESULT doSelectOne(IColumnIdentification<VALUE> pColumnToSelect,
+                                            Function<SingleSelect<VALUE>, RESULT> pSelectQuery)
   {
-    final SingleSelect<VALUE> select = new SingleSelect<>(execution.createExecutor(), this, platform, serializer,
-                                                          idColumnName, pColumnToSelect);
+    final SingleSelect<VALUE> select =
+        new SingleSelect<>(execution.createExecutor(), this, platform, serializer, idColumnName, pColumnToSelect);
 
     return execution.query(configureStatementBeforeExecution(select), pSelectQuery);
   }
@@ -106,8 +107,8 @@ public abstract class AbstractSQLBuilder implements IBaseBuilder
   public <RESULT> RESULT doSelectId(Function<SingleSelect<Integer>, RESULT> pSelectQuery)
   {
     final IColumnIdentification<Integer> idColumnIdentification = IColumnIdentification.of(idColumnName, Integer.class);
-    final SingleSelect<Integer> select = new SingleSelect<>(execution.createExecutor(), this, platform, serializer, idColumnName,
-                                                            idColumnIdentification);
+    final SingleSelect<Integer> select =
+        new SingleSelect<>(execution.createExecutor(), this, platform, serializer, idColumnName, idColumnIdentification);
 
     return execution.query(configureStatementBeforeExecution(select), pSelectQuery);
   }
@@ -126,7 +127,8 @@ public abstract class AbstractSQLBuilder implements IBaseBuilder
    * @param <RESULT>    the generic type of the result of the statement
    * @param <STATEMENT> the runtime type of the statement
    */
-  protected <RESULT, STATEMENT extends AbstractSQLStatement<RESULT, STATEMENT>> STATEMENT configureStatementBeforeExecution(STATEMENT pStatement)
+  protected <RESULT, STATEMENT extends AbstractSQLStatement<RESULT, STATEMENT>> STATEMENT configureStatementBeforeExecution(
+      STATEMENT pStatement)
   {
     return pStatement; //Nothing happens here, may be overwritten in sub classes
   }
@@ -150,8 +152,7 @@ public abstract class AbstractSQLBuilder implements IBaseBuilder
    */
   protected void addColumn(String pTableName, IColumnDefinition pColumnDefinition)
   {
-    execution.executeVoidStatement("ALTER TABLE " + pTableName + " ADD " +
-                                       pColumnDefinition.toStatementFormat(platform, idColumnName));
+    execution.executeVoidStatement("ALTER TABLE " + pTableName + " ADD " + pColumnDefinition.toStatementFormat(platform, idColumnName));
   }
 
   /**
@@ -162,8 +163,7 @@ public abstract class AbstractSQLBuilder implements IBaseBuilder
    */
   protected void removeColumn(String pTableName, IColumnIdentification<?> pColumn)
   {
-    execution.executeVoidStatement("ALTER TABLE " + pTableName + " DROP COLUMN " +
-                                       pColumn.toStatementFormat(platform, idColumnName));
+    execution.executeVoidStatement("ALTER TABLE " + pTableName + " DROP COLUMN " + pColumn.toStatementFormat(platform, idColumnName));
   }
 
   /**
@@ -187,10 +187,10 @@ public abstract class AbstractSQLBuilder implements IBaseBuilder
   {
     if (!hasTable(pTableName))
       doCreate(pCreate ->
-               {
-                 pCreate.tableName(pTableName); //Add table name for convenience
-                 pCreateStatement.accept(pCreate);
-               });
+      {
+        pCreate.tableName(pTableName); //Add table name for convenience
+        pCreateStatement.accept(pCreate);
+      });
   }
 
   /**
@@ -200,7 +200,8 @@ public abstract class AbstractSQLBuilder implements IBaseBuilder
    */
   protected Set<String> getAllTableNames()
   {
-    return execution.retrieveFromMetaData(pMetaData -> {
+    return execution.retrieveFromMetaData(pMetaData ->
+    {
       final Set<String> names = new HashSet<>();
       final ResultSet tables = pMetaData.getTables(null, null, "%", null);
       while (tables.next())
@@ -233,8 +234,8 @@ public abstract class AbstractSQLBuilder implements IBaseBuilder
    */
   protected boolean hasColumn(String pTableName, String pColumnName)
   {
-    return execution.retrieveFromMetaData(pMetaData -> pMetaData.getColumns(null, null, pTableName.toUpperCase(),
-                                                                            pColumnName.toUpperCase()).next());
+    return execution
+        .retrieveFromMetaData(pMetaData -> pMetaData.getColumns(null, null, pTableName.toUpperCase(), pColumnName.toUpperCase()).next());
   }
 
   /**
@@ -245,9 +246,11 @@ public abstract class AbstractSQLBuilder implements IBaseBuilder
    */
   protected Set<String> getAllColumnNames(String pTableName)
   {
-    return execution.retrieveFromMetaData(pMetaData -> {
+    return execution.retrieveFromMetaData(pMetaData ->
+    {
       final ResultSet resultSet = pMetaData.getColumns(null, null, pTableName.toUpperCase(), null);
       final Set<String> columnNames = new HashSet<>();
+
       while (resultSet.next())
         columnNames.add(resultSet.getString("COLUMN_NAME"));
       return columnNames;

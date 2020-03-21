@@ -45,8 +45,7 @@ public class MapBasedIndexedCache<T> implements IIndexedCache<T>
   @Override
   public Optional<T> getElementAtIndex(int pIndex)
   {
-    return Optional.ofNullable(idByIndex.get(_checkIndex(pIndex)))
-        .map(contentById::get);
+    return Optional.ofNullable(idByIndex.get(_checkIndex(pIndex))).map(contentById::get);
   }
 
   @Override
@@ -187,19 +186,19 @@ public class MapBasedIndexedCache<T> implements IIndexedCache<T>
   {
     final Set<Integer> indexesToRemove = new HashSet<>();
 
-    indexById.entrySet().stream()
+    indexById.entrySet().stream() //
         .filter(pEntry -> pEntry.getValue() >= pAffectedIndex) //Remove entries with index below affected one
         .sorted((pEntry1, pEntry2) -> pEntry2.getValue() - pEntry1.getValue()) //Descending by index
         .forEach(pEntry ->
-                 {
-                   final int oldIndex = pEntry.getValue();
-                   final int newIndex = oldIndex + 1;
+        {
+          final int oldIndex = pEntry.getValue();
+          final int newIndex = oldIndex + 1;
 
-                   pEntry.setValue(newIndex);
-                   idByIndex.put(newIndex, pEntry.getKey());
-                   indexesToRemove.add(oldIndex);
-                   indexesToRemove.remove(newIndex);
-                 });
+          pEntry.setValue(newIndex);
+          idByIndex.put(newIndex, pEntry.getKey());
+          indexesToRemove.add(oldIndex);
+          indexesToRemove.remove(newIndex);
+        });
 
     indexesToRemove.forEach(idByIndex::remove);
   }
@@ -214,19 +213,19 @@ public class MapBasedIndexedCache<T> implements IIndexedCache<T>
   {
     final Set<Integer> indexesToRemove = new HashSet<>();
 
-    indexById.entrySet().stream()
+    indexById.entrySet().stream() //
         .filter(pEntry -> pEntry.getValue() > pAffectedIndex) //Remove entries with index below the affected one
         .sorted((pEntry1, pEntry2) -> pEntry2.getValue() - pEntry1.getValue()) //Descending by index
         .forEach(pEntry ->
-                 {
-                   final int oldIndex = pEntry.getValue();
-                   final int newIndex = oldIndex - 1;
+        {
+          final int oldIndex = pEntry.getValue();
+          final int newIndex = oldIndex - 1;
 
-                   pEntry.setValue(newIndex);
-                   idByIndex.put(newIndex, pEntry.getKey());
-                   indexesToRemove.add(oldIndex);
-                   indexesToRemove.remove(newIndex);
-                 });
+          pEntry.setValue(newIndex);
+          idByIndex.put(newIndex, pEntry.getKey());
+          indexesToRemove.add(oldIndex);
+          indexesToRemove.remove(newIndex);
+        });
 
     indexesToRemove.forEach(idByIndex::remove);
   }
@@ -255,8 +254,8 @@ public class MapBasedIndexedCache<T> implements IIndexedCache<T>
    */
   private void _assureConsistency()
   {
-    final boolean isConsistent = IntStream.of(idByContent.size(), contentById.size(), indexById.size(), idByIndex.size())
-        .distinct()
+    final boolean isConsistent = IntStream.of(idByContent.size(), contentById.size(), indexById.size(), idByIndex.size()) //
+        .distinct() //
         .count() == 1;
 
     if (!isConsistent)

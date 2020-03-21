@@ -37,13 +37,14 @@ class BeanObserverTest
   public void testSimpleValueChangeObserver()
   {
     final String newValue = "newValue";
-    observe(bean, IBean::observeValues)
-        .assertCallCount(1)
-        .assertOnEveryValue(pChange -> {
+    observe(bean, IBean::observeValues) //
+        .assertCallCount(1) //
+        .assertOnEveryValue(pChange ->
+        {
           assertSame(SomeBean.field1, pChange.getField());
           assertEquals(INITIAL_VALUE, pChange.getOldValue());
           assertEquals(newValue, pChange.getNewValue());
-        })
+        }) //
         .whenDoing(pBean -> pBean.setValue(SomeBean.field1, newValue));
   }
 
@@ -72,13 +73,14 @@ class BeanObserverTest
       }
     };
 
-    observe(bean, IBean::observeFieldAdditions)
-        .assertCallCount(1)
-        .assertOnEveryValue(pChange -> {
+    observe(bean, IBean::observeFieldAdditions) //
+        .assertCallCount(1) //
+        .assertOnEveryValue(pChange ->
+        {
           assertEquals(fieldName, pChange.getField().getName());
           assertEquals(String.class, pChange.getField().getDataType());
           assertTrue(pChange.getField().hasAnnotation(Detail.class));
-        })
+        }) //
         .whenDoing(pBean -> pBean.fieldAdder(TextField.class, fieldName, Collections.singleton(annotation)).addAtTheEnd());
   }
 
@@ -103,9 +105,9 @@ class BeanObserverTest
   @Test
   public void testMultipleObservers()
   {
-    observe(bean, IBean::observeValues)
-        .assertCallCount(1)
-        .assertMultiple(observe(bean, IBean::observeValues).assertCallCount(1))
+    observe(bean, IBean::observeValues) //
+        .assertCallCount(1) //
+        .assertMultiple(observe(bean, IBean::observeValues).assertCallCount(1)) //
         .whenDoing(pBean -> pBean.setValue(SomeBean.field1, "changed"));
   }
 
@@ -119,26 +121,26 @@ class BeanObserverTest
   @Test
   public void testSingleContainerAddition()
   {
-    observe(IBeanContainer.empty(SomeBean.class), IBeanContainer::observeAdditions)
-        .assertCallCount(1)
-        .assertOnEveryValue(pChange -> assertSame(bean, pChange.getBean()))
+    observe(IBeanContainer.empty(SomeBean.class), IBeanContainer::observeAdditions) //
+        .assertCallCount(1) //
+        .assertOnEveryValue(pChange -> assertSame(bean, pChange.getBean())) //
         .whenDoing(pContainer -> pContainer.addBean(bean));
   }
 
   @Test
   public void testSingleContainerRemoval()
   {
-    observe(IBeanContainer.ofSingleBean(bean), IBeanContainer::observeRemovals)
-        .assertCallCount(1)
-        .assertOnEveryValue(pChange -> assertSame(bean, pChange.getBean()))
+    observe(IBeanContainer.ofSingleBean(bean), IBeanContainer::observeRemovals) //
+        .assertCallCount(1) //
+        .assertOnEveryValue(pChange -> assertSame(bean, pChange.getBean())) //
         .whenDoing(pContainer -> pContainer.removeBean(bean));
   }
 
   @Test
   public void testMultipleContainerAddition()
   {
-    observe(IBeanContainer.empty(SomeBean.class), IBeanContainer::observeAdditions)
-        .assertCallCount(10)
+    observe(IBeanContainer.empty(SomeBean.class), IBeanContainer::observeAdditions) //
+        .assertCallCount(10) //
         .whenDoing(pContainer -> IntStream.range(0, 10).forEach(pIndex -> pContainer.addBean(bean)));
   }
 
@@ -146,22 +148,24 @@ class BeanObserverTest
   public void testBeanChangeWithinContainer()
   {
     final String newValue = "changed";
-    observe(IBeanContainer.ofSingleBean(bean), IBeanContainer::observeValues)
-        .assertCallCount(1)
-        .assertOnEveryValue(pChange -> {
+    observe(IBeanContainer.ofSingleBean(bean), IBeanContainer::observeValues) //
+        .assertCallCount(1) //
+        .assertOnEveryValue(pChange ->
+        {
           assertSame(SomeBean.field1, pChange.getField());
           assertEquals(INITIAL_VALUE, pChange.getOldValue());
           assertEquals(newValue, pChange.getNewValue());
-        })
+        }) //
         .whenDoing(pContainer -> bean.setValue(SomeBean.field1, newValue));
   }
 
   @Test
   public void testObserversStayWhenDataSourceIsChanged()
   {
-    observe(bean, IBean::observeValues)
-        .assertCallCount(1)
-        .whenDoing(pBean -> {
+    observe(bean, IBean::observeValues) //
+        .assertCallCount(1) //
+        .whenDoing(pBean ->
+        {
           pBean.setEncapsulatedDataSource(new IBeanDataSource()
           {
             @Override
@@ -180,6 +184,7 @@ class BeanObserverTest
             {
             }
           });
+
           pBean.setValue(SomeBean.field1, "someValue");
         });
   }
@@ -193,15 +198,16 @@ class BeanObserverTest
    */
   private void _testAddition(BiConsumer<IField<?>, SomeBean> pAdder, int pExpectedIndex)
   {
-    final DecimalField fieldToAdd = BeanFieldFactory.createField(DecimalField.class, "fieldX", false,
-                                                                 Collections.emptyList(), null);
+    final DecimalField fieldToAdd = BeanFieldFactory.createField(DecimalField.class, "fieldX", false, //
+        Collections.emptyList(), null);
 
-    observe(bean, IBean::observeFieldAdditions)
-        .assertCallCount(1)
-        .assertOnEveryValue(pChange -> {
+    observe(bean, IBean::observeFieldAdditions) //
+        .assertCallCount(1) //
+        .assertOnEveryValue(pChange ->
+        {
           assertSame(fieldToAdd, pChange.getField());
           assertEquals(pExpectedIndex, pChange.getSource().getFieldIndex(pChange.getField()));
-        })
+        }) //
         .whenDoing(pBean -> pAdder.accept(fieldToAdd, pBean));
   }
 
@@ -214,16 +220,17 @@ class BeanObserverTest
    */
   private void _testRemoval(Consumer<SomeBean> pRemover, int pExpectedCallCount)
   {
-    observe(bean, IBean::observeFieldRemovals)
-        .assertCallCount(pExpectedCallCount)
-        .assertOnEveryValue(pChange -> {
+    observe(bean, IBean::observeFieldRemovals) //
+        .assertCallCount(pExpectedCallCount) //
+        .assertOnEveryValue(pChange ->
+        {
           if (pChange.getField() == SomeBean.field1)
             assertEquals(INITIAL_VALUE, pChange.getFieldValue());
           else if (pChange.getField() == SomeBean.field2)
             assertEquals(INITIAL_NUMBER, pChange.getFieldValue());
           else
             fail("unknown field");
-        })
+        }) //
         .whenDoing(pRemover);
   }
 

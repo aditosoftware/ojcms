@@ -55,8 +55,10 @@ public final class SneakyCopyUtils
 
     final Class<VALUE> valueType = (Class<VALUE>) pValueToCopy.getClass();
     final VALUE instance = SNEAKY_COPY_CREATOR.newInstance(valueType);
-    reflectDeclaredFields(valueType)
-        .forEach(pField -> {
+
+    reflectDeclaredFields(valueType) //
+        .forEach(pField ->
+        {
           try
           {
             if (!pField.isAccessible())
@@ -68,6 +70,7 @@ public final class SneakyCopyUtils
             throw new InternalCopyException(pE);
           }
         });
+
     return instance;
   }
 
@@ -85,8 +88,8 @@ public final class SneakyCopyUtils
   public static <VALUE> VALUE createDeepCopy(VALUE pValueToCopy, Type pBaseType, Type... pGenericTypes) throws CopyUnsupportedException
   {
     if (gson == null)
-      gson = new GsonBuilder()
-          .registerTypeHierarchyAdapter(Class.class, _ClassTypeAdapter.INSTANCE)
+      gson = new GsonBuilder() //
+          .registerTypeHierarchyAdapter(Class.class, _ClassTypeAdapter.INSTANCE) //
           .create();
     try
     {
@@ -108,14 +111,16 @@ public final class SneakyCopyUtils
    */
   static List<Field> reflectDeclaredFields(Class<?> pType)
   {
-    return DECLARED_FIELDS_CACHE.computeIfAbsent(pType, pTypeToReflect -> {
+    return DECLARED_FIELDS_CACHE.computeIfAbsent(pType, pTypeToReflect ->
+    {
       final List<Field> declaredFields = new ArrayList<>();
       Class<?> current = pTypeToReflect;
       do
       {
-        Stream.of(current.getDeclaredFields())
-            .filter(pField -> !pField.isSynthetic())
-            .forEach(pField -> {
+        Stream.of(current.getDeclaredFields()) //
+            .filter(pField -> !pField.isSynthetic()) //
+            .forEach(pField ->
+            {
               if (!pField.isAccessible())
                 pField.setAccessible(true);
               declaredFields.add(pField);

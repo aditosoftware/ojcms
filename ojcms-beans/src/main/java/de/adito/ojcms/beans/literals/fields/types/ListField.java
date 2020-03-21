@@ -18,8 +18,8 @@ import java.util.*;
 @NeverNull
 @TypeDefaultField(types = List.class)
 @GenericBeanField(genericWrapperType = List.class)
-public class ListField<ELEMENT> extends AbstractField<List<ELEMENT>>
-    implements ISerializableFieldJson<List<ELEMENT>>, ISneakyCopyCreatorField<List<ELEMENT>>
+public class ListField<ELEMENT> extends AbstractField<List<ELEMENT>> implements ISerializableFieldJson<List<ELEMENT>>,
+    ISneakyCopyCreatorField<List<ELEMENT>>
 {
   protected ListField(Class<List<ELEMENT>> pType, @NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional,
                       boolean pIsPrivate)

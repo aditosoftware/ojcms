@@ -33,8 +33,8 @@ class BeanFieldConverterTest
     final long now = System.currentTimeMillis();
     final Instant expected = Instant.ofEpochMilli(now);
 
-    return Stream.of(
-        new _TypeValueWrapper<>(SomeBean.dateField, Date.class, new Date(now), expected),
+    return Stream.of( //
+        new _TypeValueWrapper<>(SomeBean.dateField, Date.class, new Date(now), expected), //
         new _TypeValueWrapper<>(SomeBean.dateField, Long.class, now, expected));
   }
 

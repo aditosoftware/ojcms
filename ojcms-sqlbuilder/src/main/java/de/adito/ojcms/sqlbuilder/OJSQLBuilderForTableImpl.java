@@ -88,7 +88,8 @@ final class OJSQLBuilderForTableImpl extends AbstractSQLBuilder implements OJSQL
   }
 
   @Override
-  protected <RESULT, STATEMENT extends AbstractSQLStatement<RESULT, STATEMENT>> STATEMENT configureStatementBeforeExecution(STATEMENT pStatement)
+  protected <RESULT, STATEMENT extends AbstractSQLStatement<RESULT, STATEMENT>> STATEMENT configureStatementBeforeExecution(
+      STATEMENT pStatement)
   {
     pStatement.setTableName(tableName);
     return pStatement;

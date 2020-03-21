@@ -134,6 +134,7 @@ public abstract class OJBean implements IBean
   public int hashCode()
   {
     final Set<FieldValueTuple<?>> identifiers = getIdentifiers();
+
     return identifiers.isEmpty() ? super.hashCode() : Objects.hash(identifiers.stream() //
         .map(FieldValueTuple::getValue) //
         .toArray(Object[]::new));

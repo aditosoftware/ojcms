@@ -13,7 +13,7 @@ import javax.enterprise.context.ApplicationScoped;
  * @author Simon Danner, 04.01.2020
  */
 @ApplicationScoped
-public class TestDatabaseConfig implements IDatabaseConfig
+public class DatabaseConfigForTest implements IDatabaseConfig
 {
   @Override
   public IDatabaseConnectionSupplier createConnectionSupplier(ConnectionSupplierFactory pSupplierFactory)
