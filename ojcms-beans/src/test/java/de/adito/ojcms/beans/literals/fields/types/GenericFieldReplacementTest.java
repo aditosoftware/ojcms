@@ -3,7 +3,7 @@ package de.adito.ojcms.beans.literals.fields.types;
 import de.adito.ojcms.beans.*;
 import org.junit.jupiter.api.*;
 
-import java.time.Instant;
+import java.time.*;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -36,6 +36,7 @@ public class GenericFieldReplacementTest
     _checkLogging(Date.class);
     _checkLogging(Instant.class);
     _checkLogging(Boolean.class);
+    _checkLogging(Duration.class);
     _checkLogging(Exception.class, false);
   }
 

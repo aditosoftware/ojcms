@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 
 import java.lang.annotation.Annotation;
+import java.time.Duration;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -92,7 +93,7 @@ class BeanTest
     assertThrows(FieldIsFinalException.class, () -> bean.setValue(SomeBean.finalNumberField, 99));
 
     bean.setValue(SomeBean.anotherFinalField, null); //Event setting null should lead to an exception afterwards
-    assertThrows(FieldIsFinalException.class, () -> bean.setValue(SomeBean.anotherFinalField, "text"));
+    assertThrows(FieldIsFinalException.class, () -> bean.setValue(SomeBean.anotherFinalField, Duration.ZERO));
 
     //Test combined annotation as well
     assertThrows(FieldIsFinalException.class, () -> bean.setValue(SomeBean.someOtherFinalField, "change"));
@@ -236,7 +237,7 @@ class BeanTest
     @Final
     public static final IntegerField finalNumberField = OJFields.create(SomeBean.class);
     @Final
-    public static final TextField anotherFinalField = OJFields.create(SomeBean.class); //No initial value
+    public static final DurationField anotherFinalField = OJFields.create(SomeBean.class); //No initial value
 
     public SomeBean()
     {

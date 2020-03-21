@@ -114,7 +114,7 @@ public class PersistentContainerTest extends AbstractCdiTest
   {
     @Identifier
     public static final IntegerField NUMBER_FIELD = OJFields.create(SomeBean.class);
-    public static final DateField DATE_FIELD = OJFields.create(SomeBean.class);
+    public static final TimestampField DATE_FIELD = OJFields.create(SomeBean.class);
     public static final TextField TEXT_FIELD = OJFields.create(SomeBean.class);
 
     public SomeBean(int pNumber)

@@ -50,7 +50,7 @@ public class PersistentSingleBeanTest extends AbstractCdiTest
   public static class SomeSingleBean extends OJBean implements IModifiableBean
   {
     public static final IntegerField NUMBER_FIELD = OJFields.create(SomeSingleBean.class);
-    public static final DateField DATE_FIELD = OJFields.create(SomeSingleBean.class);
+    public static final TimestampField DATE_FIELD = OJFields.create(SomeSingleBean.class);
     public static final TextField TEXT_FIELD = OJFields.create(SomeSingleBean.class);
   }
 }

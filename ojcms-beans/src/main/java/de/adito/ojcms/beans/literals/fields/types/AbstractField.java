@@ -38,6 +38,7 @@ abstract class AbstractField<VALUE> implements IField<VALUE>
    * @param pName        the name of this field
    * @param pAnnotations a collection of annotations of this field
    * @param pIsOptional  <tt>true</tt> if the field is optional
+   * @param pIsPrivate   <tt>true</tt> if the field is private
    */
   protected AbstractField(Class<VALUE> pDataType, @NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional,
                           boolean pIsPrivate)

@@ -102,7 +102,7 @@ public class PersistentBaseContainerTest extends AbstractCdiTest
   public static class SomeOtherConcreteBean extends SomeBaseBean
   {
     public static TextField FIELD5 = OJFields.create(SomeOtherConcreteBean.class);
-    public static DateField FIELD6 = OJFields.create(SomeOtherConcreteBean.class);
+    public static TimestampField FIELD6 = OJFields.create(SomeOtherConcreteBean.class);
 
     SomeOtherConcreteBean(int pValue1, long pValue2, boolean pValue3, String pValue5)
     {

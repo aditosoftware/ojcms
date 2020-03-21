@@ -1,7 +1,7 @@
 package de.adito.ojcms.beans;
 
 import de.adito.ojcms.beans.literals.fields.IField;
-import de.adito.ojcms.beans.literals.fields.types.DateField;
+import de.adito.ojcms.beans.literals.fields.types.TimestampField;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -34,8 +34,8 @@ class BeanFieldConverterTest
     final Instant expected = Instant.ofEpochMilli(now);
 
     return Stream.of( //
-        new _TypeValueWrapper<>(SomeBean.dateField, Date.class, new Date(now), expected), //
-        new _TypeValueWrapper<>(SomeBean.dateField, Long.class, now, expected));
+        new _TypeValueWrapper<>(SomeBean.TIMESTAMP_FIELD, Date.class, new Date(now), expected), //
+        new _TypeValueWrapper<>(SomeBean.TIMESTAMP_FIELD, Long.class, now, expected));
   }
 
   @BeforeEach
@@ -60,7 +60,7 @@ class BeanFieldConverterTest
    */
   public static class SomeBean extends OJBean
   {
-    public static final DateField dateField = OJFields.create(SomeBean.class);
+    public static final TimestampField TIMESTAMP_FIELD = OJFields.create(SomeBean.class);
   }
 
   /**

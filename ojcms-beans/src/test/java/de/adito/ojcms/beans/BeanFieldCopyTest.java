@@ -9,7 +9,7 @@ import org.apache.commons.lang3.ClassUtils;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.time.Instant;
+import java.time.*;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -44,20 +44,25 @@ public class BeanFieldCopyTest
       assertEquals(testMap, pMapBean);
     };
 
-    return Stream.of(new _GenericFieldValueWrapper<>(BeanField.class, new SomeBean()), new _FieldValueWrapper<>(BooleanField.class, true),
-        new _FieldValueWrapper<>(CharacterField.class, 'a'),
-        new _GenericFieldValueWrapper<>(ContainerField.class, IBeanContainer.empty(SomeBean.class)),
-        new _FieldValueWrapper<>(DateField.class, Instant.now()), new _FieldValueWrapper<>(DecimalField.class, 5.2),
-        new _GenericFieldValueWrapper<>(EnumField.class, TestEnum.HELLO),
-        new _GenericFieldValueWrapper<>(GenericField.class, new _FieldValueWrapper<>(BooleanField.class, true)),
-        new _FieldValueWrapper<>(IntegerField.class, 1), new _GenericFieldValueWrapper<>(ListField.class, Arrays.asList("1", "2", "3")),
-        new _FieldValueWrapper<>(LongField.class, 4L),
-        new _GenericFieldValueWrapper<>(MapField.class, IMapBean.createFromMap(testMap, Integer.class, (pName, pField) -> //
-            {
-            }, //
-            pKey -> Optional.empty(), false), mapTest),
-        new _GenericFieldValueWrapper<>(SetField.class, new HashSet<>(Arrays.asList("1", "2", "3"))),
-        new _FieldValueWrapper<>(ShortField.class, (short) 7), new _FieldValueWrapper<>(TextField.class, "testing"));
+    return Stream.of( //
+        new _GenericFieldValueWrapper<>(BeanField.class, new SomeBean()), //
+        new _FieldValueWrapper<>(BooleanField.class, true), //
+        new _FieldValueWrapper<>(CharacterField.class, 'a'), //
+        new _GenericFieldValueWrapper<>(ContainerField.class, IBeanContainer.empty(SomeBean.class)), //
+        new _FieldValueWrapper<>(TimestampField.class, Instant.now()), //
+        new _FieldValueWrapper<>(DecimalField.class, 5.2), //
+        new _FieldValueWrapper<>(DurationField.class, Duration.ofMinutes(5)), //
+        new _GenericFieldValueWrapper<>(EnumField.class, TestEnum.HELLO), //
+        new _GenericFieldValueWrapper<>(GenericField.class, new _FieldValueWrapper<>(BooleanField.class, true)), //
+        new _FieldValueWrapper<>(IntegerField.class, 1), //
+        new _GenericFieldValueWrapper<>(ListField.class, Arrays.asList("1", "2", "3")), //
+        new _FieldValueWrapper<>(LongField.class, 4L), //
+        new _GenericFieldValueWrapper<>(MapField.class, IMapBean.createFromMap(testMap, Integer.class, (pName, pField) ->
+        {
+        }, pKey -> Optional.empty(), false), mapTest), //
+        new _GenericFieldValueWrapper<>(SetField.class, new HashSet<>(Arrays.asList("1", "2", "3"))), //
+        new _FieldValueWrapper<>(ShortField.class, (short) 7),  //
+        new _FieldValueWrapper<>(TextField.class, "testing"));
   }
 
   @ParameterizedTest
@@ -65,8 +70,8 @@ public class BeanFieldCopyTest
   public <VALUE> void testFieldCopyMechanisms(_FieldValueWrapper<VALUE> pFieldValueWrapper)
   {
     assertNotNull(pFieldValueWrapper.value);
-    final IField<VALUE> field = BeanFieldFactory.createField(pFieldValueWrapper.fieldType, pFieldValueWrapper::getGenericFieldType, "test",
-        false, Collections.emptySet(), null);
+    final IField<VALUE> field = BeanFieldFactory
+        .createField(pFieldValueWrapper.fieldType, pFieldValueWrapper::getGenericFieldType, "test", false, Collections.emptySet(), null);
     try
     {
       final VALUE copiedValue = field.copyValue(pFieldValueWrapper.value, ECopyMode.DEEP_ONLY_BEAN_FIELDS);

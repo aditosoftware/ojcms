@@ -12,15 +12,15 @@ import java.time.format.*;
 import java.util.*;
 
 /**
- * A bean field that holds a date (as {@link Instant}).
+ * A bean field that holds a timestamp (as {@link Instant}).
  * Provides converters for {@link Date} and {@link Long}.
  *
  * @author Simon Danner, 23.08.2016
  */
 @TypeDefaultField(types = {Instant.class, Date.class})
-public class DateField extends AbstractField<Instant> implements ISerializableField<Instant, Long>
+public class TimestampField extends AbstractField<Instant> implements ISerializableField<Instant, Long>
 {
-  protected DateField(@NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional, boolean pIsPrivate)
+  protected TimestampField(@NotNull String pName, Collection<Annotation> pAnnotations, boolean pIsOptional, boolean pIsPrivate)
   {
     super(Instant.class, pName, pAnnotations, pIsOptional, pIsPrivate);
     registerConverter(Date.class, Date::toInstant, Date::from);

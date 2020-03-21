@@ -67,7 +67,7 @@ public class BeanOptionalFieldTest
     @OptionalField
     public static final IntegerField optionalField1 = OJFields.createOptional(SomeBean.class, (pBean, pValue) -> pValue == 1);
     @OptionalField
-    public static final DateField optionalField2 = OJFields.createOptional(SomeBean.class, (pBean, pValue) -> _isFieldActive(pBean));
+    public static final TimestampField optionalField2 = OJFields.createOptional(SomeBean.class, (pBean, pValue) -> _isFieldActive(pBean));
 
     public SomeBean()
     {
