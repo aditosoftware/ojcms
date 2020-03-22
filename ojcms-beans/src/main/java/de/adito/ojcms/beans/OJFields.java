@@ -44,22 +44,6 @@ public final class OJFields
   /**
    * Takes a look at all static bean fields of a certain bean type and creates the first not initialized field automatically.
    * In this way all bean fields can be created through this method.
-   * Usage: "public static final TextField name = OJFields.createForWildcard(CLASSNAME.class);"
-   * This method takes care about the whole initialization of the fields. (name, type, annotations, etc.)
-   * This method works for wildcard field types.
-   *
-   * @param pBeanType the bean type to which the created field should belong to
-   * @return the newly created field instance
-   */
-  public static <FIELD extends IField<?>> FIELD createForWildcard(Class<? extends OJBean> pBeanType)
-  {
-    //noinspection unchecked
-    return (FIELD) _createField(pBeanType, null);
-  }
-
-  /**
-   * Takes a look at all static bean fields of a certain bean type and creates the first not initialized field automatically.
-   * In this way all bean fields can be created through this method.
    * Usage: "public static final TextField name = OJFields.createOptional(CLASSNAME.class);"
    * This method takes care about the whole initialization of the fields. (name, type, annotations, etc.)
    *

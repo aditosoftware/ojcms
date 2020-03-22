@@ -105,7 +105,7 @@ final class BeanInternalEvents
    * @throws NullValueForbiddenException    if a null value would have been returned, but the field is marked as {@link NeverNull}
    */
   @SuppressWarnings("unchecked")
-  static <VALUE> void setValueAndPropagate(IBean pBean, IField<? extends VALUE> pField, VALUE pNewValue)
+  static <VALUE> void setValueAndPropagate(IBean pBean, IField<VALUE> pField, VALUE pNewValue)
   {
     if (pNewValue == null && pField.mustNeverBeNull())
       throw new NullValueForbiddenException(pField);

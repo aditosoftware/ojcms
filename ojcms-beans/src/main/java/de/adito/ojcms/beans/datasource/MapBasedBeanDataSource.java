@@ -50,7 +50,7 @@ public final class MapBasedBeanDataSource implements IBeanDataSource
   }
 
   @Override
-  public <VALUE> void setValue(IField<? extends VALUE> pField, VALUE pValue, boolean pAllowNewField)
+  public <VALUE> void setValue(IField<VALUE> pField, VALUE pValue, boolean pAllowNewField)
   {
     final boolean existing = values.containsKey(pField);
     if (!pAllowNewField && !existing)

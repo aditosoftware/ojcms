@@ -34,7 +34,7 @@ interface IEncapsulatedBeanData extends IEncapsulatedData<FieldValueTuple<?>, IB
    * @param pValue  the new value
    * @param <VALUE> the data type of the field
    */
-  <VALUE> void setValue(IField<? extends VALUE> pField, VALUE pValue);
+  <VALUE> void setValue(IField<VALUE> pField, VALUE pValue);
 
   /**
    * Adds a bean field to the data core.

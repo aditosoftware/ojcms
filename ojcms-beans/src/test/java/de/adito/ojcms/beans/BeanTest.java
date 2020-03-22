@@ -119,7 +119,7 @@ class BeanTest
   @Test
   public void testFieldCount()
   {
-    assertEquals(8, bean.getFieldCount());
+    assertEquals(7, bean.getFieldCount());
   }
 
   @Test
@@ -210,13 +210,6 @@ class BeanTest
     assertEquals(42, bean.getValue(ConcreteBeanType.SOME_SPECIAL_FIELD));
   }
 
-  @Test
-  public void testWildcardField()
-  {
-    bean.setValue(SomeBean.wildcardField, 1);
-    assertEquals(1, bean.getValue(SomeBean.wildcardField));
-  }
-
   /**
    * Creates a new bean text field.
    *
@@ -245,7 +238,6 @@ class BeanTest
     public static final IntegerField finalNumberField = OJFields.create(SomeBean.class);
     @Final
     public static final DurationField anotherFinalField = OJFields.create(SomeBean.class); //No initial value
-    public static final GenericField<? extends Number> wildcardField = OJFields.createForWildcard(SomeBean.class);
 
     public SomeBean()
     {
@@ -360,7 +352,7 @@ class BeanTest
     }
 
     @Override
-    public <VALUE> void setValue(IField<? extends VALUE> pField, VALUE pValue, boolean pAllowNewField)
+    public <VALUE> void setValue(IField<VALUE> pField, VALUE pValue, boolean pAllowNewField)
     {
       throw new UnsupportedOperationException();
     }

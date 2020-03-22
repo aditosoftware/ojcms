@@ -33,7 +33,7 @@ class PersistentBeanDatasource implements IBeanDataSource
   }
 
   @Override
-  public <VALUE> void setValue(IField<? extends VALUE> pField, VALUE pValue, boolean pAllowNewField)
+  public <VALUE> void setValue(IField<VALUE> pField, VALUE pValue, boolean pAllowNewField)
   {
     content.setValue(pField, pValue);
   }

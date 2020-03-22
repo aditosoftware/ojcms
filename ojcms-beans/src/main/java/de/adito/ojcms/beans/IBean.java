@@ -109,7 +109,7 @@ public interface IBean extends IBeanEventPublisher<FieldValueTuple<?>, IBeanData
    * @throws BeanFieldDoesNotExistException if the bean field does not exist at the bean
    * @throws NullValueForbiddenException    if a null value would have been returned, but the field is marked as {@link NeverNull}
    */
-  default <VALUE> void setValue(IField<? extends VALUE> pField, VALUE pValue)
+  default <VALUE> void setValue(IField<VALUE> pField, VALUE pValue)
   {
     setValueAndPropagate(this, pField, pValue);
   }
@@ -152,12 +152,12 @@ public interface IBean extends IBeanEventPublisher<FieldValueTuple<?>, IBeanData
    */
   default void clear()
   {
-    // noinspection rawtypes
+    // noinspection rawtypes,unchecked
     streamFields() //
         .filter(pField -> !pField.isPrivate()) //
         .filter(pField -> !pField.isValueFinal()) //
         .filter(pField -> pField.getInitialValue() != null || !pField.mustNeverBeNull()) //
-        .forEach(pField -> setValue(pField, pField.getInitialValue()));
+        .forEach(pField -> setValue((IField) pField, pField.getInitialValue()));
   }
 
   /**
