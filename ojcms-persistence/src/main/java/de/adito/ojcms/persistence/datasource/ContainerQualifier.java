@@ -34,7 +34,7 @@ public @interface ContainerQualifier
      * @param pContainerId the container id to qualify the persistent data
      * @return the created literal
      */
-    static Literal forContainerId(String pContainerId)
+    public static Literal forContainerId(String pContainerId)
     {
       return new Literal(pContainerId);
     }

@@ -2,13 +2,16 @@ package de.adito.ojcms.cdi;
 
 import de.adito.ojcms.cdi.context.*;
 import de.adito.picoservice.IPicoRegistry;
+import org.jboss.weld.environment.se.WeldContainer;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.spi.Context;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.se.*;
 import javax.enterprise.inject.spi.*;
+import javax.enterprise.util.TypeLiteral;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
@@ -126,6 +129,19 @@ public final class CdiContainer
     public <T> T createInjected(Class<T> pType, Annotation... pQualifiers)
     {
       return container.select(pType, pQualifiers).get();
+    }
+
+    @Override
+    public <T> T createInjected(TypeLiteral<T> pType, Annotation... pQualifiers)
+    {
+      return container.select(pType, pQualifiers).get();
+    }
+
+    @Override
+    public <T> T createInjected(Type pType, Annotation... pQualifiers)
+    {
+      //noinspection unchecked
+      return (T) WeldContainer.current().select(pType, pQualifiers).get();
     }
 
     @Override

@@ -5,7 +5,9 @@ import org.jboss.weld.exceptions.IllegalStateException;
 
 import javax.enterprise.context.NormalScope;
 import javax.enterprise.inject.se.SeContainer;
+import javax.enterprise.util.TypeLiteral;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 
 /**
  * Injectable interface to control CDI elements or to create CDI managed instances programmatically.
@@ -35,6 +37,24 @@ public interface ICdiControl
    * @return the created instance
    */
   <T> T createInjected(Class<T> pType, Annotation... pQualifiers);
+
+  /**
+   * Creates an instances of a specific type. The type must be managed by the CDI container.
+   *
+   * @param pType       the type to create a CDI managed instance of
+   * @param pQualifiers qualifier annotations for the instance to create
+   * @return the created instance
+   */
+  <T> T createInjected(TypeLiteral<T> pType, Annotation... pQualifiers);
+
+  /**
+   * Creates an instances of a specific type. The type must be managed by the CDI container.
+   *
+   * @param pType       the type to create a CDI managed instance of
+   * @param pQualifiers qualifier annotations for the instance to create
+   * @return the created instance
+   */
+  <T> T createInjected(Type pType, Annotation... pQualifiers);
 
   /**
    * Injects an existing instance. An excessive use of this method may hint some bad design. Think about it.
