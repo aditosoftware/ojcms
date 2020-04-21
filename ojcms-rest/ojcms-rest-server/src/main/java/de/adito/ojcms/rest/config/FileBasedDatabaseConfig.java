@@ -3,10 +3,9 @@ package de.adito.ojcms.rest.config;
 import de.adito.ojcms.sql.datasource.connection.IDatabaseConfig;
 import de.adito.ojcms.sqlbuilder.platform.*;
 import de.adito.ojcms.sqlbuilder.platform.connection.*;
+import de.adito.ojcms.utils.config.AbstractFileBasedConfig;
 
 import javax.enterprise.context.ApplicationScoped;
-import java.io.IOException;
-import java.nio.file.*;
 import java.util.*;
 
 /**
@@ -17,9 +16,9 @@ import java.util.*;
  * @author Simon Danner, 12.01.2020
  */
 @ApplicationScoped
-class FileBasedDatabaseConfig implements IDatabaseConfig
+class FileBasedDatabaseConfig extends AbstractFileBasedConfig implements IDatabaseConfig
 {
-  private static final String FILE_NAME = "ojcms_database.properties";
+  private static final String CONFIG_PATH = "ojcms_database.properties";
   private static final String KEY_PLATFORM = "platform";
   private static final String KEY_EMBEDDED = "embedded";
   private static final String KEY_HOST = "host";
@@ -34,11 +33,9 @@ class FileBasedDatabaseConfig implements IDatabaseConfig
    * Initializes the filed based config.
    * Loads all relevant properties from the config file.
    */
-  FileBasedDatabaseConfig() throws IOException
+  FileBasedDatabaseConfig()
   {
-    final Properties properties = new Properties();
-    properties.load(Files.newInputStream(Paths.get(FILE_NAME)));
-
+    super(CONFIG_PATH);
     final String platform = _loadProperty(KEY_PLATFORM, properties, true).toUpperCase();
     final boolean embedded = _resolveEmbedded(properties);
 

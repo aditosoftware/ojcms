@@ -1,8 +1,8 @@
 package de.adito.ojcms.rest.config;
 
+import de.adito.ojcms.utils.config.AbstractFileBasedConfig;
+
 import javax.enterprise.context.ApplicationScoped;
-import java.io.*;
-import java.util.Properties;
 
 /**
  * File based configuration for the mail provider to send user restore codes.
@@ -10,7 +10,7 @@ import java.util.Properties;
  * @author Simon Danner, 30.11.2019
  */
 @ApplicationScoped
-public class RestoreMailConfig
+public class RestoreMailConfig extends AbstractFileBasedConfig
 {
   private static final String CONFIG_PATH = "ojcms_restore_mail.properties";
   private static final String KEY_MAIL_HOST = "MAIL_HOST";
@@ -19,19 +19,9 @@ public class RestoreMailConfig
   private static final String KEY_MAIL_PASSWORD = "MAIL_PASSWORD";
   private static final String KEY_MAIL_SENDER = "MAIL_SENDER";
 
-  private final Properties properties;
-
   public RestoreMailConfig()
   {
-    try
-    {
-      properties = new Properties();
-      properties.load(new FileInputStream(CONFIG_PATH));
-    }
-    catch (IOException pE)
-    {
-      throw new RuntimeException("Unable to load properties! Provide config file: " + CONFIG_PATH + "!", pE);
-    }
+    super(CONFIG_PATH);
   }
 
   /**
@@ -39,7 +29,7 @@ public class RestoreMailConfig
    */
   public String getMailHost()
   {
-    return properties.getProperty(KEY_MAIL_HOST);
+    return readMandatoryProperty(KEY_MAIL_HOST);
   }
 
   /**
@@ -47,7 +37,7 @@ public class RestoreMailConfig
    */
   public int getMailPort()
   {
-    return Integer.parseInt(properties.getProperty(KEY_MAIL_PORT));
+    return readMandatoryIntProperty(KEY_MAIL_PORT);
   }
 
   /**
@@ -55,7 +45,7 @@ public class RestoreMailConfig
    */
   public String getMailUser()
   {
-    return properties.getProperty(KEY_MAIL_USER);
+    return readMandatoryProperty(KEY_MAIL_USER);
   }
 
   /**
@@ -63,7 +53,7 @@ public class RestoreMailConfig
    */
   public String getMailPassword()
   {
-    return properties.getProperty(KEY_MAIL_PASSWORD);
+    return readMandatoryProperty(KEY_MAIL_PASSWORD);
   }
 
   /**
@@ -71,6 +61,6 @@ public class RestoreMailConfig
    */
   public String getMailSender()
   {
-    return properties.getProperty(KEY_MAIL_SENDER);
+    return readMandatoryProperty(KEY_MAIL_SENDER);
   }
 }
