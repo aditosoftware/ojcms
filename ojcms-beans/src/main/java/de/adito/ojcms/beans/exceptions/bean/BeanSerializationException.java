@@ -1,4 +1,4 @@
-package de.adito.ojcms.sql.datasource.util;
+package de.adito.ojcms.beans.exceptions.bean;
 
 /**
  * Exception for bean serialization problems.
@@ -20,10 +20,11 @@ public class BeanSerializationException extends RuntimeException
   /**
    * Creates a new serialization exception.
    *
-   * @param pThrowable the cause for the exception
+   * @param pMessage   a detailed error message
+   * @param pThrowable the cause of the exception
    */
-  public BeanSerializationException(Throwable pThrowable)
+  public BeanSerializationException(String pMessage, Throwable pThrowable)
   {
-    super(pThrowable);
+    super(pMessage, pThrowable);
   }
 }

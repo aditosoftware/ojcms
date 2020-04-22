@@ -24,32 +24,32 @@ import static de.adito.ojcms.rest.auth.util.GSONFactory.GSON;
 public class GSONSerializationProvider implements MessageBodyReader<Object>, MessageBodyWriter<Object>
 {
   @Override
-  public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
+  public boolean isReadable(Class<?> pType, Type pGenericType, Annotation[] pAnnotations, MediaType pMediaType)
   {
     return true;
   }
 
   @Override
-  public Object readFrom(Class<Object> type, Type genericType, Annotation[] annotations, MediaType mediaType,
-      MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException, WebApplicationException
+  public Object readFrom(Class<Object> pType, Type pGenericType, Annotation[] pAnnotations, MediaType pMediaType,
+      MultivaluedMap<String, String> pHttpHeaders, InputStream pEntityStream) throws IOException, WebApplicationException
   {
-    try (InputStreamReader reader = new InputStreamReader(entityStream))
+    try (InputStreamReader reader = new InputStreamReader(pEntityStream))
     {
-      return GSON.fromJson(reader, type);
+      return GSON.fromJson(reader, pType);
     }
   }
 
   @Override
-  public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
+  public boolean isWriteable(Class<?> pType, Type pGenericType, Annotation[] pAnnotations, MediaType pMediaType)
   {
     return true;
   }
 
   @Override
-  public void writeTo(Object pObject, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType,
-      MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws WebApplicationException
+  public void writeTo(Object pObject, Class<?> pType, Type pGenericType, Annotation[] pAnnotations, MediaType pMediaType,
+      MultivaluedMap<String, Object> pHttpHeaders, OutputStream pEntityStream) throws WebApplicationException
   {
-    try (PrintWriter writer = new PrintWriter(entityStream))
+    try (PrintWriter writer = new PrintWriter(pEntityStream))
     {
       writer.write(GSON.toJson(pObject));
     }

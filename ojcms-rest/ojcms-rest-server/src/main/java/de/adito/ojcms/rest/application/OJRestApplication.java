@@ -1,6 +1,6 @@
 package de.adito.ojcms.rest.application;
 
-import de.adito.ojcms.rest.serialization.GSONSerializationProvider;
+import de.adito.ojcms.rest.serialization.*;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Application;
@@ -36,6 +36,7 @@ public abstract class OJRestApplication extends Application
     }
 
     providerAndResourceTypes.add(GSONSerializationProvider.class);
+    providerAndResourceTypes.add(BeanSerializationProvider.class);
   }
 
   @Override

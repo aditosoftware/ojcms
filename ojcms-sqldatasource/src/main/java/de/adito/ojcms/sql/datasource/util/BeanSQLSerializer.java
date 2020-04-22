@@ -1,5 +1,6 @@
 package de.adito.ojcms.sql.datasource.util;
 
+import de.adito.ojcms.beans.exceptions.bean.BeanSerializationException;
 import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.beans.literals.fields.serialization.ISerializableField;
 import de.adito.ojcms.beans.literals.fields.util.*;
