@@ -14,7 +14,7 @@ import de.adito.ojcms.rest.security.user.OJUser;
  * @param <AUTH_RESPONSE>        the authentication response for the client
  * @author Simon Danner, 19.04.2020
  */
-public abstract class OJDefaultSecuredRestApplication<USER extends OJUser, REGISTRATION_REQUEST extends IRegistrationRequest,
+public abstract class OJDefaultSecuredRestApplication<USER extends OJUser, REGISTRATION_REQUEST extends RegistrationRequest,
     AUTH_RESPONSE extends AuthenticationResponse>
     extends OJSecuredRestApplication<SecureBoundary, USER, REGISTRATION_REQUEST, AUTH_RESPONSE>
 {
@@ -24,8 +24,9 @@ public abstract class OJDefaultSecuredRestApplication<USER extends OJUser, REGIS
    * @param pUserType      the type of the user for the application
    * @param pRestResources the REST resources to register
    */
-  protected OJDefaultSecuredRestApplication(Class<USER> pUserType, Class<?>... pRestResources)
+  protected OJDefaultSecuredRestApplication(Class<USER> pUserType, Class<REGISTRATION_REQUEST> pRegistrationRequestType,
+      Class<?>... pRestResources)
   {
-    super(SecureBoundary.class, pUserType, pRestResources);
+    super(SecureBoundary.class, pUserType, pRegistrationRequestType, pRestResources);
   }
 }

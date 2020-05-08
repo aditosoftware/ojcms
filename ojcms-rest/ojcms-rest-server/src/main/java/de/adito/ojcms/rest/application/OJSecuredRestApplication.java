@@ -4,9 +4,10 @@ import de.adito.ojcms.persistence.Persist;
 import de.adito.ojcms.rest.auth.api.*;
 import de.adito.ojcms.rest.security.*;
 import de.adito.ojcms.rest.security.user.*;
+import de.adito.ojcms.rest.serialization.*;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.container.ContainerRequestFilter;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.container.ContainerRequestFilter;
 import java.lang.annotation.Annotation;
 
 /**
@@ -16,7 +17,7 @@ import java.lang.annotation.Annotation;
  * <p>
  * Security mechanism: You are able to annotate JAX-RS REST methods that require authentication with the provided annotation type.
  * Use either {@link SecureBoundary} as default annotation type for just JWT based authentication or provide a custom one to add special
- * information like required user roles, for example. A custom annotation must be annotated with {@link javax.ws.rs.ext.Provider}.
+ * information like required user roles, for example. A custom annotation must be annotated with {@link jakarta.ws.rs.ext.Provider}.
  * Then, if the secured REST interface is called, a {@link ContainerRequestFilter} will check if the client is providing a valid JWT.
  * This class also allows you to define a method to validate the request based on the custom annotation. For example, you may check if the
  * authenticated user (trough JWT) has the required user role defined in the custom boundary annotation.
@@ -36,7 +37,7 @@ import java.lang.annotation.Annotation;
  * @author Simon Danner, 07.04.2020
  */
 public abstract class OJSecuredRestApplication<BOUNDARY extends Annotation, USER extends OJUser,
-    REGISTRATION_REQUEST extends IRegistrationRequest, AUTH_RESPONSE extends AuthenticationResponse>
+    REGISTRATION_REQUEST extends RegistrationRequest, AUTH_RESPONSE extends AuthenticationResponse>
     extends OJRestApplication implements IUserCreator<USER, REGISTRATION_REQUEST, AUTH_RESPONSE>, IBoundaryValidation<BOUNDARY, USER>
 {
   private final Class<BOUNDARY> boundaryAnnotationType;
@@ -49,7 +50,8 @@ public abstract class OJSecuredRestApplication<BOUNDARY extends Annotation, USER
    * @param pUserType               the type of the user for the application
    * @param pRestResources          the REST resources to register
    */
-  protected OJSecuredRestApplication(Class<BOUNDARY> pBoundaryAnnotationType, Class<USER> pUserType, Class<?>... pRestResources)
+  protected OJSecuredRestApplication(Class<BOUNDARY> pBoundaryAnnotationType, Class<USER> pUserType,
+      Class<REGISTRATION_REQUEST> pRegistrationRequestType, Class<?>... pRestResources)
   {
     super(pRestResources);
     boundaryAnnotationType = pBoundaryAnnotationType;
@@ -59,6 +61,9 @@ public abstract class OJSecuredRestApplication<BOUNDARY extends Annotation, USER
     providerAndResourceTypes.add(AuthenticationRestService.class);
     providerAndResourceInstances.add(new AuthenticationRestService<>(userService));
     providerAndResourceInstances.add(new SecureRequestBoundary<>(this, pUserType));
+
+    providerAndResourceTypes.remove(GSONSerializationProvider.class);
+    providerAndResourceInstances.add(new SecurityGSONSerializationProvider<>(pRegistrationRequestType));
   }
 
   @Override

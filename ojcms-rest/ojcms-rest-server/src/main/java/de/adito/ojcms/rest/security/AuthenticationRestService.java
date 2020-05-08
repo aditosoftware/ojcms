@@ -4,9 +4,8 @@ import de.adito.ojcms.rest.application.OJSecuredRestApplication;
 import de.adito.ojcms.rest.auth.api.*;
 import de.adito.ojcms.rest.security.user.OJUser;
 import de.adito.ojcms.rest.security.user.exceptions.*;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.*;
 
 /**
  * REST interface for user registration and authentication.
@@ -20,7 +19,7 @@ import javax.ws.rs.core.*;
  * @author Simon Danner, 22.09.2019
  */
 @Path("/authentication")
-public class AuthenticationRestService<USER extends OJUser, REGISTRATION_REQUEST extends IRegistrationRequest,
+public class AuthenticationRestService<USER extends OJUser, REGISTRATION_REQUEST extends RegistrationRequest,
     AUTH_RESPONSE extends AuthenticationResponse>
 {
   private final UserService<USER, REGISTRATION_REQUEST, AUTH_RESPONSE> userService;

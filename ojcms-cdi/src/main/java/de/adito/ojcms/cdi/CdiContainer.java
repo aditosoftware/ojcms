@@ -44,6 +44,16 @@ public final class CdiContainer
   }
 
   /**
+   * Determines if the CDI container has been booted already.
+   *
+   * @return <tt>true</tt> if the CDI container has been booted
+   */
+  public static boolean isBooted()
+  {
+    return CDI_CONTROL != null;
+  }
+
+  /**
    * Boots the CDI container. After a successful startup process {@link ICdiControl} will be available via injection.
    * To reboot the CDI container {@link ICdiControl#shutdown()} has to be called first. Otherwise a subsequent call
    * will lead to a runtime exception.
@@ -62,17 +72,46 @@ public final class CdiContainer
    * To reboot the CDI container {@link ICdiControl#shutdown()} has to be called first. Otherwise a subsequent call
    * will lead to a runtime exception.
    *
+   * @param pConfig a custom configuration for the CDI container
    * @return an interface to control and create CDI elements
    */
   public static ICdiControl boot(Consumer<SeContainerInitializer> pConfig)
   {
     if (CDI_CONTROL != null)
-      throw new IllegalStateException("Cdi container already booted!");
+      throw new IllegalStateException("CDI container already booted!");
 
     final SeContainerInitializer initializer = SeContainerInitializer.newInstance();
     pConfig.accept(initializer);
     CDI_CONTROL = new _CdiControl(initializer.initialize());
     return CDI_CONTROL;
+  }
+
+  /**
+   * Force the container to boot an additional instance. Should only be used in test scenarios.
+   *
+   * @return an interface to control the additional CDI container
+   */
+  public static ICdiControl forceAdditionalBoot()
+  {
+    return forceAdditionalBoot(config ->
+    {
+    });
+  }
+
+  /**
+   * Force the container to boot an additional instance. Should only be used in test scenarios.
+   *
+   * @param pConfig a custom configuration for the CDI container
+   * @return an interface to control the additional CDI container
+   */
+  public static ICdiControl forceAdditionalBoot(Consumer<SeContainerInitializer> pConfig)
+  {
+    if (!isBooted())
+      throw new IllegalStateException("Main CDI container not booted! Use default!");
+
+    final SeContainerInitializer initializer = SeContainerInitializer.newInstance();
+    pConfig.accept(initializer);
+    return new _CdiControl(initializer.initialize());
   }
 
   /**
@@ -141,7 +180,7 @@ public final class CdiContainer
     public <T> T createInjected(Type pType, Annotation... pQualifiers)
     {
       //noinspection unchecked
-      return (T) WeldContainer.current().select(pType, pQualifiers).get();
+      return (T) ((WeldContainer) container).select(pType, pQualifiers).get();
     }
 
     @Override

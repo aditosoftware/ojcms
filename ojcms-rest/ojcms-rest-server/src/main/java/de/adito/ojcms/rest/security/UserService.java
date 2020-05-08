@@ -25,7 +25,7 @@ import static de.adito.ojcms.rest.auth.util.SharedUtils.VALID_EMAIL_ADDRESS_REGE
  * @param <AUTH_RESPONSE>        the type of the authentication responses of the application
  * @author Simon Danner, 30.09.2019
  */
-public class UserService<USER extends OJUser, REGISTRATION_REQUEST extends IRegistrationRequest,
+public class UserService<USER extends OJUser, REGISTRATION_REQUEST extends RegistrationRequest,
     AUTH_RESPONSE extends AuthenticationResponse>
 {
   private final IUserCreator<USER, REGISTRATION_REQUEST, AUTH_RESPONSE> userCreator;

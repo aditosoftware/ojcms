@@ -45,7 +45,7 @@ public class TimestampField extends AbstractField<Instant> implements ISerializa
   @Override
   public Long toPersistent(Instant pValue)
   {
-    return pValue.toEpochMilli();
+    return pValue == null ? null : pValue.toEpochMilli();
   }
 
   @Override
@@ -57,6 +57,6 @@ public class TimestampField extends AbstractField<Instant> implements ISerializa
   @Override
   public Instant fromPersistent(Long pSerialValue)
   {
-    return Instant.ofEpochMilli(pSerialValue);
+    return pSerialValue == null ? null : Instant.ofEpochMilli(pSerialValue);
   }
 }

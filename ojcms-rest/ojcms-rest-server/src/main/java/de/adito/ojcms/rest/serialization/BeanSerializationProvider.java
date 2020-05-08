@@ -1,20 +1,21 @@
 package de.adito.ojcms.rest.serialization;
 
+import com.google.gson.reflect.TypeToken;
 import de.adito.ojcms.beans.IBean;
 import de.adito.ojcms.beans.exceptions.bean.BeanSerializationException;
+import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.beans.literals.fields.serialization.ISerializableField;
-import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.*;
+import jakarta.ws.rs.ext.*;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
-import javax.ws.rs.ext.*;
 import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static de.adito.ojcms.rest.auth.util.GSONFactory.GSON;
-import static java.util.stream.Collectors.toMap;
 
 /**
  * JSON serialization provider for {@link IBean} instances. Only possible for beans that contain {@link ISerializableField} only.
@@ -34,11 +35,14 @@ public class BeanSerializationProvider implements MessageBodyReader<IBean>, Mess
 
   @Override
   public IBean readFrom(Class<IBean> pType, Type pGenericType, Annotation[] pAnnotations, MediaType pMediaType,
-      MultivaluedMap<String, String> pHttpHeaders, InputStream pEntityStream) throws IOException, WebApplicationException
+      MultivaluedMap<String, String> pHttpHeaders, InputStream pEntityStream) throws WebApplicationException
   {
     try (InputStreamReader reader = new InputStreamReader(pEntityStream))
     {
-      final ParameterizedType mapType = ParameterizedTypeImpl.make(Map.class, new Type[]{String.class, Serializable.class}, IBean.class);
+      final Type mapType = new TypeToken<Map<String, Object>>()
+      {
+      }.getType();
+
       final Map<String, Serializable> serialBeanValues = GSON.fromJson(reader, mapType);
 
       try
@@ -58,6 +62,10 @@ public class BeanSerializationProvider implements MessageBodyReader<IBean>, Mess
         throw new BeanSerializationException("Provide a default constructor for " + pType.getName() + "! May be private!", pE);
       }
     }
+    catch (Exception pE)
+    {
+      throw new BeanSerializationException("Unable to read serialized bean!", pE);
+    }
   }
 
   @Override
@@ -68,15 +76,21 @@ public class BeanSerializationProvider implements MessageBodyReader<IBean>, Mess
 
   @Override
   public void writeTo(IBean pBean, Class<?> pType, Type pGenericType, Annotation[] pAnnotations, MediaType pMediaType,
-      MultivaluedMap<String, Object> pHttpHeaders, OutputStream pEntityStream) throws IOException, WebApplicationException
+      MultivaluedMap<String, Object> pHttpHeaders, OutputStream pEntityStream) throws WebApplicationException
   {
-    if (pBean.streamFields().allMatch(pField -> pField instanceof ISerializableField))
-      throw new BeanSerializationException("Bean of type " + pType.getName() + " has non serializable fields!");
+    final Set<String> nonSerializableFields = pBean.streamFields() //
+        .filter(pField -> !(pField instanceof ISerializableField)) //
+        .map(IField::getName) //
+        .collect(Collectors.toSet());
+
+    if (!nonSerializableFields.isEmpty())
+      throw new BeanSerializationException("Bean of type " + pType.getName() + " has a non serializable fields: " + nonSerializableFields);
 
     //noinspection unchecked
     final Map<String, Serializable> serialBeanValues = pBean.stream() //
-        .collect(toMap(pTuple -> pTuple.getField().getName(),
-            pTuple -> ((ISerializableField) pTuple.getField()).toPersistent(pTuple.getValue())));
+        //Allow null values
+        .collect(HashMap::new, (pMap, pTuple) -> pMap
+            .put(pTuple.getField().getName(), ((ISerializableField) pTuple.getField()).toPersistent(pTuple.getValue())), Map::putAll);
 
     try (PrintWriter writer = new PrintWriter(pEntityStream))
     {

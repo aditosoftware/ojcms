@@ -3,7 +3,7 @@ package de.adito.ojcms.rest.security.user;
 import de.adito.ojcms.rest.auth.api.*;
 
 /**
- * Defines how to create the user of the application based on a {@link IRegistrationRequest}.
+ * Defines how to create the user of the application based on a {@link RegistrationRequest}.
  * Furthermore defines how to create the generic {@link AuthenticationResponse} after a successful authentication.
  *
  * @param <USER>                 the generic user type of the application
@@ -11,7 +11,7 @@ import de.adito.ojcms.rest.auth.api.*;
  * @param <AUTH_RESPONSE>        the generic type of authentication responses of the application
  * @author Simon Danner, 08.04.2020
  */
-public interface IUserCreator<USER extends OJUser, REGISTRATION_REQUEST extends IRegistrationRequest,
+public interface IUserCreator<USER extends OJUser, REGISTRATION_REQUEST extends RegistrationRequest,
     AUTH_RESPONSE extends AuthenticationResponse>
 {
   /**

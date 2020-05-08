@@ -16,7 +16,7 @@ public interface IBoundaryValidation<BOUNDARY extends Annotation, USER extends O
   /**
    * The type of the secure boundary annotation. Use {@link SecureBoundary} if only JWT based.
    * You may define custom annotations to define boundaries that require a special user role etc.
-   * A custom boundary annotation must be annotated with {@link javax.ws.rs.ext.Provider}.
+   * A custom boundary annotation must be annotated with {@link jakarta.ws.rs.ext.Provider}.
    *
    * @return the type of the boundary annotation
    */

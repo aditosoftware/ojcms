@@ -6,13 +6,14 @@ import de.adito.ojcms.beans.IBeanContainer;
 import de.adito.ojcms.cdi.ICdiControl;
 import de.adito.ojcms.rest.security.user.OJUser;
 import de.adito.ojcms.rest.security.util.JWTUtil;
+import de.adito.ojcms.transactions.util.TransactionalExecution;
+import jakarta.ws.rs.Priorities;
+import jakarta.ws.rs.container.*;
+import jakarta.ws.rs.core.*;
+import jakarta.ws.rs.ext.Provider;
 import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
 
 import javax.annotation.Priority;
-import javax.ws.rs.Priorities;
-import javax.ws.rs.container.*;
-import javax.ws.rs.core.*;
-import javax.ws.rs.ext.Provider;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Optional;
@@ -38,6 +39,7 @@ public class SecureRequestBoundary<BOUNDARY extends Annotation, USER extends OJU
   private final IBoundaryValidation<BOUNDARY, USER> boundaryValidation;
   private final Class<USER> userType;
   private IBeanContainer<USER> users;
+  private TransactionalExecution transactionalExecution;
 
   public SecureRequestBoundary(IBoundaryValidation<BOUNDARY, USER> pBoundaryValidation, Class<USER> pUserType)
   {
@@ -56,11 +58,13 @@ public class SecureRequestBoundary<BOUNDARY extends Annotation, USER extends OJU
 
       if (users == null) //Initialize lazy to assure that CDI is ready
         users = ICdiControl.current().createInjected(new ParameterizedTypeImpl(IBeanContainer.class, userType));
+      if (transactionalExecution == null)
+        transactionalExecution = ICdiControl.current().createInjected(TransactionalExecution.class);
 
       final String token = _retrieveTokenFromHeader(pRequestContext);
       final DecodedJWT decoded = JWTUtil.decodeJwt(token);
       final String userMail = decoded.getClaim(JWTUtil.USER_MAIL_CLAIM).asString();
-      final Optional<USER> authenticatedUser = users.findOneByFieldValue(OJUser.MAIL, userMail);
+      final Optional<USER> authenticatedUser = transactionalExecution.resolveResult(() -> users.findOneByFieldValue(OJUser.MAIL, userMail));
 
       if (!authenticatedUser.isPresent())
       {

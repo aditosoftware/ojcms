@@ -1,10 +1,10 @@
 package de.adito.ojcms.rest.serialization;
 
 import de.adito.ojcms.rest.auth.util.GSONFactory;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.*;
+import jakarta.ws.rs.ext.*;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
-import javax.ws.rs.ext.*;
 import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;

@@ -21,6 +21,7 @@ class FileBasedDatabaseConfig extends AbstractFileBasedConfig implements IDataba
   private static final String CONFIG_PATH = "ojcms_database.properties";
   private static final String KEY_PLATFORM = "platform";
   private static final String KEY_EMBEDDED = "embedded";
+  private static final String KEY_IN_MEMORY = "inMemory";
   private static final String KEY_HOST = "host";
   private static final String KEY_PORT = "port";
   private static final String KEY_DB_NAME = "databaseName";
@@ -42,7 +43,8 @@ class FileBasedDatabaseConfig extends AbstractFileBasedConfig implements IDataba
     if (embedded)
     {
       final EEmbeddedDatabasePlatform embeddedDatabasePlatform = EEmbeddedDatabasePlatform.valueOf(platform);
-      resolver = new _EmbeddedDatabaseResolver(embeddedDatabasePlatform);
+      final boolean inMemory = _resolveInMemory(properties);
+      resolver = new _EmbeddedDatabaseResolver(embeddedDatabasePlatform, inMemory);
     }
     else
     {
@@ -69,6 +71,21 @@ class FileBasedDatabaseConfig extends AbstractFileBasedConfig implements IDataba
     final String embedded = _loadProperty(KEY_EMBEDDED, pProperties, false);
     return Optional.ofNullable(embedded) //
         .map(pValue -> Boolean.parseBoolean(embedded)) //
+        .orElse(false);
+  }
+
+  /**
+   * Resolves the 'in memory' flag from the properties file.
+   * If there is no entry, the default 'false' will be used.
+   *
+   * @param pProperties a {@link Properties} instance to retrieve entries from the config file
+   * @return <tt>true</tt> if an in memory database should be used
+   */
+  private static boolean _resolveInMemory(Properties pProperties)
+  {
+    final String inMemory = _loadProperty(KEY_IN_MEMORY, pProperties, false);
+    return Optional.ofNullable(inMemory) //
+        .map(pValue -> Boolean.parseBoolean(inMemory)) //
         .orElse(false);
   }
 
@@ -148,21 +165,24 @@ class FileBasedDatabaseConfig extends AbstractFileBasedConfig implements IDataba
   private static class _EmbeddedDatabaseResolver implements _IConnectionSupplierResolver
   {
     private final EEmbeddedDatabasePlatform platform;
+    private final boolean inMemory;
 
     /**
      * Initializes the resolver.
      *
      * @param pPlatform the embedded database platform to use
+     * @param pInMemory <tt>true</tt> if the embedded database should be persisted in memory (only for testing)
      */
-    _EmbeddedDatabaseResolver(EEmbeddedDatabasePlatform pPlatform)
+    _EmbeddedDatabaseResolver(EEmbeddedDatabasePlatform pPlatform, boolean pInMemory)
     {
       platform = pPlatform;
+      inMemory = pInMemory;
     }
 
     @Override
     public IDatabaseConnectionSupplier resolveConnectionSupplier(ConnectionSupplierFactory pFactory)
     {
-      return pFactory.forEmbeddedDatabase(platform, false);
+      return pFactory.forEmbeddedDatabase(platform, inMemory);
     }
   }
 

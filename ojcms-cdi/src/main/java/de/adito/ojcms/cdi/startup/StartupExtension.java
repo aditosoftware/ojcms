@@ -2,6 +2,7 @@ package de.adito.ojcms.cdi.startup;
 
 import javax.enterprise.context.*;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.*;
 import java.util.*;
 
@@ -29,10 +30,10 @@ class StartupExtension implements Extension
    * This function will be called when CDI boot is finished.
    * Calls every startup callback.
    */
-  void afterCdiStartup(@Observes @Initialized(ApplicationScoped.class) Object pObject)
+  void afterCdiStartup(@Observes @Initialized(ApplicationScoped.class) Object pObject, Instance<Object> pInstance)
   {
     startupCallbacks.stream() //
-        .map(pCallbackType -> CDI.current().select(pCallbackType).get()) //
+        .map(pCallbackType -> pInstance.select(pCallbackType).get()) //
         //Execute them in descending priority order
         .sorted(Comparator.comparingInt(IStartupCallback::priority).reversed()) //
         .forEach(IStartupCallback::onCdiStartup);
