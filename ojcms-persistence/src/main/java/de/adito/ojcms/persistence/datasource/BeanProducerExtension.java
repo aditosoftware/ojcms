@@ -43,9 +43,30 @@ class BeanProducerExtension implements Extension
     final Class<? extends IBean> beanType = (Class<? extends IBean>) type.getBaseType();
 
     if (type.isAnnotationPresent(Persist.class))
-      _registerPersistentBeanType(type.getAnnotation(Persist.class), beanType, pProcessedBean);
+    {
+      final Persist annotation = type.getAnnotation(Persist.class);
+      _registerPersistentBeanType(beanType, annotation.mode(), annotation.containerId());
+
+      if (annotation.mode() == EPersistenceMode.SINGLE)
+        pProcessedBean.veto(); //Veto single beans and use custom producer instead
+    }
     else if (type.isAnnotationPresent(PersistAsBaseType.class))
-      _registerPersistentBaseContainer(type.getAnnotation(PersistAsBaseType.class), beanType);
+    {
+      final PersistAsBaseType annotation = type.getAnnotation(PersistAsBaseType.class);
+      _registerPersistentBaseContainer(beanType, annotation.forSubTypes(), annotation.containerId());
+    }
+  }
+
+  /**
+   * Scans every {@link AdditionalPersistConfiguration} in the classpath and registers declared additional persistent beans.
+   */
+  void findAdditionalConfigurations(@Observes ProcessAnnotatedType<? extends AdditionalPersistConfiguration> pProcessedType)
+  {
+    for (AdditionalPersist additional : pProcessedType.getAnnotatedType().getAnnotations(AdditionalPersist.class))
+      _registerPersistentBeanType(additional.beanType(), additional.mode(), additional.containerId());
+
+    for (AdditionalPersistAsBaseType additional : pProcessedType.getAnnotatedType().getAnnotations(AdditionalPersistAsBaseType.class))
+      _registerPersistentBaseContainer(additional.baseType(), additional.forSubTypes(), additional.containerId());
   }
 
   /**
@@ -61,59 +82,56 @@ class BeanProducerExtension implements Extension
   }
 
   /**
-   * Registers a persistent bean annotated by {@link Persist}.
-   * If the bean should be persisted in {@link EPersistenceMode#SINGLE} the processed bean will be vetoed.
-   * The producer should be used instead.
+   * Registers a persistent bean type.
    *
-   * @param pAnnotation    the persistence annotation instance to retrieve configuration from
-   * @param pBeanType      the annotated bean type
-   * @param pProcessedBean the processed CDI bean
+   * @param pBeanType        the annotated bean type
+   * @param pPersistenceMode the persistence mode of the bean type to register
+   * @param pContainerId     the container id to use for the persistent bean
    */
-  private static void _registerPersistentBeanType(Persist pAnnotation, Class<? extends IBean> pBeanType,
-                                                  ProcessAnnotatedType<? extends IBean> pProcessedBean)
+  private static void _registerPersistentBeanType(Class<? extends IBean> pBeanType, EPersistenceMode pPersistenceMode, String pContainerId)
   {
     if (Modifier.isAbstract(pBeanType.getModifiers()))
       throw new OJPersistenceException("Abstract bean type " + pBeanType.getName() + " cannot be persisted!");
 
-    if (pAnnotation.mode() == EPersistenceMode.CONTAINER)
-      CONTAINER_BEAN_TYPES.put(pBeanType, pAnnotation.containerId());
+    if (pPersistenceMode == EPersistenceMode.CONTAINER)
+      CONTAINER_BEAN_TYPES.put(pBeanType, pContainerId);
     else
-    {
-      SINGLE_BEAN_TYPES.put(pBeanType, pAnnotation.containerId());
-      pProcessedBean.veto();
-    }
+      SINGLE_BEAN_TYPES.put(pBeanType, pContainerId);
   }
 
   /**
-   * Registers a persistent base bean type annotated by {@link PersistAsBaseType}.
-   * A base container will be registered for all {@link PersistAsBaseType#forSubTypes()}.
+   * Registers a persistent base bean type.
+   * A base container will be registered for all provided sub types.
    * Checks several conditions before registering the bean type.
    *
-   * @param pAnnotation the persistence annotation instance to retrieve configuration from
-   * @param pBeanType   the annotated base bean type
+   * @param pBeanBaseType the annotated base bean type
+   * @param pForSubTypes  the set of bean sub types the container is for
+   * @param pContainerId  the id of the container
    */
-  private static void _registerPersistentBaseContainer(PersistAsBaseType pAnnotation, Class<? extends IBean> pBeanType)
+  private static void _registerPersistentBaseContainer(Class<? extends IBean> pBeanBaseType, Class<? extends IBean>[] pForSubTypes,
+      String pContainerId)
   {
     final Set<Class<? extends IBean>> subTypes = new HashSet<>();
 
-    if (pAnnotation.forSubTypes().length < 2)
-      throw new OJPersistenceException("At least two sub types must be given to create a persistent container for " + pBeanType.getName());
+    if (pForSubTypes.length < 2)
+      throw new OJPersistenceException(
+          "At least two sub types must be given to create a persistent container for " + pBeanBaseType.getName());
 
-    for (Class<? extends IBean> subType : pAnnotation.forSubTypes())
+    for (Class<? extends IBean> subType : pForSubTypes)
     {
       if (Modifier.isAbstract(subType.getModifiers()))
         throw new OJPersistenceException(
-            "Sub bean type " + subType.getName() + " is abstract! " + "Cannot be used for base container " + pBeanType.getName());
+            "Sub bean type " + subType.getName() + " is abstract! " + "Cannot be used for base container " + pBeanBaseType.getName());
 
-      if (!pBeanType.isAssignableFrom(subType))
-        throw new OJPersistenceException("Sub bean type " + subType.getName() + " is not assignable from " + pBeanType
+      if (!pBeanBaseType.isAssignableFrom(subType))
+        throw new OJPersistenceException("Sub bean type " + subType.getName() + " is not assignable from " + pBeanBaseType
             .getName() + "!" + "Cannot be used for base container!");
 
       subTypes.add(subType);
     }
 
-    final BaseContainerRegistration registration = new BaseContainerRegistration(pAnnotation.containerId(), subTypes);
-    BASE_CONTAINER_TYPES.put(pBeanType, registration);
+    final BaseContainerRegistration registration = new BaseContainerRegistration(pContainerId, subTypes);
+    BASE_CONTAINER_TYPES.put(pBeanBaseType, registration);
   }
 
   /**
@@ -142,7 +160,7 @@ class BeanProducerExtension implements Extension
    * @param pRegistration       information about the registered base bean container
    */
   private static void _addBaseContainerCdiBeans(AfterBeanDiscovery pAfterBeanDiscovery, Class<? extends IBean> pBeanBaseType,
-                                                BaseContainerRegistration pRegistration)
+      BaseContainerRegistration pRegistration)
   {
     final ContainerQualifier literal = ContainerQualifier.Literal.forContainerId(pRegistration.getContainerId());
     _registerContainerCdiBean(pAfterBeanDiscovery, pBeanBaseType, literal);
@@ -183,7 +201,7 @@ class BeanProducerExtension implements Extension
    * @param pLiteral            a CDI literal to identify the container content
    */
   private static void _registerContainerCdiBean(AfterBeanDiscovery pAfterBeanDiscovery, Class<? extends IBean> pBeanType,
-                                                ContainerQualifier pLiteral)
+      ContainerQualifier pLiteral)
   {
     //noinspection unchecked
     pAfterBeanDiscovery.addBean() //
@@ -201,7 +219,7 @@ class BeanProducerExtension implements Extension
    * @param pLiteral            a CDI literal to identify the container content
    */
   private static void _registerContainerContentCdiBean(AfterBeanDiscovery pAfterBeanDiscovery, String pContainerId, //
-                                                       @Nullable Class<? extends IBean> pBeanType, ContainerQualifier pLiteral)
+      @Nullable Class<? extends IBean> pBeanType, ContainerQualifier pLiteral)
   {
     //noinspection unchecked
     pAfterBeanDiscovery.addBean() //
@@ -220,7 +238,7 @@ class BeanProducerExtension implements Extension
    * @return the created bean container instance
    */
   private static <BEAN extends IBean> IBeanContainer<BEAN> _createBeanContainer(Instance<Object> pEnvironment, Class<BEAN> pBeanType,
-                                                                                ContainerQualifier pLiteral)
+      ContainerQualifier pLiteral)
   {
     //noinspection unchecked
     final ContainerContent<BEAN> content = pEnvironment.select(ContainerContent.class, pLiteral).get();
@@ -237,7 +255,7 @@ class BeanProducerExtension implements Extension
    * @return the created instance managing the persistent container's content
    */
   private static <BEAN extends IBean> ContainerContent<BEAN> _createContainerContent(Instance<Object> pEnvironment, String pContainerId,
-                                                                                     Class<BEAN> pBeanType)
+      Class<BEAN> pBeanType)
   {
     return new ContainerContent<>(pContainerId, pBeanType, pEnvironment.select(ITransaction.class).get());
   }
@@ -251,7 +269,7 @@ class BeanProducerExtension implements Extension
    * @return the created single bean instance
    */
   private static <BEAN extends IBean> BEAN _createSingleBean(Instance<Object> pEnvironment, Class<BEAN> pBeanType,
-                                                             ContainerQualifier pLiteral)
+      ContainerQualifier pLiteral)
   {
     final SingleBeanContent content = pEnvironment.select(SingleBeanContent.class, pLiteral).get();
     final PersistentBeanDatasource datasource = new PersistentBeanDatasource(content);
@@ -267,7 +285,7 @@ class BeanProducerExtension implements Extension
    * @return the created instance managing the bean's content
    */
   private static SingleBeanContent<?> _createSingleBeanContent(Instance<Object> pEnvironment, String pBeanId,
-                                                               Class<? extends IBean> pBeanType)
+      Class<? extends IBean> pBeanType)
   {
     final ITransaction transaction = pEnvironment.select(ITransaction.class).get();
     return new SingleBeanContent<>(new SingleBeanKey(pBeanId), pBeanType, transaction);

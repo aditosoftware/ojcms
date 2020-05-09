@@ -1,5 +1,6 @@
 package de.adito.ojcms.rest.application;
 
+import de.adito.ojcms.persistence.AdditionalPersistConfiguration;
 import de.adito.ojcms.rest.serialization.*;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Application;
@@ -12,7 +13,7 @@ import java.util.*;
  *
  * @author Simon Danner, 02.04.2020
  */
-public abstract class OJRestApplication extends Application
+public abstract class OJRestApplication extends Application implements AdditionalPersistConfiguration
 {
   protected final Set<Class<?>> providerAndResourceTypes = new HashSet<>();
   protected final Set<Object> providerAndResourceInstances = new HashSet<>();

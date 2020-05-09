@@ -1,5 +1,6 @@
 package de.adito.ojcms.rest.testapplication;
 
+import de.adito.ojcms.persistence.AdditionalPersist;
 import de.adito.ojcms.rest.application.OJSecuredRestApplication;
 import de.adito.ojcms.rest.auth.api.AuthenticationResponse;
 import jakarta.ws.rs.ApplicationPath;
@@ -11,6 +12,7 @@ import java.util.Arrays;
  *
  * @author Simon Danner, 22.04.2020
  */
+@AdditionalPersist(beanType = SomeAdditionalTestBean.class, containerId = "ADDITIONAL")
 @ApplicationPath("/")
 public class SecuredApplicationForTest
     extends OJSecuredRestApplication<TestBoundary, UserForTest, RegistrationRequestForTest, AuthenticationResponse>

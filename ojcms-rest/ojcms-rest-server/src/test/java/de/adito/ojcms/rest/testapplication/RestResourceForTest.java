@@ -3,6 +3,8 @@ package de.adito.ojcms.rest.testapplication;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 
+import javax.inject.Inject;
+
 /**
  * Rest resource for testing. Contains some secured methods.
  * Also used to test bean serialization.
@@ -14,12 +16,16 @@ public class RestResourceForTest
 {
   private static UserForTest user;
 
+  @Inject
+  private SomeTestBusiness business;
+
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   @TestBoundary(requiresOneOfTheseRoles = EUserRoleForTest.ROLE1)
   @Path("/secret")
   public String getSomeSecretValue()
   {
+    business.doIt(); //Do it to test additional persistent bean
     return "42";
   }
 
