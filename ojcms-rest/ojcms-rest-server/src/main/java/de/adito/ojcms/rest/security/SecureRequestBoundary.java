@@ -39,6 +39,7 @@ public class SecureRequestBoundary<BOUNDARY extends Annotation, USER extends OJU
   private final IBoundaryValidation<BOUNDARY, USER> boundaryValidation;
   private final Class<USER> userType;
   private IBeanContainer<USER> users;
+  private UserRequestContext userRequestContext;
   private TransactionalExecution transactionalExecution;
 
   public SecureRequestBoundary(IBoundaryValidation<BOUNDARY, USER> pBoundaryValidation, Class<USER> pUserType)
@@ -56,10 +57,7 @@ public class SecureRequestBoundary<BOUNDARY extends Annotation, USER extends OJU
       if (!boundaryMethod.isAnnotationPresent(boundaryValidation.getBoundaryType()))
         return;
 
-      if (users == null) //Initialize lazy to assure that CDI is ready
-        users = ICdiControl.current().createInjected(new ParameterizedTypeImpl(IBeanContainer.class, userType));
-      if (transactionalExecution == null)
-        transactionalExecution = ICdiControl.current().createInjected(TransactionalExecution.class);
+      _initializeCdiComponents();
 
       final String token = _retrieveTokenFromHeader(pRequestContext);
       final DecodedJWT decoded = JWTUtil.decodeJwt(token);
@@ -75,11 +73,26 @@ public class SecureRequestBoundary<BOUNDARY extends Annotation, USER extends OJU
       final BOUNDARY boundaryAnnotation = boundaryMethod.getAnnotation(boundaryValidation.getBoundaryType());
       if (!(boundaryValidation).isUserAllowedToCrossBoundary(boundaryAnnotation, authenticatedUser.get()))
         pRequestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
+
+      userRequestContext.setAuthenticatedUserForRequest(authenticatedUser.get());
     }
     catch (JWTVerificationException pE)
     {
       pRequestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
     }
+  }
+
+  /**
+   * Lazily initializes CDI components. Cannot be done while construction because CDI container is not booted then.
+   */
+  private void _initializeCdiComponents()
+  {
+    if (users == null)
+      users = ICdiControl.current().createInjected(new ParameterizedTypeImpl(IBeanContainer.class, userType));
+    if (userRequestContext == null)
+      userRequestContext = ICdiControl.current().createInjected(UserRequestContext.class);
+    if (transactionalExecution == null)
+      transactionalExecution = ICdiControl.current().createInjected(TransactionalExecution.class);
   }
 
   /**
