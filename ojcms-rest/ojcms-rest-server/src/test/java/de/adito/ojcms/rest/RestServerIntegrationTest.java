@@ -13,6 +13,7 @@ import org.junit.jupiter.api.*;
 import java.net.URI;
 import java.util.UUID;
 
+import static de.adito.ojcms.rest.auth.api.AuthenticationResponse.TOKEN;
 import static de.adito.ojcms.rest.testapplication.EUserRoleForTest.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -138,7 +139,7 @@ public class RestServerIntegrationTest extends JerseyTest
     final RegistrationRequestForTest registrationRequest = new RegistrationRequestForTest(userMail, USER_DISPLAY_NAME, pUserRole);
     return target("/authentication/register").request() //
         .post(Entity.entity(registrationRequest, MediaType.APPLICATION_JSON_TYPE), AuthenticationResponse.class) //
-        .getToken();
+        .getValue(TOKEN);
   }
 
   private static class TestContainerProxy implements TestContainer

@@ -15,6 +15,9 @@ import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
+import static de.adito.ojcms.rest.auth.api.AuthenticationRequest.PASSWORD;
+import static de.adito.ojcms.rest.auth.api.RegistrationRequest.USER_MAIL;
+import static de.adito.ojcms.rest.auth.api.RestoreAuthenticationRequest.RESTORE_CODE;
 import static de.adito.ojcms.rest.auth.util.SharedUtils.VALID_EMAIL_ADDRESS_REGEX;
 
 /**
@@ -39,18 +42,18 @@ public class UserService<USER extends OJUser, REGISTRATION_REQUEST extends Regis
   }
 
   /**
-   * Authenticates an user by an {@link IAuthenticationRequest} within a new transaction.
+   * Authenticates an user by an {@link AuthenticationRequest} within a new transaction.
    *
    * @param pRequest the user authentication request
    * @return the successful authentication response
    * @throws BadCredentialsException if the credentials in the request are not correct
    */
-  AUTH_RESPONSE authenticateUser(IAuthenticationRequest pRequest) throws BadCredentialsException
+  AUTH_RESPONSE authenticateUser(AuthenticationRequest pRequest) throws BadCredentialsException
   {
     return _transactionalExecution().resolveResultThrowing(() ->
     {
-      final String userMail = pRequest.getUserMail();
-      final String password = pRequest.getPassword();
+      final String userMail = pRequest.getValue(AuthenticationRequest.USER_MAIL);
+      final String password = pRequest.getValue(PASSWORD);
 
       final USER authenticatedUser =
           _users().findOneByFieldValues(new FieldValueTuple<>(OJUser.MAIL, userMail), new FieldValueTuple<>(OJUser.PASSWORD, password)) //
@@ -73,7 +76,7 @@ public class UserService<USER extends OJUser, REGISTRATION_REQUEST extends Regis
   {
     return _transactionalExecution().<AUTH_RESPONSE, BadMailAddressException, UserAlreadyExistsException>resolveResultTwoThrowing(() ->
     {
-      final String email = pRequest.getUserMail();
+      final String email = pRequest.getValue(USER_MAIL);
 
       if (!SharedUtils.validatePattern(VALID_EMAIL_ADDRESS_REGEX, email))
         throw new BadMailAddressException(email);
@@ -119,10 +122,10 @@ public class UserService<USER extends OJUser, REGISTRATION_REQUEST extends Regis
   {
     return _transactionalExecution().<AUTH_RESPONSE, UserNotFoundException, BadRestoreCodeException>resolveResultTwoThrowing(() ->
     {
-      final USER user = _users().findOneByFieldValue(OJUser.MAIL, pRestoreAuthRequest.getUserMail()) //
-          .orElseThrow(() -> new UserNotFoundException(pRestoreAuthRequest.getUserMail()));
+      final USER user = _users().findOneByFieldValue(OJUser.MAIL, pRestoreAuthRequest.getValue(AuthenticationRequest.USER_MAIL)) //
+          .orElseThrow(() -> new UserNotFoundException(pRestoreAuthRequest.getValue(AuthenticationRequest.USER_MAIL)));
 
-      user.validateAndResetRestoreCode(pRestoreAuthRequest.getRestoreCode());
+      user.validateAndResetRestoreCode(pRestoreAuthRequest.getValue(RESTORE_CODE));
       user.generateNewPassword();
 
       return _createAuthResponse(user);

@@ -1,16 +1,20 @@
 package de.adito.ojcms.rest.auth.api;
 
-import java.io.Serializable;
+import de.adito.ojcms.beans.*;
+import de.adito.ojcms.beans.annotations.FinalNeverNull;
+import de.adito.ojcms.beans.literals.fields.types.TextField;
 
 /**
  * Defines a request to restore authentication for an user with a code.
  *
  * @author Simon Danner, 07.12.2019
  */
-public final class RestoreAuthenticationRequest implements Serializable
+public final class RestoreAuthenticationRequest extends OJBean
 {
-  private final String userMail;
-  private final String restoreCode;
+  @FinalNeverNull
+  public static TextField USER_MAIL = OJFields.create(RestoreAuthenticationRequest.class);
+  @FinalNeverNull
+  public static TextField RESTORE_CODE = OJFields.create(RestoreAuthenticationRequest.class);
 
   /**
    * Creates a new restore request.
@@ -20,23 +24,15 @@ public final class RestoreAuthenticationRequest implements Serializable
    */
   public RestoreAuthenticationRequest(String pUserMail, String pRestoreCode)
   {
-    userMail = pUserMail;
-    restoreCode = pRestoreCode;
+    setValue(USER_MAIL, pUserMail);
+    setValue(RESTORE_CODE, pRestoreCode);
   }
 
   /**
-   * The mail address of the user to restore authentication for.
+   * Required for serialization.
    */
-  public String getUserMail()
+  @SuppressWarnings("unused")
+  private RestoreAuthenticationRequest()
   {
-    return userMail;
-  }
-
-  /**
-   * The string based restore code.
-   */
-  public String getRestoreCode()
-  {
-    return restoreCode;
   }
 }

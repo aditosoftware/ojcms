@@ -1,5 +1,9 @@
 package de.adito.ojcms.rest.auth.api;
 
+import de.adito.ojcms.beans.*;
+import de.adito.ojcms.beans.annotations.FinalNeverNull;
+import de.adito.ojcms.beans.literals.fields.types.TextField;
+
 /**
  * Base class for the response of an authentication.
  * Contains the JWT for the HTTP requests and the password for the next authentication.
@@ -7,30 +11,24 @@ package de.adito.ojcms.rest.auth.api;
  *
  * @author Simon Danner, 25.10.2019
  */
-public class AuthenticationResponse
+public class AuthenticationResponse extends OJBean
 {
-  private final String token;
-  private final String nextPassword;
+  @FinalNeverNull
+  public static TextField TOKEN = OJFields.create(AuthenticationResponse.class);
+  @FinalNeverNull
+  public static TextField NEXT_PASSWORD = OJFields.create(AuthenticationResponse.class);
 
   public AuthenticationResponse(String pToken, String pNextPassword)
   {
-    token = pToken;
-    nextPassword = pNextPassword;
+    setValue(TOKEN, pToken);
+    setValue(NEXT_PASSWORD, pNextPassword);
   }
 
   /**
-   * The JWT for future HTTP requests.
+   * Required for serialization.
    */
-  public String getToken()
+  @SuppressWarnings("unused")
+  protected AuthenticationResponse()
   {
-    return token;
-  }
-
-  /**
-   * The password for the next authentication.
-   */
-  public String getNextPassword()
-  {
-    return nextPassword;
   }
 }

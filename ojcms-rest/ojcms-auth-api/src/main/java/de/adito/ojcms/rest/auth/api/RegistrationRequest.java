@@ -1,36 +1,32 @@
 package de.adito.ojcms.rest.auth.api;
 
-import java.io.Serializable;
+import de.adito.ojcms.beans.*;
+import de.adito.ojcms.beans.annotations.FinalNeverNull;
+import de.adito.ojcms.beans.literals.fields.types.TextField;
 
 /**
  * Defines an user registration request.
  *
  * @author Simon Danner, 07.12.2019
  */
-public class RegistrationRequest implements Serializable
+public class RegistrationRequest extends OJBean
 {
-  private final String userMail;
-  private final String displayName;
+  @FinalNeverNull
+  public static TextField USER_MAIL = OJFields.create(RegistrationRequest.class);
+  @FinalNeverNull
+  public static TextField DISPLAY_NAME = OJFields.create(RegistrationRequest.class);
 
   public RegistrationRequest(String pUserMail, String pDisplayName)
   {
-    userMail = pUserMail;
-    displayName = pDisplayName;
+    setValue(USER_MAIL, pUserMail);
+    setValue(DISPLAY_NAME, pDisplayName);
   }
 
   /**
-   * The mail address of the user to register.
+   * Required for serialization.
    */
-  public String getUserMail()
+  @SuppressWarnings("unused")
+  protected RegistrationRequest()
   {
-    return userMail;
-  }
-
-  /**
-   * The display name of the user to register.
-   */
-  public String getDisplayName()
-  {
-    return displayName;
   }
 }

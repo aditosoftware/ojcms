@@ -58,7 +58,7 @@ public final class OJFields
    * @return the newly created field instance
    */
   public static <BEAN extends OJBean, VALUE, FIELD extends IField<VALUE>> FIELD createOptional(Class<BEAN> pBeanType,
-                                                                                               @Nullable BiPredicate<BEAN, VALUE> pActiveCondition)
+      @Nullable BiPredicate<BEAN, VALUE> pActiveCondition)
   {
     return _createField(pBeanType, pActiveCondition);
   }
@@ -73,7 +73,7 @@ public final class OJFields
    * @return the newly created field instance
    */
   private static <VALUE, FIELD extends IField<VALUE>> FIELD _createField(Class<? extends OJBean> pBeanType,
-                                                                         @Nullable BiPredicate<? extends OJBean, VALUE> pActiveCondition)
+      @Nullable BiPredicate<? extends OJBean, VALUE> pActiveCondition)
   {
     final Field declaredFieldToCreate = BeanReflector.reflectDeclaredBeanFields(pBeanType).stream() //
         .filter(pField ->
@@ -120,7 +120,6 @@ public final class OJFields
       try
       {
         final Type declaredGenericType = ((ParameterizedType) pDeclaredField.getGenericType()).getActualTypeArguments()[0];
-
         final Type genericType;
 
         if (declaredGenericType instanceof WildcardType)
@@ -144,8 +143,7 @@ public final class OJFields
         throw new BeanFieldCreationException(
             "Unable to reflect generic type of bean field " + pBeanFieldType.getName() + "! " + "The annotation " + GenericBeanField.class
                 .getSimpleName() + " can only be used " + "if the field type uses exactly one generic type which is the data type of the "
-                + "field.",
-            pE);
+                + "field.", pE);
       }
     };
   }

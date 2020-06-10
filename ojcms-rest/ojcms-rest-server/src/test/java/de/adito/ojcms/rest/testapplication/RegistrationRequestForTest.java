@@ -1,5 +1,8 @@
 package de.adito.ojcms.rest.testapplication;
 
+import de.adito.ojcms.beans.OJFields;
+import de.adito.ojcms.beans.annotations.FinalNeverNull;
+import de.adito.ojcms.beans.literals.fields.types.EnumField;
 import de.adito.ojcms.rest.auth.api.RegistrationRequest;
 
 /**
@@ -9,16 +12,20 @@ import de.adito.ojcms.rest.auth.api.RegistrationRequest;
  */
 public class RegistrationRequestForTest extends RegistrationRequest
 {
-  private final EUserRoleForTest userRole;
+  @FinalNeverNull
+  public static final EnumField<EUserRoleForTest> USER_ROLE = OJFields.create(RegistrationRequestForTest.class);
 
   public RegistrationRequestForTest(String pUserMail, String pDisplayName, EUserRoleForTest pUserRole)
   {
     super(pUserMail, pDisplayName);
-    userRole = pUserRole;
+    setValue(USER_ROLE, pUserRole);
   }
 
-  public EUserRoleForTest getUserRole()
+  /**
+   * Required for serialization.
+   */
+  @SuppressWarnings("unused")
+  private RegistrationRequestForTest()
   {
-    return userRole;
   }
 }

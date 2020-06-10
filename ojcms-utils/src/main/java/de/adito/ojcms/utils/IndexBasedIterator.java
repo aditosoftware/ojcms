@@ -17,7 +17,7 @@ public final class IndexBasedIterator<ELEMENT> implements Iterator<ELEMENT>
   private final IntFunction<ELEMENT> elementProvider;
   private final IntSupplier sizeSupplier;
   @Nullable
-  private IntConsumer remover;
+  private final IntConsumer remover;
 
   private int index;
   private int lastIndex = -1;

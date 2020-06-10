@@ -1,5 +1,6 @@
 package de.adito.ojcms.rest.serialization;
 
+import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import de.adito.ojcms.beans.IBean;
 import de.adito.ojcms.beans.exceptions.bean.BeanSerializationException;
@@ -15,8 +16,6 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static de.adito.ojcms.rest.auth.util.GSONFactory.GSON;
-
 /**
  * JSON serialization provider for {@link IBean} instances. Only possible for beans that contain {@link ISerializableField} only.
  *
@@ -27,6 +26,8 @@ import static de.adito.ojcms.rest.auth.util.GSONFactory.GSON;
 @Produces(MediaType.APPLICATION_JSON)
 public class BeanSerializationProvider implements MessageBodyReader<IBean>, MessageBodyWriter<IBean>
 {
+  private static final Gson GSON = new Gson();
+
   @Override
   public boolean isReadable(Class<?> pType, Type pGenericType, Annotation[] pAnnotations, MediaType pMediaType)
   {
@@ -62,7 +63,7 @@ public class BeanSerializationProvider implements MessageBodyReader<IBean>, Mess
         throw new BeanSerializationException("Provide a default constructor for " + pType.getName() + "! May be private!", pE);
       }
     }
-    catch (Exception pE)
+    catch (IOException pE)
     {
       throw new BeanSerializationException("Unable to read serialized bean!", pE);
     }

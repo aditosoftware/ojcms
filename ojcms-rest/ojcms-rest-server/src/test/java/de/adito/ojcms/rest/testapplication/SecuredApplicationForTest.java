@@ -7,6 +7,9 @@ import jakarta.ws.rs.ApplicationPath;
 
 import java.util.Arrays;
 
+import static de.adito.ojcms.rest.auth.api.RegistrationRequest.*;
+import static de.adito.ojcms.rest.testapplication.RegistrationRequestForTest.USER_ROLE;
+
 /**
  * A secured REST application for testing purposes
  *
@@ -34,7 +37,7 @@ public class SecuredApplicationForTest
   @Override
   public UserForTest createNewUser(RegistrationRequestForTest pRequest)
   {
-    return new UserForTest(pRequest.getUserMail(), pRequest.getDisplayName(), pRequest.getUserRole());
+    return new UserForTest(pRequest.getValue(USER_MAIL), pRequest.getValue(DISPLAY_NAME), pRequest.getValue(USER_ROLE));
   }
 
   @Override

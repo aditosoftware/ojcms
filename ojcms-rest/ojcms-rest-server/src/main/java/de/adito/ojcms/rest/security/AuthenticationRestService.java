@@ -33,7 +33,7 @@ public class AuthenticationRestService<USER extends OJUser, REGISTRATION_REQUEST
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
-  public Response authUser(IAuthenticationRequest pAuthenticationRequest)
+  public Response authUser(AuthenticationRequest pAuthenticationRequest)
   {
     try
     {

@@ -1,6 +1,6 @@
 package de.adito.ojcms.rest.serialization;
 
-import de.adito.ojcms.rest.auth.util.GSONFactory;
+import com.google.gson.Gson;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 import jakarta.ws.rs.ext.*;
@@ -9,20 +9,18 @@ import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
-import static de.adito.ojcms.rest.auth.util.GSONFactory.GSON;
-
 /**
  * The de-/serialization provider for REST resources using GSON as library.
- * The GSON instance also provides a mechanism to serialize only getter interface types.
  *
  * @author Simon Danner, 03.11.2019
- * @see GSONFactory
  */
 @Provider
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class GSONSerializationProvider implements MessageBodyReader<Object>, MessageBodyWriter<Object>
 {
+  private static final Gson GSON = new Gson();
+
   @Override
   public boolean isReadable(Class<?> pType, Type pGenericType, Annotation[] pAnnotations, MediaType pMediaType)
   {
