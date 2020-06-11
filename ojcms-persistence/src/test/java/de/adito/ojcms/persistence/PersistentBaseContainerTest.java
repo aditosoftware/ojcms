@@ -66,10 +66,10 @@ public class PersistentBaseContainerTest extends AbstractCdiTest
   public static abstract class SomeBaseBean extends OJBean
   {
     @Identifier
-    public static IntegerField FIELD1 = OJFields.create(SomeBaseBean.class);
+    public static final IntegerField FIELD1 = OJFields.create(SomeBaseBean.class);
     @Identifier
-    public static LongField FIELD2 = OJFields.create(SomeBaseBean.class);
-    public static BooleanField FIELD3 = OJFields.create(SomeBaseBean.class);
+    public static final LongField FIELD2 = OJFields.create(SomeBaseBean.class);
+    public static final BooleanField FIELD3 = OJFields.create(SomeBaseBean.class);
 
     SomeBaseBean(int pValue1, long pValue2, boolean pValue3)
     {
@@ -85,7 +85,7 @@ public class PersistentBaseContainerTest extends AbstractCdiTest
 
   public static class SomeConcreteBean extends SomeBaseBean
   {
-    public static TextField FIELD4 = OJFields.create(SomeConcreteBean.class);
+    public static final TextField FIELD4 = OJFields.create(SomeConcreteBean.class);
 
     SomeConcreteBean(int pValue1, long pValue2, boolean pValue3, String pValue4)
     {
@@ -101,8 +101,8 @@ public class PersistentBaseContainerTest extends AbstractCdiTest
 
   public static class SomeOtherConcreteBean extends SomeBaseBean
   {
-    public static TextField FIELD5 = OJFields.create(SomeOtherConcreteBean.class);
-    public static TimestampField FIELD6 = OJFields.create(SomeOtherConcreteBean.class);
+    public static final TextField FIELD5 = OJFields.create(SomeOtherConcreteBean.class);
+    public static final TimestampField FIELD6 = OJFields.create(SomeOtherConcreteBean.class);
 
     SomeOtherConcreteBean(int pValue1, long pValue2, boolean pValue3, String pValue5)
     {

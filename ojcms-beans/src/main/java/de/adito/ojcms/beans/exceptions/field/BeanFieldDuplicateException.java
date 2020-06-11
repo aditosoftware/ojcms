@@ -22,7 +22,7 @@ public class BeanFieldDuplicateException extends OJRuntimeException
   {
     super("A bean cannot define a field twice! duplicates: " + pDuplicateFields.stream() //
         .map(IField::getName) //
-        .collect(Collectors.joining(", ")));
+        .collect(Collectors.joining(", ")) + "\n Take a look at @FieldOrder as well!");
   }
 
   /**

@@ -1,7 +1,7 @@
 package de.adito.ojcms.rest.auth.api;
 
 import de.adito.ojcms.beans.*;
-import de.adito.ojcms.beans.annotations.FinalNeverNull;
+import de.adito.ojcms.beans.annotations.*;
 import de.adito.ojcms.beans.literals.fields.types.TextField;
 
 /**
@@ -12,9 +12,12 @@ import de.adito.ojcms.beans.literals.fields.types.TextField;
 public final class RestoreAuthenticationRequest extends OJBean
 {
   @FinalNeverNull
-  public static TextField USER_MAIL = OJFields.create(RestoreAuthenticationRequest.class);
+  @FieldOrder(0)
+  public static final TextField USER_MAIL = OJFields.create(RestoreAuthenticationRequest.class);
+
   @FinalNeverNull
-  public static TextField RESTORE_CODE = OJFields.create(RestoreAuthenticationRequest.class);
+  @FieldOrder(1)
+  public static final TextField RESTORE_CODE = OJFields.create(RestoreAuthenticationRequest.class);
 
   /**
    * Creates a new restore request.

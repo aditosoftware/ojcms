@@ -1,7 +1,7 @@
 package de.adito.ojcms.rest.auth.api;
 
 import de.adito.ojcms.beans.*;
-import de.adito.ojcms.beans.annotations.FinalNeverNull;
+import de.adito.ojcms.beans.annotations.*;
 import de.adito.ojcms.beans.literals.fields.types.TextField;
 
 /**
@@ -14,9 +14,12 @@ import de.adito.ojcms.beans.literals.fields.types.TextField;
 public class AuthenticationResponse extends OJBean
 {
   @FinalNeverNull
-  public static TextField TOKEN = OJFields.create(AuthenticationResponse.class);
+  @FieldOrder(0)
+  public static final TextField TOKEN = OJFields.create(AuthenticationResponse.class);
+
   @FinalNeverNull
-  public static TextField NEXT_PASSWORD = OJFields.create(AuthenticationResponse.class);
+  @FieldOrder(1)
+  public static final TextField NEXT_PASSWORD = OJFields.create(AuthenticationResponse.class);
 
   public AuthenticationResponse(String pToken, String pNextPassword)
   {

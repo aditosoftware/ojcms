@@ -1,8 +1,10 @@
 package de.adito.ojcms.beans.util;
 
 import de.adito.ojcms.beans.*;
+import de.adito.ojcms.beans.annotations.FieldOrder;
 import de.adito.ojcms.beans.exceptions.OJInternalException;
 import de.adito.ojcms.beans.exceptions.bean.NoDeclaredBeanTypeException;
+import de.adito.ojcms.beans.exceptions.field.BeanFieldCreationException;
 import de.adito.ojcms.beans.literals.fields.IField;
 
 import java.lang.annotation.Annotation;
@@ -87,7 +89,7 @@ public final class BeanReflector
    * @param <ANNOTATION>    the generic type of the annotation
    */
   public static <ANNOTATION extends Annotation> void doIfAnnotationPresent(Class<?> pType, Class<ANNOTATION> pAnnotationType,
-                                                                           Consumer<ANNOTATION> pAction)
+      Consumer<ANNOTATION> pAction)
   {
     if (pType.isAnnotationPresent(pAnnotationType))
       pAction.accept(pType.getAnnotation(pAnnotationType));
@@ -117,16 +119,47 @@ public final class BeanReflector
   }
 
   /**
-   * Returns all public and static bean fields from a bean class type.
+   * Returns all public, static and final bean fields from a bean class type. This method must return the fields in their textual
+   * declaration order. If the JVM implementation won't do that naturally, use {@link FieldOrder}.
    *
    * @param pBeanType the type of the bean, which must be a sub class of {@link OJBean} to own specific fields
    * @return a list of declared fields of the bean type
    */
   private static List<Field> _getDeclaredBeanFields(Class<? extends IBean> pBeanType)
   {
-    return _getDeclaredFields(pBeanType,  //
+    final List<Field> unsortedDeclaredFields = _getDeclaredFields(pBeanType,  //
         pField -> Modifier.isStatic(pField.getModifiers()), //
         pField -> IField.class.isAssignableFrom(pField.getType()));
+
+    final Map<Field, Integer> fieldOrderByField = new HashMap<>();
+
+    for (Field field : unsortedDeclaredFields)
+    {
+      if (!Modifier.isFinal(field.getModifiers()))
+        throw new BeanFieldCreationException(
+            "Bean field is not declared as final! bean-type: " + pBeanType.getName() + " field name: " + field.getName());
+
+      if (field.isAnnotationPresent(FieldOrder.class))
+        fieldOrderByField.put(field, field.getAnnotation(FieldOrder.class).value());
+    }
+
+    if (fieldOrderByField.isEmpty())
+      return unsortedDeclaredFields; //They should be sorted naturally by JVM implementation
+
+    //Does every field have a field order annotation?
+    if (fieldOrderByField.size() != unsortedDeclaredFields.size())
+      throw new BeanFieldCreationException(
+          "If @FieldOrder is used, every field of the bean type must be annotated! bean-type: " + pBeanType.getName());
+
+    //Check for duplicates in order numbers
+    final Set<Integer> uniqueOrderNumbers = new HashSet<>(fieldOrderByField.values());
+    if (uniqueOrderNumbers.size() != fieldOrderByField.size())
+      throw new BeanFieldCreationException("All order numbers of @FieldOrders must be unique!");
+
+    return fieldOrderByField.entrySet().stream() //
+        .sorted(Map.Entry.comparingByValue()) //
+        .map(Map.Entry::getKey) //
+        .collect(Collectors.toList());
   }
 
   /**

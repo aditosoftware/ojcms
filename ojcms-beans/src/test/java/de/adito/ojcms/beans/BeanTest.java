@@ -4,7 +4,7 @@ import de.adito.ojcms.beans.annotations.*;
 import de.adito.ojcms.beans.base.IEqualsHashCodeChecker;
 import de.adito.ojcms.beans.datasource.IBeanDataSource;
 import de.adito.ojcms.beans.exceptions.bean.*;
-import de.adito.ojcms.beans.exceptions.field.BeanFieldDoesNotExistException;
+import de.adito.ojcms.beans.exceptions.field.*;
 import de.adito.ojcms.beans.literals.fields.IField;
 import de.adito.ojcms.beans.literals.fields.types.*;
 import de.adito.ojcms.beans.literals.fields.util.FieldValueTuple;
@@ -210,6 +210,30 @@ class BeanTest
     assertEquals(42, bean.getValue(ConcreteBeanType.SOME_SPECIAL_FIELD));
   }
 
+  @Test
+  public void testBeanFieldOrderDeclaration()
+  {
+    new FieldOrderedBean();
+  }
+
+  @Test
+  public void testBeanFieldOrderDeclaration_Illegal()
+  {
+    assertThrows(BeanFieldDuplicateException.class, IllegalOrderedBean::new);
+  }
+
+  @Test
+  public void testBeanFieldOrderDeclaration_MissingAnnotation()
+  {
+    assertThrows(ExceptionInInitializerError.class, MissingOrderAnnotationBean::new);
+  }
+
+  @Test
+  public void testBeanFieldOrderDeclaration_Duplicate()
+  {
+    assertThrows(ExceptionInInitializerError.class, DuplicateOrderAnnotationBean::new);
+  }
+
   /**
    * Creates a new bean text field.
    *
@@ -338,6 +362,51 @@ class BeanTest
   public static class ConcreteBeanType extends AbstractBaseBeanType
   {
     public static final IntegerField SOME_SPECIAL_FIELD = OJFields.create(ConcreteBeanType.class);
+  }
+
+  /**
+   * A bean defining its fields' declaration order.
+   */
+  public static class FieldOrderedBean extends OJBean
+  {
+    @FieldOrder(0)
+    public static final IntegerField FIRST_FIELD = OJFields.create(FieldOrderedBean.class);
+    @FieldOrder(1)
+    public static final IntegerField SECOND_FIELD = OJFields.create(FieldOrderedBean.class);
+    @FieldOrder(4) //Gaps should be allowed
+    public static final IntegerField THIRD_FIELD = OJFields.create(FieldOrderedBean.class);
+  }
+
+  /**
+   * A bean defining a wrong/illegal declaration order.
+   */
+  public static class IllegalOrderedBean extends OJBean
+  {
+    @FieldOrder(1)
+    public static final IntegerField FIRST_FIELD = OJFields.create(IllegalOrderedBean.class);
+    @FieldOrder(0)
+    public static final IntegerField SECOND_FIELD = OJFields.create(IllegalOrderedBean.class);
+  }
+
+  /**
+   * A bean missing a field order annotation.
+   */
+  public static class MissingOrderAnnotationBean extends OJBean
+  {
+    @FieldOrder(0)
+    public static final IntegerField FIRST_FIELD = OJFields.create(MissingOrderAnnotationBean.class);
+    public static final IntegerField SECOND_FIELD = OJFields.create(MissingOrderAnnotationBean.class);
+  }
+
+  /**
+   * A bean defining a duplicate field order annotation.
+   */
+  public static class DuplicateOrderAnnotationBean extends OJBean
+  {
+    @FieldOrder(0)
+    public static final IntegerField FIRST_FIELD = OJFields.create(DuplicateOrderAnnotationBean.class);
+    @FieldOrder(0)
+    public static final IntegerField SECOND_FIELD = OJFields.create(DuplicateOrderAnnotationBean.class);
   }
 
   /**

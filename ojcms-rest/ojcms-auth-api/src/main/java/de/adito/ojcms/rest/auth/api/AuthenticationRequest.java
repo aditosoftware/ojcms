@@ -1,7 +1,7 @@
 package de.adito.ojcms.rest.auth.api;
 
 import de.adito.ojcms.beans.*;
-import de.adito.ojcms.beans.annotations.FinalNeverNull;
+import de.adito.ojcms.beans.annotations.*;
 import de.adito.ojcms.beans.literals.fields.types.TextField;
 
 /**
@@ -12,8 +12,11 @@ import de.adito.ojcms.beans.literals.fields.types.TextField;
 public class AuthenticationRequest extends OJBean
 {
   @FinalNeverNull
+  @FieldOrder(0)
   public static final TextField USER_MAIL = OJFields.create(AuthenticationRequest.class);
+
   @FinalNeverNull
+  @FieldOrder(1)
   public static final TextField PASSWORD = OJFields.create(AuthenticationRequest.class);
 
   public AuthenticationRequest(String pUserMail, String pPassword)
