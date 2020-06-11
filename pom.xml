@@ -60,7 +60,6 @@
     <module>ojcms-cdi</module>
     <module>ojcms-cdi-testutils</module>
     <module>ojcms-persistence</module>
-    <module>ojcms-representation</module>
     <module>ojcms-rest</module>
     <module>ojcms-sqlbuilder</module>
     <module>ojcms-sqldatasource</module>
