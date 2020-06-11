@@ -27,7 +27,7 @@ import static de.adito.ojcms.sqlbuilder.format.ESeparator.COMMA_WITH_WHITESPACE;
 public abstract class AbstractSelect<SELECT extends AbstractSelect<SELECT>>
     extends AbstractConditionStatement<SelectModifiers, Result, ResultSet, SELECT>
 {
-  private List<IColumnIdentification<?>> columnsToSelect = new ArrayList<>();
+  private final List<IColumnIdentification<?>> columnsToSelect = new ArrayList<>();
 
   /**
    * Creates a new select statement.

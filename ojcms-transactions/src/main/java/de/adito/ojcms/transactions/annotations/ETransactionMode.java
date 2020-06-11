@@ -10,7 +10,7 @@ public enum ETransactionMode
   /**
    * The annotated transaction scope requires a transaction, but does not enforce a new one.
    */
-  REQUIRES, //
+  REQUIRES,
 
   /**
    * The annotated transaction scope explicitly requires a new transaction.

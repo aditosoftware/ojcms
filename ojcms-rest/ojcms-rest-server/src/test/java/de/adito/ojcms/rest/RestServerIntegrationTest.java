@@ -1,7 +1,7 @@
 package de.adito.ojcms.rest;
 
 import de.adito.ojcms.rest.auth.api.AuthenticationResponse;
-import de.adito.ojcms.rest.serialization.*;
+import de.adito.ojcms.rest.serialization.GSONSerializationProvider;
 import de.adito.ojcms.rest.testapplication.*;
 import jakarta.ws.rs.client.*;
 import jakarta.ws.rs.core.*;
@@ -77,7 +77,6 @@ public class RestServerIntegrationTest extends JerseyTest
   @Override
   protected void configureClient(ClientConfig config)
   {
-    config.register(BeanSerializationProvider.class);
     config.register(GSONSerializationProvider.class);
   }
 

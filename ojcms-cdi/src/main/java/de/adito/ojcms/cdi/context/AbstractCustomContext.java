@@ -8,7 +8,7 @@ import java.util.*;
 
 /**
  * Base class for a custom CDI context. These are used to define new scopes within the application.
- * The context class must define an annotation type that is later used the define the scope.
+ * The context class must define an annotation type that is later used to define the scope.
  *
  * These custom context types are detected automatically via {@link PicoService} and registered with the CDI container afterwards.
  * So to add any custom context you only have to define a concrete class extending this class providing the scope's annotation type

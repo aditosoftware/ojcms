@@ -46,8 +46,8 @@ public abstract class OJUser extends OJBean
    */
   protected OJUser(String pMailAddress, String pDisplayName)
   {
-    setValue(MAIL, pMailAddress);
-    setValue(DISPLAY_NAME, pDisplayName);
+    setValue(MAIL, pMailAddress.trim());
+    setValue(DISPLAY_NAME, pDisplayName.trim());
     generateNewPassword();
   }
 

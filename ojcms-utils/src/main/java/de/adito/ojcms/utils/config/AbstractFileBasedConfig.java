@@ -40,7 +40,7 @@ public abstract class AbstractFileBasedConfig
   protected String readMandatoryProperty(String pPropertyName)
   {
     return readOptionalProperty(pPropertyName) //
-        .orElseThrow(() -> new IllegalArgumentException("Property " + pPropertyName + "not set!"));
+        .orElseThrow(() -> new IllegalArgumentException("Property " + pPropertyName + " not set!"));
   }
 
   /**
@@ -63,7 +63,7 @@ public abstract class AbstractFileBasedConfig
   protected int readMandatoryIntProperty(String pPropertyName)
   {
     return readOptionalIntProperty(pPropertyName) //
-        .orElseThrow(() -> new IllegalArgumentException("Property " + pPropertyName + "not set!"));
+        .orElseThrow(() -> new IllegalArgumentException("Property " + pPropertyName + " not set!"));
   }
 
   /**

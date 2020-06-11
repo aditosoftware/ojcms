@@ -62,8 +62,8 @@ public abstract class OJSecuredRestApplication<BOUNDARY extends Annotation, USER
     providerAndResourceInstances.add(new AuthenticationRestService<>(userService));
     providerAndResourceInstances.add(new SecureRequestBoundary<>(this, pUserType));
 
-    providerAndResourceTypes.remove(BeanSerializationProvider.class);
-    providerAndResourceInstances.add(new SecurityBeanSerializationProvider<>(pRegistrationRequestType));
+    providerAndResourceTypes.remove(GSONSerializationProvider.class);
+    providerAndResourceInstances.add(new SecurityGSONSerializationProvider<>(pRegistrationRequestType));
   }
 
   @Override

@@ -1,6 +1,5 @@
 package de.adito.ojcms.rest.serialization;
 
-import com.google.gson.Gson;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 import jakarta.ws.rs.ext.*;
@@ -8,6 +7,8 @@ import jakarta.ws.rs.ext.*;
 import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+
+import static de.adito.ojcms.rest.auth.util.OJGsonSerializer.GSON_INSTANCE;
 
 /**
  * The de-/serialization provider for REST resources using GSON as library.
@@ -19,8 +20,6 @@ import java.lang.reflect.Type;
 @Produces(MediaType.APPLICATION_JSON)
 public class GSONSerializationProvider implements MessageBodyReader<Object>, MessageBodyWriter<Object>
 {
-  private static final Gson GSON = new Gson();
-
   @Override
   public boolean isReadable(Class<?> pType, Type pGenericType, Annotation[] pAnnotations, MediaType pMediaType)
   {
@@ -33,7 +32,7 @@ public class GSONSerializationProvider implements MessageBodyReader<Object>, Mes
   {
     try (InputStreamReader reader = new InputStreamReader(pEntityStream))
     {
-      return GSON.fromJson(reader, pType);
+      return GSON_INSTANCE.fromJson(reader, pType);
     }
   }
 
@@ -49,7 +48,7 @@ public class GSONSerializationProvider implements MessageBodyReader<Object>, Mes
   {
     try (PrintWriter writer = new PrintWriter(pEntityStream))
     {
-      writer.write(GSON.toJson(pObject));
+      writer.write(GSON_INSTANCE.toJson(pObject));
     }
   }
 }

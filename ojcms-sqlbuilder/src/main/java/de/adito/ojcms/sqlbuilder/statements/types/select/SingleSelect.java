@@ -20,7 +20,7 @@ import java.util.Collections;
  */
 public class SingleSelect<VALUE> extends AbstractSelect<SingleSelect<VALUE>>
 {
-  private IColumnIdentification<VALUE> column;
+  private final IColumnIdentification<VALUE> column;
 
   /**
    * Creates a new select statement based on single column.
