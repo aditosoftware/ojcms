@@ -71,9 +71,9 @@ public class AuthenticationRestService<USER extends OJUser, REGISTRATION_REQUEST
     try
     {
       userService.requestRestoreCodeByMail(pUserMail);
-      return Response.ok().build();
+      return Response.noContent().build();
     }
-    catch (UserNotFoundException pE)
+    catch (UserNotFoundException | RestoreCodeAlreadyActive pE)
     {
       return _exceptionResponse(pE);
     }

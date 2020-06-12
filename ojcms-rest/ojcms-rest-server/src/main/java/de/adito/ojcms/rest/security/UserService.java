@@ -14,11 +14,12 @@ import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.time.*;
 
 import static de.adito.ojcms.rest.auth.api.AuthenticationRequest.PASSWORD;
-import static de.adito.ojcms.rest.auth.api.RegistrationRequest.USER_MAIL;
-import static de.adito.ojcms.rest.auth.api.RestoreAuthenticationRequest.RESTORE_CODE;
-import static de.adito.ojcms.rest.auth.util.SharedUtils.VALID_EMAIL_ADDRESS_REGEX;
+import static de.adito.ojcms.rest.auth.api.RestoreAuthenticationRequest.*;
+import static de.adito.ojcms.rest.auth.util.SharedUtils.*;
+import static de.adito.ojcms.rest.security.user.OJUser.RESTORE_TIMESTAMP;
 
 /**
  * The internal service to authenticate, register and restore users.
@@ -76,7 +77,7 @@ public class UserService<USER extends OJUser, REGISTRATION_REQUEST extends Regis
   {
     return _transactionalExecution().<AUTH_RESPONSE, BadMailAddressException, UserAlreadyExistsException>resolveResultTwoThrowing(() ->
     {
-      final String email = pRequest.getValue(USER_MAIL);
+      final String email = pRequest.getValue(RegistrationRequest.USER_MAIL);
 
       if (!SharedUtils.validatePattern(VALID_EMAIL_ADDRESS_REGEX, email))
         throw new BadMailAddressException(email);
@@ -97,12 +98,15 @@ public class UserService<USER extends OJUser, REGISTRATION_REQUEST extends Regis
    * @param pUserMail the mail address of the user to send the restore code
    * @throws UserNotFoundException if there's no user for the given mail address
    */
-  void requestRestoreCodeByMail(String pUserMail) throws UserNotFoundException
+  void requestRestoreCodeByMail(String pUserMail) throws UserNotFoundException, RestoreCodeAlreadyActive
   {
-    _transactionalExecution().justRunThrowing(() ->
+    _transactionalExecution().<UserNotFoundException, RestoreCodeAlreadyActive>justRunTwoThrowing(() ->
     {
       final OJUser user = _users().findOneByFieldValue(OJUser.MAIL, pUserMail) //
           .orElseThrow(() -> new UserNotFoundException(pUserMail));
+
+      if (Duration.between(user.getValue(RESTORE_TIMESTAMP), Instant.now()).compareTo(RESTORE_CODE_EXPIRATION_THRESHOLD) < 0)
+        throw new RestoreCodeAlreadyActive(user);
 
       user.generateRestoreCode();
       _mailSender().sendRestoreCodeMail(user);
@@ -122,7 +126,7 @@ public class UserService<USER extends OJUser, REGISTRATION_REQUEST extends Regis
   {
     return _transactionalExecution().<AUTH_RESPONSE, UserNotFoundException, BadRestoreCodeException>resolveResultTwoThrowing(() ->
     {
-      final USER user = _users().findOneByFieldValue(OJUser.MAIL, pRestoreAuthRequest.getValue(AuthenticationRequest.USER_MAIL)) //
+      final USER user = _users().findOneByFieldValue(OJUser.MAIL, pRestoreAuthRequest.getValue(USER_MAIL)) //
           .orElseThrow(() -> new UserNotFoundException(pRestoreAuthRequest.getValue(AuthenticationRequest.USER_MAIL)));
 
       user.validateAndResetRestoreCode(pRestoreAuthRequest.getValue(RESTORE_CODE));
