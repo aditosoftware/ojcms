@@ -218,7 +218,8 @@ public final class CdiContainer
     public void shutdown()
     {
       container.close();
-      CDI_CONTROL = null;
+      if (this == CDI_CONTROL)
+        CDI_CONTROL = null;
     }
 
     /**
